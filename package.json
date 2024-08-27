@@ -10,6 +10,8 @@
     "**/*.php": "./vendor/bin/pint --preset laravel"
   },
   "devDependencies": {
+    "@commitlint/cli": "^19.4.0",
+    "@commitlint/config-conventional": "^19.2.2",
     "axios": "^1.6.4",
     "husky": "^9.1.5",
     "laravel-vite-plugin": "^1.0",
