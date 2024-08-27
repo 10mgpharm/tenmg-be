@@ -26,7 +26,7 @@
 - Checkout to a new feature branch using the ticket name assigned on JIRA
 e.g if ticket name is TM-001 then that is the branch name
 ```git checkout -b TM-001```
-- See [PULL_REQUEST.md](/PULL_REQUEST.md) for guide on filling the Pull request template
+- See [PULL_REQUEST_TEMPLATE.md](.github/PULL_REQUEST_TEMPLATE.md) for guide on filling the Pull request template
 - If a feature branch exist for the current task you're working on, kindly branch out from that feature branch to create your branch
 E.g if we have a feature/epic-name all related ticket that belongs to the epic, their branch should also point to it when submiting PR
 
