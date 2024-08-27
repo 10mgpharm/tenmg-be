@@ -21,6 +21,18 @@
 - Start the project
 ```php artisan serve```
 
+#### Creating a PR
+- Switch to the main branch
+- Checkout to a new feature branch using the ticket name assigned on JIRA
+e.g if ticket name is TM-001 then that is the branch name
+```git checkout -b TM-001```
+- See [PULL_REQUEST.md](/PULL_REQUEST.md) for guide on filling the Pull request template
+- If a feature branch exist for the current task you're working on, kindly branch out from that feature branch to create your branch
+E.g if we have a feature/epic-name all related ticket that belongs to the epic, their branch should also point to it when submiting PR
+
+#### Commit message
+
+
 ## 10MG Backend Engrs Team Agreement
 This section is dedicated for backend engineers to align with the codebase team agreement as we prepare to contribute to the 10mg project.
 
@@ -48,16 +60,6 @@ Laravel is accessible, powerful, and provides tools required for large, robust a
 
 
 ## Codebase Agreement
-
-
-#### Creating a PR
-- Switch to the main branch
-- Checkout to a new feature branch using the ticket name assigned on JIRA
-e.g if ticket name is TM-001 then that is the branch name
-```git checkout -b TM-001```
-- See [PULL_REQUEST.md](/PULL_REQUEST.md) for guide on filling the Pull request template
-- If a feature branch exist for the current task you're working on, kindly branch out from that feature branch to create your branch
-E.g if we have a feature/epic-name all related ticket that belongs to the epic, their branch should also point to it when submiting PR
 
 #### Route registration
 The app uses the latest laravel with some little change, 
@@ -112,3 +114,8 @@ If you discover a security vulnerability within Laravel, please send an e-mail t
 
 ## License
 The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+
+## Documentation Reference
+https://laravel.com/docs/11.x/passport#managing-clients
+
+https://laravel.com/docs/11.x/middleware#global-middleware
