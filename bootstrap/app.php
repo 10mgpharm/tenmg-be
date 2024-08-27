@@ -1,5 +1,7 @@
 <?php
 
+use App\Http\Middleware\Cors;
+use App\Http\Middleware\ForceJsonResponse;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
@@ -12,7 +14,16 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware) {
-        //
+        // append or prepend middlewares here
+        $middleware->append(ForceJsonResponse::class);
+        $middleware->append(Cors::class);
+
+        // register all middleware alias here
+        $middleware->alias([
+            'json.response' => ForceJsonResponse::class,
+            'cors' => Cors::class,
+        ]);
+
     })
     ->withExceptions(function (Exceptions $exceptions) {
         //
