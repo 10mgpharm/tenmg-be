@@ -7,7 +7,7 @@
 <a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
 </p>
 
-## About 10MG Project
+## 10MG Backend
 
 10mg Pharm is a health tech e-commerce web application designed to facilitate the purchase of drugs and medications online. The platform will support a comprehensive end-to-end e-commerce process, including business onboarding, user and admin account management, product and order management, and a "Buy Now, Pay Later" (BNPL) credit facility. The BNPL facility, which includes credit scoring, voucher issuance, and repayment management, will provide customers with financial flexibility while ensuring secure and compliant transactions.:
 
