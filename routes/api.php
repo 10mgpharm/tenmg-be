@@ -7,7 +7,6 @@ Route::group(['middleware' => ['cors', 'json.response']], function () {
 
     // public routes
 
-
     // protected routes
     Route::middleware('auth:api')->group(function () {
 
@@ -18,5 +17,3 @@ Route::group(['middleware' => ['cors', 'json.response']], function () {
         Route::post('/logout', 'Auth\ApiAuthController@logout')->name('logout.api');
     });
 });
-
-
