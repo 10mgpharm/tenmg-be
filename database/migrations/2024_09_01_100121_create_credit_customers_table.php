@@ -19,7 +19,7 @@ return new class extends Migration
             $table->string('name');
             $table->string('email')->nullable();
             $table->string('phone')->nullable();
-            $table->string('identifier')->unique(); // system generated e.g CUS-VENDOR_CODE-YEARMONTHDAY-PRIMARY_ID i.e CUS-10MG-20240901-230, CUS-TUYIL-20240901-19
+            $table->string('identifier')->nullable()->unique(); // system generated e.g CUS-VENDOR_CODE-YEARMONTHDAY-PRIMARY_ID i.e CUS-10MG-20240901-230, CUS-TUYIL-20240901-19
             $table->boolean('active')->default(true);
 
             $table->unique(['identifier', 'email', 'business_id']);
