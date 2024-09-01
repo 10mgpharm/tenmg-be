@@ -15,6 +15,7 @@ return new class extends Migration
             $table->id();
             $table->unsignedBigInteger('owner_id')->nullable()->index();
             $table->string('name');
+            $table->string('code'); //e.g slug, abbreviation, system generated identifier
             $table->foreignId('logo_id')->nullable()->constrained('files')->onDelete('set null');
             $table->enum('type', ['ADMIN', 'SUPPLIER', 'VENDOR', 'CUSTOMER_PHARMACY', 'CUSTOMER_HOSPITAL'])->nullable();
             $table->text('address');

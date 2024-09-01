@@ -17,6 +17,7 @@ return new class extends Migration
             $table->unsignedBigInteger('model_id'); // e.g 1
             $table->string('model_type'); // e.g \App\Models\Business, \App\Models\User
 
+            $table->string('document_type');
             $table->string('name');
             $table->string('url');
             $table->string('path');

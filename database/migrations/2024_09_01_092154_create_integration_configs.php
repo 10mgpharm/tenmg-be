@@ -32,11 +32,11 @@ return new class extends Migration
             $table->string('live_ip_whitelist')->nullable();
 
             // this field determine if the vendor is giving their customer loan directly or 10mg gives their customer loan on behalf of vendor
-            $table->enum('provider_mode', ['10MG', 'VENDOR'])->default('10MG')->comment('when set to 10MG, its 10mg admin that will have access to approve or reject loan and also create offer else the vendor perform the action');
+            $table->enum('provider_mode', ['SYSTEM', 'EXTERNAL'])->default('SYSTEM')->comment('when set to SYSTEM, its 10mg admin that will have access to approve or reject loan and also create offer else the vendor perform the action');
 
             // this field allows vendor to configure if they want to use their own external integration to collect loan repayment, default to internal if the provider is 10mg
             // if vendor is the loan_provider and does not have their own integration, they can choose to use 10mg loan repayment integration. 10mg will help them settle it to their account linked
-            $table->enum('collection_mode', ['INTERNAL', 'EXTERNAL'])->default('10MG')->comment('if loan_provider is VENDOR, collection can be outside or within the system. But if 10mg collection is default to internal');
+            $table->enum('collection_mode', ['SYSTEM', 'EXTERNAL'])->default('SYSTEM')->comment('if loan_provider is VENDOR, collection can be outside or within the system. But if SYSTEM collection is default to internal I.E 10MG');
 
             $table->timestamps();
         });
