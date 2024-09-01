@@ -5,11 +5,11 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class Application extends Model
+class IntegrationConfig extends Model
 {
     use HasFactory;
 
-    protected $table = 'applications';
+    protected $table = 'integration_configs';
 
     protected $guarded = [];
 }

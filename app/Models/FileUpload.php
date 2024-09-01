@@ -9,5 +9,7 @@ class FileUpload extends Model
 {
     use HasFactory;
 
+    protected $table = 'file_uploads';
+
     protected $guarded = [];
 }
