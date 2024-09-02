@@ -76,7 +76,6 @@ Laravel is accessible, powerful, and provides tools required for large, robust a
 - intervention/images - For image manipulations https://image.intervention.io/v2
 
 
-
 ## Codebase Agreement
 
 #### Route registration
@@ -134,6 +133,12 @@ If you discover a security vulnerability within Laravel, please send an e-mail t
 The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
 
 ## Documentation Reference
+
+Activity Logging
+https://spatie.be/docs/laravel-activitylog/v4/basic-usage/logging-activity
+
+Authentication JWT
 https://laravel.com/docs/11.x/passport#managing-clients
 
+Middlewars
 https://laravel.com/docs/11.x/middleware#global-middleware
