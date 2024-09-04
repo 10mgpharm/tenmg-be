@@ -17,7 +17,7 @@ return new class extends Migration
             $table->string('name')->unique();
             $table->string('short_name')->unique();
             $table->string('code')->unique(); //e.g slug, abbreviation, system generated identifier from business shortname e.g 10MG, TUYIL etc
-            $table->foreignId('logo_id')->nullable()->constrained('files')->onDelete('set null');
+            $table->foreignId('logo_id')->nullable()->constrained('file_uploads')->onDelete('set null');
             $table->enum('type', ['ADMIN', 'SUPPLIER', 'VENDOR', 'CUSTOMER_PHARMACY', 'CUSTOMER_HOSPITAL'])->nullable();
             $table->text('address');
             $table->string('contact_person');
