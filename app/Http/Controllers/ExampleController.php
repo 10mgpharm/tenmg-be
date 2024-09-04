@@ -2,9 +2,11 @@
 
 namespace App\Http\Controllers;
 
+use App\Exports\UserDataExport;
 use App\Imports\UserDataImport;
 use App\Models\Business;
 use App\Models\FileUpload;
+use App\Models\User;
 use App\Services\AttachmentService;
 use App\Traits\FileUploadTrait;
 use Carbon\Carbon;
@@ -116,7 +118,7 @@ class UploadExampleController extends Controller
             $currentDate = Carbon::now()->format('F d, Y h:i A');
 
             // Example logging activity
-            activity('asset')
+            activity('user')
                 ->causedBy($user)
                 ->performedOn($file)
                 ->withProperties([
@@ -136,5 +138,74 @@ class UploadExampleController extends Controller
 
             return back()->with('error', $th->getMessage());
         }
+    }
+
+    /**
+     * Example: Download / Export Data
+     */
+    public function exportUserData(Request $request): \Symfony\Component\HttpFoundation\BinaryFileResponse
+    {
+        $date = Carbon::parse(now())->format('d-m-Y');
+        $fileName = "USER_LIST_{$date}";
+
+        $userQuery = $this->filterUser($request);
+
+        $user = $request->user();
+        $actionPerformed = 'downloaded';
+        $currentDate = Carbon::now()->format('F d, Y h:i A');
+
+        activity('user')
+            ->causedBy($user)
+            ->performedOn($user)
+            ->withProperties([
+                'action' => $actionPerformed,
+                'auditor' => "{$user->name} {$actionPerformed} excel report: {$fileName} on {$currentDate}",
+                'is_system_user' => $user->is_system_user,
+            ])
+            ->event('excel_download')
+            ->log("You :properties.action excel report: {$fileName} on {$currentDate}");
+
+        return Excel::download(new UserDataExport($userQuery, $this), "{$fileName}.xlsx");
+    }
+
+    /**
+     * Example: Filter Query
+     */
+    protected function filterUser(Request $request): \Illuminate\Database\Eloquent\Builder
+    {
+        $userQuery = User::query()
+            ->when($request->input('search'), function ($query, $search) {
+                $query->where('name', 'like', "%{$search}%");
+            })
+            ->when($request->input('status'), function ($query, $status) {
+                $query->where('active', '=', strtolower($status) == 'active' ? 1 : (strtolower($status) == 'inactive' ? 0 : ''));
+            })
+            ->when($request->input('business'), function ($query, $businessName) {
+                $query->whereExists(function ($query) use ($businessName) {
+                    $query->select(DB::raw(1))
+                        ->from('business_users')
+                        ->whereExists(function ($query) use ($businessName) {
+                            $query->select(DB::raw(1))
+                                ->from('businesses')
+                                ->where('code', $businessName)
+                                ->whereColumn('businesses.id', 'business_users.business_id');
+                        })
+                        ->whereColumn('users.id', 'business_users.user_id');
+                });
+            });
+
+        if ($request->has('sort') && $request->has('order')) {
+            $sortColumn = $request->input('sort');
+            $sortOrder = $request->input('order');
+
+            $validColumns = ['name'];
+            if (in_array($sortColumn, $validColumns) && in_array(strtolower($sortOrder), ['asc', 'desc'])) {
+                $userQuery->orderBy($sortColumn, $sortOrder);
+            }
+        } else {
+            $userQuery->orderBy('created_at', 'desc');
+        }
+
+        return $userQuery;
     }
 }

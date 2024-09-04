@@ -18,7 +18,7 @@ return new class extends Migration
             $table->foreignId('business_id')->constrained('businesses')->onDelete('cascade'); // BusinessType::VENDOR
             $table->foreignId('customer_id')->constrained('credit_customers')->onDelete('cascade');
 
-            $table->foreignId('transaction_file_id')->nullable()->constrained('files')->onDelete('set null');
+            $table->foreignId('transaction_file_id')->nullable()->constrained('file_uploads')->onDelete('set null');
             $table->enum('file_format', ['CSV', 'JSON', 'EXCEL'])->default('JSON');
             $table->enum('source', ['DASHBOARD', 'API'])->default('DASHBOARD'); // upload source
 
