@@ -5,11 +5,11 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class DocumentType extends Model
+class CreditEvaluationCategory extends Model
 {
     use HasFactory;
 
-    protected $table = 'document_types';
+    protected $table = 'credit_evaluation_categories';
 
     protected $guarded = [];
 }

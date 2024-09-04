@@ -21,7 +21,7 @@ return new class extends Migration
 
             // score_weight is uses to compute and determine score_percent, score_value and score_total stored on credit_scores table
             $table->float('score_weight')->default(10)->comment('determines the numeric value score assign if this rule is applied and it passes');
-            $table->string('compare_value')->comment('value each rule is compare against when performing credit score on a txn_history_evaluation');
+            $table->string('compare_value')->nullable()->default(0)->comment('value each rule is compare against when performing credit score on a txn_history_evaluation');
             $table->boolean('active')->default(true)->comment('determine if a rule is active or not');
 
             $table->timestamps();

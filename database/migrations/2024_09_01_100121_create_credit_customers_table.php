@@ -15,7 +15,7 @@ return new class extends Migration
         Schema::create('credit_customers', function (Blueprint $table) {
             $table->id();
             $table->foreignId('business_id')->constrained('businesses')->onDelete('cascade'); // BusinessType::VENDOR
-            $table->foreignId('avatar_id')->nullable()->constrained('files')->onDelete('set null');
+            $table->foreignId('avatar_id')->nullable()->constrained('file_uploads')->onDelete('set null');
             $table->string('name');
             $table->string('email')->nullable();
             $table->string('phone')->nullable();

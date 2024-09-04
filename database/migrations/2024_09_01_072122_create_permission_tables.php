@@ -39,10 +39,12 @@ return new class extends Migration
             Schema::create($tableNames['permission_groups'], function (Blueprint $table) {
                 $table->bigIncrements('id');
                 $table->string('name');
+                $table->string('description')->nullable();
                 $table->unsignedBigInteger('application_id')->nullable()->index();
                 $table->timestamps();
 
                 $table->unique(['name', 'application_id']);
+                $table->softDeletes();
             });
         }
 
@@ -57,6 +59,7 @@ return new class extends Migration
                 $table->timestamps();
 
                 $table->unique(['name', 'guard_name', 'permission_group_id']);
+                $table->softDeletes();
             });
         }
 
