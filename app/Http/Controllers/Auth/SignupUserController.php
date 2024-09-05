@@ -3,7 +3,7 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Mail\Mailed;
-use App\Enums\Enums\MailType;
+use App\Enums\MailType;
 use App\Helpers\UtilityHelper;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Response;
@@ -39,8 +39,8 @@ class SignupUserController extends Controller
         
                 $tokenResult = $user->createToken('Temporary Access Token', ['temp']);
                 
-                Mail::to($user->email)->send(new Mailed($user, MailType::REGISTRATION_VERIFICATION, ['otp' => $otp]));
-            
+                $user->sendEmailVerificationNotification();
+                
                 return (new UserResource($user))->additional([
                     'temporalAccessToken' => $tokenResult->accessToken,
                     'tokenType' => 'Bearer',
