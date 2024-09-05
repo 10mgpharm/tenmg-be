@@ -2,14 +2,11 @@
 
 namespace App\Http\Controllers\Auth;
 
-use App\Mail\Mailed;
-use App\Enums\MailType;
 use App\Helpers\UtilityHelper;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Response;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Mail;
 use App\Http\Requests\Auth\SignupUserRequest;
 use App\Http\Resources\UserResource;
 
@@ -40,7 +37,7 @@ class SignupUserController extends Controller
                 $tokenResult = $user->createToken('Temporary Access Token', ['temp']);
                 
                 $user->sendEmailVerificationNotification();
-                
+
                 return (new UserResource($user))->additional([
                     'temporalAccessToken' => $tokenResult->accessToken,
                     'tokenType' => 'Bearer',
