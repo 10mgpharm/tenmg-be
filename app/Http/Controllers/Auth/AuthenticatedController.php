@@ -24,9 +24,9 @@ class AuthenticatedController extends Controller
         $tokenResult = $user->createToken('Full Access Token', ['full']);
 
         return (new UserResource($user))->additional([
-            'full_access_token' => $tokenResult->accessToken,
-            'token_type' => 'Bearer',
-            'expires_at' => $tokenResult->token->expires_at,
+            'fullAccessToken' => $tokenResult->accessToken,
+            'tokenType' => 'Bearer',
+            'expiresAt' => $tokenResult->token->expires_at,
             'message' => 'Sign in successful.',
         ])->response()
         ->setStatusCode(Response::HTTP_OK);

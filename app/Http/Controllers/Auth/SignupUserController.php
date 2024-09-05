@@ -42,9 +42,9 @@ class SignupUserController extends Controller
                 Mail::to($user->email)->send(new Mailed($user, MailType::REGISTRATION_VERIFICATION, ['otp' => $otp]));
             
                 return (new UserResource($user))->additional([
-                    'temporal_access_token' => $tokenResult->accessToken,
-                    'token_type' => 'Bearer',
-                    'expires_at' => $tokenResult->token->expires_at,
+                    'temporalAccessToken' => $tokenResult->accessToken,
+                    'tokenType' => 'Bearer',
+                    'expiresAt' => $tokenResult->token->expires_at,
                     'message' => 'Sign up successful. Please verify your email using the OTP sent.',
                 ])->response()
                 ->setStatusCode(Response::HTTP_CREATED);

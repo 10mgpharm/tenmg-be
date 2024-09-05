@@ -31,9 +31,9 @@ class VerifyEmailController extends Controller
             $tokenResult = $user->createToken('Full Access Token', ['full']);
 
             return (new UserResource($user))->additional([
-                'full_access_token' => $tokenResult->accessToken,
-                'token_type' => 'Bearer',
-                'expires_at' => $tokenResult->token->expires_at,
+                'fullAccessToken' => $tokenResult->accessToken,
+                'tokenType' => 'Bearer',
+                'expiresAt' => $tokenResult->token->expires_at,
                 'message' => 'Email already verified. Full access granted.',
             ])->response()
             ->setStatusCode(Response::HTTP_OK);
@@ -47,9 +47,9 @@ class VerifyEmailController extends Controller
         $tokenResult = $user->createToken('Full Access Token', ['full']);
 
         return (new UserResource($user))->additional([
-            'full_access_token' => $tokenResult->accessToken,
-            'token_type' => 'Bearer',
-            'expires_at' => $tokenResult->token->expires_at,
+            'fullAccessToken' => $tokenResult->accessToken,
+            'tokenType' => 'Bearer',
+            'expiresAt' => $tokenResult->token->expires_at,
             'message' => 'Email successfully verified. Full access granted.',
         ])->response()
         ->setStatusCode(Response::HTTP_OK);

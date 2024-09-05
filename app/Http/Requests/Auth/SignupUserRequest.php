@@ -35,14 +35,14 @@ class SignupUserRequest extends FormRequest
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:users,email'],
             'password' => ['required', 'confirmed', Rules\Password::default()],
-            'terms_and_conditions' => 'required|accepted',
+            'termsAndConditions' => 'required|accepted',
         ];
     }
 
     public function messages(): array
     {
         return [
-            'terms_and_conditions.required' => 'You must agree to the terms and conditions.',
+            'termsAndConditions.required' => 'You must agree to the terms and conditions.',
             'businessType.in' => 'The business type must be either supplier or pharmacy.',
         ];
     }
