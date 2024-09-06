@@ -51,5 +51,9 @@ class AppServiceProvider extends ServiceProvider
         Passport::useAuthCodeModel(PassportAuthCode::class);
         Passport::useClientModel(PassportClient::class);
         Passport::usePersonalAccessClientModel(PassportPersonalAccessClient::class);
+        Passport::tokensCan([
+            'temp' => 'Temporal access token',
+            'full' => 'Full access token',
+        ]);
     }
 }

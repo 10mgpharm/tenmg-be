@@ -143,7 +143,7 @@ class RolePermissionSeeder extends Seeder
                     Permission::firstOrCreate([
                         'name' => $permissionName,
                         'alias' => "$groupName: $permissionName",
-                        'guard_name' => 'web',
+                        'guard_name' => 'api',
                         'application_id' => $application->id,
                         'permission_group_id' => $permissionGroup->id,
                     ]);
@@ -355,7 +355,7 @@ class RolePermissionSeeder extends Seeder
         foreach ($roles as $roleName) {
             $role = Role::firstOrCreate([
                 'name' => $roleName,
-                'guard_name' => 'web',
+                'guard_name' => 'api',
                 'created_at' => now(),
                 'updated_at' => now(),
             ]);
