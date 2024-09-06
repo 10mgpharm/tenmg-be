@@ -15,28 +15,32 @@ Route::group(['middleware' => ['cors', 'json.response']], function () {
             return $request->user();
         });
 
-        // List customers with pagination and filtering
-        Route::get('/customers', [CustomerController::class, 'index'])->name('customers.index');
+        Route::prefix('/customers', function () {
+            // List customers with pagination and filtering
+            Route::get('/', [CustomerController::class, 'index'])->name('customers.index');
 
-        // Create a new customer
-        Route::post('/customers', [CustomerController::class, 'store'])->name('customers.store');
+            // Create a new customer
+            Route::post('/', [CustomerController::class, 'store'])->name('customers.store');
 
-        // Get a specific customer's details
-        Route::get('/customers/{id}', [CustomerController::class, 'show'])->name('customers.show');
+            // Get a specific customer's details
+            Route::get('/{id}', [CustomerController::class, 'show'])->name('customers.show');
 
-        // Update a customer's details
-        Route::put('/customers/{id}', [CustomerController::class, 'update'])->name('customers.update');
+            // Update a customer's details
+            Route::put('/{id}', [CustomerController::class, 'update'])->name('customers.update');
 
-        // Soft delete a customer
-        Route::delete('/customers/{id}', [CustomerController::class, 'destroy'])->name('customers.destroy');
+            // Soft delete a customer
+            Route::delete('/{id}',
+                [CustomerController::class, 'destroy']
+            )->name('customers.destroy');
 
-        // Enable or disable a customer
-        Route::patch('/customers/{id}', [CustomerController::class, 'toggleActive'])->name('customers.toggleActive');
+            // Enable or disable a customer
+            Route::patch('/{id}', [CustomerController::class, 'toggleActive'])->name('customers.toggleActive');
 
-        // Export customers to Excel
-        Route::get('/customers/export', [CustomerController::class, 'export'])->name('customers.export');
+            // Export customers to Excel
+            Route::get('/export', [CustomerController::class, 'export'])->name('customers.export');
 
-        // Import customers from Excel
-        Route::post('/customers/import', [CustomerController::class, 'import'])->name('customers.import');
+            // Import customers from Excel
+            Route::post('/import', [CustomerController::class, 'import'])->name('customers.import');
+        });
     });
 });

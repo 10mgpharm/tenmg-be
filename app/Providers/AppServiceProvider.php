@@ -9,6 +9,7 @@ use App\Models\PassportRefreshToken;
 use App\Models\PassportToken;
 use App\Repositories\CustomerRepository;
 use App\Repositories\Interfaces\CustomerRepositoryInterface;
+use App\Services\ActivityLogService;
 use App\Services\AttachmentService;
 use App\Services\AuthService;
 use App\Services\CustomerService;
@@ -28,7 +29,8 @@ class AppServiceProvider extends ServiceProvider
             return new CustomerService(
                 customerRepository: $app->make(CustomerRepositoryInterface::class),
                 attachmentService: $app->make(AttachmentService::class),
-                authService: $app->make(AuthService::class)
+                authService: $app->make(AuthService::class),
+                activityLogService: $app->make(ActivityLogService::class),
             );
         }, shared: true);
     }

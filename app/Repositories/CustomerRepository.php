@@ -31,21 +31,21 @@ class CustomerRepository implements CustomerRepositoryInterface
     {
         $query = Customer::query();
 
-        if (isset($filters['name'])) {
-            $query->where('name', 'like', '%'.$filters['name'].'%');
-        }
+        $query->when(isset($filters['name']), function ($query) use ($filters) {
+            return $query->where('name', 'like', '%'.$filters['name'].'%');
+        });
 
-        if (isset($filters['email'])) {
-            $query->where('email', 'like', '%'.$filters['email'].'%');
-        }
+        $query->when(isset($filters['email']), function ($query) use ($filters) {
+            return $query->where('email', 'like', '%'.$filters['email'].'%');
+        });
 
-        if (isset($filters['vendor_id'])) {
-            $query->where('business_id', $filters['vendor_id']);
-        }
+        $query->when(isset($filters['vendorId']), function ($query) use ($filters) {
+            return $query->where('business_id', $filters['vendorId']);
+        });
 
-        if (isset($filters['created_at_start']) && isset($filters['created_at_end'])) {
-            $query->whereBetween('created_at', [$filters['created_at_start'], $filters['created_at_end']]);
-        }
+        $query->when(isset($filters['createdAtStart']) && isset($filters['createdAtEnd']), function ($query) use ($filters) {
+            return $query->whereBetween('created_at', [$filters['createdAtStart'], $filters['createdAtEnd']]);
+        });
 
         return $query->paginate($perPage);
     }

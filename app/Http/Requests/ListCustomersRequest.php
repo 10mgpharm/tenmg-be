@@ -24,11 +24,11 @@ class ListCustomersRequest extends FormRequest
         return [
             'name' => 'sometimes|string|max:255',
             'email' => 'sometimes|email|max:255',
-            'vendor_id' => 'sometimes|integer|exists:businesses,id',
-            'created_at_start' => 'sometimes|date|before_or_equal:created_at_end',
-            'created_at_end' => 'sometimes|date|after_or_equal:created_at_start',
+            'vendorId' => 'sometimes|integer|exists:businesses,id',
+            'createdAtStart' => 'sometimes|date|before_or_equal:createdAtEnd',
+            'createdAtEnd' => 'sometimes|date|after_or_equal:createdAtStart',
             'page' => 'sometimes|integer|min:1',
-            'per_page' => 'sometimes|integer|min:1|max:100',
+            'perPage' => 'sometimes|integer|min:1|max:100',
         ];
     }
 
@@ -37,17 +37,17 @@ class ListCustomersRequest extends FormRequest
         return [
             'name.string' => 'The name must be a string.',
             'email.email' => 'Please provide a valid email address.',
-            'vendor_id.integer' => 'The vendor ID must be an integer.',
-            'vendor_id.exists' => 'The selected vendor does not exist.',
-            'created_at_start.date' => 'The start date must be a valid date.',
-            'created_at_start.before_or_equal' => 'The start date must be before or equal to the end date.',
-            'created_at_end.date' => 'The end date must be a valid date.',
-            'created_at_end.after_or_equal' => 'The end date must be after or equal to the start date.',
+            'vendorId.integer' => 'The vendor ID must be an integer.',
+            'vendorId.exists' => 'The selected vendor does not exist.',
+            'createdAtStart.date' => 'The start date must be a valid date.',
+            'createdAtStart.before_or_equal' => 'The start date must be before or equal to the end date.',
+            'createdAtEnd.date' => 'The end date must be a valid date.',
+            'createdAtEnd.after_or_equal' => 'The end date must be after or equal to the start date.',
             'page.integer' => 'The page number must be an integer.',
             'page.min' => 'The page number must be at least 1.',
-            'per_page.integer' => 'The per page value must be an integer.',
-            'per_page.min' => 'The per page value must be at least 1.',
-            'per_page.max' => 'The per page value may not be greater than 100.',
+            'perPage.integer' => 'The per page value must be an integer.',
+            'perPage.min' => 'The per page value must be at least 1.',
+            'perPage.max' => 'The per page value may not be greater than 100.',
         ];
     }
 }

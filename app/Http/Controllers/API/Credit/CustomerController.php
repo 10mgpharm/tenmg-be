@@ -23,7 +23,7 @@ class CustomerController extends Controller
 
     public function index(ListCustomersRequest $request): JsonResponse
     {
-        $customers = $this->customerService->listCustomers($request->all(), 10);
+        $customers = $this->customerService->listCustomers($request->all(), $request->perPage ?? 10);
 
         return response()->json($customers);
     }

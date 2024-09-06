@@ -22,9 +22,9 @@ class StoreCustomerRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'business_id' => 'required|exists:businesses,id',
+            'vendorId' => 'required|exists:businesses,id',
             'name' => 'required|string|max:255',
-            'email' => 'required|email|max:255|unique:credit_customers,email,NULL,id,business_id,'.$this->business_id,
+            'email' => 'required|email|max:255|unique:credit_customers,email,NULL,id,business_id,'.$this->vendorId,
             'phone' => 'nullable|string|max:15',
             'avatar' => 'nullable|image|mimes:png,jpg|max:2048', // Assuming file upload is an image
         ];
@@ -33,8 +33,8 @@ class StoreCustomerRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'business_id.required' => 'The business ID is required.',
-            'business_id.exists' => 'The selected business does not exist.',
+            'vendorId.required' => 'The business ID is required.',
+            'vendorId.exists' => 'The selected business does not exist.',
             'name.required' => 'The customer name is required.',
             'email.email' => 'Please provide a valid email address.',
             'email.unique' => 'This email is already associated with a customer in the same business.',

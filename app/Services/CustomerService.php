@@ -5,36 +5,26 @@ namespace App\Services;
 use App\Models\Customer;
 use App\Repositories\Interfaces\CustomerRepositoryInterface;
 use App\Services\Interfaces\CustomerServiceInterface;
-use Spatie\Activitylog\LogOptions;
-use Spatie\Activitylog\Traits\LogsActivity;
 
 class CustomerService implements CustomerServiceInterface
 {
-    use LogsActivity;
-
-    protected static $logName = 'customer';
-
-    protected static $logOnlyDirty = true;
-
-    protected static $logAttributes = ['name', 'email', 'phone', 'active'];
-
     public function __construct(
         private CustomerRepositoryInterface $customerRepository,
         private AttachmentService $attachmentService,
-        private AuthService $authService
+        private AuthService $authService,
+        private ActivityLogService $activityLogService,
     ) {}
 
     public function createCustomer(array $data): Customer
     {
-        $data['identifier'] = $this->generateCustomerIdentifier($data['business_id']);
+        $businessCode = '10MG'; //todo: find business using business_id using business repo when its ready
+        $count = $this->customerRepository->paginate(['vendorId' => $data['vendorId']], 1)->total() + 1;
+
+        $data['identifier'] = strtoupper($businessCode).'-CUS-'.str_pad($count, 3, '0', STR_PAD_LEFT);
         $data['created_by'] = $this->authService->getUser()->id;
         $customer = $this->customerRepository->create($data);
 
-        activity()
-            ->performedOn($customer)
-            ->causedBy($this->authService->getUser())
-            ->withProperties(['attributes' => $data])
-            ->log('created');
+        $this->activityLogService->logActivity(model: $customer, causer: $this->authService->getUser(), action: 'created', properties: ['attributes' => $data]);
 
         return $customer;
     }
@@ -55,11 +45,7 @@ class CustomerService implements CustomerServiceInterface
                 $this->attachmentService->updateFile($customer->avatar, $data['avatar']);
             }
 
-            activity()
-                ->performedOn($customer)
-                ->causedBy($this->authService->getUser())
-                ->withProperties(['attributes' => $data])
-                ->log('updated');
+            $this->activityLogService->logActivity(model: $customer, causer: $this->authService->getUser(), action: 'updated', properties: ['attributes' => $data]);
 
             return $customer;
         }
@@ -77,10 +63,7 @@ class CustomerService implements CustomerServiceInterface
             }
 
             $this->customerRepository->delete($customer);
-            activity()
-                ->performedOn($customer)
-                ->causedBy($this->authService->getUser())
-                ->log('deleted');
+            $this->activityLogService->logActivity(model: $customer, causer: $this->authService->getUser(), action: 'deleted');
 
             return true;
         }
@@ -105,21 +88,5 @@ class CustomerService implements CustomerServiceInterface
         }
 
         return null;
-    }
-
-    private function generateCustomerIdentifier(int $business_id)
-    {
-        $businessCode = '10MG'; //todo: find business using business_id using business repo when its ready
-        $count = $this->customerRepository->paginate(['business_id' => $business_id], 1)->total() + 1;
-
-        return strtoupper($businessCode).'-CUS-'.str_pad($count, 3, '0', STR_PAD_LEFT);
-    }
-
-    public function getActivitylogOptions(): LogOptions
-    {
-        return LogOptions::defaults()
-            ->logOnly(['name', 'email', 'phone', 'active'])
-            ->logOnlyDirty()
-            ->useLogName('customer');
     }
 }
