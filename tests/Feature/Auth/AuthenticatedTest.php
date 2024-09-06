@@ -37,7 +37,6 @@ class AuthenticatedTest extends TestCase
         ];
 
         $response = $this->postJson($this->url, $data);
-        // dd($response);
         $response->assertStatus(Response::HTTP_OK)
             ->assertJson(fn (AssertableJson $json) =>
                 $json->where('tokenType', 'Bearer')
