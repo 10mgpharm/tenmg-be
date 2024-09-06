@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\API\Credit\CustomerController;
 use App\Http\Controllers\Auth\AuthenticatedController;
 use App\Http\Controllers\Auth\SignupUserController;
 use App\Http\Controllers\Auth\VerifyEmailController;
@@ -25,13 +26,40 @@ Route::group(['middleware' => ['cors', 'json.response']], function () {
                     ->name('verification.verify');
             });
 
-
             // protected routes
             Route::middleware(['auth:api', 'scope:full'])->group(function () {
 
                 Route::post('/signout', [AuthenticatedController::class, 'destroy'])
                     ->name('signout');
             });
+        });
+
+        Route::prefix('/customers', function () {
+            // List customers with pagination and filtering
+            Route::get('/', [CustomerController::class, 'index'])->name('customers.index');
+
+            // Create a new customer
+            Route::post('/', [CustomerController::class, 'store'])->name('customers.store');
+
+            // Get a specific customer's details
+            Route::get('/{id}', [CustomerController::class, 'show'])->name('customers.show');
+
+            // Update a customer's details
+            Route::put('/{id}', [CustomerController::class, 'update'])->name('customers.update');
+
+            // Soft delete a customer
+            Route::delete('/{id}',
+                [CustomerController::class, 'destroy']
+            )->name('customers.destroy');
+
+            // Enable or disable a customer
+            Route::patch('/{id}', [CustomerController::class, 'toggleActive'])->name('customers.toggleActive');
+
+            // Export customers to Excel
+            Route::get('/export', [CustomerController::class, 'export'])->name('customers.export');
+
+            // Import customers from Excel
+            Route::post('/import', [CustomerController::class, 'import'])->name('customers.import');
         });
     });
 });

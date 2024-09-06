@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Middleware\CamelCaseMiddleware;
 use App\Http\Middleware\Cors;
 use App\Http\Middleware\ForceJsonResponse;
 use Illuminate\Foundation\Application;
@@ -19,6 +20,7 @@ return Application::configure(basePath: dirname(__DIR__))
         // append or prepend middlewares here
         $middleware->append(ForceJsonResponse::class);
         $middleware->append(Cors::class);
+        $middleware->append(CamelCaseMiddleware::class);
 
         // register all middleware alias here
         $middleware->alias([
@@ -27,7 +29,6 @@ return Application::configure(basePath: dirname(__DIR__))
             'scopes' => CheckScopes::class,
             'scope' => CheckForAnyScope::class,
         ]);
-
     })
     ->withExceptions(function (Exceptions $exceptions) {
         //
