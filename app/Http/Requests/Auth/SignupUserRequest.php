@@ -34,7 +34,8 @@ class SignupUserRequest extends FormRequest
             ],
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:users,email'],
-            'password' => ['required', 'confirmed', Rules\Password::default()],
+            'password' => ['required', Rules\Password::default()],
+            'passwordConfirmation' => ['required', 'same:password'],
             'termsAndConditions' => 'required|accepted',
         ];
     }

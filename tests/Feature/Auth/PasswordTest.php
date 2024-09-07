@@ -92,7 +92,7 @@ class PasswordTest extends TestCase
             'email' => $this->email,
             'otp' => $otp->code,
             'password' => 'newpassword123',
-            'password_confirmation' => 'newpassword123',
+            'passwordConfirmation' => 'newpassword123',
         ]);
 
         $response->assertStatus(Response::HTTP_OK)
