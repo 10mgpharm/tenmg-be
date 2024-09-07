@@ -17,6 +17,21 @@ use Symfony\Component\HttpKernel\Exception\UnauthorizedHttpException;
 abstract class Controller
 {
     /**
+     * handle return json response
+     *
+     * @param [type] $data
+     * @param  int  $status
+     */
+    public function returnJsonResponse(string $message = 'data retrieved', $data = null, string $status = 'success', $statusCode = Response::HTTP_OK): JsonResponse
+    {
+        return response()->json([
+            'data' => $data,
+            'message' => $message,
+            'status' => $status,
+        ], $statusCode);
+    }
+
+    /**
      * Handle error response
      */
     public function handleErrorResponse(\Throwable $th, $status = null): JsonResponse
