@@ -6,6 +6,7 @@ use App\Enums\BusinessType;
 use App\Http\Requests\Auth\SignupUserRequest;
 use App\Models\Role;
 use App\Models\User;
+use Illuminate\Http\JsonResponse;
 
 interface IAuthService
 {
@@ -25,4 +26,9 @@ interface IAuthService
      * return role based on signup type
      */
     public function resolveSignupRole(BusinessType $type): ?Role;
+
+    /**
+     * verifyUserEmail
+     */
+    public function verifyUserEmail(User $user, string $otp): ?JsonResponse;
 }

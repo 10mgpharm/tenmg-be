@@ -12,7 +12,7 @@ use Illuminate\Http\Response;
 class SignupUserController extends Controller
 {
     /**
-     * signup user controller
+     * signup user contructor
      */
     public function __construct(private IAuthService $authService)
     {

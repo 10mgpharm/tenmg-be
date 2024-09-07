@@ -2,6 +2,7 @@
 
 namespace App\Providers;
 
+use App\Listeners\SignupEmailVerifiedListener;
 use App\Models\PassportAuthCode;
 use App\Models\PassportClient;
 use App\Models\PassportPersonalAccessClient;
@@ -15,6 +16,8 @@ use App\Services\AuthService;
 use App\Services\CustomerService;
 use App\Services\Interfaces\IAuthService;
 use App\Services\Interfaces\ICustomerService;
+use Illuminate\Auth\Events\Verified;
+use Illuminate\Support\Facades\Event;
 use Illuminate\Support\ServiceProvider;
 use Laravel\Passport\Passport;
 
@@ -60,5 +63,11 @@ class AppServiceProvider extends ServiceProvider
             'temp' => 'Temporal access token',
             'full' => 'Full access token',
         ]);
+
+        // register events and listeners here
+        Event::listen(
+            Verified::class,
+            SignupEmailVerifiedListener::class,
+        );
     }
 }

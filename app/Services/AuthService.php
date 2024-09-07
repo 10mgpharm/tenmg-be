@@ -6,20 +6,28 @@ use App\Enums\BusinessStatus;
 use App\Enums\BusinessType;
 use App\Helpers\UtilityHelper;
 use App\Http\Requests\Auth\SignupUserRequest;
+use App\Http\Resources\UserResource;
 use App\Models\Business;
 use App\Models\BusinessUser;
 use App\Models\Otp;
 use App\Models\Role;
 use App\Models\User;
 use App\Services\Interfaces\IAuthService;
+use Carbon\Carbon;
 use Exception;
+use Illuminate\Auth\Events\Verified;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use Laravel\Passport\PersonalAccessTokenResult;
+use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 
 class AuthService implements IAuthService
 {
+    public const TOKEN_EXPIRED_AT = 15;
+
     public bool $isValid = false;
 
     /**
@@ -87,7 +95,7 @@ class AuthService implements IAuthService
             $code = UtilityHelper::generateOtp();
             $token = Otp::create([
                 'code' => $code,
-                'type' => 'Verify Account',
+                'type' => 'SIGNUP_EMAIL_VERIFICATION',
                 'user_id' => $user->id,
             ]);
 
@@ -119,5 +127,68 @@ class AuthService implements IAuthService
                 // BusinessType::CUSTOMER_PHARMACY
                 return Role::where('name', 'customer')->first();
         }
+    }
+
+    /**
+     * verifyUserEmail
+     */
+    public function verifyUserEmail(User $user, string $otp): ?JsonResponse
+    {
+        try {
+            DB::beginTransaction();
+
+            $otp = $user->otps()->firstWhere('code', $otp);
+
+            if (! $otp || Carbon::parse($otp->created_at)->diffInMinutes(now()) > self::TOKEN_EXPIRED_AT) {
+                throw new BadRequestHttpException('OTP expired or invalid.');
+            }
+
+            $otp->delete();
+
+            if ($user->hasVerifiedEmail()) {
+                $user->token()->revoke();
+                $tokenResult = $user->createToken('Full Access Token', ['full']);
+
+                return $this->returnAuthResponse(
+                    user: $user,
+                    tokenResult: $tokenResult,
+                    statusCode: Response::HTTP_OK
+                );
+            }
+
+            if ($user->markEmailAsVerified()) {
+                event(new Verified($user));
+            }
+
+            $user->token()->revoke();
+            $tokenResult = $user->createToken('Full Access Token', ['full']);
+
+            DB::commit();
+
+            return $this->returnAuthResponse(
+                user: $user,
+                tokenResult: $tokenResult,
+                statusCode: Response::HTTP_OK
+            );
+        } catch (\Throwable $th) {
+            DB::rollBack();
+            throw $th;
+        }
+    }
+
+    protected function returnAuthResponse(User $user, PersonalAccessTokenResult $tokenResult, int $statusCode = Response::HTTP_OK): JsonResponse
+    {
+        return (new UserResource($user))
+            ->additional([
+                'accessToken' => [
+                    'token' => $tokenResult->accessToken,
+                    'tokenType' => 'bearer',
+                    'expiresAt' => $tokenResult->token->expires_at,
+                ],
+                'message' => 'Account verified',
+                'status' => 'success',
+            ])
+            ->response()
+            ->setStatusCode($statusCode);
     }
 }
