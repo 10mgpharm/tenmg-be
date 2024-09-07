@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Enums\BusinessStatus;
 use App\Enums\BusinessType;
+use App\Enums\OtpType;
 use App\Helpers\UtilityHelper;
 use App\Http\Requests\Auth\SignupUserRequest;
 use App\Http\Resources\UserResource;
@@ -93,13 +94,13 @@ class AuthService implements IAuthService
             );
 
             $code = UtilityHelper::generateOtp();
-            $token = Otp::create([
+            $otp = Otp::create([
                 'code' => $code,
-                'type' => 'SIGNUP_EMAIL_VERIFICATION',
+                'type' => OtpType::SIGNUP_EMAIL_VERIFICATION,
                 'user_id' => $user->id,
             ]);
 
-            $user->sendEmailVerification($token->code);
+            $user->sendEmailVerification($otp->code);
 
             DB::commit();
 

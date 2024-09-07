@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\API\Auth\AuthenticatedController;
+use App\Http\Controllers\API\Auth\PasswordController;
 use App\Http\Controllers\API\Auth\SignupUserController;
 use App\Http\Controllers\API\Auth\VerifyEmailController;
 use App\Http\Controllers\API\Credit\CustomerController;
@@ -19,6 +20,12 @@ Route::group(['middleware' => ['cors', 'json.response']], function () {
 
                 Route::post('/signin', [AuthenticatedController::class, 'store'])
                     ->name('singin');
+
+                Route::post('/forgot-password', [PasswordController::class, 'forgot'])
+                    ->name('password.forgot');
+
+                Route::post('/reset-password', [PasswordController::class, 'reset'])
+                    ->name('password.reset');
             });
 
             Route::middleware(['auth:api', 'scope:temp'])->group(function () {

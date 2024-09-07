@@ -27,7 +27,7 @@ class SignupUserTest extends TestCase
             'name' => fake()->words(3, true),
             'email' => fake()->email(),
             'password' => $password,
-            'password_confirmation' => $password,
+            'passwordConfirmation' => $password,
             'termsAndConditions' => 1,
             'businessType' => 'supplier',
         ];
@@ -73,7 +73,7 @@ class SignupUserTest extends TestCase
             'name' => '',
             'email' => 'invalid-email',
             'password' => 'secret123',
-            'password_confirmation' => 'mismatch',
+            'passwordConfirmation' => 'mismatch',
         ];
 
         $this->postJson($this->url, $data)
@@ -82,7 +82,7 @@ class SignupUserTest extends TestCase
                 $json->whereType('message', 'string')
                 ->has('errors')
                     ->whereType('errors.email', 'array')
-                    ->whereType('errors.password', 'array')
+                    ->whereType('errors.passwordConfirmation', 'array')
                     ->whereType('errors.name', 'array')
                     ->whereType('errors.businessType', 'array')
                     ->whereType('errors.termsAndConditions', 'array')
