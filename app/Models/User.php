@@ -5,6 +5,7 @@ namespace App\Models;
 use App\Notifications\Auth\ResetPasswordNotification;
 use App\Notifications\Auth\VerifyEmailNotification;
 use Carbon\Carbon;
+use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -16,9 +17,11 @@ use Laravel\Passport\HasApiTokens;
 use Spatie\Activitylog\Traits\CausesActivity;
 use Spatie\Permission\Traits\HasRoles;
 
-class User extends Authenticatable
+class User extends Authenticatable implements MustVerifyEmail
 {
     use CausesActivity, HasApiTokens, HasFactory, HasRoles, Notifiable, SoftDeletes;
+
+    protected $table = 'users';
 
     /**
      * The attributes that are mass assignable.
@@ -142,7 +145,7 @@ class User extends Authenticatable
     }
 
     /**
-     * sendEmailVerification
+     * Send email verification notification
      *
      * @return void
      */
@@ -171,9 +174,15 @@ class User extends Authenticatable
         return $this->email;
     }
 
-    public function sendPasswordResetNotification($token)
+    /**
+     * Send password reset notification
+     *
+     * @param  string  $code
+     * @return void
+     */
+    public function sendPasswordResetNotification($code)
     {
-        $this->notify(new ResetPasswordNotification($token));
+        $this->notify(new ResetPasswordNotification($code));
     }
 
     protected function getDefaultGuardName(): string

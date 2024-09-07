@@ -3,17 +3,18 @@
 namespace App\Http\Requests\Auth;
 
 use App\Enums\OtpType;
-use Illuminate\Validation\Rules;
-use Illuminate\Foundation\Http\FormRequest;
 use App\Models\User;
+use App\Services\AuthService;
+use Carbon\Carbon;
+use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
+use Illuminate\Validation\Rules;
 use Illuminate\Validation\ValidationException;
 
 class ResetPasswordRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
-     *
-     * @return bool
      */
     public function authorize(): bool
     {
@@ -28,8 +29,12 @@ class ResetPasswordRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'otp' => ['required', 'string',],
-            'email' => ['required', 'email'],
+            'otp' => [
+                'required',
+                'string',
+                'exists:otps,code,type,'.OtpType::RESET_PASSWORD_VERIFICATION,
+            ],
+            'email' => ['required', Rule::exists(User::class, 'email')],
             'password' => ['required', Rules\Password::default()],
             'passwordConfirmation' => ['required', 'same:password'],
         ];
@@ -53,23 +58,18 @@ class ResetPasswordRequest extends FormRequest
     protected function validateOtp()
     {
         $email = $this->input('email');
-        $otp = $this->input('otp');
+        $code = $this->input('otp');
 
         $user = User::where('email', $email)->first();
-
-        // Ensure OTP is provided
-        if (empty($otp)) {
+        if (! $user) {
             throw ValidationException::withMessages([
-                'otp' => [__('The OTP is required.')],
+                'otp' => [__('Invalid email or otp is incorrect. Please try again.')],
             ]);
         }
 
-        // Check if OTP is valid for the given user
-        if (!$user || !$user->otps()->firstWhere([
-            'code' => $otp,
-            'user_id' => $user->id,
-            'type' => OtpType::RESET_PASSWORD_VERIFICATION
-        ])) {
+        $otp = $user->otps()->firstWhere('code', $code);
+
+        if (! $otp || Carbon::parse($otp->created_at)->diffInMinutes(now()) > AuthService::TOKEN_EXPIRED_AT) {
             throw ValidationException::withMessages([
                 'otp' => [__('The OTP provided is incorrect or has expired. Please try again.')],
             ]);

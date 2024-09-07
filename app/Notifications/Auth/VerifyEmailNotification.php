@@ -42,6 +42,7 @@ class VerifyEmailNotification extends Notification implements ShouldQueue
             ->line(Lang::get('Your account has been created on '.config('app.name')))
             ->line(Lang::get('Use the code below to verify your account'))
             ->line('Code: '.$this->code)
+            ->line('This code will expire in 15 minutes.')
             ->salutation(config('app.name'))
             ->line(Lang::get('If you are not sure about this account, no further action is required.'));
     }
