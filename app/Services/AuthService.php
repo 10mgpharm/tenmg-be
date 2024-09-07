@@ -152,6 +152,7 @@ class AuthService implements IAuthService
                 return $this->returnAuthResponse(
                     user: $user,
                     tokenResult: $tokenResult,
+                    message: 'Account verified',
                     statusCode: Response::HTTP_OK
                 );
             }
@@ -176,7 +177,10 @@ class AuthService implements IAuthService
         }
     }
 
-    protected function returnAuthResponse(User $user, PersonalAccessTokenResult $tokenResult, int $statusCode = Response::HTTP_OK): JsonResponse
+    /**
+     * Return auth response
+     */
+    public function returnAuthResponse(User $user, PersonalAccessTokenResult $tokenResult, string $message = 'Sign in successful.', int $statusCode = Response::HTTP_OK): JsonResponse
     {
         return (new UserResource($user))
             ->additional([
@@ -185,7 +189,7 @@ class AuthService implements IAuthService
                     'tokenType' => 'bearer',
                     'expiresAt' => $tokenResult->token->expires_at,
                 ],
-                'message' => 'Account verified',
+                'message' => $message,
                 'status' => 'success',
             ])
             ->response()

@@ -7,6 +7,8 @@ use App\Http\Requests\Auth\SignupUserRequest;
 use App\Models\Role;
 use App\Models\User;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Response;
+use Laravel\Passport\PersonalAccessTokenResult;
 
 interface IAuthService
 {
@@ -31,4 +33,9 @@ interface IAuthService
      * verifyUserEmail
      */
     public function verifyUserEmail(User $user, string $otp): ?JsonResponse;
+
+    /**
+     * Return auth response
+     */
+    public function returnAuthResponse(User $user, PersonalAccessTokenResult $tokenResult, string $message = 'Sign in successful.', int $statusCode = Response::HTTP_OK): JsonResponse;
 }
