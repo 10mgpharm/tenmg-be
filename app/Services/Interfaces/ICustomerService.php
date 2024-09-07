@@ -4,7 +4,7 @@ namespace App\Services\Interfaces;
 
 use App\Models\Customer;
 
-interface CustomerServiceInterface
+interface ICustomerService
 {
     public function createCustomer(array $data): Customer;
 

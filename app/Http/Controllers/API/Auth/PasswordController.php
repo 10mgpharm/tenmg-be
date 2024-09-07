@@ -1,32 +1,32 @@
 <?php
 
-namespace App\Http\Controllers\Auth;
+namespace App\Http\Controllers\API\Auth;
 
 use App\Enums\OtpType;
 use App\Helpers\UtilityHelper;
-use App\Models\User;
-use Illuminate\Support\Str;
-use Illuminate\Http\Response;
-use Illuminate\Http\JsonResponse;
 use App\Http\Controllers\Controller;
-use Illuminate\Support\Facades\Hash;
 use App\Http\Requests\Auth\ForgotPasswordRequest;
 use App\Http\Requests\Auth\ResetPasswordRequest;
+use App\Models\User;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Response;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Str;
 
 class PasswordController extends Controller
 {
     /**
      * Send a password reset link.
-     * 
-     * @param \Illuminate\Http\Request $request
-     * @return \Illuminate\Http\JsonResponse
+     *
+     * @param  \Illuminate\Http\Request  $request
+     *
      * @throws \Illuminate\Validation\ValidationException
      */
     public function forgot(ForgotPasswordRequest $request): JsonResponse
     {
         $user = User::firstWhere(['email' => $request->input('email')]);
 
-        if($user){
+        if ($user) {
             $otp = $user->otps()->create([
                 'code' => UtilityHelper::generateOtp(),
                 'type' => OtpType::RESET_PASSWORD_VERIFICATION,
@@ -34,14 +34,14 @@ class PasswordController extends Controller
             $user->sendPasswordResetNotification($otp->code);
         }
 
-        return response()->json(['status' => __('passwords.sent')], Response::HTTP_OK);
+        return $this->returnJsonResponse(
+            message: 'A one-time password has been sent to your registered email',
+            statusCode: Response::HTTP_OK
+        );
     }
 
     /**
      * Handle an incoming new password request.
-     *
-     * @param \App\Http\Requests\Auth\ResetPasswordRequest $request
-     * @return \Illuminate\Http\JsonResponse
      */
     public function reset(ResetPasswordRequest $request): JsonResponse
     {

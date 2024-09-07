@@ -18,11 +18,11 @@ return new class extends Migration
             $table->string('short_name')->unique();
             $table->string('code')->unique(); //e.g slug, abbreviation, system generated identifier from business shortname e.g 10MG, TUYIL etc
             $table->foreignId('logo_id')->nullable()->constrained('file_uploads')->onDelete('set null');
-            $table->enum('type', ['ADMIN', 'SUPPLIER', 'VENDOR', 'CUSTOMER_PHARMACY', 'CUSTOMER_HOSPITAL'])->nullable();
-            $table->text('address');
-            $table->string('contact_person');
-            $table->string('contact_phone');
-            $table->string('contact_email');
+            $table->enum('type', ['ADMIN', 'SUPPLIER', 'VENDOR', 'CUSTOMER_PHARMACY'])->nullable();
+            $table->text('address')->nullable();
+            $table->string('contact_person')->nullable();
+            $table->string('contact_phone')->nullable();
+            $table->string('contact_email')->nullable();
             $table->boolean('active')->default(true);
             $table->enum('status', ['PENDING_VERIFICATION', 'VERIFIED', 'SUSPENDED', 'BANNED'])->nullable();
 

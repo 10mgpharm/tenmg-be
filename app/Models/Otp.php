@@ -15,7 +15,7 @@ class Otp extends Model
      *
      * @var array<int, string>
      */
-    protected $fillable = ['code', 'type'];
+    protected $fillable = ['code', 'type', 'user_id'];
 
     /**
      * Get the user that owns the otp.

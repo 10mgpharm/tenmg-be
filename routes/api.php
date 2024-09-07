@@ -1,10 +1,10 @@
 <?php
 
+use App\Http\Controllers\API\Auth\AuthenticatedController;
+use App\Http\Controllers\API\Auth\PasswordController;
+use App\Http\Controllers\API\Auth\SignupUserController;
+use App\Http\Controllers\API\Auth\VerifyEmailController;
 use App\Http\Controllers\API\Credit\CustomerController;
-use App\Http\Controllers\Auth\AuthenticatedController;
-use App\Http\Controllers\Auth\PasswordController;
-use App\Http\Controllers\Auth\SignupUserController;
-use App\Http\Controllers\Auth\VerifyEmailController;
 use Illuminate\Support\Facades\Route;
 
 Route::group(['middleware' => ['cors', 'json.response']], function () {
@@ -23,7 +23,7 @@ Route::group(['middleware' => ['cors', 'json.response']], function () {
 
                 Route::post('/forgot-password', [PasswordController::class, 'forgot'])
                     ->name('password.forgot');
-    
+
                 Route::post('/reset-password', [PasswordController::class, 'reset'])
                     ->name('password.reset');
             });

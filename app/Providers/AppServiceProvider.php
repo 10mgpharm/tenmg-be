@@ -2,18 +2,22 @@
 
 namespace App\Providers;
 
+use App\Listeners\SignupEmailVerifiedListener;
 use App\Models\PassportAuthCode;
 use App\Models\PassportClient;
 use App\Models\PassportPersonalAccessClient;
 use App\Models\PassportRefreshToken;
 use App\Models\PassportToken;
 use App\Repositories\CustomerRepository;
-use App\Repositories\Interfaces\CustomerRepositoryInterface;
+use App\Repositories\Interfaces\ICustomerRepository;
 use App\Services\ActivityLogService;
 use App\Services\AttachmentService;
 use App\Services\AuthService;
 use App\Services\CustomerService;
-use App\Services\Interfaces\CustomerServiceInterface;
+use App\Services\Interfaces\IAuthService;
+use App\Services\Interfaces\ICustomerService;
+use Illuminate\Auth\Events\Verified;
+use Illuminate\Support\Facades\Event;
 use Illuminate\Support\ServiceProvider;
 use Laravel\Passport\Passport;
 
@@ -24,10 +28,14 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        $this->app->bind(CustomerRepositoryInterface::class, CustomerRepository::class);
-        $this->app->bind(abstract: CustomerServiceInterface::class, concrete: function ($app) {
+        // List Repositories bindings
+        $this->app->bind(ICustomerRepository::class, CustomerRepository::class);
+
+        // List Service bindings
+        $this->app->bind(IAuthService::class, AuthService::class);
+        $this->app->bind(abstract: ICustomerService::class, concrete: function ($app) {
             return new CustomerService(
-                customerRepository: $app->make(CustomerRepositoryInterface::class),
+                customerRepository: $app->make(ICustomerRepository::class),
                 attachmentService: $app->make(AttachmentService::class),
                 authService: $app->make(AuthService::class),
                 activityLogService: $app->make(ActivityLogService::class),
@@ -55,5 +63,11 @@ class AppServiceProvider extends ServiceProvider
             'temp' => 'Temporal access token',
             'full' => 'Full access token',
         ]);
+
+        // register events and listeners here
+        Event::listen(
+            Verified::class,
+            SignupEmailVerifiedListener::class,
+        );
     }
 }

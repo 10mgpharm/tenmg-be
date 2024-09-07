@@ -3,11 +3,8 @@
 namespace App\Http\Requests\Auth;
 
 use App\Enums\BusinessType;
-use App\Models\User;
-use Illuminate\Validation\Rules;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Support\Facades\Hash;
+use Illuminate\Validation\Rules;
 
 class SignupUserRequest extends FormRequest
 {
@@ -20,17 +17,31 @@ class SignupUserRequest extends FormRequest
     }
 
     /**
+     * Prepare the data for validation.
+     * This will remap `passwordConfirmation` to `password_confirmation` for Laravel's default validation.
+     */
+    protected function prepareForValidation(): void
+    {
+        $this->merge([
+            'password_confirmation' => $this->input('passwordConfirmation'),
+        ]);
+    }
+
+    /**
      * Get the validation rules that apply to the request.
      *
      * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
      */
     public function rules(): array
     {
+        // Fetch all business types allowed for registration and convert them to lowercase
+        $allowedBusinessTypes = array_map(fn ($type) => $type->toLowerCase(), BusinessType::allowedForRegistration());
+
         return [
             'businessType' => [
                 'required',
                 'string',
-                'in:' . implode(',', array_map(fn($type) => $type->tolowercase(), BusinessType::allowedForRegistration()))
+                'in:'.implode(',', $allowedBusinessTypes),
             ],
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:users,email'],
@@ -44,30 +55,7 @@ class SignupUserRequest extends FormRequest
     {
         return [
             'termsAndConditions.required' => 'You must agree to the terms and conditions.',
-            'businessType.in' => 'The business type must be either supplier or pharmacy.',
+            'businessType.in' => 'The business type must be either supplier, pharmacy or vendor',
         ];
-    }
-
-    /**
-     * Attempt to register the user.
-     *
-     * @throws \Illuminate\Validation\ValidationException
-     * @return User | null
-     */
-    public function register(): User
-    {
-        $validated = $this->validated();
-        $businessType = BusinessType::from(strtoupper($validated['businessType']))->toLowercase();
-
-        $user = User::create([
-            'name' => $validated['name'],
-            'email' => $validated['email'],
-            'password' => Hash::make($validated['password']),
-            'business_type' => $businessType,
-        ]);
-
-        $user->assignRole($businessType);
-
-        return $user;
     }
 }
