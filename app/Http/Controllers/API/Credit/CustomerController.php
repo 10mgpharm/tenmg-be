@@ -8,7 +8,7 @@ use App\Http\Requests\ListCustomersRequest;
 use App\Http\Requests\StoreCustomerRequest;
 use App\Http\Requests\UpdateCustomerRequest;
 use App\Imports\CustomersImport;
-use App\Services\Interfaces\CustomerServiceInterface;
+use App\Services\Interfaces\ICustomerService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
@@ -16,7 +16,7 @@ use Maatwebsite\Excel\Facades\Excel;
 
 class CustomerController extends Controller
 {
-    public function __construct(private CustomerServiceInterface $customerService)
+    public function __construct(private ICustomerService $customerService)
     {
         $this->customerService = $customerService;
     }

@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\Auth;
+namespace App\Http\Controllers\API\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Auth\VerifyEmailRequest;
@@ -19,14 +19,14 @@ class VerifyEmailController extends Controller
     {
         $user = $request->user();
 
-        if (!$user) {
+        if (! $user) {
             throw new HttpException(Response::HTTP_UNAUTHORIZED, 'Unauthenticated.');
         }
 
         $user->otps()->firstWhere('code', $request->input('otp'))->delete();
 
         if ($user->hasVerifiedEmail()) {
-    
+
             $user->token()->revoke();
             $tokenResult = $user->createToken('Full Access Token', ['full']);
 
@@ -36,7 +36,7 @@ class VerifyEmailController extends Controller
                 'expiresAt' => $tokenResult->token->expires_at,
                 'message' => 'Email already verified. Full access granted.',
             ])->response()
-            ->setStatusCode(Response::HTTP_OK);
+                ->setStatusCode(Response::HTTP_OK);
         }
 
         if ($user->markEmailAsVerified()) {
@@ -52,6 +52,6 @@ class VerifyEmailController extends Controller
             'expiresAt' => $tokenResult->token->expires_at,
             'message' => 'Email successfully verified. Full access granted.',
         ])->response()
-        ->setStatusCode(Response::HTTP_OK);
+            ->setStatusCode(Response::HTTP_OK);
     }
 }

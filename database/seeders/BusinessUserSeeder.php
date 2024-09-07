@@ -221,7 +221,7 @@ class BusinessUserSeeder extends Seeder
                     'name' => "Hospital Business $i",
                     'short_name' => "Hospital$i",
                     'owner_id' => $customerHost->id,
-                    'type' => 'CUSTOMER_HOSPITAL',
+                    'type' => 'CUSTOMER_PHARMACY',
                     'address' => $faker->address,
                     'contact_person' => $faker->name(),
                     'contact_phone' => $faker->phoneNumber,

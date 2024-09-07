@@ -3,13 +3,13 @@
 namespace App\Services;
 
 use App\Models\Customer;
-use App\Repositories\Interfaces\CustomerRepositoryInterface;
-use App\Services\Interfaces\CustomerServiceInterface;
+use App\Repositories\Interfaces\ICustomerRepository;
+use App\Services\Interfaces\ICustomerService;
 
-class CustomerService implements CustomerServiceInterface
+class CustomerService implements ICustomerService
 {
     public function __construct(
-        private CustomerRepositoryInterface $customerRepository,
+        private ICustomerRepository $customerRepository,
         private AttachmentService $attachmentService,
         private AuthService $authService,
         private ActivityLogService $activityLogService,

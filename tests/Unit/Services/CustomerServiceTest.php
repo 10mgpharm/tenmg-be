@@ -4,7 +4,7 @@ namespace Tests\Unit\Services;
 
 use App\Models\Customer;
 use App\Models\User;
-use App\Repositories\Interfaces\CustomerRepositoryInterface;
+use App\Repositories\Interfaces\ICustomerRepository;
 use App\Services\ActivityLogService;
 use App\Services\AttachmentService;
 use App\Services\AuthService;
@@ -33,7 +33,7 @@ class CustomerServiceTest extends TestCase
         parent::setUp();
 
         // Mocks for external dependencies
-        $this->customerRepositoryMock = Mockery::mock(CustomerRepositoryInterface::class);
+        $this->customerRepositoryMock = Mockery::mock(ICustomerRepository::class);
         $this->attachmentServiceMock = Mockery::mock(AttachmentService::class);
         $this->authServiceMock = Mockery::mock(AuthService::class);
         $this->activityLogServiceMock = Mockery::mock(ActivityLogService::class);

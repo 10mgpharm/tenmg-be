@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\Auth;
+namespace App\Http\Controllers\API\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Auth\AuthenticatedRequest;
@@ -16,7 +16,7 @@ class AuthenticatedController extends Controller
      */
     public function store(AuthenticatedRequest $request): JsonResponse
     {
-        if (!$request->authenticate()) {
+        if (! $request->authenticate()) {
             return response()->json(['error' => 'Unauthorized'], Response::HTTP_UNAUTHORIZED);
         }
 
@@ -29,7 +29,7 @@ class AuthenticatedController extends Controller
             'expiresAt' => $tokenResult->token->expires_at,
             'message' => 'Sign in successful.',
         ])->response()
-        ->setStatusCode(Response::HTTP_OK);
+            ->setStatusCode(Response::HTTP_OK);
     }
 
     /**
