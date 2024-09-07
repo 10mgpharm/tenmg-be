@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Auth;
 
+use App\Enums\OtpType;
 use App\Helpers\UtilityHelper;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Response;
@@ -31,7 +32,7 @@ class SignupUserController extends Controller
 
                 $otp = $user->otps()->create([
                     'code' => UtilityHelper::generateOtp(),
-                    'type' => 'SIGNUP_EMAIL_VERIFICATION',
+                    'type' => OtpType::SIGNUP_EMAIL_VERIFICATION,
                 ]);
         
                 $tokenResult = $user->createToken('Temporary Access Token', ['temp']);

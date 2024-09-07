@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests\Auth;
 
+use App\Enums\OtpType;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\Rule;
@@ -27,7 +28,7 @@ class VerifyEmailRequest extends FormRequest
             'otp' => [
                 'required',
                 'string',
-                'exists:otps,code,user_id,' . $this->user()->id . ',type,SIGNUP_EMAIL_VERIFICATION',
+                'exists:otps,code,user_id,' . $this->user()->id . ',type,' . OtpType::SIGNUP_EMAIL_VERIFICATION,
             ],
 
         ];
