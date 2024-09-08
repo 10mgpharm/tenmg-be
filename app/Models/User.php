@@ -22,6 +22,8 @@ class User extends Authenticatable implements MustVerifyEmail
 {
     use CausesActivity, HasApiTokens, HasFactory, HasRoles, Notifiable, SoftDeletes;
 
+    protected $table = 'users';
+
     /**
      * The attributes that are mass assignable.
      *
@@ -144,13 +146,13 @@ class User extends Authenticatable implements MustVerifyEmail
     }
 
     /**
-     * Send the email verification notification.
+     * Send email verification notification
      *
      * @return void
      */
-    public function sendEmailVerificationNotification()
+    public function sendEmailVerification(string $code)
     {
-        $this->notify(new VerifyEmailNotification);
+        $this->notify(new VerifyEmailNotification($code));
     }
 
     /**
@@ -173,9 +175,15 @@ class User extends Authenticatable implements MustVerifyEmail
         return $this->email;
     }
 
-    public function sendPasswordResetNotification($token)
+    /**
+     * Send password reset notification
+     *
+     * @param  string  $code
+     * @return void
+     */
+    public function sendPasswordResetNotification($code)
     {
-        $this->notify(new ResetPasswordNotification($token));
+        $this->notify(new ResetPasswordNotification($code));
     }
 
     protected function getDefaultGuardName(): string

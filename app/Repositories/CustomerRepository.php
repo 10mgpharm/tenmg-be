@@ -3,9 +3,9 @@
 namespace App\Repositories;
 
 use App\Models\Customer;
-use App\Repositories\Interfaces\CustomerRepositoryInterface;
+use App\Repositories\Interfaces\ICustomerRepository;
 
-class CustomerRepository implements CustomerRepositoryInterface
+class CustomerRepository implements ICustomerRepository
 {
     public function create(array $data): Customer
     {

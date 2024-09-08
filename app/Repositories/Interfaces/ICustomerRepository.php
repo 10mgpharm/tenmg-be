@@ -4,7 +4,7 @@ namespace App\Repositories\Interfaces;
 
 use App\Models\Customer;
 
-interface CustomerRepositoryInterface
+interface ICustomerRepository
 {
     public function create(array $data): Customer;
 

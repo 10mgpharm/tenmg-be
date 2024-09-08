@@ -2,19 +2,18 @@
 
 namespace Tests\Feature\Auth;
 
-use App\Models\User;
 use App\Models\Otp;
-use Illuminate\Foundation\Testing\RefreshDatabase;
+use App\Models\User;
 use Illuminate\Http\Response;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Hash;
 use Illuminate\Testing\Fluent\AssertableJson;
 use Tests\TestCase;
 
 class SignupUserTest extends TestCase
 {
     private $url = 'api/v1/auth/signup';
+
     private $created = null;
+
     private $data = null;
 
     protected function setUp(): void
@@ -27,7 +26,7 @@ class SignupUserTest extends TestCase
             'name' => fake()->words(3, true),
             'email' => fake()->email(),
             'password' => $password,
-            'password_confirmation' => $password,
+            'passwordConfirmation' => $password,
             'termsAndConditions' => 1,
             'businessType' => 'supplier',
         ];
@@ -39,20 +38,18 @@ class SignupUserTest extends TestCase
     public function test_user_signup_with_valid_data(): void
     {
         $response = $this->postJson($this->url, $this->data);
-        
+
         $response->assertStatus(Response::HTTP_CREATED)
-            ->assertJson(fn (AssertableJson $json) =>
-                $json->whereType('temporalAccessToken', 'string')
-                    ->where('tokenType', 'Bearer')
-                    ->whereType('expiresAt', 'string')
-                    ->where('message', 'Sign up successful. Please verify your email using the OTP sent.')
-                    ->has('data', fn ($json) =>
-                        $json->where('user.email', $this->data['email'])
-                        ->where('user.name', $this->data['name'])
-                        ->whereType('user.createdAt', 'string')
-                        ->whereType('user.updatedAt', 'string')
-                        ->whereType('user.id', 'integer')
-                    )
+            ->assertJson(fn (AssertableJson $json) => $json->whereType('temporalAccessToken', 'string')
+                ->where('tokenType', 'Bearer')
+                ->whereType('expiresAt', 'string')
+                ->where('message', 'Sign up successful. Please verify your email using the OTP sent.')
+                ->has('data', fn ($json) => $json->where('user.email', $this->data['email'])
+                    ->where('user.name', $this->data['name'])
+                    ->whereType('user.createdAt', 'string')
+                    ->whereType('user.updatedAt', 'string')
+                    ->whereType('user.id', 'integer')
+                )
             );
 
         // Assert that the user was created and the OTP was generated
@@ -60,7 +57,7 @@ class SignupUserTest extends TestCase
         $user = User::where('email', $this->data['email'])->first();
         $this->assertDatabaseHas('otps', [
             'user_id' => $user->id,
-            'type' => 'SIGNUP_EMAIL_VERIFICATION'
+            'type' => 'SIGNUP_EMAIL_VERIFICATION',
         ]);
     }
 
@@ -73,19 +70,18 @@ class SignupUserTest extends TestCase
             'name' => '',
             'email' => 'invalid-email',
             'password' => 'secret123',
-            'password_confirmation' => 'mismatch',
+            'passwordConfirmation' => 'mismatch',
         ];
 
         $this->postJson($this->url, $data)
             ->assertStatus(Response::HTTP_UNPROCESSABLE_ENTITY)
-            ->assertJson(fn (AssertableJson $json) =>
-                $json->whereType('message', 'string')
+            ->assertJson(fn (AssertableJson $json) => $json->whereType('message', 'string')
                 ->has('errors')
-                    ->whereType('errors.email', 'array')
-                    ->whereType('errors.password', 'array')
-                    ->whereType('errors.name', 'array')
-                    ->whereType('errors.businessType', 'array')
-                    ->whereType('errors.termsAndConditions', 'array')
+                ->whereType('errors.email', 'array')
+                ->whereType('errors.passwordConfirmation', 'array')
+                ->whereType('errors.name', 'array')
+                ->whereType('errors.businessType', 'array')
+                ->whereType('errors.termsAndConditions', 'array')
             );
     }
 
@@ -109,13 +105,11 @@ class SignupUserTest extends TestCase
 
         $this->postJson($this->url, $duplicateData)
             ->assertStatus(422)
-            ->assertJson(fn (AssertableJson $json) =>
-            $json->whereType('message', 'string')
-            ->has('errors')
+            ->assertJson(fn (AssertableJson $json) => $json->whereType('message', 'string')
+                ->has('errors')
                 ->where('errors.email.0', 'The email has already been taken.')
             );
     }
-
 
     protected function tearDown(): void
     {
