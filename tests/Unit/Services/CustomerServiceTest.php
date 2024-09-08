@@ -11,206 +11,168 @@ use App\Services\AuthService;
 use App\Services\CustomerService;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Mockery;
-use PHPUnit\Framework\Attributes\Test;
-use Tests\TestCase;
 
-class CustomerServiceTest extends TestCase
-{
-    protected $customerRepositoryMock;
+// Mocks and service initialization
+beforeEach(function () {
+    $this->customerRepositoryMock = Mockery::mock(ICustomerRepository::class);
+    $this->attachmentServiceMock = Mockery::mock(AttachmentService::class);
+    $this->authServiceMock = Mockery::mock(AuthService::class);
+    $this->activityLogServiceMock = Mockery::mock(ActivityLogService::class);
 
-    protected $attachmentServiceMock;
+    $this->authUserMock = Mockery::mock(User::class)->makePartial();
+    $this->authUserMock->id = 1;
 
-    protected $authServiceMock;
+    $this->authServiceMock
+        ->shouldReceive('getUser')
+        ->andReturn($this->authUserMock);
 
-    protected $activityLogServiceMock;
-
-    protected $customerService;
-
-    protected $authUserMock;
-
-    protected function setUp(): void
-    {
-        parent::setUp();
-
-        // Mocks for external dependencies
-        $this->customerRepositoryMock = Mockery::mock(ICustomerRepository::class);
-        $this->attachmentServiceMock = Mockery::mock(AttachmentService::class);
-        $this->authServiceMock = Mockery::mock(AuthService::class);
-        $this->activityLogServiceMock = Mockery::mock(ActivityLogService::class);
-
-        // Mock authenticated user
-        $this->authUserMock = Mockery::mock(User::class)->makePartial();
-        $this->authUserMock->id = 1;
-
-        $this->authServiceMock
-            ->shouldReceive('getUser')
-            ->andReturn($this->authUserMock);
-
-        // Initialize the service being tested
-        $this->customerService = new CustomerService(
-            $this->customerRepositoryMock,
-            $this->attachmentServiceMock,
-            $this->authServiceMock,
-            $this->activityLogServiceMock
-        );
-    }
-
-    #[Test]
-    public function itCanCreateACustomer()
-    {
-        $data = [
-            'vendorId' => 1,
-            'name' => 'John Doe',
-            'email' => 'john.doe@example.com',
-            'phone' => '123456789',
-        ];
-
-        // Mock pagination to get the total customer count
-        $paginationMock = Mockery::mock(LengthAwarePaginator::class);
-        $paginationMock->shouldReceive('total')->andReturn(5);
-
-        // Mock the Customer model and repository behavior
-        $customerMock = Mockery::mock(Customer::class)->makePartial();
-        $customerMock->id = 1;
-        $customerMock->name = 'John Doe';
-
-        $this->customerRepositoryMock
-            ->shouldReceive('paginate')
-            ->once()
-            ->with(['vendorId' => $data['vendorId']], 1)
-            ->andReturn($paginationMock);
-
-        $this->customerRepositoryMock
-            ->shouldReceive('create')
-            ->once()
-            ->with(Mockery::on(function ($arg) use ($data) {
-                return isset($arg['identifier'], $arg['created_by']) &&
-                    $arg['name'] === $data['name'];
-            }))
-            ->andReturn($customerMock);
-
+    $this->customerService = new CustomerService(
+        $this->customerRepositoryMock,
+        $this->attachmentServiceMock,
+        $this->authServiceMock,
         $this->activityLogServiceMock
-            ->shouldReceive('logActivity')
-            ->once();
+    );
+});
 
-        $createdCustomer = $this->customerService->createCustomer($data);
+// Cleanup after tests
+afterEach(function () {
+    Mockery::close();
+});
 
-        $this->assertInstanceOf(Customer::class, $createdCustomer);
-        $this->assertEquals('John Doe', $createdCustomer->name);
-    }
+test('it can create a customer', function () {
+    $data = [
+        'vendorId' => 1,
+        'name' => 'John Doe',
+        'email' => 'john.doe@example.com',
+        'phone' => '123456789',
+    ];
 
-    #[Test]
-    public function itCanUpdateACustomer()
-    {
-        $data = ['name' => 'John Doe', 'avatar' => 'new-avatar.png'];
+    $paginationMock = Mockery::mock(LengthAwarePaginator::class);
+    $paginationMock->shouldReceive('total')->andReturn(5);
 
-        // Mock the existing customer
-        $customerMock = Mockery::mock(Customer::class)->makePartial();
-        $customerMock->id = 1;
-        $customerMock->name = 'John Doe';
-        $customerMock->avatar = 'old-avatar.png';
+    $customerMock = Mockery::mock(Customer::class)->makePartial();
+    $customerMock->id = 1;
+    $customerMock->name = 'John Doe';
 
-        $this->customerRepositoryMock
-            ->shouldReceive('findById')
-            ->once()
-            ->with(1)
-            ->andReturn($customerMock);
+    $this->customerRepositoryMock
+        ->shouldReceive('paginate')
+        ->once()
+        ->with(['vendorId' => $data['vendorId']], 1)
+        ->andReturn($paginationMock);
 
-        $this->customerRepositoryMock
-            ->shouldReceive('update')
-            ->once();
+    $this->customerRepositoryMock
+        ->shouldReceive('create')
+        ->once()
+        ->with(Mockery::on(function ($arg) use ($data) {
+            return isset($arg['identifier'], $arg['created_by']) &&
+                $arg['name'] === $data['name'];
+        }))
+        ->andReturn($customerMock);
 
-        $this->attachmentServiceMock
-            ->shouldReceive('updateFile')
-            ->once()
-            ->with($customerMock->avatar, 'new-avatar.png');
+    $this->activityLogServiceMock
+        ->shouldReceive('logActivity')
+        ->once();
 
-        $this->activityLogServiceMock
-            ->shouldReceive('logActivity')
-            ->once();
+    $createdCustomer = $this->customerService->createCustomer($data);
 
-        $updatedCustomer = $this->customerService->updateCustomer(1, $data);
+    expect($createdCustomer)->toBeInstanceOf(Customer::class);
+    expect($createdCustomer->name)->toBe('John Doe');
+});
 
-        $this->assertEquals('John Doe', $updatedCustomer->name);
-    }
+test('it can update a customer', function () {
+    $data = ['name' => 'John Doe', 'avatar' => 'new-avatar.png'];
 
-    #[Test]
-    public function itCanDeleteACustomer()
-    {
-        // Mock the existing customer
-        $customerMock = Mockery::mock(Customer::class)->makePartial();
-        $customerMock->id = 1;
-        $customerMock->avatar = 'avatar.png';
+    $customerMock = Mockery::mock(Customer::class)->makePartial();
+    $customerMock->id = 1;
+    $customerMock->name = 'John Doe';
+    $customerMock->avatar = 'old-avatar.png';
 
-        $this->customerRepositoryMock
-            ->shouldReceive('findById')
-            ->once()
-            ->with(1)
-            ->andReturn($customerMock);
+    $this->customerRepositoryMock
+        ->shouldReceive('findById')
+        ->once()
+        ->with(1)
+        ->andReturn($customerMock);
 
-        $this->attachmentServiceMock
-            ->shouldReceive('deleteFile')
-            ->once()
-            ->with($customerMock->avatar);
+    $this->customerRepositoryMock
+        ->shouldReceive('update')
+        ->once();
 
-        $this->customerRepositoryMock
-            ->shouldReceive('delete')
-            ->once()
-            ->with($customerMock);
+    $this->attachmentServiceMock
+        ->shouldReceive('updateFile')
+        ->once()
+        ->with($customerMock->avatar, 'new-avatar.png');
 
-        $this->activityLogServiceMock
-            ->shouldReceive('logActivity')
-            ->once();
+    $this->activityLogServiceMock
+        ->shouldReceive('logActivity')
+        ->once();
 
-        $deleted = $this->customerService->deleteCustomer(1);
+    $updatedCustomer = $this->customerService->updateCustomer(1, $data);
 
-        $this->assertTrue($deleted);
-    }
+    expect($updatedCustomer->name)->toBe('John Doe');
+});
 
-    #[Test]
-    public function itCanListCustomersWithPagination()
-    {
-        $filters = ['name' => 'Jane Doe'];
-        $paginationResult = Mockery::mock(LengthAwarePaginator::class);
+test('it can delete a customer', function () {
+    $customerMock = Mockery::mock(Customer::class)->makePartial();
+    $customerMock->id = 1;
+    $customerMock->avatar = 'avatar.png';
 
-        $this->customerRepositoryMock
-            ->shouldReceive('paginate')
-            ->once()
-            ->with($filters, 10)
-            ->andReturn($paginationResult);
+    $this->customerRepositoryMock
+        ->shouldReceive('findById')
+        ->once()
+        ->with(1)
+        ->andReturn($customerMock);
 
-        $result = $this->customerService->listCustomers($filters, 10);
+    $this->attachmentServiceMock
+        ->shouldReceive('deleteFile')
+        ->once()
+        ->with($customerMock->avatar);
 
-        $this->assertEquals($paginationResult, $result);
-    }
+    $this->customerRepositoryMock
+        ->shouldReceive('delete')
+        ->once()
+        ->with($customerMock);
 
-    #[Test]
-    public function itCanToggleCustomerActiveStatus()
-    {
-        // Mock the existing customer
-        $customerMock = Mockery::mock(Customer::class)->makePartial();
-        $customerMock->id = 1;
-        $customerMock->active = true;
+    $this->activityLogServiceMock
+        ->shouldReceive('logActivity')
+        ->once();
 
-        $this->customerRepositoryMock
-            ->shouldReceive('findById')
-            ->once()
-            ->with(1)
-            ->andReturn($customerMock);
+    $deleted = $this->customerService->deleteCustomer(1);
 
-        $this->customerRepositoryMock
-            ->shouldReceive('update')
-            ->once()
-            ->with($customerMock, ['active' => false]);
+    expect($deleted)->toBeTrue();
+});
 
-        $toggledCustomer = $this->customerService->toggleCustomerActiveStatus(1);
+test('it can list customers with pagination', function () {
+    $filters = ['name' => 'Jane Doe'];
+    $paginationResult = Mockery::mock(LengthAwarePaginator::class);
 
-        $this->assertFalse($toggledCustomer->active);
-    }
+    $this->customerRepositoryMock
+        ->shouldReceive('paginate')
+        ->once()
+        ->with($filters, 10)
+        ->andReturn($paginationResult);
 
-    protected function tearDown(): void
-    {
-        Mockery::close();
-        parent::tearDown();
-    }
-}
+    $result = $this->customerService->listCustomers($filters, 10);
+
+    expect($result)->toBe($paginationResult);
+});
+
+test('it can toggle customer active status', function () {
+    $customerMock = Mockery::mock(Customer::class)->makePartial();
+    $customerMock->id = 1;
+    $customerMock->active = true;
+
+    $this->customerRepositoryMock
+        ->shouldReceive('findById')
+        ->once()
+        ->with(1)
+        ->andReturn($customerMock);
+
+    $this->customerRepositoryMock
+        ->shouldReceive('update')
+        ->once()
+        ->with($customerMock, ['active' => false]);
+
+    $toggledCustomer = $this->customerService->toggleCustomerActiveStatus(1);
+
+    expect($toggledCustomer->active)->toBeFalse();
+});
