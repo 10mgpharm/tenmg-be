@@ -21,10 +21,7 @@ class UploadExampleController extends Controller
 {
     use FileUploadTrait;
 
-    public function __construct(private AttachmentService $attachmentService)
-    {
-        $this->attachmentService = $attachmentService;
-    }
+    public function __construct(private AttachmentService $attachmentService) {}
 
     /**
      * Example: Upload picture example

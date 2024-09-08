@@ -3,6 +3,7 @@
 namespace Tests\Unit\Services;
 
 use App\Models\Customer;
+use App\Models\FileUpload;
 use App\Models\User;
 use App\Repositories\Interfaces\CustomerRepositoryInterface;
 use App\Services\ActivityLogService;
@@ -102,13 +103,16 @@ class CustomerServiceTest extends TestCase
     #[Test]
     public function itCanUpdateACustomer()
     {
-        $data = ['name' => 'John Doe', 'avatar' => 'new-avatar.png'];
+        $data = ['name' => 'John Doe', 'avatar' => ['url' => 'John Doe', 'path' => 'new-avatar.png']];
 
         // Mock the existing customer
         $customerMock = Mockery::mock(Customer::class)->makePartial();
         $customerMock->id = 1;
         $customerMock->name = 'John Doe';
-        $customerMock->avatar = 'old-avatar.png';
+
+        // Mock the avatar as an instance of FileUpload
+        $fileUploadMock = Mockery::mock(FileUpload::class)->makePartial();
+        $customerMock->avatar = $fileUploadMock;
 
         $this->customerRepositoryMock
             ->shouldReceive('findById')
@@ -120,10 +124,11 @@ class CustomerServiceTest extends TestCase
             ->shouldReceive('update')
             ->once();
 
+        // Ensure that the attachment service gets the correct model and file path
         $this->attachmentServiceMock
             ->shouldReceive('updateFile')
             ->once()
-            ->with($customerMock->avatar, 'new-avatar.png');
+            ->with($fileUploadMock, $data['avatar']);
 
         $this->activityLogServiceMock
             ->shouldReceive('logActivity')
@@ -142,16 +147,21 @@ class CustomerServiceTest extends TestCase
         $customerMock->id = 1;
         $customerMock->avatar = 'avatar.png';
 
+        // Mock the avatar as an instance of FileUpload
+        $fileUploadMock = Mockery::mock(FileUpload::class)->makePartial();
+        $customerMock->avatar = $fileUploadMock;
+
         $this->customerRepositoryMock
             ->shouldReceive('findById')
             ->once()
             ->with(1)
             ->andReturn($customerMock);
 
+        // Ensure that the attachment service gets the correct model for deletion
         $this->attachmentServiceMock
             ->shouldReceive('deleteFile')
             ->once()
-            ->with($customerMock->avatar);
+            ->with($fileUploadMock);
 
         $this->customerRepositoryMock
             ->shouldReceive('delete')

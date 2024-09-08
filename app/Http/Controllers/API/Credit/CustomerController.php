@@ -35,17 +35,22 @@ class CustomerController extends Controller
         return response()->json($customer, 201);
     }
 
-    public function show($id)
+    public function show(int $id)
     {
         $customer = $this->customerService->getCustomerById($id);
 
         return response()->json($customer);
     }
 
-    public function update(UpdateCustomerRequest $request, $id): JsonResponse
+    public function update(UpdateCustomerRequest $request, int $id): JsonResponse
     {
         $customer = $this->customerService->updateCustomer($id, $request->all());
 
+        if (! $customer) {
+            return response()->json(['message' => 'Customer not found'], Response::HTTP_NOT_FOUND);
+        }
+
+        // Return the updated customer
         return response()->json($customer);
     }
 
@@ -59,16 +64,19 @@ class CustomerController extends Controller
     public function toggleActive(int $id): JsonResponse
     {
         $customer = $this->customerService->toggleCustomerActiveStatus($id);
+        if (! $customer) {
+            return response()->json(['message' => 'Customer not found'], Response::HTTP_NOT_FOUND);
+        }
 
         return response()->json($customer);
     }
 
-    public function export()
+    public function export(): \Symfony\Component\HttpFoundation\BinaryFileResponse
     {
         return Excel::download(new CustomersExport, 'customers.xlsx');
     }
 
-    public function import(Request $request)
+    public function import(Request $request): JsonResponse
     {
         $request->validate([
             'file' => 'required|mimes:xlsx|max:20024',

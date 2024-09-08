@@ -34,32 +34,36 @@ Route::group(['middleware' => ['cors', 'json.response']], function () {
             });
         });
 
-        Route::prefix('/customers', function () {
-            // List customers with pagination and filtering
-            Route::get('/', [CustomerController::class, 'index'])->name('customers.index');
+        Route::prefix('customers')->middleware(['auth:api', 'scope:full'])->group(
+            function () {
 
-            // Create a new customer
-            Route::post('/', [CustomerController::class, 'store'])->name('customers.store');
+                // List customers with pagination and filtering
+                Route::get('/', [CustomerController::class, 'index'])->name('customers.index');
 
-            // Get a specific customer's details
-            Route::get('/{id}', [CustomerController::class, 'show'])->name('customers.show');
+                // Create a new customer
+                Route::post('/', [CustomerController::class, 'store'])->name('customers.store');
 
-            // Update a customer's details
-            Route::put('/{id}', [CustomerController::class, 'update'])->name('customers.update');
+                // Export customers to Excel
+                Route::get('/export', [CustomerController::class, 'export'])->name('customers.export');
 
-            // Soft delete a customer
-            Route::delete('/{id}',
-                [CustomerController::class, 'destroy']
-            )->name('customers.destroy');
+                // Import customers from Excel
+                Route::post('/import', [CustomerController::class, 'import'])->name('customers.import');
 
-            // Enable or disable a customer
-            Route::patch('/{id}', [CustomerController::class, 'toggleActive'])->name('customers.toggleActive');
+                // Get a specific customer's details
+                Route::get('/{id}', [CustomerController::class, 'show'])->name('customers.show');
 
-            // Export customers to Excel
-            Route::get('/export', [CustomerController::class, 'export'])->name('customers.export');
+                // Update a customer's details
+                Route::put('/{id}', [CustomerController::class, 'update'])->name('customers.update');
 
-            // Import customers from Excel
-            Route::post('/import', [CustomerController::class, 'import'])->name('customers.import');
-        });
+                // Soft delete a customer
+                Route::delete(
+                    '/{id}',
+                    [CustomerController::class, 'destroy']
+                )->name('customers.destroy');
+
+                // Enable or disable a customer
+                Route::patch('/{id}', [CustomerController::class, 'toggleActive'])->name('customers.toggleActive');
+            }
+        );
     });
 });
