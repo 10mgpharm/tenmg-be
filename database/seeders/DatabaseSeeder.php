@@ -17,6 +17,7 @@ class DatabaseSeeder extends Seeder
             AdminUserRolePermissionSeeder::class,
             BusinessRulesSeeder::class,
             BusinessUserSeeder::class,
+            PassportClientSeeder::class,
         ]);
     }
 }
