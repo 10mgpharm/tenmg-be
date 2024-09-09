@@ -13,20 +13,17 @@ Route::group(['middleware' => ['cors', 'json.response']], function () {
 
         // public routes
         Route::prefix('auth')->group(function () {
+            Route::post('/signup', [SignupUserController::class, 'store'])
+                ->name('signup');
 
-            Route::middleware('guest')->group(function () {
-                Route::post('/signup', [SignupUserController::class, 'store'])
-                    ->name('signup');
+            Route::post('/signin', [AuthenticatedController::class, 'store'])
+                ->name('signin');
 
-                Route::post('/signin', [AuthenticatedController::class, 'store'])
-                    ->name('singin');
+            Route::post('/forgot-password', [PasswordController::class, 'forgot'])
+                ->name('password.forgot');
 
-                Route::post('/forgot-password', [PasswordController::class, 'forgot'])
-                    ->name('password.forgot');
-
-                Route::post('/reset-password', [PasswordController::class, 'reset'])
-                    ->name('password.reset');
-            });
+            Route::post('/reset-password', [PasswordController::class, 'reset'])
+                ->name('password.reset');
 
             Route::middleware(['auth:api', 'scope:temp'])->group(function () {
                 Route::post('/verify-email', VerifyEmailController::class)

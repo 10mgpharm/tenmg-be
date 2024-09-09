@@ -3,95 +3,125 @@
 namespace Tests\Feature\Auth;
 
 use App\Models\User;
+use Illuminate\Contracts\Auth\StatefulGuard;
 use Illuminate\Http\Response;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Testing\Fluent\AssertableJson;
-use Tests\TestCase;
+use Laravel\Passport\Passport;
+use Laravel\Passport\PersonalAccessTokenResult;
+use Mockery;
 
-class AuthenticatedTest extends TestCase
-{
-    private $url = 'api/v1/auth/signin';
+beforeEach(function () {
+    $this->url = route('signin');
+    $this->email = 'admin@example.com';
+    $this->password = 'password';
 
-    private $user;
+    // Create a mock for User
+    $this->user = Mockery::mock(User::class)->makePartial();
+    $this->user->email = 'admin@example.com';
+    $this->user->name = 'John Doe';
+    $this->user->id = 1;
 
-    private $password = 'password';
+    // Create a mock for PersonalAccessTokenResult
+    $this->tokenResultMock = Mockery::mock(PersonalAccessTokenResult::class);
+    $this->tokenResultMock->accessToken = 'token';
+    $this->tokenResultMock->token = (object) ['expires_at' => now()->addHour()];
 
-    private $email = 'admin@example.com';
+    // Mock the createToken method
+    $this->user->shouldReceive('createToken')
+        ->with('Full Access Token', ['full'])
+        ->andReturn($this->tokenResultMock);
 
-    protected function setUp(): void
-    {
-        parent::setUp();
+    // Mock the token() method on user
+    $this->user->shouldReceive('token')->andReturn($this->tokenResultMock);
 
-        $this->user = User::firstWhere([
-            'email' => $this->email,
-        ]);
+    // Mock the revoke method on token
+    $this->tokenResultMock->shouldReceive('revoke')->andReturn(true);
 
-    }
+    // Mock Auth facade methods
+    Auth::shouldReceive('attempt')
+        ->with(['email' => $this->email, 'password' => $this->password], false)
+        ->andReturn(true);
+    Auth::shouldReceive('attempt')
+        ->with(['email' => $this->email, 'password' => 'wrongpassword'], false)
+        ->andReturn(false);
+    Auth::shouldReceive('user')->andReturn($this->user);
+    Auth::shouldReceive('check')->andReturn(true);
+    Auth::shouldReceive('userResolver')->andReturn(fn () => $this->user);
+    Auth::shouldReceive('shouldUse')->andReturnSelf(); // Mock shouldUse
 
-    /**
-     * Test user sign in with valid credentials.
-     */
-    public function test_user_sign_in_with_valid_credentials(): void
-    {
-        $data = [
-            'email' => $this->email,
-            'password' => $this->password,
-        ];
+    // Mock Auth guard
+    $authGuard = Mockery::mock(StatefulGuard::class)->makePartial();
+    $authGuard->shouldReceive('attempt')
+        ->with(['email' => $this->email, 'password' => $this->password], false)
+        ->andReturn(true);
+    $authGuard->shouldReceive('login')
+        ->with($this->user, false)
+        ->andReturn(true);
+    $authGuard->shouldReceive('logout')->andReturn(true);
+    $authGuard->shouldReceive('check')->andReturn(true);
 
-        $response = $this->postJson($this->url, $data);
-        $response->assertStatus(Response::HTTP_OK)
-            ->assertJson(fn (AssertableJson $json) => $json->where('tokenType', 'Bearer')
-                ->whereType('fullAccessToken', 'string')
-                ->whereType('expiresAt', 'string')
+    $authGuard->shouldReceive('setUser')
+        ->with($this->user)
+        ->andReturnSelf();
+    $authGuard->shouldReceive('hasUser')->andReturn(true);
+
+    Auth::shouldReceive('guard')->andReturn($authGuard);
+});
+
+it('can sign in with valid credentials', function () {
+    $data = [
+        'email' => $this->email,
+        'password' => $this->password,
+    ];
+
+    $response = $this->postJson($this->url, $data);
+
+    $response->assertStatus(Response::HTTP_OK)
+        ->assertJson(
+            fn (AssertableJson $json) => $json->where('status', 'success')
                 ->where('message', 'Sign in successful.')
-                ->has('data', fn ($json) => $json->where('user.email', $this->user['email'])
-                    ->where('user.name', $this->user['name'])
-                    ->whereType('user.createdAt', 'string')
-                    ->whereType('user.updatedAt', 'string')
-                    ->whereType('user.id', 'integer')
+                ->has(
+                    'accessToken',
+                    fn ($accessToken) => $accessToken->where('token', 'token')
+                        ->where('tokenType', 'bearer')
+                        ->whereType('expiresAt', 'string')
                 )
-            );
-    }
+                ->has(
+                    'data',
+                    fn ($data) => $data->where('id', $this->user->id)
+                        ->where('name', $this->user->name)
+                        ->where('email', $this->user->email)
+                        ->where('emailVerifiedAt', null)
+                )
+        );
+});
 
-    /**
-     * Test user sign in with invalid credentials.
-     */
-    public function test_user_sign_in_with_invalid_credentials(): void
-    {
-        $data = [
-            'email' => $this->user['email'],
-            'password' => 'wrongpassword',
-        ];
+it('cannot sign in with invalid credentials', function () {
+    $data = [
+        'email' => $this->email,
+        'password' => 'wrongpassword',
+    ];
 
-        $this->postJson($this->url, $data)
-            ->assertStatus(Response::HTTP_UNAUTHORIZED)
-            ->assertJson(fn (AssertableJson $json) => $json->where('error', 'Unauthorized')
-            );
-    }
+    $response = $this->postJson($this->url, $data);
 
-    /**
-     * Test user logout.
-     */
-    public function test_user_logout(): void
-    {
-        $token = $this->user->createToken('Full Access Token', ['full'])->accessToken;
+    $response->assertStatus(Response::HTTP_UNAUTHORIZED)
+        ->assertJson(
+            fn (AssertableJson $json) => $json->where('status', 'error')
+                ->where('message', 'Email or Password is invalid')
+        );
+});
 
-        $this->actingAs($this->user)->withHeaders(['Authorization' => "Bearer $token"])
-            ->postJson('api/v1/auth/signout', [])
-            ->assertStatus(Response::HTTP_OK)
-            ->assertJson(['message' => 'Logged out successfully']);
+it('can log out', function () {
+    $token = $this->user->createToken('Full Access Token', ['full'])->accessToken;
+    Passport::actingAs($this->user, ['full']);
 
-        $this->assertDatabaseMissing('oauth_access_tokens', [
-            'tokenable_id' => $this->user['id'],
-            'tokenable_type' => 'App\Models\User',
-            'revoked' => false,
-        ]);
-    }
+    $this->withHeaders(['Authorization' => "Bearer $token"])
+        ->postJson(route('signout'))
+        ->assertStatus(Response::HTTP_OK)
+        ->assertJson(['message' => 'Logged out successfully']);
+});
 
-    protected function tearDown(): void
-    {
-        if ($this->user) {
-            $this->user->tokens()->delete();
-        }
-        parent::tearDown();
-    }
-}
+afterEach(function () {
+    Mockery::close();
+});

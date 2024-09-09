@@ -41,7 +41,7 @@ class AuthenticatedController extends Controller
                 statusCode: Response::HTTP_OK
             );
         } catch (\Throwable $th) {
-            return $this->handleErrorResponse($th, 403);
+            return $this->handleErrorResponse($th);
         }
     }
 
@@ -53,6 +53,9 @@ class AuthenticatedController extends Controller
         $user = $request->user();
         $user->token()->revoke();
 
-        return response()->json(['message' => 'Logged out successfully']);
+        return response()->json([
+            'message' => 'Logged out successfully',
+            'status' => 'success',
+        ], Response::HTTP_OK);
     }
 }
