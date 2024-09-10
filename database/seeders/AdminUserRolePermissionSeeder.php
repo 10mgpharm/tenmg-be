@@ -24,7 +24,7 @@ class AdminUserRolePermissionSeeder extends Seeder
             if ($user) {
                 $user->assignRole($administratorRole->name);
             } else {
-                $user = User::factory()->create([
+                $user = User::create([
                     'name' => 'Christian Praise',
                     'email' => 'admin@10mg.com',
                     'phone' => '09031461447',
