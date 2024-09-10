@@ -12,19 +12,21 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('credit_customers', function (Blueprint $table) {
-            $table->id();
-            $table->foreignId('business_id')->constrained('businesses')->onDelete('cascade'); // BusinessType::VENDOR
-            $table->foreignId('avatar_id')->nullable()->constrained('file_uploads')->onDelete('set null');
-            $table->string('name');
-            $table->string('email')->nullable();
-            $table->string('phone')->nullable();
-            $table->string('identifier')->nullable()->unique(); // system generated e.g CUS-VENDOR_CODE-YEARMONTHDAY-PRIMARY_ID i.e CUS-10MG-20240901-230, CUS-TUYIL-20240901-19
-            $table->boolean('active')->default(true);
+        if (! Schema::hasTable('credit_customers')) {
+            Schema::create('credit_customers', function (Blueprint $table) {
+                $table->id();
+                $table->foreignId('business_id')->constrained('businesses')->onDelete('cascade'); // BusinessType::VENDOR
+                $table->foreignId('avatar_id')->nullable()->constrained('file_uploads')->onDelete('set null');
+                $table->string('name');
+                $table->string('email')->nullable();
+                $table->string('phone')->nullable();
+                $table->string('identifier')->nullable()->unique(); // system generated e.g CUS-VENDOR_CODE-YEARMONTHDAY-PRIMARY_ID i.e CUS-10MG-20240901-230, CUS-TUYIL-20240901-19
+                $table->boolean('active')->default(true);
 
-            $table->unique(['identifier', 'email', 'business_id']);
-            $table->timestamps();
-        });
+                $table->unique(['identifier', 'email', 'business_id']);
+                $table->timestamps();
+            });
+        }
     }
 
     /**
