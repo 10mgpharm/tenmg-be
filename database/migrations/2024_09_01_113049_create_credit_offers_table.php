@@ -33,7 +33,7 @@ return new class extends Migration
             // disbursement happen only if customer accept offer and they have has_mandate or has_active_debit_card setup for repayment
             $table->boolean('is_valid')->default(false)->comment('offer can only be valid if customer has_mandate or has_active_debit_card');
 
-            $table->unique(['business_id', 'customer_id', 'identifier']);
+            $table->unique(['business_id', 'customer_id', 'identifier'], 'offer_business_customer_identifier_unique');
             $table->timestamps();
         });
     }

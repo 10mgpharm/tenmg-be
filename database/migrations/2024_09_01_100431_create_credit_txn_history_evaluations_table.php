@@ -28,7 +28,7 @@ return new class extends Migration
 
             $table->foreignId('created_by_id')->nullable()->constrained('business_users')->onDelete('cascade');
 
-            $table->unique(['business_id', 'customer_id', 'transaction_file_id']);
+            $table->unique(['business_id', 'customer_id', 'transaction_file_id'], 'evaluation_business_customer_file_unique');
             $table->timestamps();
         });
     }
