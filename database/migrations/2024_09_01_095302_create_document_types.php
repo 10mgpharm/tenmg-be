@@ -11,17 +11,19 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('document_types', function (Blueprint $table) {
-            $table->id();
+        if (! Schema::hasTable('document_types')) {
+            Schema::create('document_types', function (Blueprint $table) {
+                $table->id();
 
-            $table->string('name')->unique();
-            $table->string('code')->unique();
-            $table->string('description')->nullable();
+                $table->string('name')->unique();
+                $table->string('code')->unique();
+                $table->string('description')->nullable();
 
-            $table->boolean('active')->default(true)->nullable();
+                $table->boolean('active')->default(true)->nullable();
 
-            $table->timestamps();
-        });
+                $table->timestamps();
+            });
+        }
     }
 
     /**

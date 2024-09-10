@@ -11,26 +11,28 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('credit_applications', function (Blueprint $table) {
-            $table->id();
+        if (! Schema::hasTable('credit_applications')) {
+            Schema::create('credit_applications', function (Blueprint $table) {
+                $table->id();
 
-            $table->string('identifier')->nullable()->unique(); // system generated e.g APP-VENDOR_CODE-YEARMONTHDAY-PRIMARY_ID i.e APP-10MG-20240901-23
-            $table->foreignId('business_id')->constrained('businesses')->onDelete('cascade'); // BusinessType::VENDOR
-            $table->foreignId('customer_id')->constrained('credit_customers')->onDelete('cascade');
+                $table->string('identifier')->nullable()->unique(); // system generated e.g APP-VENDOR_CODE-YEARMONTHDAY-PRIMARY_ID i.e APP-10MG-20240901-23
+                $table->foreignId('business_id')->constrained('businesses')->onDelete('cascade'); // BusinessType::VENDOR
+                $table->foreignId('customer_id')->constrained('credit_customers')->onDelete('cascade');
 
-            $table->decimal('requested_amount', 18, 2)->nullable();
-            $table->decimal('interest_amount', 18, 2)->nullable();
-            $table->decimal('total_amount', 18, 2)->nullable();
-            $table->float('interest_rate')->nullable(); // fetch from system settings
-            $table->string('duration_in_months')->nullable();
+                $table->decimal('requested_amount', 18, 2)->nullable();
+                $table->decimal('interest_amount', 18, 2)->nullable();
+                $table->decimal('total_amount', 18, 2)->nullable();
+                $table->float('interest_rate')->nullable(); // fetch from system settings
+                $table->string('duration_in_months')->nullable();
 
-            $table->enum('source', ['DASHBOARD', 'API']);
+                $table->enum('source', ['DASHBOARD', 'API']);
 
-            $table->string('status')->nullable();
+                $table->string('status')->nullable();
 
-            $table->unique(['business_id', 'customer_id', 'identifier'], 'application_business_customer_identifier_unique');
-            $table->timestamps();
-        });
+                $table->unique(['business_id', 'customer_id', 'identifier'], 'application_business_customer_identifier_unique');
+                $table->timestamps();
+            });
+        }
     }
 
     /**
