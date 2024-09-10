@@ -21,7 +21,7 @@ return new class extends Migration
             // ...mandate information
             // TODO: Check paystack documentation to run a new migration that add additional columns
 
-            $table->index(['business_id', 'customer_id']);
+            $table->index(['business_id', 'customer_id', 'identifier'], 'mandate_business_customer_identifier_unique');
             $table->timestamps();
         });
     }

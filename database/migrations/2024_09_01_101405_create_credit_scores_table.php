@@ -33,7 +33,7 @@ return new class extends Migration
 
             $table->enum('source', ['DASHBOARD', 'API']);
 
-            $table->unique(['business_id', 'customer_id', 'identifier']);
+            $table->unique(['business_id', 'customer_id', 'identifier'], 'score_business_customer_identifier_unique');
             $table->timestamps();
         });
     }

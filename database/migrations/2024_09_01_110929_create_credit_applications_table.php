@@ -28,7 +28,7 @@ return new class extends Migration
 
             $table->string('status')->nullable();
 
-            $table->unique(['business_id', 'customer_id', 'identifier']);
+            $table->unique(['business_id', 'customer_id', 'identifier'], 'application_business_customer_identifier_unique');
             $table->timestamps();
         });
     }
