@@ -9,7 +9,14 @@ class CustomerRepository implements ICustomerRepository
 {
     public function create(array $data): Customer
     {
-        return Customer::create($data);
+        return Customer::create([
+            'business_id' => $data['vendorId'],
+            'name' => $data['name'],
+            'email' => $data['email'],
+            'phone' => $data['phone'],
+            'identifier' => $data['identifier'],
+            'active' => $data['active'] ?? true,
+        ]);
     }
 
     public function findById(int $id): ?Customer
@@ -19,7 +26,15 @@ class CustomerRepository implements ICustomerRepository
 
     public function update(Customer $customer, array $data): bool
     {
-        return $customer->update($data);
+        $payload = [];
+        isset($data['vendorId']) && $payload['business_id'] = $data['vendorId'];
+        isset($data['name']) && $payload['name'] = $data['name'];
+        isset($data['email']) && $payload['email'] = $data['email'];
+        isset($data['phone']) && $payload['phone'] = $data['phone'];
+        isset($data['identifier']) && $payload['identifier'] = $data['identifier'];
+        isset($data['active']) && $payload['active'] = $data['active'];
+
+        return $customer->update($payload);
     }
 
     public function delete(Customer $customer): bool

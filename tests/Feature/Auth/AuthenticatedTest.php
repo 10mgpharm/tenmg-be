@@ -78,17 +78,22 @@ it('can sign in with valid credentials', function () {
     $response = $this->postJson($this->url, $data);
 
     $response->assertStatus(Response::HTTP_OK)
-        ->assertJson(fn (AssertableJson $json) => $json->where('status', 'success')
-            ->where('message', 'Sign in successful.')
-            ->has('accessToken', fn ($accessToken) => $accessToken->where('token', 'token')
-                ->where('tokenType', 'bearer')
-                ->whereType('expiresAt', 'string')
-            )
-            ->has('data', fn ($data) => $data->where('id', $this->user->id)
-                ->where('name', $this->user->name)
-                ->where('email', $this->user->email)
-                ->where('emailVerifiedAt', null)
-            )
+        ->assertJson(
+            fn (AssertableJson $json) => $json->where('status', 'success')
+                ->where('message', 'Sign in successful.')
+                ->has(
+                    'accessToken',
+                    fn ($accessToken) => $accessToken->where('token', 'token')
+                        ->where('tokenType', 'bearer')
+                        ->whereType('expiresAt', 'string')
+                )
+                ->has(
+                    'data',
+                    fn ($data) => $data->where('id', $this->user->id)
+                        ->where('name', $this->user->name)
+                        ->where('email', $this->user->email)
+                        ->where('emailVerifiedAt', null)
+                )
         );
 });
 
@@ -101,8 +106,9 @@ it('cannot sign in with invalid credentials', function () {
     $response = $this->postJson($this->url, $data);
 
     $response->assertStatus(Response::HTTP_UNAUTHORIZED)
-        ->assertJson(fn (AssertableJson $json) => $json->where('status', 'error')
-            ->where('message', 'Email or Password is invalid')
+        ->assertJson(
+            fn (AssertableJson $json) => $json->where('status', 'error')
+                ->where('message', 'Email or Password is invalid')
         );
 });
 

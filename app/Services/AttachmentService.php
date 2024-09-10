@@ -17,15 +17,10 @@ use Symfony\Component\HttpFoundation\File\UploadedFile;
 
 class AttachmentService
 {
-    protected $fileSystem;
-
     /**
      * FIleService constructor.
      */
-    public function __construct(FilesystemManager $fileSystem)
-    {
-        $this->fileSystem = $fileSystem;
-    }
+    public function __construct(private FilesystemManager $fileSystem) {}
 
     /**
      * Get the storage that will be used for storing files.

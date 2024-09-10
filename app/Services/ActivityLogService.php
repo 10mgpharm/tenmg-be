@@ -11,7 +11,7 @@ class ActivityLogService
 {
     use LogsActivity;
 
-    protected static $logName = 'customer';
+    protected static $logName = 'user';
 
     protected static $logOnlyDirty = true;
 
@@ -22,7 +22,7 @@ class ActivityLogService
         return LogOptions::defaults()
             ->logOnly(['name', 'email', 'phone', 'active'])
             ->logOnlyDirty()
-            ->useLogName('customer');
+            ->useLogName('user');
     }
 
     /**

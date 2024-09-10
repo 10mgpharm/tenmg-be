@@ -24,11 +24,12 @@ test('user can sign up successfully with valid data', function () {
     $response = $this->postJson($this->signupEndpoint, $requestData);
 
     $response->assertStatus(Response::HTTP_CREATED)
-        ->assertJson(fn ($json) => $json->where('status', 'success')
-            ->where('message', 'Sign up successful. Please verify your email using the OTP sent.')
-            ->where('data.name', $requestData['name'])
-            ->where('data.email', $requestData['email'])
-            ->has('accessToken')
+        ->assertJson(
+            fn ($json) => $json->where('status', 'success')
+                ->where('message', 'Sign up successful. Please verify your email using the OTP sent.')
+                ->where('data.name', $requestData['name'])
+                ->where('data.email', $requestData['email'])
+                ->has('accessToken')
         );
 });
 

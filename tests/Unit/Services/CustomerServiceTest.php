@@ -1,8 +1,7 @@
 <?php
 
-namespace Tests\Unit\Services;
-
 use App\Models\Customer;
+use App\Models\FileUpload;
 use App\Models\User;
 use App\Repositories\Interfaces\ICustomerRepository;
 use App\Services\ActivityLogService;
@@ -12,13 +11,15 @@ use App\Services\CustomerService;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Mockery;
 
-// Mocks and service initialization
+// Set up mocks for the dependencies
 beforeEach(function () {
+    // Mocks for external dependencies
     $this->customerRepositoryMock = Mockery::mock(ICustomerRepository::class);
     $this->attachmentServiceMock = Mockery::mock(AttachmentService::class);
     $this->authServiceMock = Mockery::mock(AuthService::class);
     $this->activityLogServiceMock = Mockery::mock(ActivityLogService::class);
 
+    // Mock authenticated user
     $this->authUserMock = Mockery::mock(User::class)->makePartial();
     $this->authUserMock->id = 1;
 
@@ -26,6 +27,7 @@ beforeEach(function () {
         ->shouldReceive('getUser')
         ->andReturn($this->authUserMock);
 
+    // Initialize the service being tested
     $this->customerService = new CustomerService(
         $this->customerRepositoryMock,
         $this->attachmentServiceMock,
@@ -34,11 +36,7 @@ beforeEach(function () {
     );
 });
 
-// Cleanup after tests
-afterEach(function () {
-    Mockery::close();
-});
-
+// Test: it can create a customer
 test('it can create a customer', function () {
     $data = [
         'vendorId' => 1,
@@ -47,9 +45,11 @@ test('it can create a customer', function () {
         'phone' => '123456789',
     ];
 
+    // Mock pagination to get the total customer count
     $paginationMock = Mockery::mock(LengthAwarePaginator::class);
     $paginationMock->shouldReceive('total')->andReturn(5);
 
+    // Mock the Customer model and repository behavior
     $customerMock = Mockery::mock(Customer::class)->makePartial();
     $customerMock->id = 1;
     $customerMock->name = 'John Doe';
@@ -79,13 +79,18 @@ test('it can create a customer', function () {
     expect($createdCustomer->name)->toBe('John Doe');
 });
 
+// Test: it can update a customer
 test('it can update a customer', function () {
-    $data = ['name' => 'John Doe', 'avatar' => 'new-avatar.png'];
+    $data = ['name' => 'John Doe', 'avatar' => ['url' => 'John Doe', 'path' => 'new-avatar.png']];
 
+    // Mock the existing customer
     $customerMock = Mockery::mock(Customer::class)->makePartial();
     $customerMock->id = 1;
     $customerMock->name = 'John Doe';
-    $customerMock->avatar = 'old-avatar.png';
+
+    // Mock the avatar as an instance of FileUpload
+    $fileUploadMock = Mockery::mock(FileUpload::class)->makePartial();
+    $customerMock->avatar = $fileUploadMock;
 
     $this->customerRepositoryMock
         ->shouldReceive('findById')
@@ -97,10 +102,11 @@ test('it can update a customer', function () {
         ->shouldReceive('update')
         ->once();
 
+    // Ensure that the attachment service gets the correct model and file path
     $this->attachmentServiceMock
         ->shouldReceive('updateFile')
         ->once()
-        ->with($customerMock->avatar, 'new-avatar.png');
+        ->with($fileUploadMock, $data['avatar']);
 
     $this->activityLogServiceMock
         ->shouldReceive('logActivity')
@@ -111,10 +117,15 @@ test('it can update a customer', function () {
     expect($updatedCustomer->name)->toBe('John Doe');
 });
 
+// Test: it can delete a customer
 test('it can delete a customer', function () {
+    // Mock the existing customer
     $customerMock = Mockery::mock(Customer::class)->makePartial();
     $customerMock->id = 1;
-    $customerMock->avatar = 'avatar.png';
+
+    // Mock the avatar as an instance of FileUpload
+    $fileUploadMock = Mockery::mock(FileUpload::class)->makePartial();
+    $customerMock->avatar = $fileUploadMock;
 
     $this->customerRepositoryMock
         ->shouldReceive('findById')
@@ -122,10 +133,11 @@ test('it can delete a customer', function () {
         ->with(1)
         ->andReturn($customerMock);
 
+    // Ensure that the attachment service gets the correct model for deletion
     $this->attachmentServiceMock
         ->shouldReceive('deleteFile')
         ->once()
-        ->with($customerMock->avatar);
+        ->with($fileUploadMock);
 
     $this->customerRepositoryMock
         ->shouldReceive('delete')
@@ -141,6 +153,7 @@ test('it can delete a customer', function () {
     expect($deleted)->toBeTrue();
 });
 
+// Test: it can list customers with pagination
 test('it can list customers with pagination', function () {
     $filters = ['name' => 'Jane Doe'];
     $paginationResult = Mockery::mock(LengthAwarePaginator::class);
@@ -156,7 +169,9 @@ test('it can list customers with pagination', function () {
     expect($result)->toBe($paginationResult);
 });
 
+// Test: it can toggle customer active status
 test('it can toggle customer active status', function () {
+    // Mock the existing customer
     $customerMock = Mockery::mock(Customer::class)->makePartial();
     $customerMock->id = 1;
     $customerMock->active = true;
@@ -175,4 +190,9 @@ test('it can toggle customer active status', function () {
     $toggledCustomer = $this->customerService->toggleCustomerActiveStatus(1);
 
     expect($toggledCustomer->active)->toBeFalse();
+});
+
+// Clean up mockery after each test
+afterEach(function () {
+    Mockery::close();
 });

@@ -41,7 +41,7 @@ class CustomerController extends Controller
         );
     }
 
-    public function show($id)
+    public function show(int $id)
     {
         $customer = $this->customerService->getCustomerById($id);
 
@@ -50,10 +50,18 @@ class CustomerController extends Controller
         );
     }
 
-    public function update(UpdateCustomerRequest $request, $id): JsonResponse
+    public function update(UpdateCustomerRequest $request, int $id): JsonResponse
     {
         $customer = $this->customerService->updateCustomer($id, $request->all());
 
+        if (! $customer) {
+            return $this->returnJsonResponse(
+                message: 'Customer not found',
+                statusCode: Response::HTTP_NOT_FOUND
+            );
+        }
+
+        // Return the updated customer
         return $this->returnJsonResponse(
             data: $customer,
         );
@@ -72,6 +80,9 @@ class CustomerController extends Controller
     public function toggleActive(int $id): JsonResponse
     {
         $customer = $this->customerService->toggleCustomerActiveStatus($id);
+        if (! $customer) {
+            return response()->json(['message' => 'Customer not found'], Response::HTTP_NOT_FOUND);
+        }
 
         return $this->returnJsonResponse(
             data: $customer,
