@@ -16,6 +16,10 @@ use App\Services\AuthService;
 use App\Services\CustomerService;
 use App\Services\Interfaces\IAuthService;
 use App\Services\Interfaces\ICustomerService;
+use App\Services\Interfaces\IRuleEngineService;
+use App\Services\Interfaces\ITxnHistoryService;
+use App\Services\RuleEngineService;
+use App\Services\TransactionHistoryService;
 use Illuminate\Auth\Events\Verified;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\ServiceProvider;
@@ -41,6 +45,9 @@ class AppServiceProvider extends ServiceProvider
                 activityLogService: $app->make(ActivityLogService::class),
             );
         }, shared: true);
+
+        $this->app->bind(ITxnHistoryService::class, TransactionHistoryService::class);
+        $this->app->bind(IRuleEngineService::class, RuleEngineService::class);
     }
 
     /**
