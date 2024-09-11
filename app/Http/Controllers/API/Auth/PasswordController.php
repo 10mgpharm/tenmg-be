@@ -9,6 +9,7 @@ use App\Http\Requests\Auth\ForgotPasswordRequest;
 use App\Http\Requests\Auth\ResetPasswordRequest;
 use App\Models\Otp;
 use App\Models\User;
+use App\Services\OtpService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Hash;
@@ -28,11 +29,7 @@ class PasswordController extends Controller
         $user = User::firstWhere(['email' => $request->input('email')]);
 
         if ($user) {
-            $otp = Otp::create([
-                'code' => UtilityHelper::generateOtp(),
-                'type' => OtpType::RESET_PASSWORD_VERIFICATION,
-                'user_id' => $user->id,
-            ]);
+            $otp = (new OtpService)->generate(OtpType::RESET_PASSWORD_VERIFICATION, $user);
             $user->sendPasswordResetNotification($otp->code);
         }
 
@@ -56,8 +53,9 @@ class PasswordController extends Controller
 
         $user->otps()->firstWhere([
             'code' => $request->input('otp'),
-            'type' => OtpType::RESET_PASSWORD_VERIFICATION,
+            'type' => OtpType::RESET_PASSWORD_VERIFICATION->value,
         ])->delete();
+
 
         return $this->returnJsonResponse(
             message: __('passwords.reset'),

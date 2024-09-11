@@ -5,6 +5,7 @@ namespace App\Http\Requests\Auth;
 use App\Enums\OtpType;
 use App\Models\User;
 use App\Services\AuthService;
+use App\Services\OtpService;
 use Carbon\Carbon;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
@@ -32,7 +33,7 @@ class ResetPasswordRequest extends FormRequest
             'otp' => [
                 'required',
                 'string',
-                'exists:otps,code,type,'.OtpType::RESET_PASSWORD_VERIFICATION,
+                'exists:otps,code,type,'.OtpType::RESET_PASSWORD_VERIFICATION->value,
             ],
             'email' => ['required', Rule::exists(User::class, 'email')],
             'password' => ['required', Rules\Password::default()],
@@ -67,12 +68,6 @@ class ResetPasswordRequest extends FormRequest
             ]);
         }
 
-        $otp = $user->otps()->firstWhere('code', $code);
-
-        if (! $otp || Carbon::parse($otp->created_at)->diffInMinutes(now()) > AuthService::TOKEN_EXPIRED_AT) {
-            throw ValidationException::withMessages([
-                'otp' => [__('The OTP provided is incorrect or has expired. Please try again.')],
-            ]);
-        }
+        (new OtpService)->validate(OtpType::RESET_PASSWORD_VERIFICATION, $code, $user);
     }
 }

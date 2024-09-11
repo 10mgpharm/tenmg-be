@@ -93,12 +93,7 @@ class AuthService implements IAuthService
                 ['role_id' => $userRole->id]
             );
 
-            $code = UtilityHelper::generateOtp();
-            $otp = Otp::create([
-                'code' => $code,
-                'type' => OtpType::SIGNUP_EMAIL_VERIFICATION,
-                'user_id' => $user->id,
-            ]);
+            $otp = (new OtpService)->generate(OtpType::SIGNUP_EMAIL_VERIFICATION, $user);
 
             $user->sendEmailVerification($otp->code);
 
@@ -133,17 +128,12 @@ class AuthService implements IAuthService
     /**
      * verifyUserEmail
      */
-    public function verifyUserEmail(User $user, string $otp): ?JsonResponse
+    public function verifyUserEmail(User $user, string $code): ?JsonResponse
     {
         try {
             DB::beginTransaction();
 
-            $otp = $user->otps()->firstWhere('code', $otp);
-
-            if (! $otp || Carbon::parse($otp->created_at)->diffInMinutes(now()) > self::TOKEN_EXPIRED_AT) {
-                throw new BadRequestHttpException('OTP expired or invalid.');
-            }
-
+            $otp = (new OtpService)->validate(OtpType::SIGNUP_EMAIL_VERIFICATION, $code);
             $otp->delete();
 
             if ($user->hasVerifiedEmail()) {

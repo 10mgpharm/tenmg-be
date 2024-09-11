@@ -5,6 +5,7 @@ namespace Tests\Feature\Auth;
 use App\Enums\OtpType;
 use App\Helpers\UtilityHelper;
 use App\Models\User;
+use App\Services\OtpService;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Notification;
@@ -42,7 +43,7 @@ test('forgot password with valid email', function () {
 
     $this->assertDatabaseHas('otps', [
         'user_id' => $this->user->id,
-        'type' => OtpType::RESET_PASSWORD_VERIFICATION,
+        'type' => OtpType::RESET_PASSWORD_VERIFICATION->value,
     ]);
 });
 
@@ -58,14 +59,14 @@ test('forgot password with invalid email', function () {
 
     $this->assertDatabaseMissing('otps', [
         'user_id' => $this->user->id,
-        'type' => OtpType::RESET_PASSWORD_VERIFICATION,
+        'type' => OtpType::RESET_PASSWORD_VERIFICATION->value,
     ]);
 });
 
 test('reset password with valid data', function () {
     $otp = $this->user->otps()->create([
         'code' => UtilityHelper::generateOtp(),
-        'type' => OtpType::RESET_PASSWORD_VERIFICATION,
+        'type' => OtpType::RESET_PASSWORD_VERIFICATION->value,
     ]);
 
     $response = $this->postJson($this->reset, [
@@ -83,7 +84,7 @@ test('reset password with valid data', function () {
         );
 
     expect(Hash::check('newpassword123', $this->user->fresh()->password))->toBeTrue();
-    $this->assertDatabaseMissing('otps', ['code' => $otp->code, 'type' => OtpType::RESET_PASSWORD_VERIFICATION]);
+    $this->assertDatabaseMissing('otps', ['code' => $otp->code, 'type' => OtpType::RESET_PASSWORD_VERIFICATION->value]);
 });
 
 test('reset password with invalid otp', function () {
