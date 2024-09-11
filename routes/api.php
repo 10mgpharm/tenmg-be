@@ -39,6 +39,9 @@ Route::group(['middleware' => ['cors', 'json.response']], function () {
             // protected routes
             Route::middleware(['auth:api', 'scope:full'])->group(function () {
 
+                Route::post('/signup/complete', [SignupUserController::class, 'complete'])
+                ->name('signup.complete');
+                
                 Route::post('/signout', [AuthenticatedController::class, 'destroy'])
                     ->name('signout');
             });
