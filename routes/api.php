@@ -5,6 +5,7 @@ use App\Http\Controllers\API\Auth\PasswordController;
 use App\Http\Controllers\API\Auth\SignupUserController;
 use App\Http\Controllers\API\Auth\VerifyEmailController;
 use App\Http\Controllers\API\Credit\CustomerController;
+use App\Http\Controllers\API\ResendOtpController;
 use Illuminate\Support\Facades\Route;
 
 Route::group(['middleware' => ['cors', 'json.response']], function () {
@@ -28,6 +29,11 @@ Route::group(['middleware' => ['cors', 'json.response']], function () {
             Route::middleware(['auth:api', 'scope:temp'])->group(function () {
                 Route::post('/verify-email', VerifyEmailController::class)
                     ->name('verification.verify');
+            });
+
+            Route::middleware(['auth:api', 'scope:temp,full'])->group(function(){
+                Route::post('/resend-otp', ResendOtpController::class)
+                    ->name('resend.otp');
             });
 
             // protected routes
