@@ -11,9 +11,12 @@ use App\Models\PassportToken;
 use App\Repositories\CustomerRepository;
 use App\Repositories\Interfaces\ICustomerRepository;
 use App\Services\ActivityLogService;
+use App\Services\AffordabilityService;
 use App\Services\AttachmentService;
 use App\Services\AuthService;
 use App\Services\CustomerService;
+use App\Services\Interfaces\IActivityLogService;
+use App\Services\Interfaces\IAffordabilityService;
 use App\Services\Interfaces\IAuthService;
 use App\Services\Interfaces\ICustomerService;
 use App\Services\Interfaces\IRuleEngineService;
@@ -46,8 +49,10 @@ class AppServiceProvider extends ServiceProvider
             );
         }, shared: true);
 
+        $this->app->bind(IActivityLogService::class, ActivityLogService::class);
         $this->app->bind(ITxnHistoryService::class, TransactionHistoryService::class);
         $this->app->bind(IRuleEngineService::class, RuleEngineService::class);
+        $this->app->bind(IAffordabilityService::class, AffordabilityService::class);
     }
 
     /**

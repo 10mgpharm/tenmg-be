@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Collection;
 
 class RuleEngineService implements IRuleEngineService
 {
-    public function evaluate(array $transactions, Collection $loans, Collection $repayments)
+    public function evaluate(array $transactions, Collection $loans, Collection $repayments): array
     {
         // Initialize the result variables by category
         $creditPattern = [
@@ -110,7 +110,7 @@ class RuleEngineService implements IRuleEngineService
         ];
     }
 
-    public function applyRules(array $evaluationResult, array $activeRules)
+    public function applyRules(array $evaluationResult, array $activeRules): array
     {
         $score = 0;
         $totalScore = 0;
@@ -151,7 +151,7 @@ class RuleEngineService implements IRuleEngineService
         ];
     }
 
-    public function evaluateCondition($operator, $comparisonValue, $ruleValue)
+    public function evaluateCondition($operator, $comparisonValue, $ruleValue): bool
     {
         switch ($operator) {
             case '>':

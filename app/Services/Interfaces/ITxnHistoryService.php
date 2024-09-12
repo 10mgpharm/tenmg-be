@@ -7,7 +7,9 @@ use Illuminate\Http\UploadedFile;
 
 interface ITxnHistoryService
 {
-    public function uploadTransactionHistory(File|UploadedFile|string $file, int $customerId);
+    public function uploadTransactionHistory(File|UploadedFile|string $file, int $customerId): array;
 
-    public function evaluateTransactionHistory(int $transactionHistoryId);
+    public function uploadAndEvaluateTransactionHistory(File|UploadedFile|string $file, int $customerId): array;
+
+    public function evaluateTransactionHistory(int $transactionHistoryId): array;
 }
