@@ -1,12 +1,13 @@
 <?php
 
-use App\Http\Controllers\API\Auth\AuthenticatedController;
+use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\API\ProfileController;
+use App\Http\Controllers\API\ResendOtpController;
 use App\Http\Controllers\API\Auth\PasswordController;
+use App\Http\Controllers\API\Credit\CustomerController;
 use App\Http\Controllers\API\Auth\SignupUserController;
 use App\Http\Controllers\API\Auth\VerifyEmailController;
-use App\Http\Controllers\API\Credit\CustomerController;
-use App\Http\Controllers\API\ResendOtpController;
-use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\API\Auth\AuthenticatedController;
 
 Route::group(['middleware' => ['cors', 'json.response']], function () {
 
@@ -47,36 +48,40 @@ Route::group(['middleware' => ['cors', 'json.response']], function () {
             });
         });
 
-        Route::prefix('customers')->middleware(['auth:api', 'scope:full'])->group(
-            function () {
+        Route::middleware(['auth:api', 'scope:full'])->group(function(){
 
-                // List customers with pagination and filtering
-                Route::get('/', [CustomerController::class, 'index'])->name('customers.index');
+            Route::get('/{businessType}/{id}', [ProfileController::class, 'show']);
 
-                // Create a new customer
-                Route::post('/', [CustomerController::class, 'store'])->name('customers.store');
-
-                // Export customers to Excel
-                Route::get('/export', [CustomerController::class, 'export'])->name('customers.export');
-
-                // Import customers from Excel
-                Route::post('/import', [CustomerController::class, 'import'])->name('customers.import');
-
-                // Get a specific customer's details
-                Route::get('/{id}', [CustomerController::class, 'show'])->name('customers.show');
-
-                // Update a customer's details
-                Route::put('/{id}', [CustomerController::class, 'update'])->name('customers.update');
-
-                // Soft delete a customer
-                Route::delete(
-                    '/{id}',
-                    [CustomerController::class, 'destroy']
-                )->name('customers.destroy');
-
-                // Enable or disable a customer
-                Route::patch('/{id}', [CustomerController::class, 'toggleActive'])->name('customers.toggleActive');
-            }
-        );
+            Route::prefix('customers')->group(function () {
+    
+                    // List customers with pagination and filtering
+                    Route::get('/', [CustomerController::class, 'index'])->name('customers.index');
+    
+                    // Create a new customer
+                    Route::post('/', [CustomerController::class, 'store'])->name('customers.store');
+    
+                    // Export customers to Excel
+                    Route::get('/export', [CustomerController::class, 'export'])->name('customers.export');
+    
+                    // Import customers from Excel
+                    Route::post('/import', [CustomerController::class, 'import'])->name('customers.import');
+    
+                    // Get a specific customer's details
+                    Route::get('/{id}', [CustomerController::class, 'show'])->name('customers.show');
+    
+                    // Update a customer's details
+                    Route::put('/{id}', [CustomerController::class, 'update'])->name('customers.update');
+    
+                    // Soft delete a customer
+                    Route::delete(
+                        '/{id}',
+                        [CustomerController::class, 'destroy']
+                    )->name('customers.destroy');
+    
+                    // Enable or disable a customer
+                    Route::patch('/{id}', [CustomerController::class, 'toggleActive'])->name('customers.toggleActive');
+                }
+            );
+        });
     });
 });
