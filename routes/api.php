@@ -34,7 +34,7 @@ Route::group(['middleware' => ['cors', 'json.response']], function () {
 
             Route::middleware(['auth:api', 'scope:temp,full'])->group(function(){
                 Route::post('/resend-otp', ResendOtpController::class)
-                    ->name('resend.otp');
+                    ->name('resend.otp')->middleware('throttle:5,1');
             });
 
             // protected routes
