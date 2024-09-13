@@ -93,9 +93,9 @@ class AuthService implements IAuthService
                 ['role_id' => $userRole->id]
             );
 
-            $otp = (new OtpService)->generate(OtpType::SIGNUP_EMAIL_VERIFICATION, $user);
-
-            $user->sendEmailVerification($otp->code);
+            (new OtpService)->forUser($user)
+            ->generate(OtpType::SIGNUP_EMAIL_VERIFICATION)
+            ->sendMail(OtpType::SIGNUP_EMAIL_VERIFICATION);
 
             DB::commit();
 

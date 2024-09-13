@@ -29,8 +29,9 @@ class PasswordController extends Controller
         $user = User::firstWhere(['email' => $request->input('email')]);
 
         if ($user) {
-            $otp = (new OtpService)->generate(OtpType::RESET_PASSWORD_VERIFICATION, $user);
-            $user->sendPasswordResetNotification($otp->code);
+            (new OtpService)->forUser($user)
+            ->generate(OtpType::RESET_PASSWORD_VERIFICATION)
+            ->sendMail(OtpType::RESET_PASSWORD_VERIFICATION);
         }
 
         return $this->returnJsonResponse(

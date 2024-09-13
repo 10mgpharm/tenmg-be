@@ -26,6 +26,7 @@ class VerifyEmailRequest extends FormRequest
             'otp' => [
                 'required',
                 'string',
+                'size:6',
                 'exists:otps,code,user_id,'.$this->user()->id.',type,'.OtpType::SIGNUP_EMAIL_VERIFICATION->value,
             ],
 

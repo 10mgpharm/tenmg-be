@@ -68,6 +68,6 @@ class ResetPasswordRequest extends FormRequest
             ]);
         }
 
-        (new OtpService)->validate(OtpType::RESET_PASSWORD_VERIFICATION, $code, $user);
+        (new OtpService)->forUser($user)->validate(OtpType::RESET_PASSWORD_VERIFICATION, $code);
     }
 }
