@@ -7,119 +7,191 @@ use App\Enums\OtpType;
 use App\Helpers\UtilityHelper;
 use App\Models\User;
 use App\Services\Interfaces\IOtpService;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 
 /**
  * OtpService provides methods to generate, validate, and regenerate OTPs for user authentication.
- * It handles OTP creation, expiration checks, and cleanup after use.
+ * It handles OTP creation, expiration checks, sending emails, and cleanup after use.
  */
 class OtpService implements IOtpService
 {
-    // The number of minutes after which an OTP is considered expired.
+    /**
+     * The OTP expiration time in minutes.
+     */
     const TOKEN_EXPIRED_AT = 15;
 
     /**
-     * Generates a new OTP for the authenticated user or the provided user.
-     * Saves the OTP in the database and updates the existing one if already present.
+     * The user for whom the OTP operations are being performed.
      * 
-     * @param OtpType $type The type of OTP to generate.
-     * @param User|null $user Optional user instance, defaults to the authenticated user.
-     * @return Otp The newly generated or updated OTP.
-     * @throws BadRequestHttpException If no authenticated user is found.
+     * @var User|null
      */
-    public function generate(OtpType $type, User $user = null): Otp
+    protected ?User $user = null;
+
+    /**
+     * The generated or validated OTP instance.
+     * 
+     * @var Otp|null
+     */
+    protected ?Otp $otp = null;
+
+    /**
+     * Set the user for whom the OTP operations will be performed.
+     *
+     * @param User|null $user The user instance.
+     * @return self
+     */
+    public function forUser(User $user = null): self
     {
-        $user = $user ?: request()->user();
-        if (! $user) {
-            throw new BadRequestHttpException('Authentication is required to proceed.');
-        }
-
-        $code = UtilityHelper::generateOtp();
-        $otp = Otp::updateOrCreate(
-            ['type' => $type->value, 'user_id' => $user->id],
-            ['code' => $code]
-        );
-
-        return $otp;
+        $this->user = $user ?: request()->user();
+        return $this;
     }
 
     /**
-     * Validates the provided OTP code for the authenticated or provided user.
+     * Generate a new OTP for the specified type and user.
+     * Saves the OTP in the database.
+     *
+     * @param OtpType $type The type of OTP to generate.
+     * @return self
+     * @throws BadRequestHttpException If no user is set.
+     */
+    public function generate(OtpType $type): self
+    {
+        DB::transaction(function () use ($type) {
+            $user = $this->user();
+
+            $code = UtilityHelper::generateOtp();
+            $this->otp = Otp::updateOrCreate(
+                ['type' => $type->value, 'user_id' => $user->id],
+                ['code' => $code]
+            );
+        });
+
+        return $this;
+    }
+
+    /**
+     * Validate the provided OTP code for the authenticated or provided user.
      * Deletes the OTP after successful validation.
-     * 
+     *
      * @param OtpType $type The type of OTP being validated.
      * @param string $code The OTP code to validate.
-     * @param User|null $user Optional user instance, defaults to the authenticated user.
-     * @return Otp The validated OTP instance.
+     * @return Otp
      * @throws ValidationException If the OTP has expired or is invalid.
-     * @throws BadRequestHttpException If no authenticated user is found.
+     * @throws BadRequestHttpException If no user is set.
      */
-    public function validate(OtpType $type, string $code, User $user = null): Otp
+    public function validate(OtpType $type, string $code): Otp
     {
-        $user = $user ?: request()->user();
-        if (! $user) {
-            throw new BadRequestHttpException('Authentication is required to proceed.');
-        }
+        $user = $this->user();
 
-        $otp = $user->otps()->firstWhere(['code' => $code, 'type' => $type->value]);
+        $this->otp = $user->otps()->firstWhere(['code' => $code, 'type' => $type->value]);
 
-        if ($this->isExpired($otp)) {
+        if ($this->isExpired($this->otp)) {
             throw ValidationException::withMessages([
                 'otp' => [__('The OTP provided is incorrect or has expired. Please try again.')],
             ]);
         }
 
-        return $otp;
+        return $this->otp;
     }
 
     /**
-     * Regenerates a new OTP for the specified type, deleting any existing OTP for the user.
-     * 
+     * Regenerate a new OTP for the specified type, removing the old one if it exists for the user.
+     *
      * @param OtpType $type The type of OTP to regenerate.
-     * @param User|null $user Optional user instance, defaults to the authenticated user.
-     * @return Otp The newly regenerated OTP.
-     * @throws BadRequestHttpException If no authenticated user is found.
+     * @return self
+     * @throws BadRequestHttpException If no user is set.
      */
-    public function regenerate(OtpType $type, User $user = null): Otp
+    public function regenerate(OtpType $type): self
     {
-        $user = $user ?: request()->user();
-        if (! $user) {
-            throw new BadRequestHttpException('Authentication is required to proceed.');
-        }
+        $user = $this->user();
 
         $otp = $user->otps()->firstWhere('type', $type->value);
-
-        // Delete OTP since we are regenerating a new one.
         if ($otp) {
             $otp->delete();
         }
 
         $code = UtilityHelper::generateOtp();
-        $otp = Otp::create([
+        $this->otp = Otp::create([
             'code' => $code,
             'type' => $type->value,
             'user_id' => $user->id,
         ]);
 
-        return $otp;
+        return $this;
     }
 
     /**
-     * Checks if the given OTP has expired based on the token expiration time.
-     * Deletes the OTP if it has expired.
-     * 
-     * @param Otp|null $otp The OTP to check. Can be null.
-     * @return bool True if the OTP has expired, false otherwise.
+     * Send an OTP email to the user based on the OTP type.
+     * If no OTP has been generated yet, an exception will be thrown.
+     *
+     * @param OtpType $type The type of OTP (e.g., RESET_PASSWORD_VERIFICATION).
+     * @return self
+     * @throws BadRequestHttpException If no OTP is available or no user is set.
+     */
+    public function sendMail(OtpType $type): self
+    {
+        $user = $this->user();
+
+        if (! $this->otp) {
+            throw new BadRequestHttpException('No OTP has been generated for this operation.');
+        }
+
+        switch ($type->value) {
+            case 'RESET_PASSWORD_VERIFICATION':
+                $user->sendPasswordResetNotification($this->otp->code);
+                break;
+            case 'SIGNUP_EMAIL_VERIFICATION':
+                $user->sendEmailVerification($this->otp->code);
+                break;
+        }
+
+        return $this;
+    }
+
+    /**
+     * Get the generated OTP instance.
+     *
+     * @return Otp|null The generated or validated OTP.
+     */
+    public function otp(): ?Otp
+    {
+        return $this->otp;
+    }
+
+    /**
+     * Check if the provided OTP has expired.
+     *
+     * @param Otp|null $otp The OTP instance to check.
+     * @return bool True if expired, false otherwise.
      */
     private function isExpired(Otp $otp = null): bool
     {
         if (! $otp || $otp->updated_at->diffInMinutes(now()) > self::TOKEN_EXPIRED_AT) {
             if ($otp) {
-                $otp->delete(); // Delete the OTP if it exists and has expired.
+                $otp->delete();
             }
             return true;
         }
         return false;
+    }
+
+    /**
+     * Retrieve the current user, setting it from the request if not already set.
+     * Throws an exception if no user is available.
+     *
+     * @return User The authenticated user.
+     * @throws BadRequestHttpException If no user is set.
+     */
+    private function user(): User
+    {
+        $this->user = $this->user ?: request()->user();
+        
+        if (! $this->user) {
+            throw new BadRequestHttpException('Authentication is required to proceed.');
+        }
+
+        return $this->user;
     }
 }
