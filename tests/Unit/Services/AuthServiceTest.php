@@ -11,9 +11,9 @@ use App\Services\AuthService;
 use Illuminate\Auth\Events\Verified;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Facades\Event;
+use Illuminate\Validation\ValidationException;
 use Laravel\Passport\PersonalAccessTokenResult;
 use Mockery;
-use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 
 beforeEach(function () {
     $this->authService = Mockery::mock(AuthService::class)->makePartial();
@@ -58,9 +58,10 @@ test('it can verify a user email', function () {
     $otpCode = '123456';
     $otp = Mockery::mock(Otp::class)->makePartial();
     $otp->shouldReceive('created_at')->andReturn(now()->subMinutes(20));
+    $otp->updated_at = now()->subMinutes(10);
 
     $otpsMock = Mockery::mock(HasMany::class);
-    $otpsMock->shouldReceive('firstWhere')->with('code', $otpCode)->andReturn($otp);
+    $otpsMock->shouldReceive('firstWhere')->with(['code' => $otpCode, 'type' => 'SIGNUP_EMAIL_VERIFICATION'])->andReturn($otp);
 
     $tokenMock = Mockery::mock();
     $tokenMock->shouldReceive('revoke')->once();
@@ -88,11 +89,11 @@ test('it throws exception if OTP is invalid or expired', function () {
 
     $otpCode = '123456';
     $otpsMock = Mockery::mock(HasMany::class);
-    $otpsMock->shouldReceive('firstWhere')->with('code', $otpCode)->andReturn(null);
+    $otpsMock->shouldReceive('firstWhere')->with(['code' => $otpCode, 'type' => 'SIGNUP_EMAIL_VERIFICATION'])->andReturn(null);
 
     $this->userMock->shouldReceive('otps')->andReturn($otpsMock);
 
-    $this->expectException(BadRequestHttpException::class);
+    $this->expectException(ValidationException::class);
 
     $this->authService->verifyUserEmail($this->userMock, $otpCode);
 });
