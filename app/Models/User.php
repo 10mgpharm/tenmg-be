@@ -11,6 +11,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
@@ -199,7 +200,12 @@ class User extends Authenticatable implements MustVerifyEmail
         return $this->hasMany(Otp::class)->latest();
     }
 
-    public function business(): BelongsToMany
+    public function ownerBusinessType(): HasOne
+    {
+        return $this->hasOne(Business::class, 'owner_id', 'id');
+    }
+
+    public function businesses(): BelongsToMany
     {
         return $this->belongsToMany(Business::class, 'business_users', 'user_id', 'business_id');
     }

@@ -9,7 +9,6 @@ use App\Services\AttachmentService;
 use App\Services\AuthService;
 use App\Services\CustomerService;
 use Illuminate\Pagination\LengthAwarePaginator;
-use Mockery;
 
 // Set up mocks for the dependencies
 beforeEach(function () {
