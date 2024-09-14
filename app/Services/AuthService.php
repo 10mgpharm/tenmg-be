@@ -10,11 +10,9 @@ use App\Http\Requests\Auth\SignupUserRequest;
 use App\Http\Resources\UserResource;
 use App\Models\Business;
 use App\Models\BusinessUser;
-use App\Models\Otp;
 use App\Models\Role;
 use App\Models\User;
 use App\Services\Interfaces\IAuthService;
-use Carbon\Carbon;
 use Exception;
 use Illuminate\Auth\Events\Verified;
 use Illuminate\Http\JsonResponse;
@@ -23,7 +21,6 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Laravel\Passport\PersonalAccessTokenResult;
-use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 
 class AuthService implements IAuthService
 {
@@ -111,14 +108,9 @@ class AuthService implements IAuthService
                 ['role_id' => $userRole->id]
             );
 
-            $code = UtilityHelper::generateOtp();
-            $otp = Otp::create([
-                'code' => $code,
-                'type' => OtpType::SIGNUP_EMAIL_VERIFICATION,
-                'user_id' => $user->id,
-            ]);
-
-            $user->sendEmailVerification($otp->code);
+            (new OtpService)->forUser($user)
+                ->generate(OtpType::SIGNUP_EMAIL_VERIFICATION)
+                ->sendMail(OtpType::SIGNUP_EMAIL_VERIFICATION);
 
             DB::commit();
 
@@ -150,16 +142,13 @@ class AuthService implements IAuthService
     /**
      * verifyUserEmail
      */
-    public function verifyUserEmail(User $user, string $otp): ?JsonResponse
+    public function verifyUserEmail(User $user, string $code): ?JsonResponse
     {
         try {
             DB::beginTransaction();
 
-            $otp = $user->otps()->firstWhere('code', $otp);
-
-            if (! $otp || Carbon::parse($otp->created_at)->diffInMinutes(now()) > self::TOKEN_EXPIRED_AT) {
-                throw new BadRequestHttpException('OTP expired or invalid.');
-            }
+            $otp = (new OtpService)->forUser($user)
+                ->validate(OtpType::SIGNUP_EMAIL_VERIFICATION, $code);
 
             $otp->delete();
 

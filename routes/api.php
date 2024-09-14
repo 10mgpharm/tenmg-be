@@ -6,6 +6,8 @@ use App\Http\Controllers\API\Auth\SignupUserController;
 use App\Http\Controllers\API\Auth\VerifyEmailController;
 use App\Http\Controllers\API\Credit\CustomerController;
 use App\Http\Controllers\API\Credit\TransactionHistoryController;
+use App\Http\Controllers\API\ProfileController;
+use App\Http\Controllers\API\ResendOtpController;
 use Illuminate\Support\Facades\Route;
 
 Route::group(['middleware' => ['cors', 'json.response']], function () {
@@ -34,17 +36,27 @@ Route::group(['middleware' => ['cors', 'json.response']], function () {
                     ->name('verification.verify');
             });
 
+            Route::middleware(['auth:api', 'scope:temp,full'])->group(function () {
+                Route::post('/resend-otp', ResendOtpController::class)
+                    ->name('resend.otp')->middleware('throttle:5,1');
+            });
+
             // protected routes
             Route::middleware(['auth:api', 'scope:full'])->group(function () {
+
+                Route::post('/signup/complete', [SignupUserController::class, 'complete'])
+                    ->name('signup.complete');
 
                 Route::post('/signout', [AuthenticatedController::class, 'destroy'])
                     ->name('signout');
             });
         });
 
-        Route::prefix('customers')->middleware(['auth:api', 'scope:full'])->group(
-            function () {
+        Route::middleware(['auth:api', 'scope:full'])->group(function () {
 
+            Route::get('/{businessType}/{id}', [ProfileController::class, 'show']);
+
+            Route::prefix('customers')->group(function () {
                 // List customers with pagination and filtering
                 Route::get('/', [CustomerController::class, 'index'])->name('customers.index');
 
@@ -71,21 +83,21 @@ Route::group(['middleware' => ['cors', 'json.response']], function () {
 
                 // Enable or disable a customer
                 Route::patch('/{id}', [CustomerController::class, 'toggleActive'])->name('customers.toggleActive');
-            }
-        );
+            });
 
-        Route::prefix('vendor')->middleware(['auth:api', 'scope:full'])->group(function () {
-            // Upload transaction history file (min of 6 months)
-            Route::post('/txn_history/upload', [TransactionHistoryController::class, 'uploadTransactionHistory'])
-                ->name('vendor.txn_history.upload');
+            Route::prefix('vendor')->middleware(['auth:api', 'scope:full'])->group(function () {
+                // Upload transaction history file (min of 6 months)
+                Route::post('/txn_history/upload', [TransactionHistoryController::class, 'uploadTransactionHistory'])
+                    ->name('vendor.txn_history.upload');
 
-            // Evaluate existing uploaded file
-            Route::post('/txn_history/evaluate', [TransactionHistoryController::class, 'evaluateTransactionHistory'])
-                ->name('vendor.txn_history.evaluate');
+                // Evaluate existing uploaded file
+                Route::post('/txn_history/evaluate', [TransactionHistoryController::class, 'evaluateTransactionHistory'])
+                    ->name('vendor.txn_history.evaluate');
 
-            // Create customer, upload txn history, and evaluate in one go
-            Route::post('/txn_history/upload_and_evaluate', [TransactionHistoryController::class, 'uploadAndEvaluate'])
-                ->name('vendor.txn_history.upload_and_evaluate');
+                // Create customer, upload txn history, and evaluate in one go
+                Route::post('/txn_history/upload_and_evaluate', [TransactionHistoryController::class, 'uploadAndEvaluate'])
+                    ->name('vendor.txn_history.upload_and_evaluate');
+            });
         });
     });
 });

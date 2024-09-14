@@ -12,7 +12,7 @@ use Symfony\Component\HttpKernel\Exception\HttpException;
 class VerifyEmailController extends Controller
 {
     /**
-     * verify user contructor
+     * verify user constructor
      */
     public function __construct(private IAuthService $authService)
     {
