@@ -51,7 +51,25 @@ class AuthService implements IAuthService
         } catch (\Throwable) {
         }
 
-        throw new Exception('User not found', Response::HTTP_NOT_FOUND);
+        throw new Exception('User not found', Response::HTTP_UNAUTHORIZED);
+    }
+
+    /**
+     * Get auth id
+     *
+     * @throws Exception
+     */
+    public function getId(): int
+    {
+        try {
+            return $id = Auth::id();
+            if ($id instanceof int) {
+                return $id;
+            }
+        } catch (\Throwable) {
+        }
+
+        throw new Exception('User not found', Response::HTTP_UNAUTHORIZED);
     }
 
     /**
@@ -105,7 +123,6 @@ class AuthService implements IAuthService
             DB::commit();
 
             return $user;
-
         } catch (\Throwable $th) {
             DB::rollBack();
             throw $th;

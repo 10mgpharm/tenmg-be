@@ -5,6 +5,7 @@ use App\Http\Controllers\API\Auth\PasswordController;
 use App\Http\Controllers\API\Auth\SignupUserController;
 use App\Http\Controllers\API\Auth\VerifyEmailController;
 use App\Http\Controllers\API\Credit\CustomerController;
+use App\Http\Controllers\API\Credit\TransactionHistoryController;
 use Illuminate\Support\Facades\Route;
 
 Route::group(['middleware' => ['cors', 'json.response']], function () {
@@ -72,5 +73,19 @@ Route::group(['middleware' => ['cors', 'json.response']], function () {
                 Route::patch('/{id}', [CustomerController::class, 'toggleActive'])->name('customers.toggleActive');
             }
         );
+
+        Route::prefix('vendor')->middleware(['auth:api', 'scope:full'])->group(function () {
+            // Upload transaction history file (min of 6 months)
+            Route::post('/txn_history/upload', [TransactionHistoryController::class, 'uploadTransactionHistory'])
+                ->name('vendor.txn_history.upload');
+
+            // Evaluate existing uploaded file
+            Route::post('/txn_history/evaluate', [TransactionHistoryController::class, 'evaluateTransactionHistory'])
+                ->name('vendor.txn_history.evaluate');
+
+            // Create customer, upload txn history, and evaluate in one go
+            Route::post('/txn_history/upload_and_evaluate', [TransactionHistoryController::class, 'uploadAndEvaluate'])
+                ->name('vendor.txn_history.upload_and_evaluate');
+        });
     });
 });
