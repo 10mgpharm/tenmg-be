@@ -19,6 +19,9 @@ Route::group(['middleware' => ['cors', 'json.response']], function () {
             Route::post('/signin', [AuthenticatedController::class, 'store'])
                 ->name('signin');
 
+            Route::get('/email', [AuthenticatedController::class, 'emailExist'])
+                ->name('email.check');
+
             Route::post('/forgot-password', [PasswordController::class, 'forgot'])
                 ->name('password.forgot');
 

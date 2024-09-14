@@ -38,4 +38,9 @@ interface IAuthService
      * Return auth response
      */
     public function returnAuthResponse(User $user, PersonalAccessTokenResult $tokenResult, string $message = 'Sign in successful.', int $statusCode = Response::HTTP_OK): JsonResponse;
+
+    /**
+     * check email exist
+     */
+    public function emailExist(string $email): ?User;
 }

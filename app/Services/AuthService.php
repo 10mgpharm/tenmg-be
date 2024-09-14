@@ -196,4 +196,12 @@ class AuthService implements IAuthService
             ->response()
             ->setStatusCode($statusCode);
     }
+
+    /**
+     * check email exist
+     */
+    public function emailExist(string $email): ?User
+    {
+        return User::firstWhere('email', $email);
+    }
 }
