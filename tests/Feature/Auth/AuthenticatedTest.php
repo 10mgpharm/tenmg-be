@@ -39,8 +39,16 @@ beforeEach(function () {
 
     // Mock the Business model instance
     $mockedBusiness = Mockery::mock(Business::class);
+
     $mockedBusiness->shouldReceive('getAttribute')->with('type')->andReturn('VENDOR');
     $mockedBusiness->shouldReceive('offsetExists')->with('type')->andReturn(true);
+
+    $mockedBusiness->shouldReceive('getAttribute')->with('name')->andReturn('Tuyil Pharmaceutical');
+    $mockedBusiness->shouldReceive('offsetExists')->with('name')->andReturn(true);
+
+    $mockedBusiness->shouldReceive('getAttribute')->with('status')->andReturn('VERIFIED');
+    $mockedBusiness->shouldReceive('offsetExists')->with('status')->andReturn(true);
+
     $mockedHasOne = Mockery::mock(HasOne::class);
     $mockedHasOne->shouldReceive('getResults')->andReturn($mockedBusiness);
     $this->user->shouldReceive('ownerBusinessType')->andReturn($mockedHasOne);
@@ -106,6 +114,8 @@ it('can sign in with valid credentials', function () {
                         ->where('email', $this->user->email)
                         ->where('emailVerifiedAt', null)
                         ->where('entityType', 'VENDOR')
+                        ->where('businessName', 'Tuyil Pharmaceutical')
+                        ->where('businessStatus', 'VERIFIED')
                 )
         );
 });
