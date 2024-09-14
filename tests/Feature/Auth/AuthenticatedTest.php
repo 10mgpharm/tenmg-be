@@ -23,6 +23,7 @@ beforeEach(function () {
     $this->user->email = 'admin@example.com';
     $this->user->name = 'John Doe';
     $this->user->id = 1;
+    $this->user->active = 1;
 
     // Create a mock for PersonalAccessTokenResult
     $this->tokenResultMock = Mockery::mock(PersonalAccessTokenResult::class);
@@ -112,6 +113,7 @@ it('can sign in with valid credentials', function () {
                     fn ($data) => $data->where('id', $this->user->id)
                         ->where('name', $this->user->name)
                         ->where('email', $this->user->email)
+                        ->where('active', true)
                         ->where('emailVerifiedAt', null)
                         ->where('entityType', 'VENDOR')
                         ->where('businessName', 'Tuyil Pharmaceutical')
