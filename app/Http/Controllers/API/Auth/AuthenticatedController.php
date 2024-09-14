@@ -53,9 +53,20 @@ class AuthenticatedController extends Controller
         $user = $request->user();
         $user->token()->revoke();
 
-        return response()->json([
-            'message' => 'Logged out successfully',
-            'status' => 'success',
-        ], Response::HTTP_OK);
+        return $this->returnJsonResponse(
+            message: 'Logged out successfully',
+        );
+    }
+
+    /**
+     * Email exist check
+     */
+    public function emailExist(Request $request): JsonResponse
+    {
+        $user = $this->authService->emailExist($request->input('email'));
+
+        return $this->returnJsonResponse(
+            data: (bool) ($user)
+        );
     }
 }

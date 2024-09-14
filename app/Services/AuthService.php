@@ -10,11 +10,9 @@ use App\Http\Requests\Auth\SignupUserRequest;
 use App\Http\Resources\UserResource;
 use App\Models\Business;
 use App\Models\BusinessUser;
-use App\Models\Otp;
 use App\Models\Role;
 use App\Models\User;
 use App\Services\Interfaces\IAuthService;
-use Carbon\Carbon;
 use Exception;
 use Illuminate\Auth\Events\Verified;
 use Illuminate\Http\JsonResponse;
@@ -23,7 +21,6 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Laravel\Passport\PersonalAccessTokenResult;
-use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 
 class AuthService implements IAuthService
 {
@@ -51,7 +48,25 @@ class AuthService implements IAuthService
         } catch (\Throwable) {
         }
 
-        throw new Exception('User not found', Response::HTTP_NOT_FOUND);
+        throw new Exception('User not found', Response::HTTP_UNAUTHORIZED);
+    }
+
+    /**
+     * Get auth id
+     *
+     * @throws Exception
+     */
+    public function getId(): int
+    {
+        try {
+            return $id = Auth::id();
+            if ($id instanceof int) {
+                return $id;
+            }
+        } catch (\Throwable) {
+        }
+
+        throw new Exception('User not found', Response::HTTP_UNAUTHORIZED);
     }
 
     /**
@@ -94,13 +109,12 @@ class AuthService implements IAuthService
             );
 
             (new OtpService)->forUser($user)
-            ->generate(OtpType::SIGNUP_EMAIL_VERIFICATION)
-            ->sendMail(OtpType::SIGNUP_EMAIL_VERIFICATION);
+                ->generate(OtpType::SIGNUP_EMAIL_VERIFICATION)
+                ->sendMail(OtpType::SIGNUP_EMAIL_VERIFICATION);
 
             DB::commit();
 
             return $user;
-
         } catch (\Throwable $th) {
             DB::rollBack();
             throw $th;
@@ -134,8 +148,8 @@ class AuthService implements IAuthService
             DB::beginTransaction();
 
             $otp = (new OtpService)->forUser($user)
-            ->validate(OtpType::SIGNUP_EMAIL_VERIFICATION, $code);
-            
+                ->validate(OtpType::SIGNUP_EMAIL_VERIFICATION, $code);
+
             $otp->delete();
 
             if ($user->hasVerifiedEmail()) {
@@ -187,5 +201,13 @@ class AuthService implements IAuthService
             ])
             ->response()
             ->setStatusCode($statusCode);
+    }
+
+    /**
+     * check email exist
+     */
+    public function emailExist(string $email): ?User
+    {
+        return User::firstWhere('email', $email);
     }
 }

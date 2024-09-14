@@ -18,7 +18,20 @@ class UserResource extends JsonResource
             'id' => $this->id,
             'name' => $this->name,
             'email' => $this->email,
+            'active' => (bool) $this->active == 1,
             'emailVerifiedAt' => $this->email_verified_at,
+            'owner' => (bool) ($this->ownerBusinessType?->type),
+
+            'entityType' => $this->ownerBusinessType?->type ?? $this->businesses()->firstWhere('user_id', $this->id)?->type,
+            'businessName' => $this->ownerBusinessType?->name ?? $this->businesses()->firstWhere('user_id', $this->id)?->name,
+            'businessStatus' => $this->ownerBusinessType?->status ?? $this->businesses()->firstWhere('user_id', $this->id)?->status,
+
+            'completeProfile' => (bool) (
+                $this->ownerBusinessType &&
+                $this->ownerBusinessType?->contact_person &&
+                $this->ownerBusinessType?->contact_phone &&
+                $this->ownerBusinessType?->contact_email
+            ),
         ];
     }
 }
