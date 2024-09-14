@@ -50,6 +50,13 @@ beforeEach(function () {
     $mockedBusiness->shouldReceive('getAttribute')->with('status')->andReturn('VERIFIED');
     $mockedBusiness->shouldReceive('offsetExists')->with('status')->andReturn(true);
 
+    $mockedBusiness->shouldReceive('getAttribute')->with('contact_person')->andReturn('Dr Seyi');
+    $mockedBusiness->shouldReceive('offsetExists')->with('contact_person')->andReturn(true);
+    $mockedBusiness->shouldReceive('getAttribute')->with('contact_email')->andReturn('business@example.com');
+    $mockedBusiness->shouldReceive('offsetExists')->with('contact_email')->andReturn(true);
+    $mockedBusiness->shouldReceive('getAttribute')->with('contact_phone')->andReturn('09012345678');
+    $mockedBusiness->shouldReceive('offsetExists')->with('contact_phone')->andReturn(true);
+
     $mockedHasOne = Mockery::mock(HasOne::class);
     $mockedHasOne->shouldReceive('getResults')->andReturn($mockedBusiness);
     $this->user->shouldReceive('ownerBusinessType')->andReturn($mockedHasOne);
@@ -114,6 +121,8 @@ it('can sign in with valid credentials', function () {
                         ->where('name', $this->user->name)
                         ->where('email', $this->user->email)
                         ->where('active', true)
+                        ->where('completeProfile', true)
+                        ->where('owner', true)
                         ->where('emailVerifiedAt', null)
                         ->where('entityType', 'VENDOR')
                         ->where('businessName', 'Tuyil Pharmaceutical')
