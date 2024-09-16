@@ -2,8 +2,10 @@
 
 namespace Tests\Feature\Auth;
 
+use App\Models\Business;
 use App\Models\User;
 use Illuminate\Contracts\Auth\StatefulGuard;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Testing\Fluent\AssertableJson;
@@ -21,6 +23,7 @@ beforeEach(function () {
     $this->user->email = 'admin@example.com';
     $this->user->name = 'John Doe';
     $this->user->id = 1;
+    $this->user->active = 1;
 
     // Create a mock for PersonalAccessTokenResult
     $this->tokenResultMock = Mockery::mock(PersonalAccessTokenResult::class);
@@ -34,6 +37,29 @@ beforeEach(function () {
 
     // Mock the token() method on user
     $this->user->shouldReceive('token')->andReturn($this->tokenResultMock);
+
+    // Mock the Business model instance
+    $mockedBusiness = Mockery::mock(Business::class);
+
+    $mockedBusiness->shouldReceive('getAttribute')->with('type')->andReturn('VENDOR');
+    $mockedBusiness->shouldReceive('offsetExists')->with('type')->andReturn(true);
+
+    $mockedBusiness->shouldReceive('getAttribute')->with('name')->andReturn('Tuyil Pharmaceutical');
+    $mockedBusiness->shouldReceive('offsetExists')->with('name')->andReturn(true);
+
+    $mockedBusiness->shouldReceive('getAttribute')->with('status')->andReturn('VERIFIED');
+    $mockedBusiness->shouldReceive('offsetExists')->with('status')->andReturn(true);
+
+    $mockedBusiness->shouldReceive('getAttribute')->with('contact_person')->andReturn('Dr Seyi');
+    $mockedBusiness->shouldReceive('offsetExists')->with('contact_person')->andReturn(true);
+    $mockedBusiness->shouldReceive('getAttribute')->with('contact_email')->andReturn('business@example.com');
+    $mockedBusiness->shouldReceive('offsetExists')->with('contact_email')->andReturn(true);
+    $mockedBusiness->shouldReceive('getAttribute')->with('contact_phone')->andReturn('09012345678');
+    $mockedBusiness->shouldReceive('offsetExists')->with('contact_phone')->andReturn(true);
+
+    $mockedHasOne = Mockery::mock(HasOne::class);
+    $mockedHasOne->shouldReceive('getResults')->andReturn($mockedBusiness);
+    $this->user->shouldReceive('ownerBusinessType')->andReturn($mockedHasOne);
 
     // Mock the revoke method on token
     $this->tokenResultMock->shouldReceive('revoke')->andReturn(true);
@@ -77,6 +103,8 @@ it('can sign in with valid credentials', function () {
 
     $response = $this->postJson($this->url, $data);
 
+    dump($response->json());
+
     $response->assertStatus(Response::HTTP_OK)
         ->assertJson(
             fn (AssertableJson $json) => $json->where('status', 'success')
@@ -92,7 +120,13 @@ it('can sign in with valid credentials', function () {
                     fn ($data) => $data->where('id', $this->user->id)
                         ->where('name', $this->user->name)
                         ->where('email', $this->user->email)
+                        ->where('active', true)
+                        ->where('completeProfile', true)
+                        ->where('owner', true)
                         ->where('emailVerifiedAt', null)
+                        ->where('entityType', 'VENDOR')
+                        ->where('businessName', 'Tuyil Pharmaceutical')
+                        ->where('businessStatus', 'VERIFIED')
                 )
         );
 });

@@ -13,6 +13,7 @@ use Illuminate\Support\Facades\Storage as FacadeStorage;
 use Illuminate\Support\Str;
 use League\Flysystem\CorruptedPathDetected;
 use LogicException;
+use Maatwebsite\Excel\Facades\Excel;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 
 class AttachmentService
@@ -35,7 +36,7 @@ class AttachmentService
      */
     protected function getStorageDiskName(): string
     {
-        $storageType = config('filesystems.attachments');
+        $storageType = config('filesystems.default');
 
         return $storageType;
     }
@@ -84,6 +85,7 @@ class AttachmentService
             'name' => $attachmentName,
             'extension' => $uploadedFile->getClientOriginalExtension(),
             'size' => $uploadedFile->getSize(),
+            'document_type' => $uploadedFile->getClientOriginalExtension(),
         ]);
     }
 
@@ -290,5 +292,39 @@ class AttachmentService
         }
 
         return $path;
+    }
+
+    public function parseCsvFromContents(string $fileContents)
+    {
+        $transactions = [];
+        $lines = explode("\n", $fileContents);
+        $header = str_getcsv(array_shift($lines));  // Assume first line contains headers
+
+        foreach ($lines as $line) {
+            if (! empty(trim($line))) {
+                $transactions[] = array_combine($header, str_getcsv($line));
+            }
+        }
+
+        return $transactions;
+    }
+
+    public function parseExcelFromContents(string $filePath)
+    {
+        $transactions = [];
+        $spreadsheet = Excel::toArray(null, $filePath);
+
+        // Assuming data is in the first sheet and the first row contains headers
+        $header = array_shift($spreadsheet[0]);
+        foreach ($spreadsheet[0] as $row) {
+            $transactions[] = array_combine($header, $row);
+        }
+
+        return $transactions;
+    }
+
+    public function parseJsonFromContents($fileContents)
+    {
+        return json_decode($fileContents, true);
     }
 }

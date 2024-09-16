@@ -4,10 +4,11 @@ namespace App\Services;
 
 use App\Models\Activity;
 use App\Models\User;
+use App\Services\Interfaces\IActivityLogService;
 use Spatie\Activitylog\LogOptions;
 use Spatie\Activitylog\Traits\LogsActivity;
 
-class ActivityLogService
+class ActivityLogService implements IActivityLogService
 {
     use LogsActivity;
 
@@ -30,9 +31,9 @@ class ActivityLogService
      *
      * @param  mixed  $causer
      */
-    public function logActivity(mixed $model, User $causer, string $action, array $properties = []): Activity
+    public function logActivity(mixed $model, User $causer, string $action, array $properties = [], string $logName = ''): Activity
     {
-        return activity()
+        return activity($logName)
             ->performedOn($model)
             ->causedBy($causer)
             ->withProperties($properties)
