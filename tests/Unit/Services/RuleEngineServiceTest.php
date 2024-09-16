@@ -39,8 +39,8 @@ it('applies rules to evaluation result and returns correct credit score', functi
     ];
 
     $activeRules = [
-        ['name' => 'totalPastCreditAmount', 'logical_operator' => '>=', 'compare_value' => 10000, 'score_weight' => 50],
-        ['name' => 'totalTransactionVolume', 'logical_operator' => '>=', 'compare_value' => 5000, 'score_weight' => 50],
+        ['name' => 'totalPastCreditAmount', 'logical_operator' => '>=', 'compare_value' => 10000, 'score_weight' => 50, 'description' => ''],
+        ['name' => 'totalTransactionVolume', 'logical_operator' => '>=', 'compare_value' => 5000, 'score_weight' => 50, 'description' => ''],
     ];
 
     $result = $this->ruleEngineService->applyRules($evaluationResult, $activeRules);

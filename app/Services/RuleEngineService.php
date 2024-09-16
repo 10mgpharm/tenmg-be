@@ -125,15 +125,24 @@ class RuleEngineService implements IRuleEngineService
             if ($this->evaluateCondition($rule['logical_operator'], $comparisonValue, $rule['compare_value'])) {
                 $score += $rule['score_weight'];
                 $appliedRules[] = [
-                    'rule' => $rule['name'],
+                    'rule_name' => $rule['name'],
+                    'rule_description' => $rule['description'],
                     'status' => 'passed',
                     'weight' => $rule['score_weight'],
+                    'transaction_value' => $comparisonValue,
+                    'operator' => $rule['logical_operator'],
+                    'system_value' => $rule['compare_value'],
+
                 ];
             } else {
                 $appliedRules[] = [
-                    'rule' => $rule['name'],
+                    'rule_name' => $rule['name'],
+                    'rule_description' => $rule['description'],
                     'status' => 'failed',
                     'weight' => 0,
+                    'transaction_value' => $comparisonValue,
+                    'operator' => $rule['logical_operator'],
+                    'system_value' => $rule['compare_value'],
                 ];
             }
 
