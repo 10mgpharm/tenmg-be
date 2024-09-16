@@ -31,28 +31,24 @@ Route::group(['middleware' => ['cors', 'json.response']], function () {
             Route::post('/reset-password', [PasswordController::class, 'reset'])
                 ->name('password.reset');
 
-            Route::middleware(['auth:api', 'scope:temp'])->group(function () {
-                Route::post('/verify-email', VerifyEmailController::class)
+                Route::middleware(['auth:api', 'scope:full'])->group(function(){
+                    Route::post('/verify-email', VerifyEmailController::class)
                     ->name('verification.verify');
-            });
-
-            Route::middleware(['auth:api', 'scope:temp,full'])->group(function () {
-                Route::post('/resend-otp', ResendOtpController::class)
-                    ->name('resend.otp')->middleware('throttle:5,1');
-            });
-
-            // protected routes
-            Route::middleware(['auth:api', 'scope:full'])->group(function () {
-
+        
                 Route::post('/signup/complete', [SignupUserController::class, 'complete'])
-                    ->name('signup.complete');
-
+                ->name('signup.complete');
+        
                 Route::post('/signout', [AuthenticatedController::class, 'destroy'])
                     ->name('signout');
-            });
+                });
         });
 
+
+        // Protected routes
         Route::middleware(['auth:api', 'scope:full'])->group(function () {
+
+            Route::post('/resend-otp', ResendOtpController::class)
+            ->name('resend.otp')->middleware('throttle:5,1');
 
             Route::get('/{businessType}/{id}', [ProfileController::class, 'show']);
 
@@ -85,7 +81,7 @@ Route::group(['middleware' => ['cors', 'json.response']], function () {
                 Route::patch('/{id}', [CustomerController::class, 'toggleActive'])->name('customers.toggleActive');
             });
 
-            Route::prefix('vendor')->middleware(['auth:api', 'scope:full'])->group(function () {
+            Route::prefix('vendor')->group(function () {
                 // Upload transaction history file (min of 6 months)
                 Route::post('/txn_history/upload', [TransactionHistoryController::class, 'uploadTransactionHistory'])
                     ->name('vendor.txn_history.upload');
