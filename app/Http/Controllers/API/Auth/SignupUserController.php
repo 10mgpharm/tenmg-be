@@ -33,7 +33,7 @@ class SignupUserController extends Controller
         try {
             $request->validated();
             $user = $this->authService->signUp($request);
-            $tokenResult = $user->createToken('Temporary Access Token', ['temp']);
+            $tokenResult = $user->createToken('Full Access Token', ['full']);
 
             return (new UserResource($user))
                 ->additional([

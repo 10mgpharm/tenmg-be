@@ -27,12 +27,12 @@ Route::group(['middleware' => ['cors', 'json.response']], function () {
             Route::post('/reset-password', [PasswordController::class, 'reset'])
                 ->name('password.reset');
 
-            Route::middleware(['auth:api', 'scope:temp'])->group(function () {
+            Route::middleware(['auth:api', 'scope:full'])->group(function () {
                 Route::post('/verify-email', VerifyEmailController::class)
                     ->name('verification.verify');
             });
 
-            Route::middleware(['auth:api', 'scope:temp,full'])->group(function(){
+            Route::middleware(['auth:api', 'scope:full'])->group(function(){
                 Route::post('/resend-otp', ResendOtpController::class)
                     ->name('resend.otp')->middleware('throttle:5,1');
             });
