@@ -24,6 +24,11 @@ class ResendOtpRequest extends FormRequest
     {
         return [
             'type' => ['required', 'string', new Enum(OtpType::class)],
+            'email' => [
+                'string',
+                'email',
+                $this->is('*/auth/*') ? 'required' : 'nullable',
+        ],
         ];
     }
 
