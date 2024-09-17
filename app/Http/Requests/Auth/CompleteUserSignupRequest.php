@@ -26,6 +26,7 @@ class CompleteUserSignupRequest extends FormRequest
             'contact_phone' => $this->input('contactPhone'),
             'contact_person' => $this->input('contactPerson'),
             'contact_person_position' => $this->input('contactPersonPosition'),
+            'business_type' => strtoupper($this->input('businessType', ''))
         ]);
     }
 
@@ -44,10 +45,11 @@ class CompleteUserSignupRequest extends FormRequest
             'name' => ['required', 'string', 'max:255', 'exists:businesses,name,status,' . BusinessStatus::PENDING_VERIFICATION->value . ',owner_id,' . $this->user()->id], 
             'termsAndConditions' => ['required', 'accepted'],
             'provider' => ['required', 'in:google,credentials'],
-            'businessType' => [
+            'business_type' => [
                 'required_if:provider,google',
                 'string',
-                'in:'.implode(',', UtilityHelper::getAllowedBusinessTypes()),
+                Rule::exists('businesses', 'type')
+                ->where('owner_id', $this->user()->id),
             ],
         ];
     }
