@@ -7,6 +7,7 @@ use App\Enums\BusinessType;
 use App\Enums\OtpType;
 use App\Helpers\UtilityHelper;
 use App\Http\Requests\Auth\SignupUserRequest;
+use App\Http\Requests\AuthProviderRequest;
 use App\Http\Resources\UserResource;
 use App\Models\Business;
 use App\Models\BusinessUser;
@@ -209,5 +210,60 @@ class AuthService implements IAuthService
     public function emailExist(string $email): ?User
     {
         return User::firstWhere('email', $email);
+    }
+
+    /**
+     * create new google user with business
+     */
+    public function googleSignUp(AuthProviderRequest $request): User
+    {
+        try {
+            DB::beginTransaction();
+
+            // Create or find the user
+            $user = User::firstOrCreate(
+                ['email' => $request['email'],],
+                [
+                    'name' => $request['name'],
+                    'email_verified_at' => now(),
+                    'password' => Hash::make($request['email'])
+                ]
+            );
+
+            $businessType = BusinessType::from(strtoupper($request['businessType'] ?: $user->ownerBusinessType->type));
+
+            $userRole = $this->resolveSignupRole(type: $businessType);
+            $user->assignRole($userRole);
+
+            // create or find business
+            $businessCode = UtilityHelper::generateBusinessCode($request['name']);
+            $adminBusiness = Business::firstOrCreate(
+                [
+                    'owner_id' => $user->id,
+                    'type' => $businessType,
+                ],
+                [
+                    'name' => $request['name'],
+                    'code' => $businessCode,
+                    'short_name' => $businessCode,
+                    'status' => BusinessStatus::PENDING_VERIFICATION->value,
+            ]);
+
+            // map user to business
+            BusinessUser::firstOrCreate(
+                [
+                    'user_id' => $user->id,
+                    'business_id' => $adminBusiness->id,
+                ],
+                ['role_id' => $userRole->id]
+            );
+
+            DB::commit();
+
+            return $user;
+        } catch (\Throwable $th) {
+            DB::rollBack();
+            throw $th;
+        }
     }
 }

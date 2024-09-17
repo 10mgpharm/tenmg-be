@@ -4,6 +4,7 @@ namespace App\Services\Interfaces;
 
 use App\Enums\BusinessType;
 use App\Http\Requests\Auth\SignupUserRequest;
+use App\Http\Requests\AuthProviderRequest;
 use App\Models\Role;
 use App\Models\User;
 use Illuminate\Http\JsonResponse;
@@ -43,4 +44,9 @@ interface IAuthService
      * check email exist
      */
     public function emailExist(string $email): ?User;
+
+    /**
+     * create new user with business
+     */
+    public function googleSignUp(AuthProviderRequest $request): ?User;
 }
