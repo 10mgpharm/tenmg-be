@@ -37,8 +37,8 @@ class HandleAuthProvider
                 if (app()->environment('local')) {
                     $data = [
                         "id" => '104589841658088651577',
-                        "name" => 'Ahmed Olanrewaju',
-                        "email" => 'business.one@10mg.com',
+                        "name" => fake()->words(3, true),
+                        "email" => $request->input('email'),
                         "image" => 'https://lh3.googleusercontent.com/a/ACg8ocKQzrqJEUdaq9348uAPTLahOiukt7hFsEQwj8opc-6N21XbopUF=s96-c'
                     ];
                 } else {
