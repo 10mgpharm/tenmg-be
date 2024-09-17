@@ -3,10 +3,9 @@
 namespace App\Http\Requests\Auth;
 
 use App\Enums\BusinessStatus;
-use App\Enums\BusinessType;
+use App\Helpers\UtilityHelper;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
-use Illuminate\Validation\Rules;
 
 class CompleteUserSignupRequest extends FormRequest
 {
@@ -43,7 +42,13 @@ class CompleteUserSignupRequest extends FormRequest
             'contact_person' => ['required', 'string', 'min:3', 'max:255'],
             'contactPersonPosition' => ['required', 'string', 'min:3', 'max:255', ],
             'name' => ['required', 'string', 'max:255', 'exists:businesses,name,status,' . BusinessStatus::PENDING_VERIFICATION->value . ',owner_id,' . $this->user()->id], 
-            'termsAndConditions' => 'required|accepted',
+            'termsAndConditions' => ['required', 'accepted'],
+            'provider' => ['required', 'in:google,credentials'],
+            'businessType' => [
+                'required_if:provider,google',
+                'string',
+                'in:'.implode(',', UtilityHelper::getAllowedBusinessTypes()),
+            ],
         ];
     }
 }
