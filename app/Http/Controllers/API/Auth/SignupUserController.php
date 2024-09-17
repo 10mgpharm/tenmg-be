@@ -65,13 +65,17 @@ class SignupUserController extends Controller
     public function complete(CompleteUserSignupRequest $request): JsonResponse
     {
         $validated = $request->validated();
-        unset($validated['termsAndConditions'], $validated['contactPersonPosition']); // since fillable isn't used.
+
+        $data = array_intersect_key(
+            $validated,
+            array_flip(['contact_phone', 'contact_person', 'name', 'business_type'])
+        );  // since fillable isn't used.
 
         Business::where('name', $request->input('name'))
             ->where('owner_id', $request->user()->id)
             ->where('status', BusinessStatus::PENDING_VERIFICATION->value)
             ->first()
-            ->update($validated);
+            ->update($data);
 
         return response()->json(['message' => 'Signup process completed successfully.'], Response::HTTP_OK);
     }
