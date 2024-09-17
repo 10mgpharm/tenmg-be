@@ -2,6 +2,8 @@
 
 namespace App\Helpers;
 
+use App\Enums\BusinessType;
+
 class UtilityHelper
 {
     /**
@@ -32,5 +34,15 @@ class UtilityHelper
     public static function generateBusinessCode(string $businessName): string
     {
         return trim(str_replace(' ', '', $businessName));
+    }
+
+    /**
+     * Get all allowed business types for registration in lowercase.
+     *
+     * @return array<string>
+     */
+    public static function getAllowedBusinessTypes(): array
+    {
+        return array_map(fn($type) => $type->toLowerCase(), BusinessType::allowedForRegistration());
     }
 }
