@@ -8,6 +8,7 @@ use Illuminate\Http\Response;
 use Illuminate\Http\JsonResponse;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\ResendOtpRequest;
+use App\Models\User;
 use Symfony\Component\HttpKernel\Exception\HttpException;
 
 class ResendOtpController extends Controller
@@ -19,14 +20,12 @@ class ResendOtpController extends Controller
     public function __invoke(ResendOtpRequest $request): JsonResponse
     {
         try {
-            $user = $request->user();
+            $user = $request->user() ?: User::firstWhere('email', $request->input('email'));
 
-            if (! $user) {
-                throw new HttpException(Response::HTTP_UNAUTHORIZED, 'Unauthenticated.');
+            if($user){
+                $otpType = OtpType::from($request->input('type'));
+                (new OtpService)->forUser($user)->regenerate($otpType)->sendMail($otpType);
             }
-
-            $otpType = OtpType::from($request->input('type'));
-            (new OtpService)->regenerate($otpType)->sendMail($otpType);
 
             return $this->returnJsonResponse(
                 message: 'A one-time password has been resent to your registered email.',
