@@ -66,10 +66,10 @@ class SignupUserController extends Controller
     {
         $validated = $request->validated();
 
-        $data = array_intersect_key(
+        $data = array_filter(array_intersect_key(
             $validated,
-            array_flip(['contact_phone', 'contact_person', 'name', 'business_type'])
-        );  // since fillable isn't used.
+            array_flip(['contact_phone', 'contact_person', 'name', 'type'])
+        ));  // since fillable isn't used.
 
         Business::where('name', $request->input('name'))
             ->where('owner_id', $request->user()->id)
