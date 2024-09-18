@@ -22,7 +22,7 @@ Route::group(['middleware' => ['cors', 'json.response']], function () {
             Route::post('/signin', [AuthenticatedController::class, 'store'])
                 ->name('signin');
 
-            Route::get('/email', [AuthenticatedController::class, 'emailExist'])
+            Route::middleware('auth.provider')->post('/google', [AuthenticatedController::class, 'google'])
                 ->name('email.check');
 
             Route::post('/forgot-password', [PasswordController::class, 'forgot'])
@@ -35,12 +35,15 @@ Route::group(['middleware' => ['cors', 'json.response']], function () {
                     Route::post('/verify-email', VerifyEmailController::class)
                     ->name('verification.verify');
         
-                Route::post('/signup/complete', [SignupUserController::class, 'complete'])
-                ->name('signup.complete');
-        
-                Route::post('/signout', [AuthenticatedController::class, 'destroy'])
-                    ->name('signout');
+                    Route::post('/signup/complete', [SignupUserController::class, 'complete'])
+                    ->name('signup.complete');
+            
+                    Route::post('/signout', [AuthenticatedController::class, 'destroy'])
+                        ->name('signout');
                 });
+
+                Route::post('/resend-otp', ResendOtpController::class)
+                ->name('resend.otp')->middleware('throttle:5,1');
         });
 
 

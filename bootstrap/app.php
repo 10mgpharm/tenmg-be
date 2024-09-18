@@ -3,6 +3,7 @@
 use App\Http\Middleware\CamelCaseMiddleware;
 use App\Http\Middleware\Cors;
 use App\Http\Middleware\ForceJsonResponse;
+use App\Http\Middleware\HandleAuthProvider;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
@@ -28,6 +29,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'cors' => Cors::class,
             'scopes' => CheckScopes::class,
             'scope' => CheckForAnyScope::class,
+            'auth.provider' => HandleAuthProvider::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {
