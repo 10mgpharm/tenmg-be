@@ -39,7 +39,13 @@ class CompleteUserSignupRequest extends FormRequest
     {
 
         return [
-            'contact_phone' => ['required', 'string', 'min:3', 'max:255', Rule::unique('users')->ignore($this->user()->id),],
+            'contact_phone' => [
+                'required', 
+                'string',
+                'min:3',
+                'max:255',
+                Rule::unique('businesses', 'contact_phone')->ignore($this->user()->id, 'owner_id'),
+            ],
             'contact_person' => ['required', 'string', 'min:3', 'max:255'],
             'contactPersonPosition' => ['required', 'string', 'min:3', 'max:255', ],
             'name' => ['required', 'string', 'max:255', 'exists:businesses,name,status,' . BusinessStatus::PENDING_VERIFICATION->value . ',owner_id,' . $this->user()->id], 
