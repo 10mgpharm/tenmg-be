@@ -4,6 +4,7 @@ namespace App\Services\Interfaces;
 
 use App\Enums\BusinessType;
 use App\Http\Requests\Auth\SignupUserRequest;
+use App\Models\Business;
 use App\Models\Role;
 use App\Models\User;
 use Illuminate\Http\JsonResponse;
@@ -18,6 +19,10 @@ interface IAuthService
      * @throws Exception
      */
     public function getUser(): User;
+
+    public function getId(): int;
+
+    public function getBusiness(): ?Business;
 
     /**
      * create new user with business

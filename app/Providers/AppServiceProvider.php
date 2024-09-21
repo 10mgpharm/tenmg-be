@@ -63,7 +63,7 @@ class AppServiceProvider extends ServiceProvider
         // configure passport token expiration
         Passport::tokensExpireIn(now()->addHours(1));
         Passport::refreshTokensExpireIn(now()->addHours(3));
-        Passport::personalAccessTokensExpireIn(now()->addHours(1));
+        Passport::personalAccessTokensExpireIn(now()->addHours(24));
 
         // configure custom models for passport
         Passport::useTokenModel(PassportToken::class);

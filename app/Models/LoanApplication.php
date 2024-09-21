@@ -7,28 +7,32 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 
-class Loan extends Model
+class LoanApplication extends Model
 {
     use HasFactory;
 
-    protected $table = 'credit_loans';
+    protected $table = 'credit_applications';
 
     protected $fillable = [
         'business_id',
         'customer_id',
-        'application_id',
-        'offer_id',
-        'capital_amount',
+        'requested_amount',
         'interest_amount',
         'total_amount',
-        'repaymemt_start_date',
-        'repaymemt_end_date',
+        'interest_rate',
+        'duration_in_months',
+        'source',
         'status',
     ];
 
-    public function repaymentSchedule()
+    public function business()
     {
-        return $this->hasMany(RepaymentSchedule::class);
+        return $this->belongsTo(Business::class);
+    }
+
+    public function customer()
+    {
+        return $this->belongsTo(Customer::class);
     }
 
     public static function boot()
@@ -36,7 +40,7 @@ class Loan extends Model
         parent::boot();
         self::creating(function ($model) {
             $businessCode = DB::table('businesses')->where('id', $model->business_id)->value('code');
-            $model->identifier = "LN-{$businessCode}-".time().'-'.Str::random(5);
+            $model->identifier = "APP-{$businessCode}-".time().'-'.Str::random(5);
         });
     }
 }

@@ -21,7 +21,7 @@ class CustomerRepository implements ICustomerRepository
 
     public function findById(int $id): ?Customer
     {
-        return Customer::find($id);
+        return Customer::whereId($id)->with('lastEvaluationHistory.creditScore')->first();
     }
 
     public function update(Customer $customer, array $data): bool

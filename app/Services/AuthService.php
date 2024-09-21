@@ -20,6 +20,7 @@ use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Log;
 use Laravel\Passport\PersonalAccessTokenResult;
 
 class AuthService implements IAuthService
@@ -48,7 +49,7 @@ class AuthService implements IAuthService
         } catch (\Throwable) {
         }
 
-        throw new Exception('User not found', Response::HTTP_UNAUTHORIZED);
+        throw new Exception('Unable to find auth User', Response::HTTP_UNAUTHORIZED);
     }
 
     /**
@@ -59,14 +60,33 @@ class AuthService implements IAuthService
     public function getId(): int
     {
         try {
-            return $id = Auth::id();
-            if ($id instanceof int) {
-                return $id;
+            $auth = Auth::user();
+            if ($auth instanceof User) {
+                return $auth->id;
             }
         } catch (\Throwable) {
         }
 
-        throw new Exception('User not found', Response::HTTP_UNAUTHORIZED);
+        throw new Exception('Unable to find auth User', Response::HTTP_UNAUTHORIZED);
+    }
+
+    /**
+     * Get auth id
+     *
+     * @throws Exception
+     */
+    public function getBusiness(): ?Business
+    {
+        try {
+            $user = Auth::user();
+            if ($user instanceof User) {
+                return $user->businesses->first();
+            }
+        } catch (\Throwable $e) {
+            Log::error($e);
+        }
+
+        throw new Exception('Unable to find auth User', Response::HTTP_UNAUTHORIZED);
     }
 
     /**
