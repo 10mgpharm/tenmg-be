@@ -7,6 +7,7 @@ use App\Http\Resources\UserResource;
 use App\Http\Requests\ResetTwoFactorRequest;
 use App\Http\Requests\SetupTwoFactorRequest;
 use App\Http\Requests\VerifyTwoFactorRequest;
+use App\Services\Interfaces\IAuthService;
 use App\Services\OtpService;
 use Illuminate\Support\Facades\DB;
 
@@ -14,8 +15,9 @@ class TwoFactorAuthenticationController extends Controller
 {
     private $google2fa;
 
-    public function __construct()
+    public function __construct(private IAuthService $authService)
     {
+        $this->authService = $authService;
         $this->google2fa = app('pragmarx.google2fa');
     }
 
@@ -74,12 +76,12 @@ class TwoFactorAuthenticationController extends Controller
             });
 
             $tokenResult = $user->createToken('Full Access Token', ['full']);
-
-            return $this->returnJsonResponse(
-                data: (new UserResource($user->refresh()))->additional([
-                    'tokenResult' => $tokenResult
-                ]),
+            
+            return $this->authService->returnAuthResponse(
+                user: $user,
+                tokenResult: $tokenResult,
                 message: 'Two-factor authentication verified successfully.'
+
             );
         } catch (\Throwable $th) {
             return $this->handleErrorResponse($th);

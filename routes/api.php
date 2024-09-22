@@ -50,6 +50,28 @@ Route::group(['middleware' => ['cors', 'json.response']], function () {
         });
 
 
+        // Account specific operations
+        Route::prefix('account')->middleware(['auth:api'])->group(function () {
+            Route::prefix('settings')->group(function () {
+
+                Route::middleware('scope:full')->group(function(){
+                    // Update authenticated user's password
+                    Route::patch('password', PasswordUpdateController::class);
+    
+                    // 2FA 
+                    Route::prefix('2fa')->controller(TwoFactorAuthenticationController::class)
+                    ->group(function () {
+                        Route::get('setup', 'setup');
+                        Route::post('reset', 'reset');
+                    });
+                });
+
+                // 2FA 
+                Route::post('2fa/verify', [TwoFactorAuthenticationController::class, 'verify'])
+                ->middleware(['scope:full,temp']);
+            });
+        });
+
         // Protected routes
         Route::middleware(['auth:api', 'scope:full'])->group(function () {
 
@@ -69,23 +91,6 @@ Route::group(['middleware' => ['cors', 'json.response']], function () {
                         // Update business account license number, expiry date and cac doc
                         Route::patch('account-setup', 'accountSetup');
                     });
-            });
-
-            // Account specific operations
-            Route::prefix('account')->group(function () {
-                Route::prefix('settings')->group(function () {
-
-                    // Update authenticated user's password
-                    Route::patch('password', PasswordUpdateController::class);
-
-                    // 2FA 
-                    Route::prefix('2fa')->controller(TwoFactorAuthenticationController::class)
-                    ->group(function () {
-                        Route::get('setup', 'setup');
-                        Route::post('verify', 'verify');
-                        Route::post('reset', 'reset');
-                    });
-                });
             });
 
             Route::get('/{businessType}/{id}', [ProfileController::class, 'show']);
