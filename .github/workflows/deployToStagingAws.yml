@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - dev
+      - MGH-32
 
 jobs:
     deploy:
@@ -27,7 +28,7 @@ jobs:
             else
               cd /var/www/tenmg-staging
               sudo git reset --hard HEAD
-              sudo git pull https://${{ secrets.GH_USERNAME }}:${{ secrets.GH_TOKEN }}@github.com/consode/tenmg-be.git dev
+              sudo git pull https://${{ secrets.GH_USERNAME }}:${{ secrets.GH_TOKEN }}@github.com/consode/tenmg-be.git MGH-32
             fi
             cd /var/www/tenmg-staging
             # sudo php -r "file_exists('.env') || copy('.env.example', '.env');"
