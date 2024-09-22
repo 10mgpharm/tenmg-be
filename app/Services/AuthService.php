@@ -143,7 +143,7 @@ class AuthService implements IAuthService
     /**
      * verifyUserEmail
      */
-    public function verifyUserEmail(User $user, string $code): ?JsonResponse
+    public function verifyUserEmail(User $user, string $code): ?User
     {
         try {
             DB::beginTransaction();
@@ -154,31 +154,16 @@ class AuthService implements IAuthService
             $otp->delete();
 
             if ($user->hasVerifiedEmail()) {
-                $user->token()->revoke();
-                $tokenResult = $user->createToken('Full Access Token', ['full']);
-
-                return $this->returnAuthResponse(
-                    user: $user,
-                    tokenResult: $tokenResult,
-                    message: 'Account verified',
-                    statusCode: Response::HTTP_OK
-                );
+                return $user;
             }
 
             if ($user->markEmailAsVerified()) {
                 event(new Verified($user));
             }
 
-            $user->token()->revoke();
-            $tokenResult = $user->createToken('Full Access Token', ['full']);
-
             DB::commit();
 
-            return $this->returnAuthResponse(
-                user: $user,
-                tokenResult: $tokenResult,
-                statusCode: Response::HTTP_OK
-            );
+            return $user;
         } catch (\Throwable $th) {
             DB::rollBack();
             throw $th;
@@ -222,11 +207,11 @@ class AuthService implements IAuthService
 
             // Create or find the user
             $user = User::firstOrCreate(
-                ['email' => $request['email'],],
+                ['email' => $request['email']],
                 [
                     'name' => $request['name'],
                     'email_verified_at' => now(),
-                    'password' => Hash::make($request['email'])
+                    'password' => Hash::make($request['email']),
                 ]
             );
 
@@ -247,7 +232,7 @@ class AuthService implements IAuthService
                     'code' => $businessCode,
                     'short_name' => $businessCode,
                     'status' => BusinessStatus::PENDING_VERIFICATION->value,
-            ]);
+                ]);
 
             // map user to business
             BusinessUser::firstOrCreate(

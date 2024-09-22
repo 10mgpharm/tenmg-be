@@ -33,7 +33,7 @@ interface IAuthService
     /**
      * verifyUserEmail
      */
-    public function verifyUserEmail(User $user, string $otp): ?JsonResponse;
+    public function verifyUserEmail(User $user, string $code): ?User;
 
     /**
      * Return auth response
