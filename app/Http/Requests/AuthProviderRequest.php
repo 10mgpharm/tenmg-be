@@ -5,6 +5,7 @@ namespace App\Http\Requests;
 use App\Constants\PublicDomainConstants;
 use App\Enums\BusinessType;
 use App\Helpers\UtilityHelper;
+use App\Rules\BusinessEmail;
 use Illuminate\Foundation\Http\FormRequest;
 
 class AuthProviderRequest extends FormRequest
@@ -48,16 +49,7 @@ class AuthProviderRequest extends FormRequest
                 'max:255',
                 // Unique email for users, considering the user ID for updates
                 'unique:users,email,' . $this->user()?->id . ',id',
-                function ($attribute, $value, $fail) {
-                    $domain = substr(strrchr($value, "@"), 1);
-                    
-                    if (
-                        in_array($domain, PublicDomainConstants::PUBLIC_DOMAINS) && 
-                        request()->input('businessType') == BusinessType::VENDOR->toLowerCase()
-                    ) {
-                        $fail('Public email providers are not allowed. Please use a business email.');
-                    }
-                }
+                new BusinessEmail,
             ],
         ];
     }

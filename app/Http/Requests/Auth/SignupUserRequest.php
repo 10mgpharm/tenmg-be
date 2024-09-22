@@ -4,6 +4,7 @@ namespace App\Http\Requests\Auth;
 
 use App\Constants\PublicDomainConstants;
 use App\Enums\BusinessType;
+use App\Rules\BusinessEmail;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rules;
 
@@ -48,16 +49,7 @@ class SignupUserRequest extends FormRequest
             'email' => [
                 'required', 'string', 'lowercase', 'email',
                 'max:255', 'unique:users,email',
-                function ($attribute, $value, $fail) {
-                    $domain = substr(strrchr($value, "@"), 1);
-                    
-                    if (
-                        in_array($domain, PublicDomainConstants::PUBLIC_DOMAINS) && 
-                        request()->input('businessType') == BusinessType::VENDOR->toLowercase()
-                    ) {
-                        $fail('Public email providers are not allowed. Please use a business email.');
-                    }
-                }
+                new BusinessEmail,
             ],
             'password' => ['required', Rules\Password::default()],
             'passwordConfirmation' => ['required', 'same:password'],
