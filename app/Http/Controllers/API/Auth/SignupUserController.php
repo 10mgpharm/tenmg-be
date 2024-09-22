@@ -53,11 +53,10 @@ class SignupUserController extends Controller
         }
     }
 
-
     /**
      * Complete signup flow by updating the business details.
      *
-     * This method handles the final step in the user signup process, ensuring that 
+     * This method handles the final step in the user signup process, ensuring that
      * the business details are updated.
      *
      * @throws \Illuminate\Validation\ValidationException If validation fails.
@@ -77,7 +76,9 @@ class SignupUserController extends Controller
             ->first()
             ->update($data);
 
-        return response()->json(['message' => 'Signup process completed successfully.'], Response::HTTP_OK);
+        return $this->returnJsonResponse(
+            message: 'Signup process completed successfully.',
+            status: Response::HTTP_OK
+        );
     }
-
 }
