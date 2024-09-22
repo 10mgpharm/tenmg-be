@@ -98,36 +98,34 @@ Route::prefix('v1')->group(function () {
             // Submit New Application via Dashboard
             Route::post('/applications', [LoanApplicationController::class, 'store']);
 
+            // View All Loan Applications
+            Route::get('/applications', [LoanApplicationController::class, 'index'])->name('vendor.applications');
+
             // Submit Loan Application from E-commerce Site
             Route::post('/application/apply', [LoanApplicationController::class, 'applyFromEcommerce'])->withoutMiddleware(['auth:api', 'scope:full']);
 
             // Retrieve Vendor Customizations
             Route::get('/application/customisations', [LoanApplicationController::class, 'getCustomisations']);
 
+            // Filter Loan Applications
+            Route::get('/applications/filter', [LoanApplicationController::class, 'filter']);
+
+            // Enable/Disable Loan Application
+            Route::patch('/applications/{id}', [LoanApplicationController::class, 'toggleActive'])->middleware('admin');
+
+            Route::get('/applications/{reference}', [LoanApplicationController::class, 'getLoanApplicationByReference']);
+
+            // View All Applications for a Specific Customer
+            Route::get('/applications/customer/{customerId}', [LoanApplicationController::class, 'getCustomerApplications'])->middleware('admin');
+
+            // View Loan Application Details
+            Route::get('/applications/view/{id}', [LoanApplicationController::class, 'show']);
+
             // Delete Loan Application
             Route::delete('/applications/{id}', [LoanApplicationController::class, 'destroy'])->middleware('admin');
 
-            // View All Loan Applications
-            Route::get('/applications', [LoanApplicationController::class, 'index'])->name('vendor.applications');
-
-            // Filter Loan Applications
-            Route::get('/applications/filter', [LoanApplicationController::class, 'filter']);
-            Route::get('/applications/{reference}', [LoanApplicationController::class, 'getLoanApplicationByReference']);
-
-            // View Loan Application Details
-            Route::get('/applications/{id}', [LoanApplicationController::class, 'show']);
-
             // Approve/Reject Loan Application (10mg Admins Only)
             Route::post('/applications/{applicationId}/review', [LoanApplicationController::class, 'review'])->middleware('admin');
-
-            // Enable/Disable Loan Application
-            Route::patch('/applications/{id}', [
-                LoanApplicationController::class,
-                'toggleActive',
-            ])->middleware('admin');
-
-            // View All Applications for a Specific Customer
-            Route::get('/applications/{customerId}', [LoanApplicationController::class, 'getCustomerApplications'])->middleware('admin');
 
             // Loan Offer
             // Create a new loan offer

@@ -16,13 +16,9 @@ class LoanController extends Controller
      */
     public function getAllLoans(): JsonResponse
     {
-        try {
-            $loans = $this->loanService->getAllLoans();
+        $loans = $this->loanService->getAllLoans();
 
-            return $this->returnJsonResponse(data: $loans);
-        } catch (Exception $e) {
-            return $this->handleErrorResponse($e);
-        }
+        return $this->returnJsonResponse(data: $loans);
     }
 
     /**
@@ -30,16 +26,12 @@ class LoanController extends Controller
      */
     public function getLoanById(int $id): JsonResponse
     {
-        try {
-            $loan = $this->loanService->getLoanById($id);
-            if (! $loan) {
-                throw new Exception('Loan not found', 404);
-            }
-
-            return $this->returnJsonResponse(data: $loan);
-        } catch (Exception $e) {
-            return $this->handleErrorResponse($e);
+        $loan = $this->loanService->getLoanById($id);
+        if (! $loan) {
+            throw new Exception('Loan not found', 404);
         }
+
+        return $this->returnJsonResponse(data: $loan);
     }
 
     /**
@@ -47,15 +39,11 @@ class LoanController extends Controller
      */
     public function disbursed(int $id): JsonResponse
     {
-        try {
-            $disbursed = $this->loanService->markAsDisbursed($id);
-            if (! $disbursed) {
-                throw new Exception('Failed to disburse loan', 400);
-            }
-
-            return $this->returnJsonResponse(message: 'Loan disbursed successfully');
-        } catch (Exception $e) {
-            return $this->handleErrorResponse($e);
+        $disbursed = $this->loanService->markAsDisbursed($id);
+        if (! $disbursed) {
+            throw new Exception('Failed to disburse loan', 400);
         }
+
+        return $this->returnJsonResponse(message: 'Loan disbursed successfully');
     }
 }

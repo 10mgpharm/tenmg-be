@@ -4,13 +4,16 @@ namespace App\Http\Controllers\API\Credit;
 
 use App\Http\Controllers\Controller;
 use App\Services\LoanApplicationService;
-use Exception;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 
 class LoanApplicationController extends Controller
 {
-    public function __construct(private LoanApplicationService $loanApplicationService) {}
+    public function __construct(private LoanApplicationService $loanApplicationService)
+    {
+        Log::info('Request reached Controller: '.get_class($this));
+    }
 
     // Submit New Application via Dashboard
     public function store(Request $request)
@@ -22,14 +25,9 @@ class LoanApplicationController extends Controller
             'reference' => 'nullable|exists:credit_applications,identifier',
         ]);
 
-        try {
+        $application = isset($request->reference) ? $this->loanApplicationService->updateApplication($request->all()) : $this->loanApplicationService->createApplication($request->all());
 
-            $application = isset($request->reference) ? $this->loanApplicationService->updateApplication($request->all()) : $this->loanApplicationService->createApplication($request->all());
-
-            return $this->returnJsonResponse('Loan application submitted successfully', $application, 201);
-        } catch (Exception $e) {
-            return $this->handleErrorResponse($e);
-        }
+        return $this->returnJsonResponse('Loan application submitted successfully', $application, 201);
     }
 
     // Submit Loan Application from E-commerce Site
@@ -39,18 +37,14 @@ class LoanApplicationController extends Controller
             'customerId' => 'required|exists:credit_customers,id',
         ]);
 
-        try {
-            // Call service to generate the application link
-            $referenceLink = $this->loanApplicationService->createEcommerceApplication([
-                'vendorId' => $request->headers->get('x-vendor-key'),
-                'vendorSecret' => $request->headers->get('x-vendor-secret'),
-                'customerId' => $request->customerId,
-            ]);
+        // Call service to generate the application link
+        $referenceLink = $this->loanApplicationService->createEcommerceApplication([
+            'vendorId' => $request->headers->get('x-vendor-key'),
+            'vendorSecret' => $request->headers->get('x-vendor-secret'),
+            'customerId' => $request->customerId,
+        ]);
 
-            return $this->returnJsonResponse('Application link generated', ['link' => $referenceLink]);
-        } catch (Exception $e) {
-            return $this->handleErrorResponse($e);
-        }
+        return $this->returnJsonResponse('Application link generated', ['link' => $referenceLink]);
     }
 
     // Retrieve Vendor Customizations

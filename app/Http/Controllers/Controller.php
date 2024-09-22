@@ -32,7 +32,7 @@ abstract class Controller
     }
 
     /**
-     * Handle error response
+     * Deprecate the error handler
      */
     public function handleErrorResponse(\Throwable $th, $status = null): JsonResponse
     {

@@ -24,17 +24,12 @@ class VerifyEmailController extends Controller
      */
     public function __invoke(VerifyEmailRequest $request): JsonResponse
     {
-        try {
-            $user = $request->user();
+        $user = $request->user();
 
-            if (! $user) {
-                throw new HttpException(Response::HTTP_UNAUTHORIZED, 'Unauthenticated.');
-            }
-
-            return $this->authService->verifyUserEmail($user, $request->input('otp'));
-
-        } catch (\Throwable $th) {
-            return $this->handleErrorResponse($th);
+        if (! $user) {
+            throw new HttpException(Response::HTTP_UNAUTHORIZED, 'Unauthenticated.');
         }
+
+        return $this->authService->verifyUserEmail($user, $request->input('otp'));
     }
 }

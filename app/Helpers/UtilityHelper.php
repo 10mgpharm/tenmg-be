@@ -126,7 +126,7 @@ class UtilityHelper
     /**
      * Get the status code based on the exception type.
      */
-    public static function getStatusCode(Throwable|Exception $throwable): int
+    public static function getStatusCode(Throwable $throwable): int
     {
         if ($throwable instanceof HttpException) {
             return $throwable->getStatusCode();
