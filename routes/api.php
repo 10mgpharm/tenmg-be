@@ -8,6 +8,9 @@ use App\Http\Controllers\API\Credit\CustomerController;
 use App\Http\Controllers\API\Credit\TransactionHistoryController;
 use App\Http\Controllers\API\ProfileController;
 use App\Http\Controllers\API\ResendOtpController;
+use App\Http\Controllers\BusinessSettingController;
+use App\Http\Controllers\TwoFactorAuthenticationController;
+use App\Http\Controllers\PasswordUpdateController;
 use Illuminate\Support\Facades\Route;
 
 Route::group(['middleware' => ['cors', 'json.response']], function () {
@@ -31,18 +34,18 @@ Route::group(['middleware' => ['cors', 'json.response']], function () {
             Route::post('/reset-password', [PasswordController::class, 'reset'])
                 ->name('password.reset');
 
-                Route::middleware(['auth:api', 'scope:full'])->group(function(){
-                    Route::post('/verify-email', VerifyEmailController::class)
+            Route::middleware(['auth:api', 'scope:full'])->group(function () {
+                Route::post('/verify-email', VerifyEmailController::class)
                     ->name('verification.verify');
-        
-                    Route::post('/signup/complete', [SignupUserController::class, 'complete'])
-                    ->name('signup.complete');
-            
-                    Route::post('/signout', [AuthenticatedController::class, 'destroy'])
-                        ->name('signout');
-                });
 
-                Route::post('/resend-otp', ResendOtpController::class)
+                Route::post('/signup/complete', [SignupUserController::class, 'complete'])
+                    ->name('signup.complete');
+
+                Route::post('/signout', [AuthenticatedController::class, 'destroy'])
+                    ->name('signout');
+            });
+
+            Route::post('/resend-otp', ResendOtpController::class)
                 ->name('resend.otp')->middleware('throttle:5,1');
         });
 
@@ -51,7 +54,39 @@ Route::group(['middleware' => ['cors', 'json.response']], function () {
         Route::middleware(['auth:api', 'scope:full'])->group(function () {
 
             Route::post('/resend-otp', ResendOtpController::class)
-            ->name('resend.otp')->middleware('throttle:5,1');
+                ->name('resend.otp')->middleware('throttle:5,1');
+
+            // Business specific operations
+            Route::prefix('business')->group(function () {
+
+                Route::prefix('settings')->controller(BusinessSettingController::class)
+                    ->group(function () {
+                        Route::get('/', 'show');
+
+                        // Update business personal information
+                        Route::patch('personal-information', 'personalInformation');
+
+                        // Update business account license number, expiry date and cac doc
+                        Route::patch('account-setup', 'accountSetup');
+                    });
+            });
+
+            // Account specific operations
+            Route::prefix('account')->group(function () {
+                Route::prefix('settings')->group(function () {
+
+                    // Update authenticated user's password
+                    Route::patch('password', PasswordUpdateController::class);
+
+                    // 2FA 
+                    Route::prefix('2fa')->controller(TwoFactorAuthenticationController::class)
+                    ->group(function () {
+                        Route::get('setup', 'setup');
+                        Route::post('verify', 'verify');
+                        Route::post('reset', 'reset');
+                    });
+                });
+            });
 
             Route::get('/{businessType}/{id}', [ProfileController::class, 'show']);
 
