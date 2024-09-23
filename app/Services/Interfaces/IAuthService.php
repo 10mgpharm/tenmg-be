@@ -58,5 +58,10 @@ interface IAuthService
      */
     public function completeGoogleSignUp(CompleteUserSignupRequest $request);
 
+    /**
+     * Complete signup using credentials
+     *
+     * @return void
+     */
     public function completeCredentialSignUp(CompleteUserSignupRequest $request);
 }

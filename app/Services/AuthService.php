@@ -273,7 +273,7 @@ class AuthService implements IAuthService
     }
 
     /**
-     * Complete signup using google
+     * Complete signup using credentials
      *
      * @return void
      */
