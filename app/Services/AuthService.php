@@ -230,6 +230,13 @@ class AuthService implements IAuthService
                 ]
             );
 
+            // verify user
+            if (! $user->hasVerifiedEmail()) {
+                if ($user->markEmailAsVerified()) {
+                    event(new Verified($user));
+                }
+            }
+
             $businessType = BusinessType::from(strtoupper($request['businessType'] ?: $user->ownerBusinessType->type));
 
             $userRole = $this->resolveSignupRole(type: $businessType);
