@@ -19,6 +19,7 @@ class DatabaseSeeder extends Seeder
             BusinessUserSeeder::class,
             PassportClientSeeder::class,
             AffordabilitySeeder::class,
+            DocumentTypeSeeder::class,
         ]);
     }
 }
