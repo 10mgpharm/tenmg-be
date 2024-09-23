@@ -81,6 +81,7 @@ Route::prefix('v1')->group(function () {
         });
 
         Route::prefix('vendor')->group(function () {
+
             // Upload transaction history file (min of 6 months)
             Route::post('/txn_history/upload', [TransactionHistoryController::class, 'uploadTransactionHistory'])
                 ->name('vendor.txn_history.upload');
@@ -94,71 +95,89 @@ Route::prefix('v1')->group(function () {
                 ->name('vendor.txn_history.upload_and_evaluate');
 
             // Loan Application
+            Route::prefix('loan-applications')->group(function () {
 
-            // Submit New Application via Dashboard
-            Route::post('/applications', [LoanApplicationController::class, 'store']);
+                // Submit New Application via Dashboard
+                Route::post('/', [LoanApplicationController::class, 'store'])->name('vendor.applications.create');
 
-            // View All Loan Applications
-            Route::get('/applications', [LoanApplicationController::class, 'index'])->name('vendor.applications');
+                // View All Loan Applications
+                Route::get('/', [LoanApplicationController::class, 'index'])->name('vendor.applications');
 
-            // Submit Loan Application from E-commerce Site
-            Route::post('/application/apply', [LoanApplicationController::class, 'applyFromEcommerce'])->withoutMiddleware(['auth:api', 'scope:full']);
+                // Submit Loan Application from E-commerce Site
+                Route::post('/apply', [
+                    LoanApplicationController::class,
+                    'applyFromEcommerce'
+                ])->name('vendor.applications.apply')->withoutMiddleware(['auth:api', 'scope:full']);
 
-            // Retrieve Vendor Customizations
-            Route::get('/application/customisations', [LoanApplicationController::class, 'getCustomisations']);
+                // Retrieve Vendor Customizations
+                Route::get('/customisations', [LoanApplicationController::class, 'getCustomisations'])->name('vendor.applications.customisations');
 
-            // Filter Loan Applications
-            Route::get('/applications/filter', [LoanApplicationController::class, 'filter']);
+                // Filter Loan Applications
+                Route::get('/filter', [
+                    LoanApplicationController::class,
+                    'filter'
+                ])->name('vendor.applications.filter');
 
-            // Enable/Disable Loan Application
-            Route::patch('/applications/{id}', [LoanApplicationController::class, 'toggleActive'])->middleware('admin');
+                // Enable/Disable Loan Application
+                Route::patch(
+                    '/{id}',
+                    [LoanApplicationController::class, 'toggleActive']
+                )->name('vendor.applications.toggleActive')->middleware('admin');
 
-            Route::get('/applications/{reference}', [LoanApplicationController::class, 'getLoanApplicationByReference']);
+                Route::get('/{reference}', [LoanApplicationController::class, 'getLoanApplicationByReference'])->name('vendor.applications.getLoanApplicationByReference');
 
-            // View All Applications for a Specific Customer
-            Route::get('/applications/customer/{customerId}', [LoanApplicationController::class, 'getCustomerApplications'])->middleware('admin');
+                // View All Applications for a Specific Customer
+                Route::get('/customer/{customerId}', [LoanApplicationController::class, 'getCustomerApplications'])->name('vendor.applications.getByCustomer')->middleware('admin');
 
-            // View Loan Application Details
-            Route::get('/applications/view/{id}', [LoanApplicationController::class, 'show']);
+                // View Loan Application Details
+                Route::get('/view/{id}', [LoanApplicationController::class, 'show'])->name('vendor.applications.view');
 
-            // Delete Loan Application
-            Route::delete('/applications/{id}', [LoanApplicationController::class, 'destroy'])->middleware('admin');
+                // Delete Loan Application
+                Route::delete('/{id}', [
+                    LoanApplicationController::class,
+                    'destroy'
+                ])->middleware('admin');
 
-            // Approve/Reject Loan Application (10mg Admins Only)
-            Route::post('/applications/{applicationId}/review', [LoanApplicationController::class, 'review'])->middleware('admin');
+                // Approve/Reject Loan Application (10mg Admins Only)
+                Route::post('/{applicationId}/review', [LoanApplicationController::class, 'review'])->name('vendor.applications.review')->middleware('admin');
+            });
+
 
             // Loan Offer
-            // Create a new loan offer
-            Route::post('/offers', [LoanOfferController::class, 'createOffer'])->name('offers.create')->middleware('admin');
+            Route::prefix('offers')->group(function () {
+                // Create a new loan offer
+                Route::post('/', [LoanOfferController::class, 'createOffer'])->name('offers.create')->middleware('admin');
 
-            // Customer accepts or rejects a loan offer
-            Route::post('/offers/{offerReference}', [LoanOfferController::class, 'handleOfferAction'])->name('offers.handleAction');
+                // Customer accepts or rejects a loan offer
+                Route::post('/{offerReference}', [LoanOfferController::class, 'handleOfferAction'])->name('offers.handleAction');
 
-            // Get all loan offers (with filters and pagination)
-            Route::get('/offers', [LoanOfferController::class, 'getAllOffers'])->name('offers.getAll')->middleware('admin');
+                // Get all loan offers (with filters and pagination)
+                Route::get('/', [LoanOfferController::class, 'getAllOffers'])->name('offers.getAll')->middleware('admin');
 
-            // Get a specific loan offer by ID
-            Route::get('/offers/{id}', [LoanOfferController::class, 'getOfferById'])->name('offers.getById');
+                // Get a specific loan offer by ID
+                Route::get('/{id}', [LoanOfferController::class, 'getOfferById'])->name('offers.getById');
 
-            // Delete an offer (only if it's open)
-            Route::delete('/offers/{id}', [LoanOfferController::class, 'deleteOffer'])->name('offers.delete')->middleware('admin');
+                // Delete an offer (only if it's open)
+                Route::delete('/{id}', [LoanOfferController::class, 'deleteOffer'])->name('offers.delete')->middleware('admin');
 
-            // Enable or disable a loan offer (activate or deactivate)
-            Route::patch('/offers/{id}', [LoanOfferController::class, 'toggleOfferStatus'])->name('offers.toggleStatus')->middleware('admin');
+                // Enable or disable a loan offer (activate or deactivate)
+                Route::patch('/{id}', [LoanOfferController::class, 'toggleOfferStatus'])->name('offers.toggleStatus')->middleware('admin');
 
-            // Get all offers for a specific customer
-            Route::get('/offers/{customerId}/customer', [LoanOfferController::class, 'getOffersByCustomer'])->name('offers.getByCustomer');
+                // Get all offers for a specific customer
+                Route::get('/{customerId}/customer', [LoanOfferController::class, 'getOffersByCustomer'])->name('offers.getByCustomer');
+            });
+
 
             Route::post('/direct-debit/mandate/generate', [LoanOfferController::class, 'generateMandateForCustomer'])->name('mandate.generate');
             Route::post('/direct-debit/mandate/verify', [LoanOfferController::class, 'verifyMandateForCustomer'])->name('mandate.verify');
 
             // Loan
-            Route::get('/loans', [
-                LoanController::class,
-                'getAllLoans',
-            ])->name('loans.getAll')->middleware('admin');
-            Route::get('/loans/{id}', [LoanController::class, 'getLoanById'])->name('loans.getById');
-            Route::post('/loans/{id}/disbursed', [LoanController::class, 'disbursed'])->name('loans.disbursed');
+            Route::prefix('loans')->group(function () {
+                Route::get('/', [LoanController::class, 'getAllLoans'])->name('loans.getAll')->middleware('admin');
+                Route::get('/{id}', [LoanController::class, 'getLoanById'])->name('loans.getById');
+                Route::post('/{id}/disbursed', [LoanController::class, 'disbursed'])->name('loans.disbursed');
+            });
+
         });
 
         Route::get('/{businessType}/{id}', [ProfileController::class, 'show']);

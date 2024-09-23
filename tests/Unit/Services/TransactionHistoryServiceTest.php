@@ -9,7 +9,7 @@ use App\Models\User;
 use App\Repositories\CreditBusinessRuleRepository;
 use App\Repositories\CreditScoreRepository;
 use App\Repositories\FileUploadRepository;
-use App\Repositories\Interfaces\ICustomerRepository;
+use App\Repositories\CustomerRepository;
 use App\Repositories\LoanRepository;
 use App\Repositories\RepaymentScheduleRepository;
 use App\Repositories\TransactionHistoryRepository;
@@ -26,7 +26,7 @@ beforeEach(function () {
     $this->fileUploadRepositoryMock = mock(FileUploadRepository::class);
     $this->attachmentServiceMock = mock(AttachmentService::class);
     $this->ruleEngineServiceMock = mock(IRuleEngineService::class);
-    $this->customerRepositoryMock = mock(ICustomerRepository::class);
+    $this->customerRepositoryMock = mock(CustomerRepository::class);
     $this->affordabilityServiceMock = mock(IAffordabilityService::class);
     $this->transactionHistoryRepositoryMock = mock(TransactionHistoryRepository::class);
     $this->creditScoreRepositoryMock = mock(CreditScoreRepository::class);

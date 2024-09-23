@@ -19,7 +19,6 @@ class LoanApplicationService
         private AuthService $authService,
         private ApiKeyRepository $apiKeyRepository,
         private NotificationService $notificationService,
-        private OfferService $offerService,
     ) {}
 
     // Create Loan Application
@@ -142,8 +141,6 @@ class LoanApplicationService
             $application = $this->approveApplication($application->id);
             $subject = 'Loan Application Approved';
             $message = "Your loan application with reference {$application->identifier} has been approved. You will receive a loan offer shortly.";
-
-            $this->offerService->createOffer($applicationId, $offerAmount);
         } else {
             $application = $this->closeApplication($applicationId);
             $subject = 'Loan Application Rejected';

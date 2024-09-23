@@ -4,16 +4,14 @@ namespace App\Http\Controllers\API\Credit;
 
 use App\Http\Controllers\Controller;
 use App\Services\LoanApplicationService;
+use App\Services\OfferService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 
 class LoanApplicationController extends Controller
 {
-    public function __construct(private LoanApplicationService $loanApplicationService)
-    {
-        Log::info('Request reached Controller: '.get_class($this));
-    }
+    public function __construct(private LoanApplicationService $loanApplicationService, private OfferService $offerService) {}
 
     // Submit New Application via Dashboard
     public function store(Request $request)
@@ -109,7 +107,13 @@ class LoanApplicationController extends Controller
         ]);
 
         // Assuming the admin ID is available in the request
-        $this->loanApplicationService->reviewApplication($applicationId, $request->status, $request->offerAmount);
+        $application = $this->loanApplicationService->reviewApplication($applicationId, $request->status, $request->offerAmount);
+
+        if ($application->status === 'APPROVED') {
+            // Create an offer for the approved application
+            $offerAmount = $request->offerAmount;
+            $this->offerService->createOffer($applicationId, $offerAmount);
+        }
 
         return $this->returnJsonResponse(message: 'Application reviewed successfully');
     }

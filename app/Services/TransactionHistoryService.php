@@ -6,7 +6,7 @@ use App\Models\CreditTxnHistoryEvaluation;
 use App\Repositories\CreditBusinessRuleRepository;
 use App\Repositories\CreditScoreRepository;
 use App\Repositories\FileUploadRepository;
-use App\Repositories\Interfaces\ICustomerRepository;
+use App\Repositories\CustomerRepository;
 use App\Repositories\LoanRepository;
 use App\Repositories\RepaymentScheduleRepository;
 use App\Repositories\TransactionHistoryRepository;
@@ -24,7 +24,7 @@ class TransactionHistoryService implements ITxnHistoryService
         private FileUploadRepository $fileUploadRepository,
         private AttachmentService $attachmentService,
         private IRuleEngineService $ruleEngineService,
-        private ICustomerRepository $customerRepository,
+        private CustomerRepository $customerRepository,
         private IAffordabilityService $affordabilityService,
         private TransactionHistoryRepository $transactionHistoryRepository,
         private CreditScoreRepository $creditScoreRepository,
