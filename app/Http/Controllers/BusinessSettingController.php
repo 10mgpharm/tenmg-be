@@ -8,6 +8,7 @@ use App\Http\Resources\BusinessResource;
 use App\Http\Requests\ShowBusinessSettingRequest;
 use App\Http\Requests\BusinessSettingPersonalInformationRequest;
 use App\Http\Resources\UserResource;
+use App\Models\Business;
 use App\Models\User;
 
 class BusinessSettingController extends Controller
@@ -76,17 +77,29 @@ class BusinessSettingController extends Controller
     public function accountSetup(BusinessSettingAccountSetupRequest $request)
     {
         $validated = $request->validated();
+        $user = $request->user();
 
         $data = array_filter(array_intersect_key(
             $validated,
             array_flip(['license_number', 'expiry_date'])
         ));  // since fillable isn't used.
 
-        $request->user()->ownerBusinessType()->update($data);
+         // Save uploaded file
+        if($request->hasFile('cacDocument')){
+            $created = $this->attachmentService->saveNewUpload(
+                $request->file('cacDocument'),
+                $user->ownerBusinessType->id,
+                Business::class,
+            );
+            
+            $data['cac_document_id'] = $created->id;
+        }
+
+        $user->ownerBusinessType()->update($data);
 
         return $this->returnJsonResponse(
             message: 'Business account setup details successfully updated.',
-            data: (new BusinessResource($request->user()->ownerBusinessType->refresh()))
+            data: (new BusinessResource($user->ownerBusinessType->refresh()))
         );
     }
 }
