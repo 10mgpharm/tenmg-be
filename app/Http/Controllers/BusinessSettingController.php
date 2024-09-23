@@ -8,6 +8,7 @@ use App\Http\Resources\BusinessResource;
 use App\Http\Requests\ShowBusinessSettingRequest;
 use App\Http\Requests\BusinessSettingPersonalInformationRequest;
 use App\Http\Resources\UserResource;
+use App\Models\User;
 
 class BusinessSettingController extends Controller
 {
@@ -38,17 +39,30 @@ class BusinessSettingController extends Controller
     public function personalInformation(BusinessSettingPersonalInformationRequest $request)
     {
         $validated = $request->validated();
+        $user = $request->user()->load('ownerBusinessType.owner');
 
         $data = array_filter(array_intersect_key(
             $validated,
             array_flip(['name', 'contact_person', 'contact_phone', 'contact_email', 'address'])
         ));  // since fillable isn't used.
 
-        $request->user()->ownerBusinessType()->update($data);
+        // Save uploaded file
+        if($request->hasFile('profilePicture')){
+            $created = $this->attachmentService->saveNewUpload(
+                $request->file('profilePicture'),
+                $user->id,
+                User::class,
+            );
+            
+            $user->update(['avatar_id' => $created->id]);
+        }
+
+        $user->ownerBusinessType()->update($data);
+        $user->ownerBusinessType->refresh();
 
         return $this->returnJsonResponse(
             message: 'Business personal information details successfully updated.',
-            data: (new BusinessResource($request->user()->ownerBusinessType->refresh()))
+            data: (new BusinessResource($user->ownerBusinessType))
         );
     }
 

@@ -86,7 +86,7 @@ Route::group(['middleware' => ['cors', 'json.response']], function () {
                         Route::get('/', 'show');
 
                         // Update business personal information
-                        Route::patch('personal-information', 'personalInformation');
+                        Route::match(['post', 'patch'], 'personal-information', 'personalInformation');
 
                         // Update business account license number, expiry date and cac doc
                         Route::patch('account-setup', 'accountSetup');
