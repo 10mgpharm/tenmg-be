@@ -34,7 +34,7 @@ class HandleAuthProvider
                 $accessToken = $request->bearerToken();
 
                 // Mock response in local environment
-                if (app()->environment('local')) {
+                if (config('app.env') == 'local') {
                     $data = [
                         "id" => '104589841658088651577',
                         "name" => fake()->words(3, true),
