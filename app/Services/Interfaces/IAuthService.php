@@ -3,6 +3,7 @@
 namespace App\Services\Interfaces;
 
 use App\Enums\BusinessType;
+use App\Http\Requests\Auth\CompleteUserSignupRequest;
 use App\Http\Requests\Auth\SignupUserRequest;
 use App\Http\Requests\AuthProviderRequest;
 use App\Models\Role;
@@ -49,4 +50,13 @@ interface IAuthService
      * create new user with business
      */
     public function googleSignUp(AuthProviderRequest $request): ?User;
+
+    /**
+     * Complete signup using google
+     *
+     * @return void
+     */
+    public function completeGoogleSignUp(CompleteUserSignupRequest $request);
+
+    public function completeCredentialSignUp(CompleteUserSignupRequest $request);
 }

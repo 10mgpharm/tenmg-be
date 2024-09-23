@@ -2,9 +2,6 @@
 
 namespace App\Http\Requests;
 
-use App\Constants\PublicDomainConstants;
-use App\Enums\BusinessType;
-use App\Helpers\UtilityHelper;
 use Illuminate\Foundation\Http\FormRequest;
 
 class AuthProviderRequest extends FormRequest
@@ -26,39 +23,11 @@ class AuthProviderRequest extends FormRequest
     {
 
         return [
-            'provider' => ['required', 'string', 'in:google,credentials'],
-            'businessType' => [
-                'string',
-                'in:' . implode(',', UtilityHelper::getAllowedBusinessTypes()),
-                // Require businessType only if user is not authenticated (sign up)
-                $this->user() ? 'nullable' : 'required',
-            ],
-            'name' => [
-                'required', 
-                'string', 
-                'max:255',
-                // Unique name for businesses, considering owner_id for existing users
-                'unique:businesses,name,' . $this->user()?->id . ',owner_id'
-            ],
-            'email' => [
-                'required', 
-                'string', 
-                'lowercase', 
-                'email',
-                'max:255',
-                // Unique email for users, considering the user ID for updates
-                'unique:users,email,' . $this->user()?->id . ',id',
-                function ($attribute, $value, $fail) {
-                    $domain = substr(strrchr($value, "@"), 1);
-                    
-                    if (
-                        in_array($domain, PublicDomainConstants::PUBLIC_DOMAINS) && 
-                        request()->input('businessType') == BusinessType::VENDOR->toLowerCase()
-                    ) {
-                        $fail('Public email providers are not allowed. Please use a business email.');
-                    }
-                }
-            ],
+            'name' => ['required', 'string', 'max:255'],
+            'email_verified' => ['required', 'boolean'],
+            'provider' => ['required', 'string'],
+            'picture' => ['sometimes', 'string'],
+            'email' => ['required', 'string', 'lowercase', 'email'],
         ];
     }
 
@@ -69,8 +38,6 @@ class AuthProviderRequest extends FormRequest
      */
     public function messages(): array
     {
-        return [
-            'businessType.in' => 'The business type must be one of the following: ' . implode(', ', UtilityHelper::getAllowedBusinessTypes()),
-        ];
+        return [];
     }
 }

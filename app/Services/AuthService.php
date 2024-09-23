@@ -6,6 +6,7 @@ use App\Enums\BusinessStatus;
 use App\Enums\BusinessType;
 use App\Enums\OtpType;
 use App\Helpers\UtilityHelper;
+use App\Http\Requests\Auth\CompleteUserSignupRequest;
 use App\Http\Requests\Auth\SignupUserRequest;
 use App\Http\Requests\AuthProviderRequest;
 use App\Http\Resources\UserResource;
@@ -203,8 +204,6 @@ class AuthService implements IAuthService
     public function googleSignUp(AuthProviderRequest $request): User
     {
         try {
-            DB::beginTransaction();
-
             // Create or find the user
             $user = User::firstOrCreate(
                 ['email' => $request['email']],
@@ -212,27 +211,49 @@ class AuthService implements IAuthService
                     'name' => $request['name'],
                     'email_verified_at' => now(),
                     'password' => Hash::make($request['email']),
+                    'google_picture_url' => $request['picture'] ?? null,
                 ]
             );
 
-            $businessType = BusinessType::from(strtoupper($request['businessType'] ?: $user->ownerBusinessType->type));
+            return $user;
+        } catch (\Throwable $th) {
+            DB::rollBack();
+            throw $th;
+        }
+    }
 
+    /**
+     * Complete signup using google
+     *
+     * @return void
+     */
+    public function completeGoogleSignUp(CompleteUserSignupRequest $request)
+    {
+        try {
+            $validated = $request->validated();
+
+            DB::beginTransaction();
+
+            $businessType = BusinessType::from(strtoupper($validated['type']));
+
+            $user = $request->user();
             $userRole = $this->resolveSignupRole(type: $businessType);
             $user->assignRole($userRole);
 
-            // create or find business
-            $businessCode = UtilityHelper::generateBusinessCode($request['name']);
-            $adminBusiness = Business::firstOrCreate(
-                [
-                    'owner_id' => $user->id,
-                    'type' => $businessType,
-                ],
-                [
-                    'name' => $request['name'],
-                    'code' => $businessCode,
-                    'short_name' => $businessCode,
-                    'status' => BusinessStatus::PENDING_VERIFICATION->value,
-                ]);
+            // create business
+            $businessCode = UtilityHelper::generateBusinessCode($validated['name']);
+            $adminBusiness = Business::create([
+                'name' => $validated['name'],
+                'code' => $businessCode,
+                'short_name' => $businessCode,
+                'owner_id' => $user->id,
+                'type' => $businessType,
+                'status' => BusinessStatus::PENDING_VERIFICATION->value,
+                'contact_email' => $validated['contact_email'],
+                'contact_phone' => $validated['contact_phone'],
+                'contact_person' => $validated['contact_person'],
+                'contact_person_position' => $validated['contact_person_position'],
+            ]);
 
             // map user to business
             BusinessUser::firstOrCreate(
@@ -245,10 +266,30 @@ class AuthService implements IAuthService
 
             DB::commit();
 
-            return $user;
         } catch (\Throwable $th) {
             DB::rollBack();
             throw $th;
         }
+    }
+
+    /**
+     * Complete signup using google
+     *
+     * @return void
+     */
+    public function completeCredentialSignUp(CompleteUserSignupRequest $request)
+    {
+        $validated = $request->validated();
+
+        $data = array_filter(array_intersect_key(
+            $validated,
+            array_flip(['contact_email', 'contact_phone', 'contact_person', 'name', 'type', 'contact_person_position'])
+        ));  // since fillable isn't used.
+
+        Business::where('name', $request->input('name'))
+            ->where('owner_id', $request->user()->id)
+            ->where('status', BusinessStatus::PENDING_VERIFICATION->value)
+            ->first()
+            ->update($data);
     }
 }

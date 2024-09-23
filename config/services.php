@@ -35,4 +35,8 @@ return [
         ],
     ],
 
+    'google' => [
+        'oauth_url' => env('GOOGLE_OAUTH2_URL'),
+    ],
+
 ];

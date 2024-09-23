@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers\API\Auth;
 
-use App\Enums\BusinessStatus;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Auth\CompleteUserSignupRequest;
 use App\Http\Requests\Auth\SignupUserRequest;
@@ -63,18 +62,12 @@ class SignupUserController extends Controller
      */
     public function complete(CompleteUserSignupRequest $request): JsonResponse
     {
-        $validated = $request->validated();
-
-        $data = array_filter(array_intersect_key(
-            $validated,
-            array_flip(['contact_email', 'contact_phone', 'contact_person', 'name', 'type', 'contact_person_position'])
-        ));  // since fillable isn't used.
-
-        Business::where('name', $request->input('name'))
-            ->where('owner_id', $request->user()->id)
-            ->where('status', BusinessStatus::PENDING_VERIFICATION->value)
-            ->first()
-            ->update($data);
+        if ($request->provider == 'google') {
+            $this->authService->completeGoogleSignUp($request);
+        } else {
+            // credentials
+            $this->authService->completeCredentialSignUp($request);
+        }
 
         return $this->returnJsonResponse(
             message: 'Signup process completed successfully.',

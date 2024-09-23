@@ -127,6 +127,7 @@ it('can sign in with valid credentials', function () {
                         ->where('entityType', 'VENDOR')
                         ->where('businessName', 'Tuyil Pharmaceutical')
                         ->where('businessStatus', 'VERIFIED')
+                        ->has('avatar')
                 )
         );
 });
