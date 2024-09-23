@@ -89,7 +89,7 @@ Route::group(['middleware' => ['cors', 'json.response']], function () {
                         Route::match(['post', 'patch'], 'personal-information', 'personalInformation');
 
                         // Update business account license number, expiry date and cac doc
-                        Route::patch('account-setup', 'accountSetup');
+                        Route::match(['post', 'patch'], 'account-setup', 'accountSetup');
                     });
             });
 
