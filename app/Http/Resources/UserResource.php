@@ -33,7 +33,7 @@ class UserResource extends JsonResource
                 $this->ownerBusinessType?->contact_phone &&
                 $this->ownerBusinessType?->contact_email
             ),
-            'avatar' => $this->avatar,
+            'profilePicture' => $this->avatar,
         ];
     }
 }
