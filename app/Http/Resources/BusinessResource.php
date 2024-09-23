@@ -23,6 +23,7 @@ class BusinessResource extends JsonResource
             'businessAddress' => $this->address,
             'licenseNumber' => $this->license_number,
             'expiryDate' => $this->expiry_date?->diffForHumans(),
+            'cacDocument' => $this->cac,
             'owner' => new UserResource($this->whenLoaded('owner')),
         ];
     }
