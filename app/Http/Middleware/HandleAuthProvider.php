@@ -35,7 +35,7 @@ class HandleAuthProvider
                         "id" => '104589841658088651577',
                         "name" => fake()->words(3, true),
                         "email" => $request->input('email'),
-                        "image" => 'https://lh3.googleusercontent.com/a/ACg8ocKQzrqJEUdaq9348uAPTLahOiukt7hFsEQwj8opc-6N21XbopUF=s96-c'
+                        "picture" => 'https://lh3.googleusercontent.com/a/ACg8ocKQzrqJEUdaq9348uAPTLahOiukt7hFsEQwj8opc-6N21XbopUF=s96-c'
                     ];
                 } else {
                     // Call the Google API to verify the token
@@ -46,10 +46,9 @@ class HandleAuthProvider
                     if ($response->failed()) {
                         return response()->json(['message' => 'Failed to authenticate with Google. Please try again'], Response::HTTP_UNAUTHORIZED);
                     }
+
+                    $data = $response->json();
                 }
-
-                $data = $response->json();
-
                 // Check if the request email matches the email from Google
                 if ($data['email'] !== $email) {
                     return response()->json(['message' => 'Provider Email does not match.'], Response::HTTP_FORBIDDEN);
@@ -63,7 +62,7 @@ class HandleAuthProvider
                 'name' => $data['name'],
                 'picture' => $data['picture']
             ]);
-
+            
             return $next($request);
         } catch (\Throwable $th) {
             return response()->json(['message' => 'An error occurred.'], Response::HTTP_INTERNAL_SERVER_ERROR);
