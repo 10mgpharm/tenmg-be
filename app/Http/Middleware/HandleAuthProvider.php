@@ -39,12 +39,13 @@ class HandleAuthProvider
                     ];
                 } else {
                     // Call the Google API to verify the token
-                $response = Http::withHeaders([
-                    'Authorization' => "Bearer $accessToken",
-                ])->get(config('services.google.oauth_url'));
+                    $response = Http::withHeaders([
+                        'Authorization' => "Bearer $accessToken",
+                    ])->get(config('services.google.oauth_url'));
 
-                if ($response->failed()) {
-                    return response()->json(['message' => 'Failed to authenticate with Google. Please try again'], Response::HTTP_UNAUTHORIZED);
+                    if ($response->failed()) {
+                        return response()->json(['message' => 'Failed to authenticate with Google. Please try again'], Response::HTTP_UNAUTHORIZED);
+                    }
                 }
 
                 $data = $response->json();
@@ -53,14 +54,15 @@ class HandleAuthProvider
                 if ($data['email'] !== $email) {
                     return response()->json(['message' => 'Provider Email does not match.'], Response::HTTP_FORBIDDEN);
                 }
-
             } else {
                 return response()->json(['message' => 'Invalid provider.'], Response::HTTP_BAD_REQUEST);
             }
 
             // merge google response to request
-            $request->merge(['name' => $data['name']]);
-            $request->merge(['picture' => $data['picture']]);
+            $request->merge([
+                'name' => $data['name'],
+                'picture' => $data['picture']
+            ]);
 
             return $next($request);
         } catch (\Throwable $th) {
