@@ -30,6 +30,16 @@ class CreditOffer extends Model
         return $this->belongsTo(LoanApplication::class, 'application_id');
     }
 
+    public function business()
+    {
+        return $this->belongsTo(Business::class, 'business_id');
+    }
+
+    public function customer()
+    {
+        return $this->belongsTo(Customer::class, 'customer_id');
+    }
+
     public static function boot()
     {
         parent::boot();

@@ -53,25 +53,21 @@ class LoanService
      */
     public function markAsDisbursed(int $loanId): bool
     {
-        try {
-            $loan = $this->loanRepository->findById($loanId);
 
-            if (! $loan) {
-                throw new \Exception('Loan not found', 404);
-            }
+        $loan = $this->loanRepository->findById($loanId);
 
-            // Update the loan status
-            $loan->status = 'DISBURSED';
-            $loan->repaymemt_start_date = Carbon::now();
-            $loan->repaymemt_end_date = Carbon::now()->addMonths($loan->duration_in_months);
-
-            $this->loanRepository->update($loan->id, $loan->toArray());
-
-            return true;
-        } catch (\Exception $e) {
-            Log::error('Failed to mark loan as disbursed', ['loanId' => $loanId, 'error' => $e->getMessage()]);
-            throw new \Exception('Failed to mark loan as disbursed');
+        if (! $loan) {
+            throw new \Exception('Loan not found', 404);
         }
+
+        // Update the loan status
+        $this->loanRepository->update($loan->id, [
+            'status' => 'DISBURSED',
+            'repaymemt_start_date' => Carbon::now(),
+            'repaymemt_end_date' => Carbon::now()->addMonths((int)$loan?->application?->duration_in_months)
+        ]);
+
+        return true;
     }
 
     /**

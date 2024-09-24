@@ -24,12 +24,12 @@ class LoanRepository
 
     public function findById(int $id): ?Loan
     {
-        return Loan::whereId($id)->with('repayment_schedule')->first();
+        return Loan::whereId($id)->with('repaymentSchedule')->first();
     }
 
     public function update(int $id, array $data): bool
     {
-        return Loan::where('id', $id)->update($data);
+        return Loan::whereId($id)->update($data);
     }
 
     public function fetchAllLoans(): Collection

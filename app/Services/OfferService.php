@@ -78,7 +78,7 @@ class OfferService
                 'total_amount' => $offer->offer_amount + $interestAmount,
                 'status' => 'PENDING',
             ];
-            $this->loanService->createLoan($loanData, json_decode($offer->repayment_breakdown));
+            $this->loanService->createLoan($loanData, json_decode($offer->repayment_breakdown, true));
             $this->notificationService->sendOfferAcceptanceNotification($offer);
         } elseif ($action === 'reject') {
             $this->loanApplicationService->closeApplication($offer->application_id);

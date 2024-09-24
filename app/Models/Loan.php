@@ -31,6 +31,26 @@ class Loan extends Model
         return $this->hasMany(RepaymentSchedule::class);
     }
 
+    public function application()
+    {
+        return $this->belongsTo(LoanApplication::class, 'application_id');
+    }
+
+    public function business()
+    {
+        return $this->belongsTo(Business::class, 'business_id');
+    }
+
+    public function customer()
+    {
+        return $this->belongsTo(Customer::class, 'customer_id');
+    }
+
+    public function offer()
+    {
+        return $this->belongsTo(CreditOffer::class, 'offer_id');
+    }
+
     public static function boot()
     {
         parent::boot();
