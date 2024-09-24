@@ -37,7 +37,11 @@ class User extends Authenticatable implements MustVerifyEmail
         'phone',
         'active',
         'use_two_factor',
+        'gender',
         'avatar_id',
+        'email_verified_at',
+        'google_picture_url',
+        'force_password_change',
     ];
 
     /**
@@ -81,7 +85,7 @@ class User extends Authenticatable implements MustVerifyEmail
 
         return new Attribute(
             get: function () use ($_this) {
-                return $_this->file?->url;
+                return $_this->file?->url ?? $this->google_picture_url;
             }
         );
     }

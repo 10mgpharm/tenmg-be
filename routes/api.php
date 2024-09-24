@@ -25,8 +25,9 @@ Route::group(['middleware' => ['cors', 'json.response']], function () {
             Route::post('/signin', [AuthenticatedController::class, 'store'])
                 ->name('signin');
 
-            Route::middleware('auth.provider')->post('/google', [AuthenticatedController::class, 'google'])
-                ->name('email.check');
+            Route::post('/google', [AuthenticatedController::class, 'google'])
+                ->middleware('auth.provider')
+                ->name('google.signin');
 
             Route::post('/forgot-password', [PasswordController::class, 'forgot'])
                 ->name('password.forgot');
@@ -48,7 +49,6 @@ Route::group(['middleware' => ['cors', 'json.response']], function () {
             Route::post('/resend-otp', ResendOtpController::class)
                 ->name('resend.otp')->middleware('throttle:5,1');
         });
-
 
         // Account specific operations
         Route::prefix('account')->middleware(['auth:api'])->group(function () {

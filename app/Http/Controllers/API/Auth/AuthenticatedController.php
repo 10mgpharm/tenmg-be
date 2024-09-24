@@ -5,7 +5,6 @@ namespace App\Http\Controllers\API\Auth;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Auth\AuthenticatedRequest;
 use App\Http\Requests\AuthProviderRequest;
-use App\Http\Resources\UserResource;
 use App\Services\Interfaces\IAuthService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -72,10 +71,13 @@ class AuthenticatedController extends Controller
      */
     public function google(AuthProviderRequest $request): JsonResponse
     {
-        $user = $this->authService->googleSignUp($request);
+        $user = $this->authService->emailExist($request->email);
+        if (! $user) {
+            $user = $this->authService->googleSignUp($request);
+        }
+
         $tokenResult = $user->createToken('Full Access Token', ['full']);
 
-        // Return the token in response
         return $this->authService->returnAuthResponse(
             user: $user,
             tokenResult: $tokenResult,

@@ -2,8 +2,6 @@
 
 namespace App\Http\Requests;
 
-use App\Constants\PublicDomainConstants;
-use App\Enums\BusinessType;
 use App\Helpers\UtilityHelper;
 use App\Rules\BusinessEmail;
 use Illuminate\Foundation\Http\FormRequest;
@@ -51,6 +49,8 @@ class AuthProviderRequest extends FormRequest
                 'unique:users,email,' . $this->user()?->id . ',id',
                 new BusinessEmail,
             ],
+            // 'email_verified' => ['required', 'boolean'],
+            'picture' => ['sometimes', 'string'],
         ];
     }
 
@@ -61,8 +61,6 @@ class AuthProviderRequest extends FormRequest
      */
     public function messages(): array
     {
-        return [
-            'businessType.in' => 'The business type must be one of the following: ' . implode(', ', UtilityHelper::getAllowedBusinessTypes()),
-        ];
+        return [];
     }
 }

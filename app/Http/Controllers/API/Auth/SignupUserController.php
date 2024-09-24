@@ -2,12 +2,10 @@
 
 namespace App\Http\Controllers\API\Auth;
 
-use App\Enums\BusinessStatus;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Auth\CompleteUserSignupRequest;
 use App\Http\Requests\Auth\SignupUserRequest;
 use App\Http\Resources\UserResource;
-use App\Models\Business;
 use App\Services\Interfaces\IAuthService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Response;
@@ -53,31 +51,26 @@ class SignupUserController extends Controller
         }
     }
 
-
     /**
      * Complete signup flow by updating the business details.
      *
-     * This method handles the final step in the user signup process, ensuring that 
+     * This method handles the final step in the user signup process, ensuring that
      * the business details are updated.
      *
      * @throws \Illuminate\Validation\ValidationException If validation fails.
      */
     public function complete(CompleteUserSignupRequest $request): JsonResponse
     {
-        $validated = $request->validated();
+        if ($request->provider == 'google') {
+            $this->authService->completeGoogleSignUp($request);
+        } else {
+            // credentials
+            $this->authService->completeCredentialSignUp($request);
+        }
 
-        $data = array_filter(array_intersect_key(
-            $validated,
-            array_flip(['contact_phone', 'contact_person', 'name', 'type'])
-        ));  // since fillable isn't used.
-
-        Business::where('name', $request->input('name'))
-            ->where('owner_id', $request->user()->id)
-            ->where('status', BusinessStatus::PENDING_VERIFICATION->value)
-            ->first()
-            ->update($data);
-
-        return response()->json(['message' => 'Signup process completed successfully.'], Response::HTTP_OK);
+        return $this->returnJsonResponse(
+            message: 'Signup process completed successfully.',
+            status: Response::HTTP_OK
+        );
     }
-
 }

@@ -20,6 +20,7 @@ class UserResource extends JsonResource
             'email' => $this->email,
             'active' => (bool) $this->active == 1,
             'useTwoFactor' => $this->use_two_factor,
+            'avatar' => $this->avatar,
             'emailVerifiedAt' => $this->email_verified_at,
             'owner' => (bool) ($this->ownerBusinessType?->type),
 
@@ -33,7 +34,6 @@ class UserResource extends JsonResource
                 $this->ownerBusinessType?->contact_phone &&
                 $this->ownerBusinessType?->contact_email
             ),
-            'profilePicture' => $this->avatar,
         ];
     }
 }
