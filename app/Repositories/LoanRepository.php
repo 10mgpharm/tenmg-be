@@ -29,7 +29,9 @@ class LoanRepository
 
     public function update(int $id, array $data): bool
     {
-        return Loan::whereId($id)->update($data);
+        $loan = Loan::findOrFail($id);
+        $loan->update($data);
+        return true;
     }
 
     public function fetchAllLoans(): Collection

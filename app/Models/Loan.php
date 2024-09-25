@@ -24,6 +24,7 @@ class Loan extends Model
         'repaymemt_start_date',
         'repaymemt_end_date',
         'status',
+        'voucher_number'
     ];
 
     public function repaymentSchedule()
@@ -54,9 +55,17 @@ class Loan extends Model
     public static function boot()
     {
         parent::boot();
+
+        self::updating(function ($model) {
+            if ($model->isDirty('status') && $model->status == 'DISBURSED') {
+                $businessCode = DB::table('businesses')->whereId($model->business_id)->value('code');
+                $model->voucher_number = "VCH-{$businessCode}-" . time() . '-' . Str::random(5);
+            }
+        });
+
         self::creating(function ($model) {
             $businessCode = DB::table('businesses')->where('id', $model->business_id)->value('code');
-            $model->identifier = "LN-{$businessCode}-".time().'-'.Str::random(5);
+            $model->identifier = "LN-{$businessCode}-" . time() . '-' . Str::random(5);
         });
     }
 }

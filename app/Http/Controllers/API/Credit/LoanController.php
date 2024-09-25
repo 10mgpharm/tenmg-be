@@ -44,6 +44,6 @@ class LoanController extends Controller
             throw new Exception('Failed to disburse loan', 400);
         }
 
-        return $this->returnJsonResponse(message: 'Loan disbursed successfully');
+        return $this->returnJsonResponse(message: 'Loan disbursed successfully', data: $disbursed);
     }
 }

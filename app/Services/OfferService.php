@@ -54,10 +54,15 @@ class OfferService
     {
         $offer = $this->offerRepository->findByIdentifier($offerReferenceId);
         if (! $offer) {
-            throw new Exception('Offer not found.');
+            throw new Exception('Offer not found.', 400);
         }
 
         if ($action === 'accept') {
+
+            if (!$offer->has_mandate) {
+                throw new Exception('Can not accept this offer. Customer does not have debit mandate setup yet!', 400);
+            }
+
             // create loan repayment breakdown and create a loan
             $offer = $this->offerRepository->acceptOffer($offer->id);
 
@@ -76,7 +81,7 @@ class OfferService
                 'capital_amount' => $offer->offer_amount,
                 'interest_amount' => $interestAmount,
                 'total_amount' => $offer->offer_amount + $interestAmount,
-                'status' => 'PENDING',
+                'status' => 'PENDING_DISBURSEMENT',
             ];
             $this->loanService->createLoan($loanData, json_decode($offer->repayment_breakdown, true));
             $this->notificationService->sendOfferAcceptanceNotification($offer);

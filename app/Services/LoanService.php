@@ -51,13 +51,17 @@ class LoanService
     /**
      * Mark a loan as disbursed and update its status.
      */
-    public function markAsDisbursed(int $loanId): bool
+    public function markAsDisbursed(int $loanId): Loan
     {
 
         $loan = $this->loanRepository->findById($loanId);
 
-        if (! $loan) {
+        if (!$loan) {
             throw new \Exception('Loan not found', 404);
+        }
+
+        if ($loan->status === 'DISBURSED') {
+            throw new \Exception('Loan has already been disbursed', 400);
         }
 
         // Update the loan status
@@ -67,7 +71,7 @@ class LoanService
             'repaymemt_end_date' => Carbon::now()->addMonths((int)$loan?->application?->duration_in_months)
         ]);
 
-        return true;
+        return $this->loanRepository->findById($loanId);
     }
 
     /**
