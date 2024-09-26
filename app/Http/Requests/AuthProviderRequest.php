@@ -25,19 +25,11 @@ class AuthProviderRequest extends FormRequest
     {
 
         return [
-            'provider' => ['required', 'string', 'in:google,credentials'],
-            'businessType' => [
-                'string',
-                'in:' . implode(',', UtilityHelper::getAllowedBusinessTypes()),
-                // Require businessType only if user is not authenticated (sign up)
-                $this->user() ? 'nullable' : 'required',
-            ],
+            'provider' => ['required', 'string', 'in:google'],
             'name' => [
                 'required', 
                 'string', 
                 'max:255',
-                // Unique name for businesses, considering owner_id for existing users
-                'unique:businesses,name,' . $this->user()?->id . ',owner_id'
             ],
             'email' => [
                 'required', 
@@ -45,8 +37,6 @@ class AuthProviderRequest extends FormRequest
                 'lowercase', 
                 'email',
                 'max:255',
-                // Unique email for users, considering the user ID for updates
-                'unique:users,email,' . $this->user()?->id . ',id',
                 new BusinessEmail,
             ],
             // 'email_verified' => ['required', 'boolean'],
