@@ -93,8 +93,6 @@ Route::group(['middleware' => ['cors', 'json.response']], function () {
                     });
             });
 
-            Route::get('/{businessType}/{id}', [ProfileController::class, 'show']);
-
             Route::prefix('customers')->group(function () {
                 // List customers with pagination and filtering
                 Route::get('/', [CustomerController::class, 'index'])->name('customers.index');
@@ -137,6 +135,8 @@ Route::group(['middleware' => ['cors', 'json.response']], function () {
                 Route::post('/txn_history/upload_and_evaluate', [TransactionHistoryController::class, 'uploadAndEvaluate'])
                     ->name('vendor.txn_history.upload_and_evaluate');
             });
+
+            Route::get('/{businessType}/{id}', [ProfileController::class, 'show']);
         });
     });
 });
