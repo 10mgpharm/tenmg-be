@@ -18,7 +18,7 @@ Route::group(['middleware' => ['cors', 'json.response']], function () {
     Route::prefix('v1')->group(function () {
 
         // public routes
-        Route::prefix('auth')->group(function () {
+        Route::prefix('auth')->name('guest.')->group(function () {
             Route::post('/signup', [SignupUserController::class, 'store'])
                 ->name('signup');
 
@@ -51,8 +51,8 @@ Route::group(['middleware' => ['cors', 'json.response']], function () {
         });
 
         // Account specific operations
-        Route::prefix('account')->middleware(['auth:api'])->group(function () {
-            Route::prefix('settings')->group(function () {
+        Route::prefix('account')->name('account.')->middleware(['auth:api'])->group(function () {
+            Route::prefix('settings')->name('settings.')->group(function () {
 
                 Route::middleware('scope:full')->group(function(){
                     // Update authenticated user's password
