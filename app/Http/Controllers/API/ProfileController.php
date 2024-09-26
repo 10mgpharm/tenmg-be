@@ -19,7 +19,7 @@ class ProfileController extends Controller
      * @param int $id
      * @return \Illuminate\Http\JsonResponse
      */
-    public function show(ProfileShowRequest $request, string $businessType, int $id)
+    public function show(ProfileShowRequest $request, int $id)
     {
         $user = $request->user();
         return (new UserResource($user))
