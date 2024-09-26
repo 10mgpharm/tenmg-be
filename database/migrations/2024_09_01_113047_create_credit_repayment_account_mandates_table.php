@@ -20,7 +20,7 @@ return new class extends Migration
                 $table->foreignId('customer_id')->constrained('credit_customers')->onDelete('cascade');
 
                 // ...mandate information
-                // TODO: Check paystack documentation to run a new migration that add additional columns
+                // DONE: Check paystack documentation to run a new migration that add additional columns
 
                 $table->index(['business_id', 'customer_id', 'identifier'], 'mandate_business_customer_identifier_unique');
                 $table->timestamps();

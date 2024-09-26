@@ -14,34 +14,29 @@ class VerifyEmailController extends Controller
     /**
      * verify user constructor
      */
-    public function __construct(private IAuthService $authService)
-    {
-        $this->authService = $authService;
-    }
+    public function __construct(private IAuthService $authService) {}
 
     /**
      * Mark the authenticated user's email address as verified.
      */
     public function __invoke(VerifyEmailRequest $request): JsonResponse
     {
-        try {
-            $user = $request->user();
+        $user = $request->user();
 
-            if (! $user) {
-                throw new HttpException(Response::HTTP_UNAUTHORIZED, 'Unauthenticated.');
-            }
-
-            $verifiedUser = $this->authService->verifyUserEmail($user, $request->input('otp'));
-
-            return $this->returnJsonResponse(
-                message: 'User verified',
-                data: [
-                    'emailVerifiedAt' => $verifiedUser?->email_verified_at,
-                ],
-                status: Response::HTTP_OK
-            );
-        } catch (\Throwable $th) {
-            return $this->handleErrorResponse($th);
+        if (! $user) {
+            throw new HttpException(Response::HTTP_UNAUTHORIZED, 'Unauthenticated.');
         }
+
+        $verifiedUser = $this->authService->verifyUserEmail($user, $request->input('otp'));
+
+        return $this->returnJsonResponse(
+            message: 'User verified',
+            data: [
+                'emailVerifiedAt' => $verifiedUser?->email_verified_at,
+            ],
+            status: Response::HTTP_OK
+        );
+
+        return $this->authService->verifyUserEmail($user, $request->input('otp'));
     }
 }

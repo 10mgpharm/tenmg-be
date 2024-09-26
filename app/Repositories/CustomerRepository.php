@@ -3,9 +3,8 @@
 namespace App\Repositories;
 
 use App\Models\Customer;
-use App\Repositories\Interfaces\ICustomerRepository;
 
-class CustomerRepository implements ICustomerRepository
+class CustomerRepository
 {
     public function create(array $data): Customer
     {
@@ -21,7 +20,7 @@ class CustomerRepository implements ICustomerRepository
 
     public function findById(int $id): ?Customer
     {
-        return Customer::find($id);
+        return Customer::whereId($id)->with('lastEvaluationHistory.creditScore')->first();
     }
 
     public function update(Customer $customer, array $data): bool

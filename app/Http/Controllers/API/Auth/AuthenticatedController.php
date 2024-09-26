@@ -51,6 +51,15 @@ class AuthenticatedController extends Controller
         } catch (\Throwable $th) {
             return $this->handleErrorResponse($th);
         }
+
+        $user = $request->user();
+        $tokenResult = $user->createToken('Full Access Token', ['full']);
+
+        return $this->authService->returnAuthResponse(
+            user: $user,
+            tokenResult: $tokenResult,
+            statusCode: Response::HTTP_OK
+        );
     }
 
     /**

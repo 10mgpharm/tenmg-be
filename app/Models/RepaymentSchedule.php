@@ -12,6 +12,15 @@ class RepaymentSchedule extends Model
 
     protected $table = 'credit_repayment_schedules';
 
+    protected $fillable = [
+        'loan_id',
+        'payment_id',
+        'amount',
+        'late_fee',
+        'due_date',
+        'payment_status',
+    ];
+
     public function loan(): BelongsTo
     {
         return $this->belongsTo(Loan::class, 'loan_id', 'id'); // Assuming 'id' is the primary key of the Loan model

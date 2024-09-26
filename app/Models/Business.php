@@ -55,4 +55,9 @@ class Business extends Model
             get: fn() => $_this->cac_document?->url
         );
     }
+    
+    public function apiKeys()
+    {
+        return $this->hasMany(ApiKey::class);
+    }
 }

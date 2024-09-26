@@ -28,27 +28,22 @@ class SignupUserController extends Controller
      */
     public function store(SignupUserRequest $request): JsonResponse
     {
-        try {
-            $request->validated();
-            $user = $this->authService->signUp($request);
-            $tokenResult = $user->createToken('Full Access Token', ['full']);
+        $request->validated();
+        $user = $this->authService->signUp($request);
+        $tokenResult = $user->createToken('Full Access Token', ['full']);
 
-            return (new UserResource($user))
-                ->additional([
-                    'accessToken' => [
-                        'token' => $tokenResult->accessToken,
-                        'tokenType' => 'bearer',
-                        'expiresAt' => $tokenResult->token->expires_at,
-                    ],
-                    'message' => 'Sign up successful. Please verify your email using the OTP sent.',
-                    'status' => 'success',
-                ])
-                ->response()
-                ->setStatusCode(Response::HTTP_CREATED);
-
-        } catch (\Throwable $th) {
-            return $this->handleErrorResponse($th);
-        }
+        return (new UserResource($user))
+            ->additional([
+                'accessToken' => [
+                    'token' => $tokenResult->accessToken,
+                    'tokenType' => 'bearer',
+                    'expiresAt' => $tokenResult->token->expires_at,
+                ],
+                'message' => 'Sign up successful. Please verify your email using the OTP sent.',
+                'status' => 'success',
+            ])
+            ->response()
+            ->setStatusCode(Response::HTTP_CREATED);
     }
 
     /**

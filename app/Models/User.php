@@ -107,6 +107,8 @@ class User extends Authenticatable implements MustVerifyEmail
 
         return new Attribute(
             get: function () use ($_this) {
+                return '-';
+
                 $lastActivity = $_this->activities()->latest()->first();
 
                 if (! $lastActivity) {
