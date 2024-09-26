@@ -30,7 +30,7 @@ class HandleAuthProvider
                 $accessToken = $request->bearerToken();
 
                 // Mock response in local environment
-                if (config('app.env') == 'local') {
+                if (env('GOOGLE_OAUTH2_USE_LOCAL')) {
                     $data = [
                         "id" => '104589841658088651577',
                         "name" => fake()->words(3, true),
