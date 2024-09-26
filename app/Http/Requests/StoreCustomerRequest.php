@@ -23,9 +23,8 @@ class StoreCustomerRequest extends FormRequest
     {
         return [
             'name' => 'required|string|max:255',
-            'email' => 'required|email|max:255|unique:credit_customers,email,NULL,id,business_id,'.$this->vendorId,
+            'email' => 'required|email|max:255|unique:credit_customers,email,NULL,id,business_id,' . $this->vendorId,
             'phone' => 'nullable|string|max:15',
-            // 'avatar' => 'nullable|image|mimes:png,jpg|max:2048', // Assuming file upload is an image
         ];
     }
 
@@ -38,8 +37,6 @@ class StoreCustomerRequest extends FormRequest
             'email.required' => 'The customer email is required.',
             'phone.string' => 'The phone number must be a string.',
             'phone.max' => 'The phone number should not exceed 15 characters.',
-            // 'avatar.image' => 'The avatar must be an image file.',
-            // 'avatar.max' => 'The avatar size should not exceed 2MB.',
         ];
     }
 }

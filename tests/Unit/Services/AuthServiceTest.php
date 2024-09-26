@@ -23,6 +23,7 @@ beforeEach(function () {
     $this->userMock->id = 1;
     $this->userMock->name = 'John Doe';
     $this->userMock->email = 'john.doe@example.com';
+    $this->userMock->email_verified_at = now();
 
     $this->tokenResultMock = Mockery::mock(PersonalAccessTokenResult::class);
     $this->tokenResultMock->accessToken = 'token';
@@ -63,25 +64,15 @@ test('it can verify a user email', function () {
     $otpsMock = Mockery::mock(HasMany::class);
     $otpsMock->shouldReceive('firstWhere')->with(['code' => $otpCode, 'type' => 'SIGNUP_EMAIL_VERIFICATION'])->andReturn($otp);
 
-    $tokenMock = Mockery::mock();
-    $tokenMock->shouldReceive('revoke')->once();
-
     $this->userMock->shouldReceive('otps')->andReturn($otpsMock);
     $this->userMock->shouldReceive('hasVerifiedEmail')->andReturn(false);
     $this->userMock->shouldReceive('markEmailAsVerified')->andReturn(true);
-    $this->userMock->shouldReceive('createToken')->andReturn($this->tokenResultMock);
-    $this->userMock->shouldReceive('token')->andReturn($tokenMock);
 
-    $response = $this->authService->verifyUserEmail($this->userMock, $otpCode);
+    $user = $this->authService->verifyUserEmail($this->userMock, $otpCode);
 
     Event::assertDispatched(Verified::class);
 
-    expect($response->status())->toBe(200);
-
-    $responseData = json_decode($response->getContent(), true);
-    expect($responseData['data']['email'])->toBe($this->userMock->email);
-    expect($responseData['accessToken']['token'])->toBe($this->tokenResultMock->accessToken);
-    expect($responseData['status'])->toBe('success');
+    expect($user->email_verified_at)->toBe($this->userMock->email_verified_at);
 });
 
 test('it throws exception if OTP is invalid or expired', function () {

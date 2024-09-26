@@ -3,8 +3,10 @@
 namespace App\Services\Interfaces;
 
 use App\Enums\BusinessType;
+use App\Http\Requests\Auth\CompleteUserSignupRequest;
 use App\Http\Requests\Auth\SignupUserRequest;
 use App\Models\Business;
+use App\Http\Requests\AuthProviderRequest;
 use App\Models\Role;
 use App\Models\User;
 use Illuminate\Http\JsonResponse;
@@ -37,7 +39,7 @@ interface IAuthService
     /**
      * verifyUserEmail
      */
-    public function verifyUserEmail(User $user, string $otp): ?JsonResponse;
+    public function verifyUserEmail(User $user, string $code): ?User;
 
     /**
      * Return auth response
@@ -48,4 +50,23 @@ interface IAuthService
      * check email exist
      */
     public function emailExist(string $email): ?User;
+
+    /**
+     * create new user with business
+     */
+    public function googleSignUp(AuthProviderRequest $request): ?User;
+
+    /**
+     * Complete signup using google
+     *
+     * @return void
+     */
+    public function completeGoogleSignUp(CompleteUserSignupRequest $request);
+
+    /**
+     * Complete signup using credentials
+     *
+     * @return void
+     */
+    public function completeCredentialSignUp(CompleteUserSignupRequest $request);
 }

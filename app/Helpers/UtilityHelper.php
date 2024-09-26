@@ -8,6 +8,7 @@ use Exception;
 use Illuminate\Http\Response;
 use Symfony\Component\HttpKernel\Exception\HttpException;
 use Throwable;
+use App\Enums\BusinessType;
 
 class UtilityHelper
 {
@@ -24,8 +25,8 @@ class UtilityHelper
      */
     public static function generateOtp(): string
     {
-        $numbers = array_map(fn () => random_int(0, 9), range(1, 3));
-        $letters = array_map(fn () => chr(random_int(65, 90)), range(1, 3));
+        $numbers = array_map(fn() => random_int(0, 9), range(1, 3));
+        $letters = array_map(fn() => chr(random_int(65, 90)), range(1, 3));
 
         $shuffled = array_merge($numbers, $letters);
         shuffle($shuffled);
@@ -133,5 +134,15 @@ class UtilityHelper
         }
 
         return 500;
+    }
+
+    /**
+     * Get all allowed business types for registration in lowercase.
+     *
+     * @return array<string>
+     */
+    public static function getAllowedBusinessTypes(): array
+    {
+        return array_map(fn($type) => $type->toLowerCase(), BusinessType::allowedForRegistration());
     }
 }

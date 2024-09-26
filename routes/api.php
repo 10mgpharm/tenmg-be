@@ -27,9 +27,12 @@ Route::prefix('v1')->group(function () {
         Route::get('/email', [AuthenticatedController::class, 'emailExist'])
             ->name('email.check');
 
+        Route::post('/google', [AuthenticatedController::class, 'google'])
+            ->middleware('auth.provider')
+            ->name('google.signin');
+
         Route::post('/forgot-password', [PasswordController::class, 'forgot'])
             ->name('password.forgot');
-
         Route::post('/reset-password', [PasswordController::class, 'reset'])
             ->name('password.reset');
 
@@ -43,6 +46,8 @@ Route::prefix('v1')->group(function () {
             Route::post('/signout', [AuthenticatedController::class, 'destroy'])
                 ->name('signout');
         });
+        Route::post('/resend-otp', ResendOtpController::class)
+            ->name('resend.otp')->middleware('throttle:5,1');
     });
 
     // Protected routes
@@ -177,7 +182,6 @@ Route::prefix('v1')->group(function () {
                 Route::get('/{id}', [LoanController::class, 'getLoanById'])->name('loans.getById');
                 Route::post('/{id}/disbursed', [LoanController::class, 'disbursed'])->name('loans.disbursed');
             });
-
         });
 
         Route::get('/{businessType}/{id}', [ProfileController::class, 'show']);

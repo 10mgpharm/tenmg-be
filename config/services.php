@@ -34,11 +34,14 @@ return [
             'channel' => env('SLACK_BOT_USER_DEFAULT_CHANNEL'),
         ],
     ],
-
     'paystack' => [
         'public' => env('PAYSTACK_PUBLIC_KEY'),
         'secret' => env('PAYSTACK_SECRET_KEY'),
         'url' => env('PAYSTACK_PAYMENT_URL'),
+    ],
+
+    'google' => [
+        'oauth_url' => env('GOOGLE_OAUTH2_URL'),
     ],
 
 ];

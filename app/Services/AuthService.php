@@ -6,7 +6,9 @@ use App\Enums\BusinessStatus;
 use App\Enums\BusinessType;
 use App\Enums\OtpType;
 use App\Helpers\UtilityHelper;
+use App\Http\Requests\Auth\CompleteUserSignupRequest;
 use App\Http\Requests\Auth\SignupUserRequest;
+use App\Http\Requests\AuthProviderRequest;
 use App\Http\Resources\UserResource;
 use App\Models\Business;
 use App\Models\BusinessUser;
@@ -162,7 +164,7 @@ class AuthService implements IAuthService
     /**
      * verifyUserEmail
      */
-    public function verifyUserEmail(User $user, string $code): ?JsonResponse
+    public function verifyUserEmail(User $user, string $code): ?User
     {
         try {
             DB::beginTransaction();
@@ -173,31 +175,16 @@ class AuthService implements IAuthService
             $otp->delete();
 
             if ($user->hasVerifiedEmail()) {
-                $user->token()->revoke();
-                $tokenResult = $user->createToken('Full Access Token', ['full']);
-
-                return $this->returnAuthResponse(
-                    user: $user,
-                    tokenResult: $tokenResult,
-                    message: 'Account verified',
-                    statusCode: Response::HTTP_OK
-                );
+                return $user;
             }
 
             if ($user->markEmailAsVerified()) {
                 event(new Verified($user));
             }
 
-            $user->token()->revoke();
-            $tokenResult = $user->createToken('Full Access Token', ['full']);
-
             DB::commit();
 
-            return $this->returnAuthResponse(
-                user: $user,
-                tokenResult: $tokenResult,
-                statusCode: Response::HTTP_OK
-            );
+            return $user;
         } catch (\Throwable $th) {
             DB::rollBack();
             throw $th;
@@ -229,5 +216,99 @@ class AuthService implements IAuthService
     public function emailExist(string $email): ?User
     {
         return User::firstWhere('email', $email);
+    }
+
+    /**
+     * create new google user with business
+     */
+    public function googleSignUp(AuthProviderRequest $request): User
+    {
+        try {
+            // Create or find the user
+            $user = User::firstOrCreate(
+                ['email' => $request['email']],
+                [
+                    'name' => $request['name'],
+                    'email_verified_at' => now(),
+                    'password' => Hash::make($request['email']),
+                    'google_picture_url' => $request['picture'] ?? null,
+                ]
+            );
+
+            return $user;
+        } catch (\Throwable $th) {
+            DB::rollBack();
+            throw $th;
+        }
+    }
+
+    /**
+     * Complete signup using google
+     *
+     * @return void
+     */
+    public function completeGoogleSignUp(CompleteUserSignupRequest $request)
+    {
+        try {
+            $validated = $request->validated();
+
+            DB::beginTransaction();
+
+            $businessType = BusinessType::from(strtoupper($validated['type']));
+
+            $user = $request->user();
+            $userRole = $this->resolveSignupRole(type: $businessType);
+            $user->assignRole($userRole);
+
+            // create business
+            $businessCode = UtilityHelper::generateBusinessCode($validated['name']);
+            $adminBusiness = Business::create([
+                'name' => $validated['name'],
+                'code' => $businessCode,
+                'short_name' => $businessCode,
+                'owner_id' => $user->id,
+                'type' => $businessType,
+                'status' => BusinessStatus::PENDING_VERIFICATION->value,
+                'contact_email' => $validated['contact_email'],
+                'contact_phone' => $validated['contact_phone'],
+                'contact_person' => $validated['contact_person'],
+                'contact_person_position' => $validated['contact_person_position'],
+            ]);
+
+            // map user to business
+            BusinessUser::firstOrCreate(
+                [
+                    'user_id' => $user->id,
+                    'business_id' => $adminBusiness->id,
+                ],
+                ['role_id' => $userRole->id]
+            );
+
+            DB::commit();
+        } catch (\Throwable $th) {
+            DB::rollBack();
+            throw $th;
+        }
+    }
+
+    /**
+     * Complete signup using credentials
+     *
+     * @return void
+     */
+    public function completeCredentialSignUp(CompleteUserSignupRequest $request)
+    {
+        $validated = $request->validated();
+
+        $data = array_filter(array_intersect_key(
+            $validated,
+            array_flip(['contact_email', 'contact_phone', 'contact_person', 'name', 'type', 'contact_person_position'])
+        ));  // since fillable isn't used.
+
+        Business::where('name', $request->input('name'))
+            ->where('owner_id', $request->user()->id)
+            ->where('status', BusinessStatus::PENDING_VERIFICATION->value)
+            ->first()
+            ->update($data);
     }
 }
