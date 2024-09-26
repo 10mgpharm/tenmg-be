@@ -22,27 +22,24 @@ class StoreCustomerRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'vendorId' => 'required|exists:businesses,id',
             'name' => 'required|string|max:255',
             'email' => 'required|email|max:255|unique:credit_customers,email,NULL,id,business_id,'.$this->vendorId,
             'phone' => 'nullable|string|max:15',
-            'avatar' => 'nullable|image|mimes:png,jpg|max:2048', // Assuming file upload is an image
+            // 'avatar' => 'nullable|image|mimes:png,jpg|max:2048', // Assuming file upload is an image
         ];
     }
 
     public function messages(): array
     {
         return [
-            'vendorId.required' => 'The business ID is required.',
-            'vendorId.exists' => 'The selected business does not exist.',
             'name.required' => 'The customer name is required.',
             'email.email' => 'Please provide a valid email address.',
             'email.unique' => 'This email is already associated with a customer in the same business.',
             'email.required' => 'The customer email is required.',
             'phone.string' => 'The phone number must be a string.',
             'phone.max' => 'The phone number should not exceed 15 characters.',
-            'avatar.image' => 'The avatar must be an image file.',
-            'avatar.max' => 'The avatar size should not exceed 2MB.',
+            // 'avatar.image' => 'The avatar must be an image file.',
+            // 'avatar.max' => 'The avatar size should not exceed 2MB.',
         ];
     }
 }

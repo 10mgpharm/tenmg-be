@@ -18,7 +18,9 @@ class CustomerService implements ICustomerService
     public function createCustomer(array $data): Customer
     {
         $businessCode = '10MG'; //todo: find business using business_id using business repo when its ready
-        $count = $this->customerRepository->paginate(['vendorId' => $data['vendorId']], 1)->total() + 1;
+
+        $vendorId = $this->authService->getBusiness()->id;
+        $count = $this->customerRepository->paginate(['vendorId' => $vendorId], 1)->total() + 1;
 
         $data['identifier'] = strtoupper($businessCode).'-CUS-'.str_pad($count, 3, '0', STR_PAD_LEFT);
         $data['created_by'] = $this->authService->getUser()->id;
