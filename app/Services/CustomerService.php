@@ -17,10 +17,7 @@ class CustomerService implements ICustomerService
 
     public function createCustomer(array $data): Customer
     {
-        $businessCode = '10MG'; //todo: find business using business_id using business repo when its ready
-        $count = $this->customerRepository->paginate(['vendorId' => $data['vendorId']], 1)->total() + 1;
-
-        $data['identifier'] = strtoupper($businessCode).'-CUS-'.str_pad($count, 3, '0', STR_PAD_LEFT);
+        $data['vendorId'] = $this->authService->getBusiness()?->id;
         $data['created_by'] = $this->authService->getUser()->id;
         $customer = $this->customerRepository->create($data);
 
@@ -39,11 +36,9 @@ class CustomerService implements ICustomerService
         $customer = $this->customerRepository->findById($id);
 
         if ($customer) {
-            $this->customerRepository->update($customer, $data);
+            $data['vendorId'] = $this->authService->getBusiness()?->id;
 
-            if (isset($data['avatar'])) {
-                $this->attachmentService->updateFile($customer->avatar, $data['avatar']);
-            }
+            $this->customerRepository->update($customer, $data);
 
             $this->activityLogService->logActivity(model: $customer, causer: $this->authService->getUser(), action: 'updated', properties: ['attributes' => $data]);
 
