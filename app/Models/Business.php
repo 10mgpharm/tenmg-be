@@ -12,4 +12,9 @@ class Business extends Model
     protected $table = 'businesses';
 
     protected $guarded = [];
+
+    public function apiKeys()
+    {
+        return $this->hasMany(ApiKey::class);
+    }
 }

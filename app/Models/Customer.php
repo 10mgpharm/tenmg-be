@@ -32,6 +32,15 @@ class Customer extends Model
         return $this->morphOne(FileUpload::class, 'model');
     }
 
+    public function evaluationHistories()
+    {
+        return $this->hasMany(CreditTxnHistoryEvaluation::class);
+    }
+
+    public function lastEvaluationHistory()
+    {
+        return $this->hasOne(CreditTxnHistoryEvaluation::class)->latest();
+    }
 
     public static function boot()
     {

@@ -23,7 +23,7 @@ class StoreCustomerRequest extends FormRequest
     {
         return [
             'name' => 'required|string|max:255',
-            'email' => 'required|email|max:255|unique:credit_customers,email,NULL,id,business_id,'.$this->vendorId,
+            'email' => 'required|email|max:255|unique:credit_customers,email,NULL,id,business_id,' . $this->vendorId,
             'phone' => 'nullable|string|max:15',
         ];
     }

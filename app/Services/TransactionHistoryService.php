@@ -6,7 +6,7 @@ use App\Models\CreditTxnHistoryEvaluation;
 use App\Repositories\CreditBusinessRuleRepository;
 use App\Repositories\CreditScoreRepository;
 use App\Repositories\FileUploadRepository;
-use App\Repositories\Interfaces\ICustomerRepository;
+use App\Repositories\CustomerRepository;
 use App\Repositories\LoanRepository;
 use App\Repositories\RepaymentScheduleRepository;
 use App\Repositories\TransactionHistoryRepository;
@@ -24,7 +24,7 @@ class TransactionHistoryService implements ITxnHistoryService
         private FileUploadRepository $fileUploadRepository,
         private AttachmentService $attachmentService,
         private IRuleEngineService $ruleEngineService,
-        private ICustomerRepository $customerRepository,
+        private CustomerRepository $customerRepository,
         private IAffordabilityService $affordabilityService,
         private TransactionHistoryRepository $transactionHistoryRepository,
         private CreditScoreRepository $creditScoreRepository,
@@ -153,7 +153,10 @@ class TransactionHistoryService implements ITxnHistoryService
         // 5. Apply business rules to evaluation result and calculate credit score
         $creditScore = $this->ruleEngineService->applyRules($evaluationResult, $activeRules->toArray());
 
-        // 6. Store the credit score result in the credit_scores table
+        // 6. Calculate affordability using credit score percent
+        $affordability = $this->affordabilityService->calculateAffordability($creditScore['score_percent']);
+
+        // 7. Store the credit score result in the credit_scores table
         $this->creditScoreRepository->store([
             'business_id' => $txnHistoryEvaluation->business_id,
             'customer_id' => $txnHistoryEvaluation->customer_id,
@@ -165,10 +168,8 @@ class TransactionHistoryService implements ITxnHistoryService
             'score_total' => $creditScore['score_total'],
             'created_by_id' => $this->authService->getId(),
             'source' => 'API',
+            'affordability' => json_encode($affordability),
         ]);
-
-        // 7. Calculate affordability using credit score percent
-        $affordability = $this->affordabilityService->calculateAffordability($creditScore['score_percent']);
 
         // Logging evaluation success or failure
         $this->activityLogService->logActivity(

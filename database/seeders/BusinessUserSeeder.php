@@ -2,13 +2,15 @@
 
 namespace Database\Seeders;
 
+use App\Models\ApiKey;
 use App\Models\Business;
 use App\Models\BusinessUser;
-use App\Models\CreditCustomer;
+use App\Models\Customer;
 use App\Models\Role;
 use App\Models\User;
 use Faker\Factory as Faker;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Str;
 
 class BusinessUserSeeder extends Seeder
 {
@@ -149,11 +151,19 @@ class BusinessUserSeeder extends Seeder
                 ['role_id' => $vendorRole->id]
             );
 
+            ApiKey::firstOrCreate(
+                ['business_id' => $vendorBusiness->id],
+                [
+                    'key' => time().Str::random(5),
+                    'secret' => time().Str::random(8),
+                ]
+            );
+
             // Creating 5 customers for each vendor business
             for ($j = 1; $j <= 5; $j++) {
                 $identifier = 'CUS-'.$vendorBusiness->code.'-'.now()->format('Ymd').'-'.($j + $vendorBusiness->id * 100);
 
-                CreditCustomer::firstOrCreate(
+                Customer::firstOrCreate(
                     [
                         'identifier' => $identifier,
                         'business_id' => $vendorBusiness->id,

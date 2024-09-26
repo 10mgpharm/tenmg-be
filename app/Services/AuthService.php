@@ -51,7 +51,7 @@ class AuthService implements IAuthService
         } catch (\Throwable) {
         }
 
-        throw new Exception('User not found', Response::HTTP_UNAUTHORIZED);
+        throw new Exception('Unable to find auth User', Response::HTTP_UNAUTHORIZED);
     }
 
     /**
