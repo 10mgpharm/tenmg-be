@@ -24,7 +24,6 @@ class AuthProviderRequest extends FormRequest
 
         return [
             'name' => ['required', 'string', 'max:255'],
-            'email_verified' => ['required', 'boolean'],
             'provider' => ['required', 'string'],
             'picture' => ['sometimes', 'string'],
             'email' => ['required', 'string', 'lowercase', 'email'],
