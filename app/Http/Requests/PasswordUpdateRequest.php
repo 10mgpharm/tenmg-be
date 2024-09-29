@@ -25,7 +25,6 @@ class PasswordUpdateRequest extends FormRequest
             'current_password' => $this->input('currentPassword'),
             'new_password' => $this->input('newPassword'),
             'new_password_confirmation' => $this->input('newPasswordConfirmation'),
-            'use_two_factor' => $this->input('useTwoFactor'),
         ]);
     }
 
@@ -52,7 +51,6 @@ class PasswordUpdateRequest extends FormRequest
                 'confirmed',
                 'different:current_password'
             ],
-            'use_two_factor' => ['required', 'boolean']
         ];
     }
 }

@@ -27,7 +27,6 @@ class PasswordUpdateController extends Controller
                 // Update password
                 $user->update([
                     'password' => Hash::make($password),
-                    'use_two_factor' => boolval($request->input('use_two_factor')),
                 ]);
 
                 // Check if the user has a current token
