@@ -7,6 +7,7 @@ use App\Enums\OtpType;
 use App\Http\Resources\UserResource;
 use App\Http\Requests\ResetTwoFactorRequest;
 use App\Http\Requests\SetupTwoFactorRequest;
+use App\Http\Requests\ToggleTwoFactorRequest;
 use App\Http\Requests\VerifyTwoFactorRequest;
 use App\Services\Interfaces\IAuthService;
 use App\Services\OtpService;
@@ -32,7 +33,8 @@ class TwoFactorAuthenticationController extends Controller
         $user = $request->user();
         $two_factor_secret = $this->google2fa->generateSecretKey();
 
-        DB::transaction(fn () =>
+        DB::transaction(
+            fn() =>
             $user->forceFill([
                 'two_factor_secret' => encrypt($two_factor_secret),
                 'use_two_factor' => true,
@@ -77,7 +79,7 @@ class TwoFactorAuthenticationController extends Controller
             });
 
             $tokenResult = $user->createToken('Full Access Token', ['full']);
-            
+
             return $this->authService->returnAuthResponse(
                 user: $user,
                 tokenResult: $tokenResult,
@@ -117,5 +119,30 @@ class TwoFactorAuthenticationController extends Controller
         } catch (\Throwable $th) {
             return $this->handleErrorResponse($th);
         }
+    }
+
+    /**
+     * Toggle Two-Factor Authentication (2FA) on or off for the authenticated user.
+     *
+     * @param App\Http\Requests\ToggleTwoFactorRequest $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function toggle(ToggleTwoFactorRequest $request)
+    {
+        $user = $request->user();
+
+        // Update the user's 2FA status
+        $user->update([
+            'use_two_factor' => boolval($request->input('use_two_factor')),
+        ]);
+
+        // Determine the status of 2FA
+        $status = $request->input('use_two_factor') ? 'enabled' : 'disabled';
+
+        // Return response with the updated user resource
+        return $this->returnJsonResponse(
+            message: '2FA ' . $status . ' successfully.',
+            data: new UserResource($user->refresh())
+        );
     }
 }
