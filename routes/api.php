@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\API\Account\AccountController;
 use App\Http\Controllers\API\Auth\AuthenticatedController;
 use App\Http\Controllers\API\Auth\PasswordController;
 use App\Http\Controllers\API\Auth\SignupUserController;
@@ -59,8 +60,12 @@ Route::prefix('v1')->group(function () {
         Route::prefix('settings')->name('settings.')->group(function () {
 
             Route::middleware('scope:full')->group(function(){
+
                 // Update authenticated user's password
                 Route::patch('password', PasswordUpdateController::class);
+
+                // Update authenticated user's profile
+                Route::match(['post', 'patch'], 'profile', [AccountController::class, 'profile']);
 
                 // 2FA 
                 Route::prefix('2fa')->controller(TwoFactorAuthenticationController::class)
