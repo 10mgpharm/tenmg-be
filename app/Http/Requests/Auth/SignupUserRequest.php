@@ -45,6 +45,7 @@ class SignupUserRequest extends FormRequest
                 'string',
                 'in:'.implode(',', $allowedBusinessTypes),
             ],
+            'fullname' => ['required', 'string', 'max:255'],
             'name' => ['required', 'string', 'max:255', 'unique:businesses,name'],
             'email' => [
                 'required', 'string', 'lowercase', 'email',

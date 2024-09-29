@@ -25,21 +25,8 @@ class AuthProviderRequest extends FormRequest
     {
 
         return [
-            'provider' => ['required', 'string', 'in:google'],
-            'name' => [
-                'required', 
-                'string', 
-                'max:255',
-            ],
-            'email' => [
-                'required', 
-                'string', 
-                'lowercase', 
-                'email',
-                'max:255',
-                new BusinessEmail,
-            ],
-            // 'email_verified' => ['required', 'boolean'],
+            'name' => ['required', 'string', 'max:255'],
+            'provider' => ['required', 'string'],
             'picture' => ['sometimes', 'string'],
         ];
     }
