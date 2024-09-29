@@ -153,7 +153,7 @@ class AuthService implements IAuthService
                 return Role::where('name', 'supplier')->first();
 
             case BusinessType::VENDOR:
-                return Role::where('name', 'supplier')->first();
+                return Role::where('name', 'vendor')->first();
 
             default:
                 // BusinessType::CUSTOMER_PHARMACY
