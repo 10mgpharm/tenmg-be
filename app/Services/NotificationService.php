@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Models\CreditOffer;
 use App\Models\Customer;
 use App\Models\LoanApplication;
+use App\Models\RepaymentSchedule;
 use App\Models\User;
 use App\Services\Interfaces\INotificationService;
 use Illuminate\Support\Facades\Mail;
@@ -82,5 +83,25 @@ class NotificationService implements INotificationService
             $message->to($data['to'])
                 ->subject($data['subject']);
         });
+    }
+
+    /**
+     * Send repayment reminder to customer.
+     */
+    public function sendRepaymentReminder(RepaymentSchedule $repayment)
+    {
+        // Get customer and loan information
+        $customer = $repayment->loan->customer;
+
+        $link = config('app.frontend_url') . '/widgets/repayment/shedule/' . $repayment->id;
+
+
+        $subject = 'Loan Repayment Reminder';
+        $message = "Hi {$repayment?->loan?->customer?->name}, Kindly use the below link to make your upcoming repayment. \n\nClick {$link} to make payment.";
+
+
+        $this->sendCustomerNotification($customer->id, $subject, $message);
+
+        // Mail::to($customer->email)->send(new RepaymentReminderMail($repayment));
     }
 }
