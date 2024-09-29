@@ -72,12 +72,6 @@ class BusinessSettingPersonalInformationRequest extends FormRequest
                 'string',
                 'max:255',
             ],
-            'profilePicture' => [
-                'sometimes',
-                'nullable',
-                'image',
-                'max:10240'
-            ],
         ];
     }
 

@@ -47,17 +47,6 @@ class BusinessSettingController extends Controller
             array_flip(['name', 'contact_person', 'contact_phone', 'contact_email', 'address'])
         ));  // since fillable isn't used.
 
-        // Save uploaded file
-        if($request->hasFile('profilePicture')){
-            $created = $this->attachmentService->saveNewUpload(
-                $request->file('profilePicture'),
-                $user->id,
-                User::class,
-            );
-            
-            $user->update(['avatar_id' => $created->id]);
-        }
-
         $user->ownerBusinessType()->update($data);
         $user->ownerBusinessType->refresh();
 
