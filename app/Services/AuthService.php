@@ -83,7 +83,7 @@ class AuthService implements IAuthService
 
             // create user
             $user = User::create([
-                'name' => $request['name'],
+                'name' => $request['fullname'],
                 'email' => $request['email'],
                 'password' => Hash::make($request['password']),
             ]);
