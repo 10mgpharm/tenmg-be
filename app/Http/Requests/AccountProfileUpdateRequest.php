@@ -23,7 +23,7 @@ class AccountProfileUpdateRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'name' => ['string', 'nullable', 'sometimes', 'min:3', 'max:255'],
+            'name' => ['string', 'required', 'min:3', 'max:255'],
             'email' => [
                 'required',
                 'string',
