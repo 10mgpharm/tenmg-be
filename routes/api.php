@@ -72,6 +72,7 @@ Route::prefix('v1')->group(function () {
                 ->group(function () {
                     Route::get('setup', 'setup');
                     Route::post('reset', 'reset');
+                    Route::post('toggle', 'toggle');  // Toggle 2FA (enable/disable)
                 });
             });
 
