@@ -34,13 +34,7 @@ class AuthenticatedController extends Controller
             }
 
             $user = $request->user();
-
-            // If user uses two-factor authentication generate temp token
-            if($user->two_factor_secret && $user->use_two_factor){
-                $tokenResult = $user->createToken('Temporal Access Token', ['temp']);
-            } else {
-                $tokenResult = $user->createToken('Full Access Token', ['full']);
-            }
+            $tokenResult = $user->createToken('Full Access Token', ['full']);
             
 
             return $this->authService->returnAuthResponse(
