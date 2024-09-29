@@ -63,7 +63,7 @@ class BusinessSettingController extends Controller
      * @param \App\Http\Requests\BusinessSettingAccountSetupRequest $request
      * @return \Illuminate\Http\JsonResponse
      */
-    public function accountSetup(BusinessSettingAccountSetupRequest $request)
+    public function license(BusinessSettingAccountSetupRequest $request)
     {
         $validated = $request->validated();
         $user = $request->user();
@@ -87,7 +87,7 @@ class BusinessSettingController extends Controller
         $user->ownerBusinessType()->update($data);
 
         return $this->returnJsonResponse(
-            message: 'Business account setup details successfully updated.',
+            message: 'Business license details successfully updated.',
             data: (new BusinessResource($user->ownerBusinessType->refresh()))
         );
     }

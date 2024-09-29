@@ -99,7 +99,7 @@ Route::prefix('v1')->group(function () {
                     Route::match(['post', 'patch'], 'personal-information', 'personalInformation');
 
                     // Update business account license number, expiry date and cac doc
-                    Route::match(['post', 'patch'], 'account-setup', 'accountSetup');
+                    Route::match(['post', 'patch'], 'license', 'accountSetup');
                 });
         });
 
