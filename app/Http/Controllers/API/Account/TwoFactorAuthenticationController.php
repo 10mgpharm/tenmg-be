@@ -1,7 +1,8 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\API\Account;
 
+use App\Http\Controllers\Controller;
 use App\Enums\OtpType;
 use App\Http\Resources\UserResource;
 use App\Http\Requests\ResetTwoFactorRequest;
