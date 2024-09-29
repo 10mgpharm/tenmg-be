@@ -8,8 +8,11 @@ use App\Models\PassportClient;
 use App\Models\PassportPersonalAccessClient;
 use App\Models\PassportRefreshToken;
 use App\Models\PassportToken;
+use App\Repositories\ApiKeyRepository;
+use App\Repositories\CreditCustomerDebitMandateRepository;
 use App\Repositories\CustomerRepository;
-use App\Repositories\Interfaces\ICustomerRepository;
+use App\Repositories\LoanApplicationRepository;
+use App\Repositories\OfferRepository;
 use App\Services\ActivityLogService;
 use App\Services\AffordabilityService;
 use App\Services\AttachmentService;
@@ -21,6 +24,11 @@ use App\Services\Interfaces\IAuthService;
 use App\Services\Interfaces\ICustomerService;
 use App\Services\Interfaces\IRuleEngineService;
 use App\Services\Interfaces\ITxnHistoryService;
+use App\Services\LoanApplicationService;
+use App\Services\LoanService;
+use App\Services\NotificationService;
+use App\Services\OfferService;
+use App\Services\PaystackService;
 use App\Services\RuleEngineService;
 use App\Services\TransactionHistoryService;
 use Illuminate\Auth\Events\Verified;
@@ -36,13 +44,12 @@ class AppServiceProvider extends ServiceProvider
     public function register(): void
     {
         // List Repositories bindings
-        $this->app->bind(ICustomerRepository::class, CustomerRepository::class);
 
         // List Service bindings
         $this->app->bind(IAuthService::class, AuthService::class);
         $this->app->bind(abstract: ICustomerService::class, concrete: function ($app) {
             return new CustomerService(
-                customerRepository: $app->make(ICustomerRepository::class),
+                customerRepository: $app->make(CustomerRepository::class),
                 attachmentService: $app->make(AttachmentService::class),
                 authService: $app->make(AuthService::class),
                 activityLogService: $app->make(ActivityLogService::class),
@@ -63,7 +70,7 @@ class AppServiceProvider extends ServiceProvider
         // configure passport token expiration
         Passport::tokensExpireIn(now()->addHours(1));
         Passport::refreshTokensExpireIn(now()->addHours(3));
-        Passport::personalAccessTokensExpireIn(now()->addHours(1));
+        Passport::personalAccessTokensExpireIn(now()->addHours(24));
 
         // configure custom models for passport
         Passport::useTokenModel(PassportToken::class);

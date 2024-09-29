@@ -1,0 +1,181 @@
+<?php
+
+namespace App\Services;
+
+use App\Helpers\UtilityHelper;
+use App\Models\LoanApplication;
+use App\Notifications\CustomerLoanApplicationNotification;
+use App\Repositories\ApiKeyRepository;
+use App\Repositories\LoanApplicationRepository;
+use Exception;
+use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Http\Response;
+use Illuminate\Support\Facades\Notification;
+
+class LoanApplicationService
+{
+    public function __construct(
+        private LoanApplicationRepository $loanApplicationRepository,
+        private AuthService $authService,
+        private ApiKeyRepository $apiKeyRepository,
+        private NotificationService $notificationService,
+    ) {}
+
+    // Create Loan Application
+    public function createApplication(array $data)
+    {
+        $business = $this->authService->getBusiness();
+
+        if ($business) {
+            $data['businessId'] = $business->id;
+        }
+
+        $interestData = UtilityHelper::calculateInterestAmount($data['requestedAmount'], $data['durationInMonths']);
+        $data['interestRate'] = $interestData['interestRate'];
+        $data['interestAmount'] = $interestData['interestAmount'];
+        $data['totalAmount'] = $interestData['totalAmount'];
+
+        $application = $this->loanApplicationRepository->create($data);
+
+        // TODO: notification to customer here
+
+        return $application;
+    }
+
+    public function updateApplication(array $data): LoanApplication
+    {
+        $application = $this->loanApplicationRepository->findByReference($data['reference']);
+
+        if ($application->status != 'PENDING') {
+            throw new Exception('Application cannot be updated', Response::HTTP_BAD_REQUEST);
+        }
+
+        $interestData = UtilityHelper::calculateInterestAmount($data['requestedAmount'], $data['durationInMonths']);
+        $data['interestRate'] = $interestData['interestRate'];
+        $data['interestAmount'] = $interestData['interestAmount'];
+        $data['totalAmount'] = $interestData['totalAmount'];
+
+        return $this->loanApplicationRepository->update(id: $application->id, data: $data);
+    }
+
+    // Submit Loan Application from E-commerce
+    public function createEcommerceApplication(array $data)
+    {
+
+        $apikey = $this->apiKeyRepository->verifyApiKey(key: $data['vendorId'], secret: $data['vendorSecret']);
+
+        if (! $apikey) {
+            throw new Exception('Invalid API keys', Response::HTTP_UNAUTHORIZED);
+        }
+
+        $data['businessId'] = $apikey->business_id;
+        $data['source'] = 'API';
+
+        $application = $this->loanApplicationRepository->create($data);
+
+        $token = $apikey->createToken('Full Access Token', ['full']);
+
+        $link = config('app.frontend_url').'/widgets/applications/'.$application->identifier.'?token='.$token->accessToken;
+
+        $customer = $application->customer;
+
+        // notifation to customer here
+        Notification::route('mail', [
+            $customer?->email => $customer?->name,
+        ])->notify(new CustomerLoanApplicationNotification($link));
+
+        return $link;
+    }
+
+    // Retrieve Customizations
+    public function getVendorCustomisations()
+    {
+        // Retrieve vendor-specific customization like name, logo, etc.
+        return [
+            'name' => 'Vendor Name',
+            'logo' => 'https://example.com/logo.png',
+            'color' => '#123456',
+        ];
+    }
+
+    // Retrive Loan Application
+    public function getLoanApplicationByReference(string $reference)
+    {
+        return $this->loanApplicationRepository->findByReference($reference);
+    }
+
+    // Retrive All Loan Applications
+    public function getLoanApplications(): array
+    {
+        $business = $this->authService->getBusiness();
+        if ($business->type == 'ADMIN') {
+            return $this->loanApplicationRepository->getAll();
+        }
+
+        return $this->getLoanApplicationsByFilter([
+            'businessId' => $business->id,
+        ]);
+    }
+
+    public function getLoanApplicationsByFilter(array $filter): array
+    {
+        $business = $this->authService->getBusiness();
+        if ($business->type != 'ADMIN') {
+            $filter['businessId'] = $business->id;
+        }
+
+        $applications = $this->loanApplicationRepository->filter($filter);
+
+        return $applications;
+    }
+
+    // Review Loan Application (approve/reject)
+    public function reviewApplication(int $applicationId, string $status, $offerAmount = null)
+    {
+        $application = $this->loanApplicationRepository->findById($applicationId);
+
+        $subject = '';
+        $message = '';
+
+        if ($status == 'approve') {
+            $application = $this->approveApplication($application->id);
+            $subject = 'Loan Application Approved';
+            $message = "Your loan application with reference {$application->identifier} has been approved. You will receive a loan offer shortly.";
+        } else {
+            $application = $this->closeApplication($applicationId);
+            $subject = 'Loan Application Rejected';
+            $message = "Your loan application with reference {$application->identifier} has been rejected. If you have any questions, feel free to contact us.";
+        }
+
+        // Send notification to customer here
+        $this->notificationService->sendCustomerNotification($application->customer_id, $subject, $message);
+
+        return $application;
+    }
+
+    // Other methods for listing, filtering, deleting, etc.
+    public function getApplicationDetails(int $id): ?LoanApplication
+    {
+        return $this->loanApplicationRepository->findById($id);
+    }
+
+    public function closeApplication(int $id): LoanApplication
+    {
+        return $this->loanApplicationRepository->review($id, 'CLOSED');
+    }
+
+    public function approveApplication(int $id): LoanApplication
+    {
+        return $this->loanApplicationRepository->review($id, 'APPROVED');
+    }
+
+    public function deleteApplication(int $id): bool
+    {
+        return $this->loanApplicationRepository->deleteById($id);
+    }
+
+    public function getApplicationsByCustomer(int $customerId): Collection
+    {
+        return $this->loanApplicationRepository->getApplicationsByCustomer($customerId);
+    }
+}

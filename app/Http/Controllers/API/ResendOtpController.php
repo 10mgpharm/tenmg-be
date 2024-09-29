@@ -3,17 +3,14 @@
 namespace App\Http\Controllers\API;
 
 use App\Enums\OtpType;
-use App\Services\OtpService;
-use Illuminate\Http\Response;
-use Illuminate\Http\JsonResponse;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\ResendOtpRequest;
+use App\Services\OtpService;
+use Illuminate\Http\JsonResponse;
 use App\Models\User;
-use Symfony\Component\HttpKernel\Exception\HttpException;
 
 class ResendOtpController extends Controller
 {
-
     /**
      * Regenerate OTP and send it to the user's email.
      */
@@ -22,7 +19,7 @@ class ResendOtpController extends Controller
         try {
             $user = $request->user() ?: User::firstWhere('email', $request->input('email'));
 
-            if($user){
+            if ($user) {
                 $otpType = OtpType::from($request->input('type'));
                 (new OtpService)->forUser($user)->regenerate($otpType)->sendMail($otpType);
             }
@@ -30,9 +27,15 @@ class ResendOtpController extends Controller
             return $this->returnJsonResponse(
                 message: 'A one-time password has been resent to your registered email.',
             );
-
         } catch (\Throwable $th) {
             return $this->handleErrorResponse($th);
         }
+
+        $otpType = OtpType::from($request->input('type'));
+        (new OtpService)->regenerate($otpType)->sendMail($otpType);
+
+        return $this->returnJsonResponse(
+            message: 'A one-time password has been resent to your registered email.',
+        );
     }
 }

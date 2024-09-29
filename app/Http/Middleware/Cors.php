@@ -16,7 +16,6 @@ class Cors
      */
     public function handle(Request $request, Closure $next): Response
     {
-
         $response = $next($request);
 
         // If the response is a BinaryFileResponse (like file downloads), set headers accordingly

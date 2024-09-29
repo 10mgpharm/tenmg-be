@@ -16,6 +16,7 @@ class CreditScore extends Model
         'business_id',
         'customer_id',
         'txn_evaluation_id',
+        'affordability',
         'business_rule_json',
         'credit_score_result',
         'score_percent',
@@ -24,6 +25,11 @@ class CreditScore extends Model
         'created_by_id',
         'source',
     ];
+
+    public function creditEvaluation()
+    {
+        return $this->belongsTo(CreditTxnHistoryEvaluation::class, 'txn_evaluation_id');
+    }
 
     public static function boot()
     {
