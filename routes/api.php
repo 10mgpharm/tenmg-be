@@ -12,8 +12,8 @@ use App\Http\Controllers\API\Credit\TransactionHistoryController;
 use App\Http\Controllers\API\ProfileController;
 use App\Http\Controllers\API\ResendOtpController;
 use App\Http\Controllers\BusinessSettingController;
-use App\Http\Controllers\TwoFactorAuthenticationController;
-use App\Http\Controllers\PasswordUpdateController;
+use App\Http\Controllers\API\Account\TwoFactorAuthenticationController;
+use App\Http\Controllers\API\Account\PasswordUpdateController;
 use App\Http\Controllers\API\Webhooks\PaystackWebhookController;
 use Illuminate\Support\Facades\Route;
 
