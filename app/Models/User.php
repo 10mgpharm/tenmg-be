@@ -218,4 +218,12 @@ class User extends Authenticatable implements MustVerifyEmail
     {
         return $this->belongsToMany(Business::class, 'business_users', 'user_id', 'business_id');
     }
+
+    /**
+     * Get the team members created by the user.
+     */
+    public function teamMembers()
+    {
+        return $this->hasMany(TeamMember::class, 'creator_id');
+    }
 }
