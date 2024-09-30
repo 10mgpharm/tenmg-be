@@ -13,8 +13,9 @@ beforeEach(function () {
 
 test('user can sign up successfully with valid data', function () {
     $requestData = [
+        'fullname' => fake()->name(),
         'businessType' => strtolower(BusinessType::VENDOR->value),
-        'name' => fake()->name(),
+        'name' => fake()->company(),
         'email' => fake()->unique()->safeEmail(),
         'password' => 'Password123!',
         'passwordConfirmation' => 'Password123!',
@@ -27,7 +28,8 @@ test('user can sign up successfully with valid data', function () {
         ->assertJson(
             fn ($json) => $json->where('status', 'success')
                 ->where('message', 'Sign up successful. Please verify your email using the OTP sent.')
-                ->where('data.name', $requestData['name'])
+                ->where('data.name', $requestData['fullname'])
+                ->where('data.businessName', $requestData['name'])
                 ->where('data.email', $requestData['email'])
                 ->has('accessToken')
         );
@@ -35,6 +37,7 @@ test('user can sign up successfully with valid data', function () {
 
 test('signup fails with missing or invalid data', function () {
     $requestData = [
+        'fullname' => fake()->name(),
         'businessType' => 'invalid-type',
         'name' => '',
         'email' => 'invalid-email',
@@ -55,6 +58,7 @@ test('signup fails if user already exists', function () {
     ]);
 
     $requestData = [
+        'fullname' => fake()->name(),
         'businessType' => BusinessType::allowedForRegistration()[0],
         'name' => fake()->name(),
         'email' => 'existinguser@example.com',

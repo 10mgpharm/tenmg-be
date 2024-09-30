@@ -44,20 +44,21 @@ class SignupUserRequest extends FormRequest
                 'string',
                 'in:'.implode(',', $allowedBusinessTypes),
             ],
+            'fullname' => ['required', 'string', 'max:255'],
             'name' => ['required', 'string', 'max:255', 'unique:businesses,name'],
             'email' => [
                 'required', 'string', 'lowercase', 'email',
                 'max:255', 'unique:users,email',
                 function ($attribute, $value, $fail) {
-                    $domain = substr(strrchr($value, "@"), 1);
-                    
+                    $domain = substr(strrchr($value, '@'), 1);
+
                     if (
-                        in_array($domain, PublicDomainConstants::PUBLIC_DOMAINS) && 
+                        in_array($domain, PublicDomainConstants::PUBLIC_DOMAINS) &&
                         request()->input('businessType') == BusinessType::VENDOR->toLowercase()
                     ) {
                         $fail('Public email providers are not allowed. Please use a business email.');
                     }
-                }
+                },
             ],
             'password' => ['required', Rules\Password::default()],
             'passwordConfirmation' => ['required', 'same:password'],

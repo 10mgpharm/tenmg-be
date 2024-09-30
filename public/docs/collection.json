@@ -1,0 +1,1824 @@
+{
+    "variable": [
+        {
+            "id": "baseUrl",
+            "key": "baseUrl",
+            "type": "string",
+            "name": "string",
+            "value": "http:\/\/localhost"
+        }
+    ],
+    "info": {
+        "name": "10MG",
+        "_postman_id": "2fa04b64-87f3-47aa-b272-232130b35aa5",
+        "description": "",
+        "schema": "https:\/\/schema.getpostman.com\/json\/collection\/v2.1.0\/collection.json"
+    },
+    "item": [
+        {
+            "name": "Endpoints",
+            "description": "",
+            "item": [
+                {
+                    "name": "Handle an incoming signup request.",
+                    "request": {
+                        "url": {
+                            "host": "{{baseUrl}}",
+                            "path": "api\/v1\/auth\/signup",
+                            "query": [],
+                            "raw": "{{baseUrl}}\/api\/v1\/auth\/signup"
+                        },
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application\/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application\/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\"businessType\":\"supplier\",\"fullname\":\"reioapxjfnpxdrmqe\",\"name\":\"ogrdchdaaynujmaze\",\"email\":\"gabriel60@example.net\",\"password\":\"voluptates\",\"passwordConfirmation\":\"voluptatum\",\"termsAndConditions\":true}"
+                        },
+                        "description": "",
+                        "auth": {
+                            "type": "noauth"
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Handle an incoming authentication request.",
+                    "request": {
+                        "url": {
+                            "host": "{{baseUrl}}",
+                            "path": "api\/v1\/auth\/signin",
+                            "query": [],
+                            "raw": "{{baseUrl}}\/api\/v1\/auth\/signin"
+                        },
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application\/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application\/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\"email\":\"adams.bernard@example.net\",\"password\":\"djH$cCh*hGN'|R\"}"
+                        },
+                        "description": "",
+                        "auth": {
+                            "type": "noauth"
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Handle an incoming google authentication request.",
+                    "request": {
+                        "url": {
+                            "host": "{{baseUrl}}",
+                            "path": "api\/v1\/auth\/google",
+                            "query": [],
+                            "raw": "{{baseUrl}}\/api\/v1\/auth\/google"
+                        },
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application\/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application\/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\"name\":\"njbmzanjnaaalhl\",\"provider\":\"placeat\",\"picture\":\"sapiente\",\"email\":\"spencer.bernita@example.net\"}"
+                        },
+                        "description": "",
+                        "auth": {
+                            "type": "noauth"
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Send a password reset link.",
+                    "request": {
+                        "url": {
+                            "host": "{{baseUrl}}",
+                            "path": "api\/v1\/auth\/forgot-password",
+                            "query": [],
+                            "raw": "{{baseUrl}}\/api\/v1\/auth\/forgot-password"
+                        },
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application\/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application\/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\"email\":\"beatae\"}"
+                        },
+                        "description": "",
+                        "auth": {
+                            "type": "noauth"
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Handle an incoming new password request.",
+                    "request": {
+                        "url": {
+                            "host": "{{baseUrl}}",
+                            "path": "api\/v1\/auth\/reset-password",
+                            "query": [],
+                            "raw": "{{baseUrl}}\/api\/v1\/auth\/reset-password"
+                        },
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application\/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application\/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\"otp\":\"consequatur\",\"email\":\"sed\",\"password\":\"minima\",\"passwordConfirmation\":\"qui\"}"
+                        },
+                        "description": "",
+                        "auth": {
+                            "type": "noauth"
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Complete signup flow by updating the business details.",
+                    "request": {
+                        "url": {
+                            "host": "{{baseUrl}}",
+                            "path": "api\/v1\/auth\/signup\/complete",
+                            "query": [],
+                            "raw": "{{baseUrl}}\/api\/v1\/auth\/signup\/complete"
+                        },
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application\/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application\/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\"contact_email\":\"vkirlin@example.org\",\"contact_phone\":\"yuujnlfuccfhmlxaimw\",\"contact_person\":\"qmseuyz\",\"contact_person_position\":\"btaxylsuwzxncrpnsjnr\",\"name\":\"lilwuqpiz\",\"termsAndConditions\":true,\"provider\":\"credentials\",\"type\":\"customer_pharmacy\"}"
+                        },
+                        "description": "This method handles the final step in the user signup process, ensuring that\nthe business details are updated.",
+                        "auth": {
+                            "type": "noauth"
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Destroy an authenticated session.",
+                    "request": {
+                        "url": {
+                            "host": "{{baseUrl}}",
+                            "path": "api\/v1\/auth\/signout",
+                            "query": [],
+                            "raw": "{{baseUrl}}\/api\/v1\/auth\/signout"
+                        },
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application\/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application\/json"
+                            }
+                        ],
+                        "body": null,
+                        "description": "",
+                        "auth": {
+                            "type": "noauth"
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Regenerate OTP and send it to the user's email.",
+                    "request": {
+                        "url": {
+                            "host": "{{baseUrl}}",
+                            "path": "api\/v1\/auth\/resend-otp",
+                            "query": [],
+                            "raw": "{{baseUrl}}\/api\/v1\/auth\/resend-otp"
+                        },
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application\/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application\/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\"type\":\"RESET_PASSWORD_VERIFICATION\",\"email\":\"seamus.wintheiser@example.org\"}"
+                        },
+                        "description": "",
+                        "auth": {
+                            "type": "noauth"
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Regenerate OTP and send it to the user's email.",
+                    "request": {
+                        "url": {
+                            "host": "{{baseUrl}}",
+                            "path": "api\/v1\/resend-otp",
+                            "query": [],
+                            "raw": "{{baseUrl}}\/api\/v1\/resend-otp"
+                        },
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application\/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application\/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\"type\":\"SIGNUP_EMAIL_VERIFICATION\",\"email\":\"catalina87@example.com\"}"
+                        },
+                        "description": "",
+                        "auth": {
+                            "type": "noauth"
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "GET api\/v1\/customers",
+                    "request": {
+                        "url": {
+                            "host": "{{baseUrl}}",
+                            "path": "api\/v1\/customers",
+                            "query": [],
+                            "raw": "{{baseUrl}}\/api\/v1\/customers"
+                        },
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application\/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application\/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\"name\":\"paurylkrfap\",\"email\":\"wschumm@example.net\",\"vendorId\":19,\"createdAtStart\":\"2020-10-16\",\"createdAtEnd\":\"2085-09-13\",\"page\":79,\"perPage\":21}"
+                        },
+                        "description": "",
+                        "auth": {
+                            "type": "noauth"
+                        }
+                    },
+                    "response": [
+                        {
+                            "header": [
+                                {
+                                    "key": "cache-control",
+                                    "value": "no-cache, private"
+                                },
+                                {
+                                    "key": "content-type",
+                                    "value": "application\/json"
+                                },
+                                {
+                                    "key": "access-control-allow-origin",
+                                    "value": "*"
+                                },
+                                {
+                                    "key": "access-control-allow-methods",
+                                    "value": "GET, POST, PUT, DELETE, OPTIONS"
+                                },
+                                {
+                                    "key": "access-control-allow-headers",
+                                    "value": "X-Requested-With, Content-Type, X-Token-Auth, Authorization"
+                                }
+                            ],
+                            "code": 401,
+                            "body": "{\"success\":false,\"message\":\"Unauthenticated.\"}",
+                            "name": ""
+                        }
+                    ]
+                },
+                {
+                    "name": "POST api\/v1\/customers",
+                    "request": {
+                        "url": {
+                            "host": "{{baseUrl}}",
+                            "path": "api\/v1\/customers",
+                            "query": [],
+                            "raw": "{{baseUrl}}\/api\/v1\/customers"
+                        },
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application\/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application\/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\"name\":\"syasntkl\",\"email\":\"gturner@example.com\",\"phone\":\"cszwrlzhpekdkap\"}"
+                        },
+                        "description": "",
+                        "auth": {
+                            "type": "noauth"
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "GET api\/v1\/customers\/export",
+                    "request": {
+                        "url": {
+                            "host": "{{baseUrl}}",
+                            "path": "api\/v1\/customers\/export",
+                            "query": [],
+                            "raw": "{{baseUrl}}\/api\/v1\/customers\/export"
+                        },
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application\/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application\/json"
+                            }
+                        ],
+                        "body": null,
+                        "description": "",
+                        "auth": {
+                            "type": "noauth"
+                        }
+                    },
+                    "response": [
+                        {
+                            "header": [
+                                {
+                                    "key": "cache-control",
+                                    "value": "no-cache, private"
+                                },
+                                {
+                                    "key": "content-type",
+                                    "value": "application\/json"
+                                },
+                                {
+                                    "key": "access-control-allow-origin",
+                                    "value": "*"
+                                },
+                                {
+                                    "key": "access-control-allow-methods",
+                                    "value": "GET, POST, PUT, DELETE, OPTIONS"
+                                },
+                                {
+                                    "key": "access-control-allow-headers",
+                                    "value": "X-Requested-With, Content-Type, X-Token-Auth, Authorization"
+                                }
+                            ],
+                            "code": 401,
+                            "body": "{\"success\":false,\"message\":\"Unauthenticated.\"}",
+                            "name": ""
+                        }
+                    ]
+                },
+                {
+                    "name": "POST api\/v1\/customers\/import",
+                    "request": {
+                        "url": {
+                            "host": "{{baseUrl}}",
+                            "path": "api\/v1\/customers\/import",
+                            "query": [],
+                            "raw": "{{baseUrl}}\/api\/v1\/customers\/import"
+                        },
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application\/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application\/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\"file\":\"ilhgatfwjg\"}"
+                        },
+                        "description": "",
+                        "auth": {
+                            "type": "noauth"
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "GET api\/v1\/customers\/{id}",
+                    "request": {
+                        "url": {
+                            "host": "{{baseUrl}}",
+                            "path": "api\/v1\/customers\/:id",
+                            "query": [],
+                            "raw": "{{baseUrl}}\/api\/v1\/customers\/:id",
+                            "variable": [
+                                {
+                                    "id": "id",
+                                    "key": "id",
+                                    "value": "odit",
+                                    "description": "The ID of the customer."
+                                }
+                            ]
+                        },
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application\/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application\/json"
+                            }
+                        ],
+                        "body": null,
+                        "description": "",
+                        "auth": {
+                            "type": "noauth"
+                        }
+                    },
+                    "response": [
+                        {
+                            "header": [
+                                {
+                                    "key": "cache-control",
+                                    "value": "no-cache, private"
+                                },
+                                {
+                                    "key": "content-type",
+                                    "value": "application\/json"
+                                },
+                                {
+                                    "key": "access-control-allow-origin",
+                                    "value": "*"
+                                },
+                                {
+                                    "key": "access-control-allow-methods",
+                                    "value": "GET, POST, PUT, DELETE, OPTIONS"
+                                },
+                                {
+                                    "key": "access-control-allow-headers",
+                                    "value": "X-Requested-With, Content-Type, X-Token-Auth, Authorization"
+                                }
+                            ],
+                            "code": 401,
+                            "body": "{\"success\":false,\"message\":\"Unauthenticated.\"}",
+                            "name": ""
+                        }
+                    ]
+                },
+                {
+                    "name": "PUT api\/v1\/customers\/{id}",
+                    "request": {
+                        "url": {
+                            "host": "{{baseUrl}}",
+                            "path": "api\/v1\/customers\/:id",
+                            "query": [],
+                            "raw": "{{baseUrl}}\/api\/v1\/customers\/:id",
+                            "variable": [
+                                {
+                                    "id": "id",
+                                    "key": "id",
+                                    "value": "minima",
+                                    "description": "The ID of the customer."
+                                }
+                            ]
+                        },
+                        "method": "PUT",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application\/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application\/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\"name\":\"izdgawnhwoccqbyemyxebe\",\"email\":\"josie.zieme@example.org\",\"phone\":\"fyjwdbzgunfqbb\",\"active\":true}"
+                        },
+                        "description": "",
+                        "auth": {
+                            "type": "noauth"
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "DELETE api\/v1\/customers\/{id}",
+                    "request": {
+                        "url": {
+                            "host": "{{baseUrl}}",
+                            "path": "api\/v1\/customers\/:id",
+                            "query": [],
+                            "raw": "{{baseUrl}}\/api\/v1\/customers\/:id",
+                            "variable": [
+                                {
+                                    "id": "id",
+                                    "key": "id",
+                                    "value": "tenetur",
+                                    "description": "The ID of the customer."
+                                }
+                            ]
+                        },
+                        "method": "DELETE",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application\/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application\/json"
+                            }
+                        ],
+                        "body": null,
+                        "description": "",
+                        "auth": {
+                            "type": "noauth"
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "PATCH api\/v1\/customers\/{id}",
+                    "request": {
+                        "url": {
+                            "host": "{{baseUrl}}",
+                            "path": "api\/v1\/customers\/:id",
+                            "query": [],
+                            "raw": "{{baseUrl}}\/api\/v1\/customers\/:id",
+                            "variable": [
+                                {
+                                    "id": "id",
+                                    "key": "id",
+                                    "value": "animi",
+                                    "description": "The ID of the customer."
+                                }
+                            ]
+                        },
+                        "method": "PATCH",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application\/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application\/json"
+                            }
+                        ],
+                        "body": null,
+                        "description": "",
+                        "auth": {
+                            "type": "noauth"
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "POST api\/v1\/vendor\/txn_history\/upload",
+                    "request": {
+                        "url": {
+                            "host": "{{baseUrl}}",
+                            "path": "api\/v1\/vendor\/txn_history\/upload",
+                            "query": [],
+                            "raw": "{{baseUrl}}\/api\/v1\/vendor\/txn_history\/upload"
+                        },
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application\/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application\/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\"file\":\"omky\",\"customerId\":\"et\"}"
+                        },
+                        "description": "",
+                        "auth": {
+                            "type": "noauth"
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "POST api\/v1\/vendor\/txn_history\/evaluate",
+                    "request": {
+                        "url": {
+                            "host": "{{baseUrl}}",
+                            "path": "api\/v1\/vendor\/txn_history\/evaluate",
+                            "query": [],
+                            "raw": "{{baseUrl}}\/api\/v1\/vendor\/txn_history\/evaluate"
+                        },
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application\/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application\/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\"transactionHistoryId\":\"ex\"}"
+                        },
+                        "description": "",
+                        "auth": {
+                            "type": "noauth"
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "POST api\/v1\/vendor\/txn_history\/upload_and_evaluate",
+                    "request": {
+                        "url": {
+                            "host": "{{baseUrl}}",
+                            "path": "api\/v1\/vendor\/txn_history\/upload_and_evaluate",
+                            "query": [],
+                            "raw": "{{baseUrl}}\/api\/v1\/vendor\/txn_history\/upload_and_evaluate"
+                        },
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application\/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application\/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\"file\":\"hxsgvrtajyw\",\"customerId\":\"aut\"}"
+                        },
+                        "description": "",
+                        "auth": {
+                            "type": "noauth"
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "POST api\/v1\/vendor\/loan-applications",
+                    "request": {
+                        "url": {
+                            "host": "{{baseUrl}}",
+                            "path": "api\/v1\/vendor\/loan-applications",
+                            "query": [],
+                            "raw": "{{baseUrl}}\/api\/v1\/vendor\/loan-applications"
+                        },
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application\/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application\/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\"requestedAmount\":6,\"durationInMonths\":7}"
+                        },
+                        "description": "",
+                        "auth": {
+                            "type": "noauth"
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "GET api\/v1\/vendor\/loan-applications",
+                    "request": {
+                        "url": {
+                            "host": "{{baseUrl}}",
+                            "path": "api\/v1\/vendor\/loan-applications",
+                            "query": [],
+                            "raw": "{{baseUrl}}\/api\/v1\/vendor\/loan-applications"
+                        },
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application\/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application\/json"
+                            }
+                        ],
+                        "body": null,
+                        "description": "",
+                        "auth": {
+                            "type": "noauth"
+                        }
+                    },
+                    "response": [
+                        {
+                            "header": [
+                                {
+                                    "key": "cache-control",
+                                    "value": "no-cache, private"
+                                },
+                                {
+                                    "key": "content-type",
+                                    "value": "application\/json"
+                                },
+                                {
+                                    "key": "access-control-allow-origin",
+                                    "value": "*"
+                                },
+                                {
+                                    "key": "access-control-allow-methods",
+                                    "value": "GET, POST, PUT, DELETE, OPTIONS"
+                                },
+                                {
+                                    "key": "access-control-allow-headers",
+                                    "value": "X-Requested-With, Content-Type, X-Token-Auth, Authorization"
+                                }
+                            ],
+                            "code": 401,
+                            "body": "{\"success\":false,\"message\":\"Unauthenticated.\"}",
+                            "name": ""
+                        }
+                    ]
+                },
+                {
+                    "name": "POST api\/v1\/vendor\/loan-applications\/apply",
+                    "request": {
+                        "url": {
+                            "host": "{{baseUrl}}",
+                            "path": "api\/v1\/vendor\/loan-applications\/apply",
+                            "query": [],
+                            "raw": "{{baseUrl}}\/api\/v1\/vendor\/loan-applications\/apply"
+                        },
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application\/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application\/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\"customerId\":\"vel\"}"
+                        },
+                        "description": "",
+                        "auth": {
+                            "type": "noauth"
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "GET api\/v1\/vendor\/loan-applications\/customisations",
+                    "request": {
+                        "url": {
+                            "host": "{{baseUrl}}",
+                            "path": "api\/v1\/vendor\/loan-applications\/customisations",
+                            "query": [],
+                            "raw": "{{baseUrl}}\/api\/v1\/vendor\/loan-applications\/customisations"
+                        },
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application\/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application\/json"
+                            }
+                        ],
+                        "body": null,
+                        "description": "",
+                        "auth": {
+                            "type": "noauth"
+                        }
+                    },
+                    "response": [
+                        {
+                            "header": [
+                                {
+                                    "key": "cache-control",
+                                    "value": "no-cache, private"
+                                },
+                                {
+                                    "key": "content-type",
+                                    "value": "application\/json"
+                                },
+                                {
+                                    "key": "access-control-allow-origin",
+                                    "value": "*"
+                                },
+                                {
+                                    "key": "access-control-allow-methods",
+                                    "value": "GET, POST, PUT, DELETE, OPTIONS"
+                                },
+                                {
+                                    "key": "access-control-allow-headers",
+                                    "value": "X-Requested-With, Content-Type, X-Token-Auth, Authorization"
+                                }
+                            ],
+                            "code": 401,
+                            "body": "{\"success\":false,\"message\":\"Unauthenticated.\"}",
+                            "name": ""
+                        }
+                    ]
+                },
+                {
+                    "name": "GET api\/v1\/vendor\/loan-applications\/filter",
+                    "request": {
+                        "url": {
+                            "host": "{{baseUrl}}",
+                            "path": "api\/v1\/vendor\/loan-applications\/filter",
+                            "query": [],
+                            "raw": "{{baseUrl}}\/api\/v1\/vendor\/loan-applications\/filter"
+                        },
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application\/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application\/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\"status\":\"rejected\",\"search\":\"quia\",\"dateFrom\":\"2024-09-29T19:12:22\",\"dateTo\":\"2024-09-29T19:12:22\"}"
+                        },
+                        "description": "",
+                        "auth": {
+                            "type": "noauth"
+                        }
+                    },
+                    "response": [
+                        {
+                            "header": [
+                                {
+                                    "key": "cache-control",
+                                    "value": "no-cache, private"
+                                },
+                                {
+                                    "key": "content-type",
+                                    "value": "application\/json"
+                                },
+                                {
+                                    "key": "access-control-allow-origin",
+                                    "value": "*"
+                                },
+                                {
+                                    "key": "access-control-allow-methods",
+                                    "value": "GET, POST, PUT, DELETE, OPTIONS"
+                                },
+                                {
+                                    "key": "access-control-allow-headers",
+                                    "value": "X-Requested-With, Content-Type, X-Token-Auth, Authorization"
+                                }
+                            ],
+                            "code": 401,
+                            "body": "{\"success\":false,\"message\":\"Unauthenticated.\"}",
+                            "name": ""
+                        }
+                    ]
+                },
+                {
+                    "name": "GET api\/v1\/vendor\/loan-applications\/{reference}",
+                    "request": {
+                        "url": {
+                            "host": "{{baseUrl}}",
+                            "path": "api\/v1\/vendor\/loan-applications\/:reference",
+                            "query": [],
+                            "raw": "{{baseUrl}}\/api\/v1\/vendor\/loan-applications\/:reference",
+                            "variable": [
+                                {
+                                    "id": "reference",
+                                    "key": "reference",
+                                    "value": "sequi",
+                                    "description": ""
+                                }
+                            ]
+                        },
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application\/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application\/json"
+                            }
+                        ],
+                        "body": null,
+                        "description": "",
+                        "auth": {
+                            "type": "noauth"
+                        }
+                    },
+                    "response": [
+                        {
+                            "header": [
+                                {
+                                    "key": "cache-control",
+                                    "value": "no-cache, private"
+                                },
+                                {
+                                    "key": "content-type",
+                                    "value": "application\/json"
+                                },
+                                {
+                                    "key": "access-control-allow-origin",
+                                    "value": "*"
+                                },
+                                {
+                                    "key": "access-control-allow-methods",
+                                    "value": "GET, POST, PUT, DELETE, OPTIONS"
+                                },
+                                {
+                                    "key": "access-control-allow-headers",
+                                    "value": "X-Requested-With, Content-Type, X-Token-Auth, Authorization"
+                                }
+                            ],
+                            "code": 401,
+                            "body": "{\"success\":false,\"message\":\"Unauthenticated.\"}",
+                            "name": ""
+                        }
+                    ]
+                },
+                {
+                    "name": "GET api\/v1\/vendor\/loan-applications\/customer\/{customerId}",
+                    "request": {
+                        "url": {
+                            "host": "{{baseUrl}}",
+                            "path": "api\/v1\/vendor\/loan-applications\/customer\/:customerId",
+                            "query": [],
+                            "raw": "{{baseUrl}}\/api\/v1\/vendor\/loan-applications\/customer\/:customerId",
+                            "variable": [
+                                {
+                                    "id": "customerId",
+                                    "key": "customerId",
+                                    "value": "maxime",
+                                    "description": ""
+                                }
+                            ]
+                        },
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application\/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application\/json"
+                            }
+                        ],
+                        "body": null,
+                        "description": "",
+                        "auth": {
+                            "type": "noauth"
+                        }
+                    },
+                    "response": [
+                        {
+                            "header": [
+                                {
+                                    "key": "cache-control",
+                                    "value": "no-cache, private"
+                                },
+                                {
+                                    "key": "content-type",
+                                    "value": "application\/json"
+                                },
+                                {
+                                    "key": "access-control-allow-origin",
+                                    "value": "*"
+                                },
+                                {
+                                    "key": "access-control-allow-methods",
+                                    "value": "GET, POST, PUT, DELETE, OPTIONS"
+                                },
+                                {
+                                    "key": "access-control-allow-headers",
+                                    "value": "X-Requested-With, Content-Type, X-Token-Auth, Authorization"
+                                }
+                            ],
+                            "code": 401,
+                            "body": "{\"success\":false,\"message\":\"Unauthenticated.\"}",
+                            "name": ""
+                        }
+                    ]
+                },
+                {
+                    "name": "GET api\/v1\/vendor\/loan-applications\/view\/{id}",
+                    "request": {
+                        "url": {
+                            "host": "{{baseUrl}}",
+                            "path": "api\/v1\/vendor\/loan-applications\/view\/:id",
+                            "query": [],
+                            "raw": "{{baseUrl}}\/api\/v1\/vendor\/loan-applications\/view\/:id",
+                            "variable": [
+                                {
+                                    "id": "id",
+                                    "key": "id",
+                                    "value": "unde",
+                                    "description": "The ID of the view."
+                                }
+                            ]
+                        },
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application\/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application\/json"
+                            }
+                        ],
+                        "body": null,
+                        "description": "",
+                        "auth": {
+                            "type": "noauth"
+                        }
+                    },
+                    "response": [
+                        {
+                            "header": [
+                                {
+                                    "key": "cache-control",
+                                    "value": "no-cache, private"
+                                },
+                                {
+                                    "key": "content-type",
+                                    "value": "application\/json"
+                                },
+                                {
+                                    "key": "access-control-allow-origin",
+                                    "value": "*"
+                                },
+                                {
+                                    "key": "access-control-allow-methods",
+                                    "value": "GET, POST, PUT, DELETE, OPTIONS"
+                                },
+                                {
+                                    "key": "access-control-allow-headers",
+                                    "value": "X-Requested-With, Content-Type, X-Token-Auth, Authorization"
+                                }
+                            ],
+                            "code": 401,
+                            "body": "{\"success\":false,\"message\":\"Unauthenticated.\"}",
+                            "name": ""
+                        }
+                    ]
+                },
+                {
+                    "name": "DELETE api\/v1\/vendor\/loan-applications\/{id}",
+                    "request": {
+                        "url": {
+                            "host": "{{baseUrl}}",
+                            "path": "api\/v1\/vendor\/loan-applications\/:id",
+                            "query": [],
+                            "raw": "{{baseUrl}}\/api\/v1\/vendor\/loan-applications\/:id",
+                            "variable": [
+                                {
+                                    "id": "id",
+                                    "key": "id",
+                                    "value": "rerum",
+                                    "description": "The ID of the loan application."
+                                }
+                            ]
+                        },
+                        "method": "DELETE",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application\/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application\/json"
+                            }
+                        ],
+                        "body": null,
+                        "description": "",
+                        "auth": {
+                            "type": "noauth"
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "POST api\/v1\/vendor\/loan-applications\/{applicationId}\/review",
+                    "request": {
+                        "url": {
+                            "host": "{{baseUrl}}",
+                            "path": "api\/v1\/vendor\/loan-applications\/:applicationId\/review",
+                            "query": [],
+                            "raw": "{{baseUrl}}\/api\/v1\/vendor\/loan-applications\/:applicationId\/review",
+                            "variable": [
+                                {
+                                    "id": "applicationId",
+                                    "key": "applicationId",
+                                    "value": "hic",
+                                    "description": ""
+                                }
+                            ]
+                        },
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application\/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application\/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\"status\":\"reject\",\"offerAmount\":28}"
+                        },
+                        "description": "",
+                        "auth": {
+                            "type": "noauth"
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "POST api\/v1\/vendor\/offers",
+                    "request": {
+                        "url": {
+                            "host": "{{baseUrl}}",
+                            "path": "api\/v1\/vendor\/offers",
+                            "query": [],
+                            "raw": "{{baseUrl}}\/api\/v1\/vendor\/offers"
+                        },
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application\/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application\/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\"applicationId\":\"optio\",\"offerAmount\":66}"
+                        },
+                        "description": "",
+                        "auth": {
+                            "type": "noauth"
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "POST api\/v1\/vendor\/offers\/{offerReference}",
+                    "request": {
+                        "url": {
+                            "host": "{{baseUrl}}",
+                            "path": "api\/v1\/vendor\/offers\/:offerReference",
+                            "query": [],
+                            "raw": "{{baseUrl}}\/api\/v1\/vendor\/offers\/:offerReference",
+                            "variable": [
+                                {
+                                    "id": "offerReference",
+                                    "key": "offerReference",
+                                    "value": "aliquid",
+                                    "description": ""
+                                }
+                            ]
+                        },
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application\/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application\/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\"action\":\"accept\"}"
+                        },
+                        "description": "",
+                        "auth": {
+                            "type": "noauth"
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "GET api\/v1\/vendor\/offers",
+                    "request": {
+                        "url": {
+                            "host": "{{baseUrl}}",
+                            "path": "api\/v1\/vendor\/offers",
+                            "query": [],
+                            "raw": "{{baseUrl}}\/api\/v1\/vendor\/offers"
+                        },
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application\/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application\/json"
+                            }
+                        ],
+                        "body": null,
+                        "description": "",
+                        "auth": {
+                            "type": "noauth"
+                        }
+                    },
+                    "response": [
+                        {
+                            "header": [
+                                {
+                                    "key": "cache-control",
+                                    "value": "no-cache, private"
+                                },
+                                {
+                                    "key": "content-type",
+                                    "value": "application\/json"
+                                },
+                                {
+                                    "key": "access-control-allow-origin",
+                                    "value": "*"
+                                },
+                                {
+                                    "key": "access-control-allow-methods",
+                                    "value": "GET, POST, PUT, DELETE, OPTIONS"
+                                },
+                                {
+                                    "key": "access-control-allow-headers",
+                                    "value": "X-Requested-With, Content-Type, X-Token-Auth, Authorization"
+                                }
+                            ],
+                            "code": 401,
+                            "body": "{\"success\":false,\"message\":\"Unauthenticated.\"}",
+                            "name": ""
+                        }
+                    ]
+                },
+                {
+                    "name": "GET api\/v1\/vendor\/offers\/{id}",
+                    "request": {
+                        "url": {
+                            "host": "{{baseUrl}}",
+                            "path": "api\/v1\/vendor\/offers\/:id",
+                            "query": [],
+                            "raw": "{{baseUrl}}\/api\/v1\/vendor\/offers\/:id",
+                            "variable": [
+                                {
+                                    "id": "id",
+                                    "key": "id",
+                                    "value": "ducimus",
+                                    "description": "The ID of the offer."
+                                }
+                            ]
+                        },
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application\/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application\/json"
+                            }
+                        ],
+                        "body": null,
+                        "description": "",
+                        "auth": {
+                            "type": "noauth"
+                        }
+                    },
+                    "response": [
+                        {
+                            "header": [
+                                {
+                                    "key": "cache-control",
+                                    "value": "no-cache, private"
+                                },
+                                {
+                                    "key": "content-type",
+                                    "value": "application\/json"
+                                },
+                                {
+                                    "key": "access-control-allow-origin",
+                                    "value": "*"
+                                },
+                                {
+                                    "key": "access-control-allow-methods",
+                                    "value": "GET, POST, PUT, DELETE, OPTIONS"
+                                },
+                                {
+                                    "key": "access-control-allow-headers",
+                                    "value": "X-Requested-With, Content-Type, X-Token-Auth, Authorization"
+                                }
+                            ],
+                            "code": 401,
+                            "body": "{\"success\":false,\"message\":\"Unauthenticated.\"}",
+                            "name": ""
+                        }
+                    ]
+                },
+                {
+                    "name": "DELETE api\/v1\/vendor\/offers\/{id}",
+                    "request": {
+                        "url": {
+                            "host": "{{baseUrl}}",
+                            "path": "api\/v1\/vendor\/offers\/:id",
+                            "query": [],
+                            "raw": "{{baseUrl}}\/api\/v1\/vendor\/offers\/:id",
+                            "variable": [
+                                {
+                                    "id": "id",
+                                    "key": "id",
+                                    "value": "rem",
+                                    "description": "The ID of the offer."
+                                }
+                            ]
+                        },
+                        "method": "DELETE",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application\/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application\/json"
+                            }
+                        ],
+                        "body": null,
+                        "description": "",
+                        "auth": {
+                            "type": "noauth"
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "PATCH api\/v1\/vendor\/offers\/{id}",
+                    "request": {
+                        "url": {
+                            "host": "{{baseUrl}}",
+                            "path": "api\/v1\/vendor\/offers\/:id",
+                            "query": [],
+                            "raw": "{{baseUrl}}\/api\/v1\/vendor\/offers\/:id",
+                            "variable": [
+                                {
+                                    "id": "id",
+                                    "key": "id",
+                                    "value": "occaecati",
+                                    "description": "The ID of the offer."
+                                }
+                            ]
+                        },
+                        "method": "PATCH",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application\/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application\/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\"active\":false}"
+                        },
+                        "description": "",
+                        "auth": {
+                            "type": "noauth"
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "GET api\/v1\/vendor\/offers\/{customerId}\/customer",
+                    "request": {
+                        "url": {
+                            "host": "{{baseUrl}}",
+                            "path": "api\/v1\/vendor\/offers\/:customerId\/customer",
+                            "query": [],
+                            "raw": "{{baseUrl}}\/api\/v1\/vendor\/offers\/:customerId\/customer",
+                            "variable": [
+                                {
+                                    "id": "customerId",
+                                    "key": "customerId",
+                                    "value": "temporibus",
+                                    "description": ""
+                                }
+                            ]
+                        },
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application\/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application\/json"
+                            }
+                        ],
+                        "body": null,
+                        "description": "",
+                        "auth": {
+                            "type": "noauth"
+                        }
+                    },
+                    "response": [
+                        {
+                            "header": [
+                                {
+                                    "key": "cache-control",
+                                    "value": "no-cache, private"
+                                },
+                                {
+                                    "key": "content-type",
+                                    "value": "application\/json"
+                                },
+                                {
+                                    "key": "access-control-allow-origin",
+                                    "value": "*"
+                                },
+                                {
+                                    "key": "access-control-allow-methods",
+                                    "value": "GET, POST, PUT, DELETE, OPTIONS"
+                                },
+                                {
+                                    "key": "access-control-allow-headers",
+                                    "value": "X-Requested-With, Content-Type, X-Token-Auth, Authorization"
+                                }
+                            ],
+                            "code": 401,
+                            "body": "{\"success\":false,\"message\":\"Unauthenticated.\"}",
+                            "name": ""
+                        }
+                    ]
+                },
+                {
+                    "name": "POST api\/v1\/vendor\/direct-debit\/mandate\/generate",
+                    "request": {
+                        "url": {
+                            "host": "{{baseUrl}}",
+                            "path": "api\/v1\/vendor\/direct-debit\/mandate\/generate",
+                            "query": [],
+                            "raw": "{{baseUrl}}\/api\/v1\/vendor\/direct-debit\/mandate\/generate"
+                        },
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application\/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application\/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\"offerReference\":\"eos\"}"
+                        },
+                        "description": "",
+                        "auth": {
+                            "type": "noauth"
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "POST api\/v1\/vendor\/direct-debit\/mandate\/verify",
+                    "request": {
+                        "url": {
+                            "host": "{{baseUrl}}",
+                            "path": "api\/v1\/vendor\/direct-debit\/mandate\/verify",
+                            "query": [],
+                            "raw": "{{baseUrl}}\/api\/v1\/vendor\/direct-debit\/mandate\/verify"
+                        },
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application\/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application\/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\"mandateReference\":\"fuga\"}"
+                        },
+                        "description": "",
+                        "auth": {
+                            "type": "noauth"
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Get all loans.",
+                    "request": {
+                        "url": {
+                            "host": "{{baseUrl}}",
+                            "path": "api\/v1\/vendor\/loans",
+                            "query": [],
+                            "raw": "{{baseUrl}}\/api\/v1\/vendor\/loans"
+                        },
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application\/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application\/json"
+                            }
+                        ],
+                        "body": null,
+                        "description": "",
+                        "auth": {
+                            "type": "noauth"
+                        }
+                    },
+                    "response": [
+                        {
+                            "header": [
+                                {
+                                    "key": "cache-control",
+                                    "value": "no-cache, private"
+                                },
+                                {
+                                    "key": "content-type",
+                                    "value": "application\/json"
+                                },
+                                {
+                                    "key": "access-control-allow-origin",
+                                    "value": "*"
+                                },
+                                {
+                                    "key": "access-control-allow-methods",
+                                    "value": "GET, POST, PUT, DELETE, OPTIONS"
+                                },
+                                {
+                                    "key": "access-control-allow-headers",
+                                    "value": "X-Requested-With, Content-Type, X-Token-Auth, Authorization"
+                                }
+                            ],
+                            "code": 401,
+                            "body": "{\"success\":false,\"message\":\"Unauthenticated.\"}",
+                            "name": ""
+                        }
+                    ]
+                },
+                {
+                    "name": "Get loan by ID.",
+                    "request": {
+                        "url": {
+                            "host": "{{baseUrl}}",
+                            "path": "api\/v1\/vendor\/loans\/:id",
+                            "query": [],
+                            "raw": "{{baseUrl}}\/api\/v1\/vendor\/loans\/:id",
+                            "variable": [
+                                {
+                                    "id": "id",
+                                    "key": "id",
+                                    "value": "qui",
+                                    "description": "The ID of the loan."
+                                }
+                            ]
+                        },
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application\/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application\/json"
+                            }
+                        ],
+                        "body": null,
+                        "description": "",
+                        "auth": {
+                            "type": "noauth"
+                        }
+                    },
+                    "response": [
+                        {
+                            "header": [
+                                {
+                                    "key": "cache-control",
+                                    "value": "no-cache, private"
+                                },
+                                {
+                                    "key": "content-type",
+                                    "value": "application\/json"
+                                },
+                                {
+                                    "key": "access-control-allow-origin",
+                                    "value": "*"
+                                },
+                                {
+                                    "key": "access-control-allow-methods",
+                                    "value": "GET, POST, PUT, DELETE, OPTIONS"
+                                },
+                                {
+                                    "key": "access-control-allow-headers",
+                                    "value": "X-Requested-With, Content-Type, X-Token-Auth, Authorization"
+                                }
+                            ],
+                            "code": 401,
+                            "body": "{\"success\":false,\"message\":\"Unauthenticated.\"}",
+                            "name": ""
+                        }
+                    ]
+                },
+                {
+                    "name": "Mark loan as disbursed.",
+                    "request": {
+                        "url": {
+                            "host": "{{baseUrl}}",
+                            "path": "api\/v1\/vendor\/loans\/:id\/disbursed",
+                            "query": [],
+                            "raw": "{{baseUrl}}\/api\/v1\/vendor\/loans\/:id\/disbursed",
+                            "variable": [
+                                {
+                                    "id": "id",
+                                    "key": "id",
+                                    "value": "omnis",
+                                    "description": "The ID of the loan."
+                                }
+                            ]
+                        },
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application\/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application\/json"
+                            }
+                        ],
+                        "body": null,
+                        "description": "",
+                        "auth": {
+                            "type": "noauth"
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "POST api\/v1\/webhooks\/vendor\/direct-debit\/mandate",
+                    "request": {
+                        "url": {
+                            "host": "{{baseUrl}}",
+                            "path": "api\/v1\/webhooks\/vendor\/direct-debit\/mandate",
+                            "query": [],
+                            "raw": "{{baseUrl}}\/api\/v1\/webhooks\/vendor\/direct-debit\/mandate"
+                        },
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application\/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application\/json"
+                            }
+                        ],
+                        "body": null,
+                        "description": "",
+                        "auth": {
+                            "type": "noauth"
+                        }
+                    },
+                    "response": []
+                }
+            ]
+        }
+    ],
+    "auth": {
+        "type": "noauth"
+    }
+}
