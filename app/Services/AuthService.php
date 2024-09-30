@@ -235,6 +235,14 @@ class AuthService implements IAuthService
                 ]
             );
 
+            // verify user
+            if (! $user->hasVerifiedEmail()) {
+                if ($user->markEmailAsVerified()) {
+                    event(new Verified($user));
+                }
+            }
+
+            $businessType = BusinessType::from(strtoupper($request['businessType'] ?: $user->ownerBusinessType->type));
             return $user;
         } catch (\Throwable $th) {
             DB::rollBack();

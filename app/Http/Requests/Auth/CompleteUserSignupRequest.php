@@ -82,6 +82,20 @@ class CompleteUserSignupRequest extends FormRequest
             'type.required_if' => 'The business type is required when provider is google.',
             'type.string' => 'The business type must be a string.',
             'type.in' => 'The business type must be either supplier or customer_pharmacy',
+
+            'contact_email.required' => 'The business email field is required.',
+            'contact_email.string' => 'The business email field must be a string.',
+            'contact_email.email' => 'The business email field must be a valid email address.',
+            'contact_email.max' => 'The business email field must not be greater than :max characters.',
+
+            'contact_person.required' => 'The contact person name field is required.',
+            'contact_person.string' => 'The contact person name field must be a string.',
+            'contact_person.max' => 'The contact person name field must not be greater than :max characters.',
+            'contact_person.min' => 'The contact person name field must not be lesser than :min characters.',
+
+            'name.required' => 'The business name field is required.',
+            'name.string' => 'The business name field must be a string.',
+            'name.max' => 'The business name field must not be greater than :max characters.',
         ];
     }
 }

@@ -25,11 +25,25 @@ class AuthenticatedController extends Controller
      */
     public function store(AuthenticatedRequest $request): JsonResponse
     {
-        if (! $request->authenticate()) {
-            return response()->json([
-                'message' => 'Email or Password is invalid',
-                'status' => 'error',
-            ], Response::HTTP_UNAUTHORIZED);
+        try {
+            if (! $request->authenticate()) {
+                return response()->json([
+                    'message' => 'Email or Password is invalid',
+                    'status' => 'error',
+                ], Response::HTTP_UNAUTHORIZED);
+            }
+
+            $user = $request->user();
+            $tokenResult = $user->createToken('Full Access Token', ['full']);
+            
+
+            return $this->authService->returnAuthResponse(
+                user: $user,
+                tokenResult: $tokenResult,
+                statusCode: Response::HTTP_OK
+            );
+        } catch (\Throwable $th) {
+            return $this->handleErrorResponse($th);
         }
 
         $user = $request->user();

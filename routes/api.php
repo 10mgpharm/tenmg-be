@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\API\Account\AccountController;
 use App\Http\Controllers\API\Auth\AuthenticatedController;
 use App\Http\Controllers\API\Auth\PasswordController;
 use App\Http\Controllers\API\Auth\SignupUserController;
@@ -12,13 +13,16 @@ use App\Http\Controllers\API\Credit\LoanOfferController;
 use App\Http\Controllers\API\Credit\TransactionHistoryController;
 use App\Http\Controllers\API\ProfileController;
 use App\Http\Controllers\API\ResendOtpController;
+use App\Http\Controllers\BusinessSettingController;
+use App\Http\Controllers\API\Account\TwoFactorAuthenticationController;
+use App\Http\Controllers\API\Account\PasswordUpdateController;
 use App\Http\Controllers\API\Webhooks\PaystackWebhookController;
 use Illuminate\Support\Facades\Route;
 
 Route::prefix('v1')->group(function () {
 
     // public routes
-    Route::prefix('auth')->group(function () {
+    Route::prefix('auth')->name('guest.')->group(function () {
         Route::post('/signup', [SignupUserController::class, 'store'])
             ->name('signup');
 
@@ -37,18 +41,46 @@ Route::prefix('v1')->group(function () {
         Route::post('/reset-password', [PasswordController::class, 'reset'])
             ->name('password.reset');
 
-        Route::middleware(['auth:api', 'scope:full'])->group(function () {
-            Route::post('/verify-email', VerifyEmailController::class)
-                ->name('verification.verify');
+            Route::middleware(['auth:api', 'scope:full'])->group(function () {
+                Route::post('/verify-email', VerifyEmailController::class)
+                    ->name('verification.verify');
 
-            Route::post('/signup/complete', [SignupUserController::class, 'complete'])
-                ->name('signup.complete');
+                Route::post('/signup/complete', [SignupUserController::class, 'complete'])
+                    ->name('signup.complete');
 
-            Route::post('/signout', [AuthenticatedController::class, 'destroy'])
-                ->name('signout');
+                Route::post('/signout', [AuthenticatedController::class, 'destroy'])
+                    ->name('signout');
+            });
+
+            Route::post('/resend-otp', ResendOtpController::class)
+                ->name('resend.otp')->middleware('throttle:5,1');
+    });
+
+    // Account specific operations
+    Route::prefix('account')->name('account.')->middleware(['auth:api'])->group(function () {
+        Route::prefix('settings')->name('settings.')->group(function () {
+
+            Route::middleware('scope:full')->group(function(){
+
+                // Update authenticated user's password
+                Route::patch('password', PasswordUpdateController::class);
+
+                // Update authenticated user's profile
+                Route::match(['post', 'patch'], 'profile', [AccountController::class, 'profile']);
+
+                // 2FA 
+                Route::prefix('2fa')->controller(TwoFactorAuthenticationController::class)
+                ->group(function () {
+                    Route::get('setup', 'setup');
+                    Route::post('reset', 'reset');
+                    Route::post('toggle', 'toggle');  // Toggle 2FA (enable/disable)
+                });
+            });
+
+            // 2FA 
+            Route::post('2fa/verify', [TwoFactorAuthenticationController::class, 'verify'])
+            ->middleware(['scope:full,temp']);
         });
-        Route::post('/resend-otp', ResendOtpController::class)
-            ->name('resend.otp')->middleware('throttle:5,1');
     });
 
     // Protected routes
@@ -56,6 +88,27 @@ Route::prefix('v1')->group(function () {
 
         Route::post('/resend-otp', ResendOtpController::class)
             ->name('resend.otp')->middleware('throttle:5,1');
+
+         // Business specific operations
+        Route::prefix('business')->group(function () {
+
+            Route::prefix('settings')->controller(BusinessSettingController::class)
+                ->group(function () {
+                    Route::get('/', 'show');
+
+                    // Update business personal information
+                    Route::match(['post', 'patch'], 'personal-information', 'personalInformation');
+
+                    // Update business account license number, expiry date and cac doc
+                    Route::match(['post', 'patch'], 'license', 'accountSetup');
+                });
+        });
+
+        // supplier specific operations
+        Route::prefix('supplier')->group(function(){
+            Route::get('/{id}', [ProfileController::class, 'show']);
+        });
+
 
         Route::prefix('customers')->group(function () {
             // List customers with pagination and filtering
@@ -87,6 +140,8 @@ Route::prefix('v1')->group(function () {
         });
 
         Route::prefix('vendor')->group(function () {
+
+            Route::get('/{id}', [ProfileController::class, 'show']);
 
             Route::prefix('business')->name('business.')->group(function () {
                 Route::prefix('settings')->name('settings.')->group(function () {
@@ -196,9 +251,10 @@ Route::prefix('v1')->group(function () {
                 Route::get('/{id}', [LoanController::class, 'getLoanById'])->name('loans.getById');
                 Route::post('/{id}/disbursed', [LoanController::class, 'disbursed'])->name('loans.disbursed');
             });
+
+            Route::get('/{businessType}/{id}', [ProfileController::class, 'show']);
         });
 
-        Route::get('/{businessType}/{id}', [ProfileController::class, 'show']);
     });
 
     Route::post('/webhooks/vendor/direct-debit/mandate', [PaystackWebhookController::class, 'handle'])->name('webhooks.paystack.direct_debit');

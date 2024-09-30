@@ -24,8 +24,10 @@ class ProfileShowRequest extends FormRequest
      */
     protected function prepareForValidation()
     {
+        $businessType = strtoupper(last(explode('/', $this->route()->getPrefix())));
+        
         $this->merge([
-            'businessType' => strtoupper($this->route('businessType')),
+            'businessType' => $businessType,
             'id' => $this->route('id'),
         ]);
     }
