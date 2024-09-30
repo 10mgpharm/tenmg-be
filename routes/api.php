@@ -4,6 +4,7 @@ use App\Http\Controllers\API\Auth\AuthenticatedController;
 use App\Http\Controllers\API\Auth\PasswordController;
 use App\Http\Controllers\API\Auth\SignupUserController;
 use App\Http\Controllers\API\Auth\VerifyEmailController;
+use App\Http\Controllers\API\Business\VendorBusinessSettingController;
 use App\Http\Controllers\API\Credit\CustomerController;
 use App\Http\Controllers\API\Credit\LoanApplicationController;
 use App\Http\Controllers\API\Credit\LoanController;
@@ -86,6 +87,19 @@ Route::prefix('v1')->group(function () {
         });
 
         Route::prefix('vendor')->group(function () {
+
+            Route::prefix('business')->name('business.')->group(function () {
+                Route::prefix('settings')->name('settings.')->group(function () {
+
+                    Route::controller(VendorBusinessSettingController::class)->group(function () {
+                        Route::prefix('teams')->name('teams.')->group(function () {
+                            Route::post('/', 'AddTeamMember');
+                            Route::get('/', 'TeamMembers');
+                        });
+                    });
+
+                });
+            });
 
             // Upload transaction history file (min of 6 months)
             Route::post('/txn_history/upload', [TransactionHistoryController::class, 'uploadTransactionHistory'])

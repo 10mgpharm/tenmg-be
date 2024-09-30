@@ -17,4 +17,12 @@ class Business extends Model
     {
         return $this->hasMany(ApiKey::class);
     }
+
+    /**
+     * Get the team members associated with the business.
+     */
+    public function teamMembers()
+    {
+        return $this->hasMany(TeamMember::class);
+    }
 }
