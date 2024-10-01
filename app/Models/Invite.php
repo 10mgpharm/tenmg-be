@@ -23,6 +23,16 @@ class Invite extends Model
         'invite_token',
     ];
 
+
+    /**
+     * Get the attributes that should be cast.
+     *
+     * @param array<string, string>
+     */
+    protected $casts = [
+        'expires_at' => 'datetime',
+    ];
+
     /**
      * Get the user that created the team member.
      */
@@ -39,6 +49,9 @@ class Invite extends Model
         return $this->belongsTo(Business::class);
     }
 
+    /**
+     * Get the role associated with the invitee.
+     */
     public function role()
     {
         return $this->belongsTo(Role::class);
