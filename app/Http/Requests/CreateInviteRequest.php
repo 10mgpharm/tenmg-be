@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests;
 
+use App\Models\Role;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
@@ -22,8 +23,13 @@ class CreateInviteRequest extends FormRequest
      */
     protected function prepareForValidation(): void
     {
+        $role = Role::where('name', $this->input('role'))
+            ->whereIn('name', ['admin', 'support', 'operation'])
+            ->first();
+
         $this->merge([
             'full_name' => $this->input('fullName'),
+            'role_id' => $role ? $role->id : null, // Merge the role ID or null if not found
         ]);
     }
 
@@ -34,6 +40,7 @@ class CreateInviteRequest extends FormRequest
      */
     public function rules(): array
     {
+        
         return [
             'full_name' => ['required', 'string', 'max:255',],
             'email' => [
@@ -41,9 +48,9 @@ class CreateInviteRequest extends FormRequest
                 'string',
                 'email',
                 'max:255',
-                Rule::unique('invites')->where(fn($query) => $query->where('business_id', $this->business_id)->whereNotIn('status', ['REJECTED', 'REMOVED'])),
+                Rule::unique('invites')->where(fn($query) => $query->where('business_id', $this->user()->ownerBusinessType->id)->whereNotIn('status', ['REJECTED', 'REMOVED'])),
             ],
-            'role' => ['required', 'in:admin,support,operation'],
+            'role_id' => ['required', 'exists:roles,id'],
         ];
     }
 
@@ -56,6 +63,8 @@ class CreateInviteRequest extends FormRequest
     {
         return [
             'email.unique' => 'This email has already been invited to this business.',
+            'role_id.required' => $this->input('role') ? 'The selected role does not exist.' : 'The role field is required.',
+            'role_id.exists' => 'The selected role does not exist.',
         ];
     }
 }
