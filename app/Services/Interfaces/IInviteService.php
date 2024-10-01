@@ -42,4 +42,18 @@ interface IInviteService
      * @throws Exception If the invite acceptance process fails.
      */
     public function accept(array $validated, Invite $invite): User;
+
+    /**
+     * Reject an invite and update its status to REJECTED.
+     *
+     * This method performs the status update within a database transaction
+     * to ensure data integrity. If the update fails, an exception is thrown.
+     *
+     * @param Invite $invite The invite instance to be rejected.
+     * @return bool Returns true if the invite was successfully rejected; 
+     * otherwise, it will throw an exception.
+     *
+     * @throws Exception If the invite status update fails.
+     */
+    public function reject(Invite $invite): bool;
 }

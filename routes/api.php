@@ -58,7 +58,7 @@ Route::prefix('v1')->group(function () {
 
         Route::get('invite/view', [InviteController::class, 'view'])->name('invite.view');
         Route::post('invite/accept', [InviteController::class, 'accept'])->name('invite.accept')->middleware('signed');
-        Route::get('invite/reject', [InviteController::class, 'reject'])->name('invite.reject')->middleware('signed');
+        Route::post('invite/reject', [InviteController::class, 'reject'])->name('invite.reject')->middleware('signed');
     });
 
     // Account specific operations

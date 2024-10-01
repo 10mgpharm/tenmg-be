@@ -16,6 +16,7 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Str;
+use Illuminate\Validation\ValidationException;
 
 /**
  * Class InviteService
@@ -53,7 +54,6 @@ class InviteService implements IInviteService
                 return null; // Return null on failure
             });
         } catch (Exception $e) {
-            // Optionally log the exception here
             throw new Exception('Failed to create invite: ' . $e->getMessage());
         }
     }
@@ -128,6 +128,13 @@ class InviteService implements IInviteService
         try {
             return DB::transaction(function () use ($validated, $invite) {
 
+
+                if (User::firstWhere('email', $invite->email)) {
+                    throw ValidationException::withMessages([
+                        'email' => [__('The selected email address already exist.')],
+                    ]);
+                }
+
                 // Create user
                 $user = User::create([
                     'name' => $invite->full_name,
@@ -156,10 +163,36 @@ class InviteService implements IInviteService
                 return $user->refresh(); // Return the updated user instance
             });
         } catch (Exception $e) {
-            // Optionally log the exception here
             throw new Exception('Failed to accept invite: ' . $e->getMessage());
         }
     }
+
+    /**
+     * Reject an invite and update its status to REJECTED.
+     *
+     * This method performs the status update within a database transaction
+     * to ensure data integrity. If the update fails, an exception is thrown.
+     *
+     * @param Invite $invite The invite instance to be rejected.
+     * @return bool Returns true if the invite was successfully rejected; 
+     *              otherwise, it will throw an exception.
+     *
+     * @throws Exception If the invite status update fails.
+     */
+    public function reject(Invite $invite): bool
+    {
+        try {
+            return DB::transaction(function () use ($invite) {
+                // Update the invite status to rejected
+                $invite->update(['status' => 'REJECTED']);
+
+                return true;
+            });
+        } catch (Exception $e) {
+            throw new Exception('Failed to reject invite: ' . $e->getMessage());
+        }
+    }
+
 
     /**
      * Resolve the appropriate role for the user based on the invite's role.
