@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\CreateInviteRequest;
 use App\Http\Requests\GuestAcceptInviteRequest;
+use App\Http\Requests\GuestRejectInviteRequest;
 use App\Http\Requests\ListInvitesRequest;
 use App\Http\Requests\ViewInviteGuestRequest;
 use App\Http\Resources\BusinessUserResource;
@@ -139,5 +140,23 @@ class InviteController extends Controller
             ])
             ->response()
             ->setStatusCode(Response::HTTP_CREATED);
+    }
+
+    /**
+     * Reject an invitation for a guest user.
+     *
+     * @param RejectInviteRequest $request Validated request instance.
+     * @return \Illuminate\Http\JsonResponse A JSON response indicating the rejection status.
+     */
+    public function reject(GuestRejectInviteRequest $request)
+    {
+        $invite = Invite::findOrFail($request->query('inviteId'));
+
+        // Call the service method to reject the invite
+        $this->inviteService->reject($invite);
+
+        return $this->returnJsonResponse(
+            message: 'Invitation has been rejected successfully.'
+        );
     }
 }
