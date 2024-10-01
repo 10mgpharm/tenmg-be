@@ -30,9 +30,15 @@ class InviteController extends Controller
 
         $invite = $this->inviteService->store($validated, $user);
 
+        if (!$invite) {
+            return $this->returnJsonResponse(
+                message: 'Oops, can\'t add invite at the moment. Please try again later.'
+            );
+        }
+
         return $this->returnJsonResponse(
             message: 'Invite sent successfully.',
-            data: (new InviteResource($invite))
+            data: new InviteResource($invite)
         );
     }
 }
