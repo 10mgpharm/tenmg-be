@@ -19,6 +19,7 @@ class InviteResource extends JsonResource
             'fullName' => $this->full_name,
             'email' => $this->email,
             'status' => $this->status,
+            'role' => $this->role->name,
         ];
     }
 }
