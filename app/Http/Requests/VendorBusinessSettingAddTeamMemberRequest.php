@@ -3,6 +3,7 @@
 namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class VendorBusinessSettingAddTeamMemberRequest extends FormRequest
 {
@@ -23,7 +24,6 @@ class VendorBusinessSettingAddTeamMemberRequest extends FormRequest
     {
         $this->merge([
             'full_name' => $this->input('fullName'),
-            'role_id' => $this->input('roleId'),
         ]);
     }
 
@@ -36,8 +36,26 @@ class VendorBusinessSettingAddTeamMemberRequest extends FormRequest
     {
         return [
             'full_name' => ['required', 'string', 'max:255',],
-            'email' => ['required', 'string', 'email', 'max:255', 'unique:team_members,email'],
-            // 'role_id' => ['required', 'exists:roles,id']
+            'email' => [
+                'required',
+                'string',
+                'email',
+                'max:255',
+                Rule::unique('invites')->where(fn($query) => $query->where('business_id', $this->business_id)->whereNotIn('status', ['REJECTED', 'REMOVED'])),
+            ],
+            'role' => ['required', 'in:admin,support,operation'],
+        ];
+    }
+
+    /**
+     * Custom error messages for validation failures.
+     *
+     * @return array
+     */
+    public function messages()
+    {
+        return [
+            'email.unique' => 'This email has already been invited to this business.',
         ];
     }
 }
