@@ -153,7 +153,7 @@ class AuthService implements IAuthService
                 return Role::where('name', 'supplier')->first();
 
             case BusinessType::VENDOR:
-                return Role::where('name', 'supplier')->first();
+                return Role::where('name', 'vendor')->first();
 
             default:
                 // BusinessType::CUSTOMER_PHARMACY
@@ -234,6 +234,15 @@ class AuthService implements IAuthService
                     'google_picture_url' => $request['picture'] ?? null,
                 ]
             );
+
+            // verify user
+            if (! $user->hasVerifiedEmail()) {
+                if ($user->markEmailAsVerified()) {
+                    event(new Verified($user));
+                }
+            }
+
+            $businessType = BusinessType::from(strtoupper($request['businessType'] ?: $user->ownerBusinessType->type));
 
             return $user;
         } catch (\Throwable $th) {

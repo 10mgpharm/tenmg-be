@@ -36,6 +36,7 @@ class User extends Authenticatable implements MustVerifyEmail
         'password',
         'phone',
         'active',
+        'use_two_factor',
         'gender',
         'avatar_id',
         'email_verified_at',
@@ -63,6 +64,7 @@ class User extends Authenticatable implements MustVerifyEmail
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+            'use_two_factor' => 'boolean',
         ];
     }
 
@@ -215,5 +217,13 @@ class User extends Authenticatable implements MustVerifyEmail
     public function businesses(): BelongsToMany
     {
         return $this->belongsToMany(Business::class, 'business_users', 'user_id', 'business_id');
+    }
+
+    /**
+     * Get the invites created by the user.
+     */
+    public function invites()
+    {
+        return $this->hasMany(Invite::class, 'creator_id');
     }
 }

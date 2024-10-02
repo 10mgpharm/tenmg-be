@@ -4,14 +4,16 @@ namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
 
-class AuthProviderRequest extends FormRequest
+class ListInvitesRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
      */
     public function authorize(): bool
     {
-        return true;
+        $user = $this->user();
+
+        return $user && $user->ownerBusinessType && $user->hasRole('vendor');
     }
 
     /**
@@ -21,21 +23,8 @@ class AuthProviderRequest extends FormRequest
      */
     public function rules(): array
     {
-
         return [
-            'name' => ['required', 'string', 'max:255'],
-            'provider' => ['required', 'string'],
-            'picture' => ['sometimes', 'string'],
+            //
         ];
-    }
-
-    /**
-     * Custom error messages.
-     *
-     * @return array<string, string>
-     */
-    public function messages(): array
-    {
-        return [];
     }
 }
