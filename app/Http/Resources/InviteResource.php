@@ -5,7 +5,7 @@ namespace App\Http\Resources;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
-class TeamMemberResource extends JsonResource
+class InviteResource extends JsonResource
 {
     /**
      * Transform the resource into an array.
@@ -19,6 +19,7 @@ class TeamMemberResource extends JsonResource
             'fullName' => $this->full_name,
             'email' => $this->email,
             'status' => $this->status,
+            'role' => $this->role->name,
         ];
     }
 }

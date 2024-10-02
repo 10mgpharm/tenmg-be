@@ -4,17 +4,33 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Notifications\Notifiable;
 
-class TeamMember extends Model
+class Invite extends Model
 {
-    use HasFactory;
+    use HasFactory, Notifiable;
+
+    protected $table = 'invites';
 
     protected $fillable = [
         'full_name',
         'email',
         'status',
         'business_id',
+        'role_id',
         'creator_id',
+        'expires_at',
+        'invite_token',
+    ];
+
+
+    /**
+     * Get the attributes that should be cast.
+     *
+     * @param array<string, string>
+     */
+    protected $casts = [
+        'expires_at' => 'datetime',
     ];
 
     /**
@@ -31,5 +47,13 @@ class TeamMember extends Model
     public function business()
     {
         return $this->belongsTo(Business::class);
+    }
+
+    /**
+     * Get the role associated with the invitee.
+     */
+    public function role()
+    {
+        return $this->belongsTo(Role::class);
     }
 }

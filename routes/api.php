@@ -17,6 +17,7 @@ use App\Http\Controllers\BusinessSettingController;
 use App\Http\Controllers\API\Account\TwoFactorAuthenticationController;
 use App\Http\Controllers\API\Account\PasswordUpdateController;
 use App\Http\Controllers\API\Webhooks\PaystackWebhookController;
+use App\Http\Controllers\InviteController;
 use Illuminate\Support\Facades\Route;
 
 Route::prefix('v1')->group(function () {
@@ -54,6 +55,10 @@ Route::prefix('v1')->group(function () {
 
             Route::post('/resend-otp', ResendOtpController::class)
                 ->name('resend.otp')->middleware('throttle:5,1');
+
+        Route::get('invite/view', [InviteController::class, 'view'])->name('invite.view');
+        Route::post('invite/accept', [InviteController::class, 'accept'])->name('invite.accept')->middleware('signed');
+        Route::post('invite/reject', [InviteController::class, 'reject'])->name('invite.reject')->middleware('signed');
     });
 
     // Account specific operations
@@ -143,16 +148,10 @@ Route::prefix('v1')->group(function () {
 
             Route::get('/{id}', [ProfileController::class, 'show']);
 
-            Route::prefix('business')->name('business.')->group(function () {
+            Route::prefix('business')->name('vendor.business.')->group(function () {
                 Route::prefix('settings')->name('settings.')->group(function () {
-
-                    Route::controller(VendorBusinessSettingController::class)->group(function () {
-                        Route::prefix('teams')->name('teams.')->group(function () {
-                            Route::post('/', 'AddTeamMember');
-                            Route::get('/', 'TeamMembers');
-                        });
-                    });
-
+                    Route::get('invite/team-members', [InviteController::class, 'members'])->name('invite.team-members');
+                    Route::apiResource('invite', InviteController::class);
                 });
             });
 

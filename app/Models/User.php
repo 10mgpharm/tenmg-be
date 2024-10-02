@@ -220,10 +220,10 @@ class User extends Authenticatable implements MustVerifyEmail
     }
 
     /**
-     * Get the team members created by the user.
+     * Get the invites created by the user.
      */
-    public function teamMembers()
+    public function invites()
     {
-        return $this->hasMany(TeamMember::class, 'creator_id');
+        return $this->hasMany(Invite::class, 'creator_id');
     }
 }

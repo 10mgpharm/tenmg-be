@@ -62,10 +62,18 @@ class Business extends Model
     }
 
     /**
-     * Get the team members associated with the business.
+     * Get the team members/business users associated with the business.
      */
-    public function teamMembers()
+    public function businessUsers()
     {
-        return $this->hasMany(TeamMember::class);
+        return $this->hasMany(BusinessUser::class);
+    }
+
+    /**
+     * Get the invitees associated with the business.
+     */
+    public function invites()
+    {
+        return $this->hasMany(Invite::class);
     }
 }
