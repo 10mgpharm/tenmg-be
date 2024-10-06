@@ -245,6 +245,11 @@ Route::prefix('v1')->group(function () {
                 Route::get('/', [LoanController::class, 'getAllLoans'])->name('loans.getAll')->middleware('admin');
                 Route::get('/{id}', [LoanController::class, 'getLoanById'])->name('loans.getById');
                 Route::post('/{id}/disbursed', [LoanController::class, 'disbursed'])->name('loans.disbursed');
+
+                Route::prefix('repayments')->group(function () {
+                    Route::post('/{id}/repay', [LoanController::class, 'repayLoan'])->name('loans.repay');
+                    Route::post('/{id}/liquidate', [LoanController::class, 'liquidateLoan'])->name('loans.liquidate');
+                });
             });
 
             Route::get('/{businessType}/{id}', [ProfileController::class, 'show']);

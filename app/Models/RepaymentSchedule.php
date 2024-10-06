@@ -15,7 +15,10 @@ class RepaymentSchedule extends Model
     protected $fillable = [
         'loan_id',
         'payment_id',
-        'amount',
+        'principal',
+        'interest',
+        'balance',
+        'total_amount',
         'late_fee',
         'due_date',
         'payment_status',

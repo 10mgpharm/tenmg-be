@@ -7,10 +7,13 @@ use App\Models\RepaymentSchedule;
 use App\Repositories\CreditCustomerDebitMandateRepository;
 use App\Repositories\OfferRepository;
 use App\Repositories\RepaymentLogRepository;
+use App\Repositories\RepaymentScheduleRepository;
 use Exception;
+use Illuminate\Http\Client\Response;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 use Throwable;
+use \Illuminate\Http\Response as HttpResponse;
 
 class PaystackService
 {
@@ -20,9 +23,10 @@ class PaystackService
     public function __construct(
         private CreditCustomerDebitMandateRepository $creditCustomerDebitMandateRepository,
         private OfferRepository $offerRepository,
-        private RepaymentLogRepository $repaymentLogRepository
+        private RepaymentLogRepository $repaymentLogRepository,
+        private RepaymentScheduleRepository $repaymentScheduleRepository
     ) {
-        $this->pk_secret = config('services.paystack.secret_key');
+        $this->pk_secret = config('services.paystack.secret');
         $this->pk_url = config('services.paystack.url');
     }
 
@@ -135,34 +139,50 @@ class PaystackService
     /**
      * Debit customer using Paystack.
      */
-    public function debitCustomer(RepaymentSchedule $repayment)
+    public function debitCustomer(RepaymentSchedule $repayment, bool $isLiquidation = false): Response
     {
         $mandate = $repayment?->loan?->customer?->debitMandate;
 
         if (!$mandate || !$mandate->active) {
-            throw new \Exception('Customer does not have an active debit mandate.');
+            throw new Exception('Customer does not have an active debit mandate.');
         }
 
-        $repaymentLog = $this->initiateLogRepayment($repayment);
+        $repaymentLog = $this->initiateLogRepayment(repayment: $repayment, isLiquidation: $isLiquidation);
 
-        $response = Http::withToken($this->pk_secret)->post(
-            $this->pk_url . '/transaction/charge_authorization',
-            [
+        $payload = [
+            'authorization_code' => $mandate->authorization_code,
+            'amount' => $repayment->total_amount * 100, // amount in kobo
+            'email' => $repayment->loan->customer->email,
+            'currency' => 'NGN',
+            'reference' => $repaymentLog->reference,
+        ];
+
+        if ($isLiquidation) {
+            $payload = [
                 'authorization_code' => $mandate->authorization_code,
-                'amount' => $repayment->amount * 100, // amount in kobo
+                'amount' => ($repayment->total_amount + $repayment->balance) * 100, // amount in kobo
                 'email' => $repayment->loan->customer->email,
                 'currency' => 'NGN',
                 'reference' => $repaymentLog->reference,
-            ]
+            ];
+        }
+
+        $response = Http::withToken($this->pk_secret)->post(
+            $this->pk_url . '/transaction/charge_authorization', $payload
         );
 
+        $data = $response->json();
+
         if ($response->successful()) {
+
             // Update repayment status to PROCESSING
-            $repayment->update(['payment_status' => 'PROCESSING', 'payment_id' => $repaymentLog->id]);
-        } else {
-            // Handle failure (e.g. log error)
-            Log::error('Failed to debit customer: ' . $response->body());
-        }
+            !$isLiquidation && $repayment->update(['payment_status' => 'PROCESSING', 'payment_id' => $repaymentLog->id]);
+
+            return $response;
+        } 
+        $errorMessage = 'Paystack Error: '. $data['message'] ?? 'Failed to debit customer';
+        Log::error('Failed to debit customer: ' . $response->body());
+        throw new Exception($errorMessage, HttpResponse::HTTP_FAILED_DEPENDENCY);
     }
 
     public function handleChargeSuccess(array $payload): void
@@ -192,17 +212,17 @@ class PaystackService
     /**
      * Log the repayment in credit_repayment_logs.
      */
-    protected function initiateLogRepayment(RepaymentSchedule $repayment): RepaymentLog
+    protected function initiateLogRepayment(RepaymentSchedule $repayment, bool $isLiquidation = false): RepaymentLog
     {
         $reference = '10MG-PK-' . time() . '-' . $repayment->id;
 
-        return $this->repaymentLogRepository->create([
+        return $this->repaymentLogRepository->logRepayment([
             'reference' => $reference,
             'business_id' => $repayment->loan->business_id,
             'customer_id' => $repayment->loan->customer_id,
             'loan_id' => $repayment->loan_id,
-            'total_amount_paid' => $repayment->amount,
-            'capital_amount' => $repayment->amount,
+            'total_amount_paid' => $isLiquidation ? $repayment->total_amount + $repayment->balance : $repayment->total_amount,
+            'capital_amount' => $isLiquidation ? $repayment->principal + $repayment->balance : $repayment->principal,
             'txn_status' => 'pending',
             'channel' => 'paystack',
             'channel_reference' => $reference,
@@ -252,7 +272,7 @@ class PaystackService
     // verify repayment schedule transactions every hour
     public function verifyRepaymentScheduleTransactions()
     {
-        $repaymentSchedules = $this->repaymentLogRepository->findProcessingRepayments();
+        $repaymentSchedules = $this->repaymentScheduleRepository->findProcessingRepayments();
 
         foreach ($repaymentSchedules as $repayment) {
             try {

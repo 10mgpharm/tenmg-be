@@ -13,8 +13,6 @@ use Illuminate\Support\Facades\Validator;
 
 trait FileUploadTrait
 {
-    // public function __construct(private FilesystemManager $fileSystem) {}
-
     protected function processFileUpload(
         AttachmentService $service,
         Request $request,

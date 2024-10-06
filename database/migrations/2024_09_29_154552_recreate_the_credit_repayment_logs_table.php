@@ -19,7 +19,7 @@ return new class extends Migration
             $table->foreignId('customer_id')->constrained('credit_customers')->onDelete('cascade');
             $table->foreignId('loan_id')->constrained('credit_loans')->onDelete('cascade');
             $table->string('reference', 50)->unique();
-            $table->foreignId('payment_method_id')->constrained('credit_payment_methods')->onDelete('cascade')->nullable();
+            $table->foreignId('payment_method_id')->nullable()->constrained('credit_payment_methods')->nullOnDelete();
 
             $table->decimal('total_amount_paid', 18, 2)->nullable();
             $table->decimal('capital_amount', 18, 2)->nullable();

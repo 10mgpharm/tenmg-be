@@ -9,7 +9,9 @@ use Illuminate\Http\JsonResponse;
 
 class LoanController extends Controller
 {
-    public function __construct(private LoanService $loanService) {}
+    public function __construct(private LoanService $loanService)
+    {
+    }
 
     /**
      * Get all loans.
@@ -27,7 +29,7 @@ class LoanController extends Controller
     public function getLoanById(int $id): JsonResponse
     {
         $loan = $this->loanService->getLoanById($id);
-        if (! $loan) {
+        if (!$loan) {
             throw new Exception('Loan not found', 404);
         }
 
@@ -40,10 +42,23 @@ class LoanController extends Controller
     public function disbursed(int $id): JsonResponse
     {
         $disbursed = $this->loanService->markAsDisbursed($id);
-        if (! $disbursed) {
+        if (!$disbursed) {
             throw new Exception('Failed to disburse loan', 400);
         }
 
         return $this->returnJsonResponse(message: 'Loan disbursed successfully', data: $disbursed);
     }
+
+    public function liquidateLoan(int $repaymentScheduleId): JsonResponse
+    {
+        $response = $this->loanService->processLoanRepayment(repaymentScheduleId: $repaymentScheduleId, isLiquidation: true);
+        return $this->returnJsonResponse(message: 'Loan liquidation is being process', data: $response);
+    }
+
+    public function repayLoan(int $repaymentScheduleId): JsonResponse
+    {
+        $response = $this->loanService->processLoanRepayment(repaymentScheduleId: $repaymentScheduleId);
+        return $this->returnJsonResponse(message: 'Loan repayment is being process', data: $response);
+    }
+
 }

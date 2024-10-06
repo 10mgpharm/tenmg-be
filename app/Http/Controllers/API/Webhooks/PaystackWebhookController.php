@@ -15,13 +15,13 @@ class PaystackWebhookController extends Controller
     public function handle(Request $request)
     {
         // Verify the Paystack signature
-        // $secret = config('services.paystack.secret');
-        // $paystackSignature = $request->header('x-paystack-signature');
-        // $computedSignature = hash_hmac('sha512', $request->getContent(), $secret);
+        $secret = config('services.paystack.secret');
+        $paystackSignature = $request->header('x-paystack-signature');
+        $computedSignature = hash_hmac('sha512', $request->getContent(), $secret);
 
-        // if ($paystackSignature !== $computedSignature) {
-        //     return response()->json(['message' => 'Invalid signature'], 400);
-        // }
+        if ($paystackSignature !== $computedSignature) {
+            return response()->json(['message' => 'Invalid signature'], 400);
+        }
 
         // Log the request for debugging
         Log::info('Paystack Webhook Event', ['data' => $request->all()]);

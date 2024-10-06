@@ -62,4 +62,17 @@ class RepaymentScheduleRepository
             ->with(['loan.customer']) // eager load related customer and loan info
             ->get();
     }
+
+    public function findProcessingRepayments(): Collection
+    {
+        return RepaymentSchedule::where('payment_status', 'PROCESSING')->get();
+    }
+
+    public function markRepaymentsAsCancelled(int $loanId): bool
+    {
+        return RepaymentSchedule::where('loan_id', $loanId)
+            ->where('payment_status', 'PENDING')
+            ->orWhere('payment_status', 'PROCESSING')
+            ->update(['payment_status' => 'CANCELLED']);
+    }
 }

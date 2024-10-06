@@ -12,7 +12,7 @@ class RepaymentLogRepository
     /**
      * Insert a new repayment log.
      */
-    public function create(array $data): RepaymentLog
+    public function logRepayment(array $data): RepaymentLog
     {
         return RepaymentLog::create($data);
     }
@@ -33,8 +33,4 @@ class RepaymentLogRepository
         return RepaymentLog::whereReference($reference)->first();
     }
 
-    public function findProcessingRepayments(): Collection
-    {
-        return RepaymentSchedule::where('payment_status', 'PROCESSING')->get();
-    }
 }

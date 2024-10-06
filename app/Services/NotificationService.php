@@ -104,4 +104,16 @@ class NotificationService implements INotificationService
 
         // Mail::to($customer->email)->send(new RepaymentReminderMail($repayment));
     }
+
+    public function sendLoanLiquidationNotification($customer, $loan)
+    {
+        $subject = 'Loan Liquidation';
+        $message = "Dear {$customer->name}, your loan (ID: {$loan->identifier}) has been successfully paid off.";
+
+        $this->sendCustomerNotification($customer->id, $subject, $message);
+
+        // Send email or SMS
+        // Mail::to($customer->email)->send(new LoanLiquidationMail($loan));
+        // Admin notification logic here
+    }
 }
