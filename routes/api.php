@@ -144,7 +144,7 @@ Route::prefix('v1')->group(function () {
 
         Route::prefix('vendor')->group(function () {
 
-            Route::get('/{id}', [ProfileController::class, 'show']);
+            Route::get('/', action: [ProfileController::class, 'show']);
 
             Route::prefix('business')->name('vendor.business.')->group(function () {
                 Route::prefix('settings')->name('settings.')->group(function () {

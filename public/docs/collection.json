@@ -10,7 +10,7 @@
     ],
     "info": {
         "name": "10MG",
-        "_postman_id": "2fa04b64-87f3-47aa-b272-232130b35aa5",
+        "_postman_id": "a37970fb-5a0b-4630-a51a-1bba398bb488",
         "description": "",
         "schema": "https:\/\/schema.getpostman.com\/json\/collection\/v2.1.0\/collection.json"
     },
@@ -41,7 +41,7 @@
                         ],
                         "body": {
                             "mode": "raw",
-                            "raw": "{\"businessType\":\"supplier\",\"fullname\":\"reioapxjfnpxdrmqe\",\"name\":\"ogrdchdaaynujmaze\",\"email\":\"gabriel60@example.net\",\"password\":\"voluptates\",\"passwordConfirmation\":\"voluptatum\",\"termsAndConditions\":true}"
+                            "raw": "{\"businessType\":\"vendor\",\"fullname\":\"oqwnafhnjcnerceqcsfyz\",\"name\":\"n\",\"email\":\"lurline14@example.org\",\"password\":\"accusamus\",\"passwordConfirmation\":\"quod\",\"termsAndConditions\":true}"
                         },
                         "description": "",
                         "auth": {
@@ -72,7 +72,7 @@
                         ],
                         "body": {
                             "mode": "raw",
-                            "raw": "{\"email\":\"adams.bernard@example.net\",\"password\":\"djH$cCh*hGN'|R\"}"
+                            "raw": "{\"email\":\"cwilliamson@example.com\",\"password\":\"#dVOxD>\"}"
                         },
                         "description": "",
                         "auth": {
@@ -103,7 +103,7 @@
                         ],
                         "body": {
                             "mode": "raw",
-                            "raw": "{\"name\":\"njbmzanjnaaalhl\",\"provider\":\"placeat\",\"picture\":\"sapiente\",\"email\":\"spencer.bernita@example.net\"}"
+                            "raw": "{\"name\":\"synzlrj\",\"provider\":\"sed\",\"picture\":\"nemo\"}"
                         },
                         "description": "",
                         "auth": {
@@ -134,7 +134,7 @@
                         ],
                         "body": {
                             "mode": "raw",
-                            "raw": "{\"email\":\"beatae\"}"
+                            "raw": "{\"email\":\"possimus\"}"
                         },
                         "description": "",
                         "auth": {
@@ -165,7 +165,7 @@
                         ],
                         "body": {
                             "mode": "raw",
-                            "raw": "{\"otp\":\"consequatur\",\"email\":\"sed\",\"password\":\"minima\",\"passwordConfirmation\":\"qui\"}"
+                            "raw": "{\"otp\":\"et\",\"email\":\"itaque\",\"password\":\"doloribus\",\"passwordConfirmation\":\"vel\"}"
                         },
                         "description": "",
                         "auth": {
@@ -196,7 +196,7 @@
                         ],
                         "body": {
                             "mode": "raw",
-                            "raw": "{\"contact_email\":\"vkirlin@example.org\",\"contact_phone\":\"yuujnlfuccfhmlxaimw\",\"contact_person\":\"qmseuyz\",\"contact_person_position\":\"btaxylsuwzxncrpnsjnr\",\"name\":\"lilwuqpiz\",\"termsAndConditions\":true,\"provider\":\"credentials\",\"type\":\"customer_pharmacy\"}"
+                            "raw": "{\"contact_email\":\"hauck.bethany@example.com\",\"contact_phone\":\"ozhbsgfzggxmsw\",\"contact_person\":\"qnqxwryditrcotp\",\"contact_person_position\":\"ofodspnocydgxvvg\",\"name\":\"fdwvssjjkivktvjujsq\",\"termsAndConditions\":true,\"provider\":\"google\",\"type\":\"vendor\"}"
                         },
                         "description": "This method handles the final step in the user signup process, ensuring that\nthe business details are updated.",
                         "auth": {
@@ -255,7 +255,277 @@
                         ],
                         "body": {
                             "mode": "raw",
-                            "raw": "{\"type\":\"RESET_PASSWORD_VERIFICATION\",\"email\":\"seamus.wintheiser@example.org\"}"
+                            "raw": "{\"type\":\"RESET_PASSWORD_VERIFICATION\",\"email\":\"nhilpert@example.net\"}"
+                        },
+                        "description": "",
+                        "auth": {
+                            "type": "noauth"
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Retrieve and display invitation details for a guest user.",
+                    "request": {
+                        "url": {
+                            "host": "{{baseUrl}}",
+                            "path": "api\/v1\/auth\/invite\/view",
+                            "query": [],
+                            "raw": "{{baseUrl}}\/api\/v1\/auth\/invite\/view"
+                        },
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application\/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application\/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\"invite_token\":\"magni\"}"
+                        },
+                        "description": "This method processes the request to view an invitation, using the\ninvite service to fetch the relevant invitation details. It returns\na JSON response containing the invite information, such as role,\nfull name, email, and action URLs for accepting or rejecting the invitation.",
+                        "auth": {
+                            "type": "noauth"
+                        }
+                    },
+                    "response": [
+                        {
+                            "header": [
+                                {
+                                    "key": "cache-control",
+                                    "value": "no-cache, private"
+                                },
+                                {
+                                    "key": "content-type",
+                                    "value": "application\/json"
+                                },
+                                {
+                                    "key": "access-control-allow-origin",
+                                    "value": "*"
+                                },
+                                {
+                                    "key": "access-control-allow-methods",
+                                    "value": "GET, POST, PUT, DELETE, OPTIONS"
+                                },
+                                {
+                                    "key": "access-control-allow-headers",
+                                    "value": "X-Requested-With, Content-Type, X-Token-Auth, Authorization"
+                                }
+                            ],
+                            "code": 400,
+                            "body": "{\"success\":false,\"message\":\"Invalid parameters supplied.\",\"data\":{\"inviteToken\":[\"The invite token field is required.\"]}}",
+                            "name": ""
+                        }
+                    ]
+                },
+                {
+                    "name": "Accept an invitation and create a new user account.",
+                    "request": {
+                        "url": {
+                            "host": "{{baseUrl}}",
+                            "path": "api\/v1\/auth\/invite\/accept",
+                            "query": [],
+                            "raw": "{{baseUrl}}\/api\/v1\/auth\/invite\/accept"
+                        },
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application\/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application\/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\"invite_id\":\"quia\",\"invite_token\":\"unde\",\"password\":\"velit\",\"passwordConfirmation\":\"voluptas\",\"termsAndConditions\":true}"
+                        },
+                        "description": "This method validates the invitation details, ensures the token and invite are valid, and creates\na new user account if the invitation is successfully accepted. The invite token must not be expired.",
+                        "auth": {
+                            "type": "noauth"
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Reject an invitation for a guest user.",
+                    "request": {
+                        "url": {
+                            "host": "{{baseUrl}}",
+                            "path": "api\/v1\/auth\/invite\/reject",
+                            "query": [],
+                            "raw": "{{baseUrl}}\/api\/v1\/auth\/invite\/reject"
+                        },
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application\/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application\/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\"invite_id\":\"magnam\",\"invite_token\":\"qui\"}"
+                        },
+                        "description": "",
+                        "auth": {
+                            "type": "noauth"
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Update the authenticated user password.",
+                    "request": {
+                        "url": {
+                            "host": "{{baseUrl}}",
+                            "path": "api\/v1\/account\/settings\/password",
+                            "query": [],
+                            "raw": "{{baseUrl}}\/api\/v1\/account\/settings\/password"
+                        },
+                        "method": "PATCH",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application\/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application\/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\"current_password\":\"bmvhioaqsrf\",\"new_password\":\"est\"}"
+                        },
+                        "description": "",
+                        "auth": {
+                            "type": "noauth"
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Setup multi-factor authentication (MFA) for the user.",
+                    "request": {
+                        "url": {
+                            "host": "{{baseUrl}}",
+                            "path": "api\/v1\/account\/settings\/2fa\/setup",
+                            "query": [],
+                            "raw": "{{baseUrl}}\/api\/v1\/account\/settings\/2fa\/setup"
+                        },
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application\/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application\/json"
+                            }
+                        ],
+                        "body": null,
+                        "description": "",
+                        "auth": {
+                            "type": "noauth"
+                        }
+                    },
+                    "response": [
+                        {
+                            "header": [
+                                {
+                                    "key": "cache-control",
+                                    "value": "no-cache, private"
+                                },
+                                {
+                                    "key": "content-type",
+                                    "value": "application\/json"
+                                },
+                                {
+                                    "key": "access-control-allow-origin",
+                                    "value": "*"
+                                },
+                                {
+                                    "key": "access-control-allow-methods",
+                                    "value": "GET, POST, PUT, DELETE, OPTIONS"
+                                },
+                                {
+                                    "key": "access-control-allow-headers",
+                                    "value": "X-Requested-With, Content-Type, X-Token-Auth, Authorization"
+                                }
+                            ],
+                            "code": 401,
+                            "body": "{\"success\":false,\"message\":\"Unauthenticated.\"}",
+                            "name": ""
+                        }
+                    ]
+                },
+                {
+                    "name": "Toggle Two-Factor Authentication (2FA) on or off for the authenticated user.",
+                    "request": {
+                        "url": {
+                            "host": "{{baseUrl}}",
+                            "path": "api\/v1\/account\/settings\/2fa\/toggle",
+                            "query": [],
+                            "raw": "{{baseUrl}}\/api\/v1\/account\/settings\/2fa\/toggle"
+                        },
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application\/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application\/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\"current_password\":\"ypgtorfxzcnw\",\"use_two_factor\":true}"
+                        },
+                        "description": "",
+                        "auth": {
+                            "type": "noauth"
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Verify the provided multi-factor authentication token.",
+                    "request": {
+                        "url": {
+                            "host": "{{baseUrl}}",
+                            "path": "api\/v1\/account\/settings\/2fa\/verify",
+                            "query": [],
+                            "raw": "{{baseUrl}}\/api\/v1\/account\/settings\/2fa\/verify"
+                        },
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application\/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application\/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\"code\":\"gzvuuj\"}"
                         },
                         "description": "",
                         "auth": {
@@ -286,7 +556,7 @@
                         ],
                         "body": {
                             "mode": "raw",
-                            "raw": "{\"type\":\"SIGNUP_EMAIL_VERIFICATION\",\"email\":\"catalina87@example.com\"}"
+                            "raw": "{\"type\":\"CHANGE_EMAIL_VERIFICATION\",\"email\":\"amedhurst@example.net\"}"
                         },
                         "description": "",
                         "auth": {
@@ -294,6 +564,62 @@
                         }
                     },
                     "response": []
+                },
+                {
+                    "name": "Display the business details associated with the authenticated user.",
+                    "request": {
+                        "url": {
+                            "host": "{{baseUrl}}",
+                            "path": "api\/v1\/business\/settings",
+                            "query": [],
+                            "raw": "{{baseUrl}}\/api\/v1\/business\/settings"
+                        },
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application\/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application\/json"
+                            }
+                        ],
+                        "body": null,
+                        "description": "",
+                        "auth": {
+                            "type": "noauth"
+                        }
+                    },
+                    "response": [
+                        {
+                            "header": [
+                                {
+                                    "key": "cache-control",
+                                    "value": "no-cache, private"
+                                },
+                                {
+                                    "key": "content-type",
+                                    "value": "application\/json"
+                                },
+                                {
+                                    "key": "access-control-allow-origin",
+                                    "value": "*"
+                                },
+                                {
+                                    "key": "access-control-allow-methods",
+                                    "value": "GET, POST, PUT, DELETE, OPTIONS"
+                                },
+                                {
+                                    "key": "access-control-allow-headers",
+                                    "value": "X-Requested-With, Content-Type, X-Token-Auth, Authorization"
+                                }
+                            ],
+                            "code": 401,
+                            "body": "{\"success\":false,\"message\":\"Unauthenticated.\"}",
+                            "name": ""
+                        }
+                    ]
                 },
                 {
                     "name": "GET api\/v1\/customers",
@@ -317,7 +643,7 @@
                         ],
                         "body": {
                             "mode": "raw",
-                            "raw": "{\"name\":\"paurylkrfap\",\"email\":\"wschumm@example.net\",\"vendorId\":19,\"createdAtStart\":\"2020-10-16\",\"createdAtEnd\":\"2085-09-13\",\"page\":79,\"perPage\":21}"
+                            "raw": "{\"name\":\"ahnc\",\"email\":\"melisa.kling@example.com\",\"vendorId\":4,\"createdAtStart\":\"2010-11-14\",\"createdAtEnd\":\"2057-01-07\",\"page\":80,\"perPage\":25}"
                         },
                         "description": "",
                         "auth": {
@@ -376,7 +702,7 @@
                         ],
                         "body": {
                             "mode": "raw",
-                            "raw": "{\"name\":\"syasntkl\",\"email\":\"gturner@example.com\",\"phone\":\"cszwrlzhpekdkap\"}"
+                            "raw": "{\"name\":\"jhwqrmkdurjywuw\",\"email\":\"alan.moen@example.org\",\"phone\":\"zvlzdvagcjvae\"}"
                         },
                         "description": "",
                         "auth": {
@@ -463,7 +789,7 @@
                         ],
                         "body": {
                             "mode": "raw",
-                            "raw": "{\"file\":\"ilhgatfwjg\"}"
+                            "raw": "{\"file\":\"kwmaxg\"}"
                         },
                         "description": "",
                         "auth": {
@@ -484,7 +810,7 @@
                                 {
                                     "id": "id",
                                     "key": "id",
-                                    "value": "odit",
+                                    "value": "tempora",
                                     "description": "The ID of the customer."
                                 }
                             ]
@@ -548,7 +874,7 @@
                                 {
                                     "id": "id",
                                     "key": "id",
-                                    "value": "minima",
+                                    "value": "provident",
                                     "description": "The ID of the customer."
                                 }
                             ]
@@ -566,7 +892,7 @@
                         ],
                         "body": {
                             "mode": "raw",
-                            "raw": "{\"name\":\"izdgawnhwoccqbyemyxebe\",\"email\":\"josie.zieme@example.org\",\"phone\":\"fyjwdbzgunfqbb\",\"active\":true}"
+                            "raw": "{\"name\":\"e\",\"email\":\"sadie.stehr@example.com\",\"phone\":\"x\",\"active\":true}"
                         },
                         "description": "",
                         "auth": {
@@ -587,7 +913,7 @@
                                 {
                                     "id": "id",
                                     "key": "id",
-                                    "value": "tenetur",
+                                    "value": "ducimus",
                                     "description": "The ID of the customer."
                                 }
                             ]
@@ -623,7 +949,7 @@
                                 {
                                     "id": "id",
                                     "key": "id",
-                                    "value": "animi",
+                                    "value": "dolore",
                                     "description": "The ID of the customer."
                                 }
                             ]
@@ -641,6 +967,149 @@
                         ],
                         "body": null,
                         "description": "",
+                        "auth": {
+                            "type": "noauth"
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Retrieve all team members for the authenticated user's business.",
+                    "request": {
+                        "url": {
+                            "host": "{{baseUrl}}",
+                            "path": "api\/v1\/vendor\/business\/settings\/invite\/team-members",
+                            "query": [],
+                            "raw": "{{baseUrl}}\/api\/v1\/vendor\/business\/settings\/invite\/team-members"
+                        },
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application\/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application\/json"
+                            }
+                        ],
+                        "body": null,
+                        "description": "",
+                        "auth": {
+                            "type": "noauth"
+                        }
+                    },
+                    "response": [
+                        {
+                            "header": [
+                                {
+                                    "key": "cache-control",
+                                    "value": "no-cache, private"
+                                },
+                                {
+                                    "key": "content-type",
+                                    "value": "application\/json"
+                                },
+                                {
+                                    "key": "access-control-allow-origin",
+                                    "value": "*"
+                                },
+                                {
+                                    "key": "access-control-allow-methods",
+                                    "value": "GET, POST, PUT, DELETE, OPTIONS"
+                                },
+                                {
+                                    "key": "access-control-allow-headers",
+                                    "value": "X-Requested-With, Content-Type, X-Token-Auth, Authorization"
+                                }
+                            ],
+                            "code": 401,
+                            "body": "{\"success\":false,\"message\":\"Unauthenticated.\"}",
+                            "name": ""
+                        }
+                    ]
+                },
+                {
+                    "name": "Retrieve all invite for the authenticated user's business.",
+                    "request": {
+                        "url": {
+                            "host": "{{baseUrl}}",
+                            "path": "api\/v1\/vendor\/business\/settings\/invite",
+                            "query": [],
+                            "raw": "{{baseUrl}}\/api\/v1\/vendor\/business\/settings\/invite"
+                        },
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application\/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application\/json"
+                            }
+                        ],
+                        "body": null,
+                        "description": "",
+                        "auth": {
+                            "type": "noauth"
+                        }
+                    },
+                    "response": [
+                        {
+                            "header": [
+                                {
+                                    "key": "cache-control",
+                                    "value": "no-cache, private"
+                                },
+                                {
+                                    "key": "content-type",
+                                    "value": "application\/json"
+                                },
+                                {
+                                    "key": "access-control-allow-origin",
+                                    "value": "*"
+                                },
+                                {
+                                    "key": "access-control-allow-methods",
+                                    "value": "GET, POST, PUT, DELETE, OPTIONS"
+                                },
+                                {
+                                    "key": "access-control-allow-headers",
+                                    "value": "X-Requested-With, Content-Type, X-Token-Auth, Authorization"
+                                }
+                            ],
+                            "code": 401,
+                            "body": "{\"success\":false,\"message\":\"Unauthenticated.\"}",
+                            "name": ""
+                        }
+                    ]
+                },
+                {
+                    "name": "Add a new team member\/invite to the authenticated user's business.",
+                    "request": {
+                        "url": {
+                            "host": "{{baseUrl}}",
+                            "path": "api\/v1\/vendor\/business\/settings\/invite",
+                            "query": [],
+                            "raw": "{{baseUrl}}\/api\/v1\/vendor\/business\/settings\/invite"
+                        },
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application\/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application\/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\"full_name\":\"wwppwlgyzssdslqwzfpvnc\",\"email\":\"fschneider@example.net\",\"role_id\":\"expedita\"}"
+                        },
+                        "description": "This method validates the incoming request, creates a new team member\/invite\nusing the validated data, and returns a JSON response with the team member's\/invite's details.",
                         "auth": {
                             "type": "noauth"
                         }
@@ -669,7 +1138,7 @@
                         ],
                         "body": {
                             "mode": "raw",
-                            "raw": "{\"file\":\"omky\",\"customerId\":\"et\"}"
+                            "raw": "{\"file\":\"usxdswhxvpocisjpraucvvigs\",\"customerId\":\"minus\"}"
                         },
                         "description": "",
                         "auth": {
@@ -700,7 +1169,7 @@
                         ],
                         "body": {
                             "mode": "raw",
-                            "raw": "{\"transactionHistoryId\":\"ex\"}"
+                            "raw": "{\"transactionHistoryId\":\"harum\"}"
                         },
                         "description": "",
                         "auth": {
@@ -731,7 +1200,7 @@
                         ],
                         "body": {
                             "mode": "raw",
-                            "raw": "{\"file\":\"hxsgvrtajyw\",\"customerId\":\"aut\"}"
+                            "raw": "{\"file\":\"zofyq\",\"customerId\":\"aut\"}"
                         },
                         "description": "",
                         "auth": {
@@ -762,7 +1231,7 @@
                         ],
                         "body": {
                             "mode": "raw",
-                            "raw": "{\"requestedAmount\":6,\"durationInMonths\":7}"
+                            "raw": "{\"requestedAmount\":52,\"durationInMonths\":11}"
                         },
                         "description": "",
                         "auth": {
@@ -849,7 +1318,7 @@
                         ],
                         "body": {
                             "mode": "raw",
-                            "raw": "{\"customerId\":\"vel\"}"
+                            "raw": "{\"customerId\":\"voluptatem\"}"
                         },
                         "description": "",
                         "auth": {
@@ -936,7 +1405,7 @@
                         ],
                         "body": {
                             "mode": "raw",
-                            "raw": "{\"status\":\"rejected\",\"search\":\"quia\",\"dateFrom\":\"2024-09-29T19:12:22\",\"dateTo\":\"2024-09-29T19:12:22\"}"
+                            "raw": "{\"status\":\"approved\",\"search\":\"nobis\",\"dateFrom\":\"2024-10-06T09:22:41\",\"dateTo\":\"2024-10-06T09:22:41\"}"
                         },
                         "description": "",
                         "auth": {
@@ -985,7 +1454,7 @@
                                 {
                                     "id": "reference",
                                     "key": "reference",
-                                    "value": "sequi",
+                                    "value": "dolores",
                                     "description": ""
                                 }
                             ]
@@ -1049,7 +1518,7 @@
                                 {
                                     "id": "customerId",
                                     "key": "customerId",
-                                    "value": "maxime",
+                                    "value": "quas",
                                     "description": ""
                                 }
                             ]
@@ -1113,7 +1582,7 @@
                                 {
                                     "id": "id",
                                     "key": "id",
-                                    "value": "unde",
+                                    "value": "quia",
                                     "description": "The ID of the view."
                                 }
                             ]
@@ -1177,7 +1646,7 @@
                                 {
                                     "id": "id",
                                     "key": "id",
-                                    "value": "rerum",
+                                    "value": "ratione",
                                     "description": "The ID of the loan application."
                                 }
                             ]
@@ -1213,7 +1682,7 @@
                                 {
                                     "id": "applicationId",
                                     "key": "applicationId",
-                                    "value": "hic",
+                                    "value": "ut",
                                     "description": ""
                                 }
                             ]
@@ -1231,7 +1700,7 @@
                         ],
                         "body": {
                             "mode": "raw",
-                            "raw": "{\"status\":\"reject\",\"offerAmount\":28}"
+                            "raw": "{\"status\":\"approve\",\"offerAmount\":66}"
                         },
                         "description": "",
                         "auth": {
@@ -1262,7 +1731,7 @@
                         ],
                         "body": {
                             "mode": "raw",
-                            "raw": "{\"applicationId\":\"optio\",\"offerAmount\":66}"
+                            "raw": "{\"applicationId\":\"suscipit\",\"offerAmount\":54}"
                         },
                         "description": "",
                         "auth": {
@@ -1283,7 +1752,7 @@
                                 {
                                     "id": "offerReference",
                                     "key": "offerReference",
-                                    "value": "aliquid",
+                                    "value": "dolorum",
                                     "description": ""
                                 }
                             ]
@@ -1301,7 +1770,7 @@
                         ],
                         "body": {
                             "mode": "raw",
-                            "raw": "{\"action\":\"accept\"}"
+                            "raw": "{\"action\":\"reject\"}"
                         },
                         "description": "",
                         "auth": {
@@ -1378,7 +1847,7 @@
                                 {
                                     "id": "id",
                                     "key": "id",
-                                    "value": "ducimus",
+                                    "value": "eaque",
                                     "description": "The ID of the offer."
                                 }
                             ]
@@ -1442,7 +1911,7 @@
                                 {
                                     "id": "id",
                                     "key": "id",
-                                    "value": "rem",
+                                    "value": "laudantium",
                                     "description": "The ID of the offer."
                                 }
                             ]
@@ -1478,7 +1947,7 @@
                                 {
                                     "id": "id",
                                     "key": "id",
-                                    "value": "occaecati",
+                                    "value": "illo",
                                     "description": "The ID of the offer."
                                 }
                             ]
@@ -1496,7 +1965,7 @@
                         ],
                         "body": {
                             "mode": "raw",
-                            "raw": "{\"active\":false}"
+                            "raw": "{\"active\":true}"
                         },
                         "description": "",
                         "auth": {
@@ -1517,7 +1986,7 @@
                                 {
                                     "id": "customerId",
                                     "key": "customerId",
-                                    "value": "temporibus",
+                                    "value": "voluptas",
                                     "description": ""
                                 }
                             ]
@@ -1591,7 +2060,7 @@
                         ],
                         "body": {
                             "mode": "raw",
-                            "raw": "{\"offerReference\":\"eos\"}"
+                            "raw": "{\"offerReference\":\"repudiandae\"}"
                         },
                         "description": "",
                         "auth": {
@@ -1622,7 +2091,7 @@
                         ],
                         "body": {
                             "mode": "raw",
-                            "raw": "{\"mandateReference\":\"fuga\"}"
+                            "raw": "{\"mandateReference\":\"magni\"}"
                         },
                         "description": "",
                         "auth": {
@@ -1699,7 +2168,7 @@
                                 {
                                     "id": "id",
                                     "key": "id",
-                                    "value": "qui",
+                                    "value": "rem",
                                     "description": "The ID of the loan."
                                 }
                             ]
@@ -1763,7 +2232,7 @@
                                 {
                                     "id": "id",
                                     "key": "id",
-                                    "value": "omnis",
+                                    "value": "non",
                                     "description": "The ID of the loan."
                                 }
                             ]

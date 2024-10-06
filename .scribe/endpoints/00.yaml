@@ -26,7 +26,7 @@ endpoints:
         name: businessType
         description: ''
         required: true
-        example: supplier
+        example: vendor
         type: string
         enumValues:
           - supplier
@@ -38,7 +38,7 @@ endpoints:
         name: fullname
         description: 'Must not be greater than 255 characters.'
         required: true
-        example: reioapxjfnpxdrmqe
+        example: oqwnafhnjcnerceqcsfyz
         type: string
         enumValues: []
         exampleWasSpecified: false
@@ -47,7 +47,7 @@ endpoints:
         name: name
         description: 'Must not be greater than 255 characters.'
         required: true
-        example: ogrdchdaaynujmaze
+        example: 'n'
         type: string
         enumValues: []
         exampleWasSpecified: false
@@ -56,7 +56,7 @@ endpoints:
         name: email
         description: 'Must be a valid email address. Must not be greater than 255 characters.'
         required: true
-        example: gabriel60@example.net
+        example: lurline14@example.org
         type: string
         enumValues: []
         exampleWasSpecified: false
@@ -65,7 +65,7 @@ endpoints:
         name: password
         description: ''
         required: true
-        example: voluptates
+        example: accusamus
         type: string
         enumValues: []
         exampleWasSpecified: false
@@ -74,7 +74,7 @@ endpoints:
         name: passwordConfirmation
         description: 'The value and <code>password</code> must match.'
         required: true
-        example: voluptatum
+        example: quod
         type: string
         enumValues: []
         exampleWasSpecified: false
@@ -89,12 +89,12 @@ endpoints:
         exampleWasSpecified: false
         custom: []
     cleanBodyParameters:
-      businessType: supplier
-      fullname: reioapxjfnpxdrmqe
-      name: ogrdchdaaynujmaze
-      email: gabriel60@example.net
-      password: voluptates
-      passwordConfirmation: voluptatum
+      businessType: vendor
+      fullname: oqwnafhnjcnerceqcsfyz
+      name: 'n'
+      email: lurline14@example.org
+      password: accusamus
+      passwordConfirmation: quod
       termsAndConditions: true
     fileParameters: []
     responses: []
@@ -129,7 +129,7 @@ endpoints:
         name: email
         description: 'Must be a valid email address.'
         required: true
-        example: adams.bernard@example.net
+        example: cwilliamson@example.com
         type: string
         enumValues: []
         exampleWasSpecified: false
@@ -138,14 +138,14 @@ endpoints:
         name: password
         description: ''
         required: true
-        example: "djH$cCh*hGN'|R"
+        example: '#dVOxD>'
         type: string
         enumValues: []
         exampleWasSpecified: false
         custom: []
     cleanBodyParameters:
-      email: adams.bernard@example.net
-      password: "djH$cCh*hGN'|R"
+      email: cwilliamson@example.com
+      password: '#dVOxD>'
     fileParameters: []
     responses: []
     responseFields: []
@@ -179,7 +179,7 @@ endpoints:
         name: name
         description: 'Must not be greater than 255 characters.'
         required: true
-        example: njbmzanjnaaalhl
+        example: synzlrj
         type: string
         enumValues: []
         exampleWasSpecified: false
@@ -188,7 +188,7 @@ endpoints:
         name: provider
         description: ''
         required: true
-        example: placeat
+        example: sed
         type: string
         enumValues: []
         exampleWasSpecified: false
@@ -197,25 +197,15 @@ endpoints:
         name: picture
         description: ''
         required: false
-        example: sapiente
-        type: string
-        enumValues: []
-        exampleWasSpecified: false
-        custom: []
-      email:
-        name: email
-        description: 'Must be a valid email address.'
-        required: true
-        example: spencer.bernita@example.net
+        example: nemo
         type: string
         enumValues: []
         exampleWasSpecified: false
         custom: []
     cleanBodyParameters:
-      name: njbmzanjnaaalhl
-      provider: placeat
-      picture: sapiente
-      email: spencer.bernita@example.net
+      name: synzlrj
+      provider: sed
+      picture: nemo
     fileParameters: []
     responses: []
     responseFields: []
@@ -249,13 +239,13 @@ endpoints:
         name: email
         description: ''
         required: true
-        example: beatae
+        example: possimus
         type: string
         enumValues: []
         exampleWasSpecified: false
         custom: []
     cleanBodyParameters:
-      email: beatae
+      email: possimus
     fileParameters: []
     responses: []
     responseFields: []
@@ -289,7 +279,7 @@ endpoints:
         name: otp
         description: ''
         required: true
-        example: consequatur
+        example: et
         type: string
         enumValues: []
         exampleWasSpecified: false
@@ -298,7 +288,7 @@ endpoints:
         name: email
         description: ''
         required: true
-        example: sed
+        example: itaque
         type: string
         enumValues: []
         exampleWasSpecified: false
@@ -307,7 +297,7 @@ endpoints:
         name: password
         description: ''
         required: true
-        example: minima
+        example: doloribus
         type: string
         enumValues: []
         exampleWasSpecified: false
@@ -316,16 +306,16 @@ endpoints:
         name: passwordConfirmation
         description: 'The value and <code>password</code> must match.'
         required: true
-        example: qui
+        example: vel
         type: string
         enumValues: []
         exampleWasSpecified: false
         custom: []
     cleanBodyParameters:
-      otp: consequatur
-      email: sed
-      password: minima
-      passwordConfirmation: qui
+      otp: et
+      email: itaque
+      password: doloribus
+      passwordConfirmation: vel
     fileParameters: []
     responses: []
     responseFields: []
@@ -361,7 +351,7 @@ endpoints:
         name: contact_email
         description: 'Must be a valid email address. Must not be greater than 255 characters.'
         required: true
-        example: vkirlin@example.org
+        example: hauck.bethany@example.com
         type: string
         enumValues: []
         exampleWasSpecified: false
@@ -370,7 +360,7 @@ endpoints:
         name: contact_phone
         description: 'Must be at least 3 characters. Must not be greater than 255 characters.'
         required: true
-        example: yuujnlfuccfhmlxaimw
+        example: ozhbsgfzggxmsw
         type: string
         enumValues: []
         exampleWasSpecified: false
@@ -379,7 +369,7 @@ endpoints:
         name: contact_person
         description: 'Must be at least 3 characters. Must not be greater than 255 characters.'
         required: true
-        example: qmseuyz
+        example: qnqxwryditrcotp
         type: string
         enumValues: []
         exampleWasSpecified: false
@@ -388,7 +378,7 @@ endpoints:
         name: contact_person_position
         description: 'Must be at least 3 characters. Must not be greater than 255 characters.'
         required: true
-        example: btaxylsuwzxncrpnsjnr
+        example: ofodspnocydgxvvg
         type: string
         enumValues: []
         exampleWasSpecified: false
@@ -397,7 +387,7 @@ endpoints:
         name: name
         description: 'Must not be greater than 255 characters.'
         required: true
-        example: lilwuqpiz
+        example: fdwvssjjkivktvjujsq
         type: string
         enumValues: []
         exampleWasSpecified: false
@@ -415,7 +405,7 @@ endpoints:
         name: provider
         description: ''
         required: true
-        example: credentials
+        example: google
         type: string
         enumValues:
           - google
@@ -426,7 +416,7 @@ endpoints:
         name: type
         description: 'This field is required when <code>provider</code> is <code>google</code>.'
         required: false
-        example: customer_pharmacy
+        example: vendor
         type: string
         enumValues:
           - supplier
@@ -435,14 +425,14 @@ endpoints:
         exampleWasSpecified: false
         custom: []
     cleanBodyParameters:
-      contact_email: vkirlin@example.org
-      contact_phone: yuujnlfuccfhmlxaimw
-      contact_person: qmseuyz
-      contact_person_position: btaxylsuwzxncrpnsjnr
-      name: lilwuqpiz
+      contact_email: hauck.bethany@example.com
+      contact_phone: ozhbsgfzggxmsw
+      contact_person: qnqxwryditrcotp
+      contact_person_position: ofodspnocydgxvvg
+      name: fdwvssjjkivktvjujsq
       termsAndConditions: true
-      provider: credentials
-      type: customer_pharmacy
+      provider: google
+      type: vendor
     fileParameters: []
     responses: []
     responseFields: []
@@ -511,20 +501,390 @@ endpoints:
         enumValues:
           - RESET_PASSWORD_VERIFICATION
           - SIGNUP_EMAIL_VERIFICATION
+          - RESET_MULTI_FACTOR_AUTHENTICATION
+          - CHANGE_EMAIL_VERIFICATION
         exampleWasSpecified: false
         custom: []
       email:
         name: email
         description: 'Must be a valid email address.'
         required: false
-        example: seamus.wintheiser@example.org
+        example: nhilpert@example.net
         type: string
         enumValues: []
         exampleWasSpecified: false
         custom: []
     cleanBodyParameters:
       type: RESET_PASSWORD_VERIFICATION
-      email: seamus.wintheiser@example.org
+      email: nhilpert@example.net
+    fileParameters: []
+    responses: []
+    responseFields: []
+    auth: []
+    controller: null
+    method: null
+    route: null
+    custom: []
+  -
+    httpMethods:
+      - GET
+    uri: api/v1/auth/invite/view
+    metadata:
+      groupName: Endpoints
+      groupDescription: ''
+      subgroup: ''
+      subgroupDescription: ''
+      title: 'Retrieve and display invitation details for a guest user.'
+      description: |-
+        This method processes the request to view an invitation, using the
+        invite service to fetch the relevant invitation details. It returns
+        a JSON response containing the invite information, such as role,
+        full name, email, and action URLs for accepting or rejecting the invitation.
+      authenticated: false
+      custom: []
+    headers:
+      Content-Type: application/json
+      Accept: application/json
+    urlParameters: []
+    cleanUrlParameters: []
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters:
+      invite_token:
+        name: invite_token
+        description: ''
+        required: true
+        example: magni
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        custom: []
+    cleanBodyParameters:
+      invite_token: magni
+    fileParameters: []
+    responses:
+      -
+        status: 400
+        content: '{"success":false,"message":"Invalid parameters supplied.","data":{"inviteToken":["The invite token field is required."]}}'
+        headers:
+          cache-control: 'no-cache, private'
+          content-type: application/json
+          access-control-allow-origin: '*'
+          access-control-allow-methods: 'GET, POST, PUT, DELETE, OPTIONS'
+          access-control-allow-headers: 'X-Requested-With, Content-Type, X-Token-Auth, Authorization'
+        description: null
+        custom: []
+    responseFields: []
+    auth: []
+    controller: null
+    method: null
+    route: null
+    custom: []
+  -
+    httpMethods:
+      - POST
+    uri: api/v1/auth/invite/accept
+    metadata:
+      groupName: Endpoints
+      groupDescription: ''
+      subgroup: ''
+      subgroupDescription: ''
+      title: 'Accept an invitation and create a new user account.'
+      description: |-
+        This method validates the invitation details, ensures the token and invite are valid, and creates
+        a new user account if the invitation is successfully accepted. The invite token must not be expired.
+      authenticated: false
+      custom: []
+    headers:
+      Content-Type: application/json
+      Accept: application/json
+    urlParameters: []
+    cleanUrlParameters: []
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters:
+      invite_id:
+        name: invite_id
+        description: ''
+        required: true
+        example: quia
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        custom: []
+      invite_token:
+        name: invite_token
+        description: ''
+        required: true
+        example: unde
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        custom: []
+      password:
+        name: password
+        description: ''
+        required: true
+        example: velit
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        custom: []
+      passwordConfirmation:
+        name: passwordConfirmation
+        description: 'The value and <code>password</code> must match.'
+        required: true
+        example: voluptas
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        custom: []
+      termsAndConditions:
+        name: termsAndConditions
+        description: 'Must be accepted.'
+        required: true
+        example: true
+        type: boolean
+        enumValues: []
+        exampleWasSpecified: false
+        custom: []
+    cleanBodyParameters:
+      invite_id: quia
+      invite_token: unde
+      password: velit
+      passwordConfirmation: voluptas
+      termsAndConditions: true
+    fileParameters: []
+    responses: []
+    responseFields: []
+    auth: []
+    controller: null
+    method: null
+    route: null
+    custom: []
+  -
+    httpMethods:
+      - POST
+    uri: api/v1/auth/invite/reject
+    metadata:
+      groupName: Endpoints
+      groupDescription: ''
+      subgroup: ''
+      subgroupDescription: ''
+      title: 'Reject an invitation for a guest user.'
+      description: ''
+      authenticated: false
+      custom: []
+    headers:
+      Content-Type: application/json
+      Accept: application/json
+    urlParameters: []
+    cleanUrlParameters: []
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters:
+      invite_id:
+        name: invite_id
+        description: ''
+        required: true
+        example: magnam
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        custom: []
+      invite_token:
+        name: invite_token
+        description: ''
+        required: true
+        example: qui
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        custom: []
+    cleanBodyParameters:
+      invite_id: magnam
+      invite_token: qui
+    fileParameters: []
+    responses: []
+    responseFields: []
+    auth: []
+    controller: null
+    method: null
+    route: null
+    custom: []
+  -
+    httpMethods:
+      - PATCH
+    uri: api/v1/account/settings/password
+    metadata:
+      groupName: Endpoints
+      groupDescription: ''
+      subgroup: ''
+      subgroupDescription: ''
+      title: 'Update the authenticated user password.'
+      description: ''
+      authenticated: false
+      custom: []
+    headers:
+      Content-Type: application/json
+      Accept: application/json
+    urlParameters: []
+    cleanUrlParameters: []
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters:
+      current_password:
+        name: current_password
+        description: 'Must not be greater than 255 characters.'
+        required: true
+        example: bmvhioaqsrf
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        custom: []
+      new_password:
+        name: new_password
+        description: 'This field is required when <code>new_password_confirmation</code> is present.  The value and <code>current_password</code> must be different.'
+        required: false
+        example: est
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        custom: []
+    cleanBodyParameters:
+      current_password: bmvhioaqsrf
+      new_password: est
+    fileParameters: []
+    responses: []
+    responseFields: []
+    auth: []
+    controller: null
+    method: null
+    route: null
+    custom: []
+  -
+    httpMethods:
+      - GET
+    uri: api/v1/account/settings/2fa/setup
+    metadata:
+      groupName: Endpoints
+      groupDescription: ''
+      subgroup: ''
+      subgroupDescription: ''
+      title: 'Setup multi-factor authentication (MFA) for the user.'
+      description: ''
+      authenticated: false
+      custom: []
+    headers:
+      Content-Type: application/json
+      Accept: application/json
+    urlParameters: []
+    cleanUrlParameters: []
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters: []
+    cleanBodyParameters: []
+    fileParameters: []
+    responses:
+      -
+        status: 401
+        content: '{"success":false,"message":"Unauthenticated."}'
+        headers:
+          cache-control: 'no-cache, private'
+          content-type: application/json
+          access-control-allow-origin: '*'
+          access-control-allow-methods: 'GET, POST, PUT, DELETE, OPTIONS'
+          access-control-allow-headers: 'X-Requested-With, Content-Type, X-Token-Auth, Authorization'
+        description: null
+        custom: []
+    responseFields: []
+    auth: []
+    controller: null
+    method: null
+    route: null
+    custom: []
+  -
+    httpMethods:
+      - POST
+    uri: api/v1/account/settings/2fa/toggle
+    metadata:
+      groupName: Endpoints
+      groupDescription: ''
+      subgroup: ''
+      subgroupDescription: ''
+      title: 'Toggle Two-Factor Authentication (2FA) on or off for the authenticated user.'
+      description: ''
+      authenticated: false
+      custom: []
+    headers:
+      Content-Type: application/json
+      Accept: application/json
+    urlParameters: []
+    cleanUrlParameters: []
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters:
+      current_password:
+        name: current_password
+        description: 'Must not be greater than 255 characters.'
+        required: true
+        example: ypgtorfxzcnw
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        custom: []
+      use_two_factor:
+        name: use_two_factor
+        description: ''
+        required: true
+        example: true
+        type: boolean
+        enumValues: []
+        exampleWasSpecified: false
+        custom: []
+    cleanBodyParameters:
+      current_password: ypgtorfxzcnw
+      use_two_factor: true
+    fileParameters: []
+    responses: []
+    responseFields: []
+    auth: []
+    controller: null
+    method: null
+    route: null
+    custom: []
+  -
+    httpMethods:
+      - POST
+    uri: api/v1/account/settings/2fa/verify
+    metadata:
+      groupName: Endpoints
+      groupDescription: ''
+      subgroup: ''
+      subgroupDescription: ''
+      title: 'Verify the provided multi-factor authentication token.'
+      description: ''
+      authenticated: false
+      custom: []
+    headers:
+      Content-Type: application/json
+      Accept: application/json
+    urlParameters: []
+    cleanUrlParameters: []
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters:
+      code:
+        name: code
+        description: 'Must be 6 characters.'
+        required: true
+        example: gzvuuj
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        custom: []
+    cleanBodyParameters:
+      code: gzvuuj
     fileParameters: []
     responses: []
     responseFields: []
@@ -558,27 +918,70 @@ endpoints:
         name: type
         description: ''
         required: true
-        example: SIGNUP_EMAIL_VERIFICATION
+        example: CHANGE_EMAIL_VERIFICATION
         type: string
         enumValues:
           - RESET_PASSWORD_VERIFICATION
           - SIGNUP_EMAIL_VERIFICATION
+          - RESET_MULTI_FACTOR_AUTHENTICATION
+          - CHANGE_EMAIL_VERIFICATION
         exampleWasSpecified: false
         custom: []
       email:
         name: email
         description: 'Must be a valid email address.'
         required: false
-        example: catalina87@example.com
+        example: amedhurst@example.net
         type: string
         enumValues: []
         exampleWasSpecified: false
         custom: []
     cleanBodyParameters:
-      type: SIGNUP_EMAIL_VERIFICATION
-      email: catalina87@example.com
+      type: CHANGE_EMAIL_VERIFICATION
+      email: amedhurst@example.net
     fileParameters: []
     responses: []
+    responseFields: []
+    auth: []
+    controller: null
+    method: null
+    route: null
+    custom: []
+  -
+    httpMethods:
+      - GET
+    uri: api/v1/business/settings
+    metadata:
+      groupName: Endpoints
+      groupDescription: ''
+      subgroup: ''
+      subgroupDescription: ''
+      title: 'Display the business details associated with the authenticated user.'
+      description: ''
+      authenticated: false
+      custom: []
+    headers:
+      Content-Type: application/json
+      Accept: application/json
+    urlParameters: []
+    cleanUrlParameters: []
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters: []
+    cleanBodyParameters: []
+    fileParameters: []
+    responses:
+      -
+        status: 401
+        content: '{"success":false,"message":"Unauthenticated."}'
+        headers:
+          cache-control: 'no-cache, private'
+          content-type: application/json
+          access-control-allow-origin: '*'
+          access-control-allow-methods: 'GET, POST, PUT, DELETE, OPTIONS'
+          access-control-allow-headers: 'X-Requested-With, Content-Type, X-Token-Auth, Authorization'
+        description: null
+        custom: []
     responseFields: []
     auth: []
     controller: null
@@ -610,7 +1013,7 @@ endpoints:
         name: name
         description: 'Must not be greater than 255 characters.'
         required: false
-        example: paurylkrfap
+        example: ahnc
         type: string
         enumValues: []
         exampleWasSpecified: false
@@ -619,7 +1022,7 @@ endpoints:
         name: email
         description: 'Must be a valid email address. Must not be greater than 255 characters.'
         required: false
-        example: wschumm@example.net
+        example: melisa.kling@example.com
         type: string
         enumValues: []
         exampleWasSpecified: false
@@ -628,7 +1031,7 @@ endpoints:
         name: vendorId
         description: ''
         required: false
-        example: 19
+        example: 4
         type: integer
         enumValues: []
         exampleWasSpecified: false
@@ -637,7 +1040,7 @@ endpoints:
         name: createdAtStart
         description: 'Must be a valid date. Must be a date before or equal to <code>createdAtEnd</code>.'
         required: false
-        example: '2020-10-16'
+        example: '2010-11-14'
         type: string
         enumValues: []
         exampleWasSpecified: false
@@ -646,7 +1049,7 @@ endpoints:
         name: createdAtEnd
         description: 'Must be a valid date. Must be a date after or equal to <code>createdAtStart</code>.'
         required: false
-        example: '2085-09-13'
+        example: '2057-01-07'
         type: string
         enumValues: []
         exampleWasSpecified: false
@@ -655,7 +1058,7 @@ endpoints:
         name: page
         description: 'Must be at least 1.'
         required: false
-        example: 79
+        example: 80
         type: integer
         enumValues: []
         exampleWasSpecified: false
@@ -664,19 +1067,19 @@ endpoints:
         name: perPage
         description: 'Must be at least 1. Must not be greater than 100.'
         required: false
-        example: 21
+        example: 25
         type: integer
         enumValues: []
         exampleWasSpecified: false
         custom: []
     cleanBodyParameters:
-      name: paurylkrfap
-      email: wschumm@example.net
-      vendorId: 19
-      createdAtStart: '2020-10-16'
-      createdAtEnd: '2085-09-13'
-      page: 79
-      perPage: 21
+      name: ahnc
+      email: melisa.kling@example.com
+      vendorId: 4
+      createdAtStart: '2010-11-14'
+      createdAtEnd: '2057-01-07'
+      page: 80
+      perPage: 25
     fileParameters: []
     responses:
       -
@@ -721,7 +1124,7 @@ endpoints:
         name: name
         description: 'Must not be greater than 255 characters.'
         required: true
-        example: syasntkl
+        example: jhwqrmkdurjywuw
         type: string
         enumValues: []
         exampleWasSpecified: false
@@ -730,7 +1133,7 @@ endpoints:
         name: email
         description: 'Must be a valid email address. Must not be greater than 255 characters.'
         required: true
-        example: gturner@example.com
+        example: alan.moen@example.org
         type: string
         enumValues: []
         exampleWasSpecified: false
@@ -739,15 +1142,15 @@ endpoints:
         name: phone
         description: 'Must not be greater than 15 characters.'
         required: false
-        example: cszwrlzhpekdkap
+        example: zvlzdvagcjvae
         type: string
         enumValues: []
         exampleWasSpecified: false
         custom: []
     cleanBodyParameters:
-      name: syasntkl
-      email: gturner@example.com
-      phone: cszwrlzhpekdkap
+      name: jhwqrmkdurjywuw
+      email: alan.moen@example.org
+      phone: zvlzdvagcjvae
     fileParameters: []
     responses: []
     responseFields: []
@@ -822,13 +1225,13 @@ endpoints:
         name: file
         description: 'Must not be greater than 20024 characters.'
         required: true
-        example: ilhgatfwjg
+        example: kwmaxg
         type: string
         enumValues: []
         exampleWasSpecified: false
         custom: []
     cleanBodyParameters:
-      file: ilhgatfwjg
+      file: kwmaxg
     fileParameters: []
     responses: []
     responseFields: []
@@ -858,13 +1261,13 @@ endpoints:
         name: id
         description: 'The ID of the customer.'
         required: true
-        example: odit
+        example: tempora
         type: string
         enumValues: []
         exampleWasSpecified: false
         custom: []
     cleanUrlParameters:
-      id: odit
+      id: tempora
     queryParameters: []
     cleanQueryParameters: []
     bodyParameters: []
@@ -909,13 +1312,13 @@ endpoints:
         name: id
         description: 'The ID of the customer.'
         required: true
-        example: minima
+        example: provident
         type: string
         enumValues: []
         exampleWasSpecified: false
         custom: []
     cleanUrlParameters:
-      id: minima
+      id: provident
     queryParameters: []
     cleanQueryParameters: []
     bodyParameters:
@@ -923,7 +1326,7 @@ endpoints:
         name: name
         description: 'Must not be greater than 255 characters.'
         required: false
-        example: izdgawnhwoccqbyemyxebe
+        example: e
         type: string
         enumValues: []
         exampleWasSpecified: false
@@ -932,7 +1335,7 @@ endpoints:
         name: email
         description: 'Must be a valid email address. Must not be greater than 255 characters.'
         required: false
-        example: josie.zieme@example.org
+        example: sadie.stehr@example.com
         type: string
         enumValues: []
         exampleWasSpecified: false
@@ -941,7 +1344,7 @@ endpoints:
         name: phone
         description: 'Must not be greater than 15 characters.'
         required: false
-        example: fyjwdbzgunfqbb
+        example: x
         type: string
         enumValues: []
         exampleWasSpecified: false
@@ -956,9 +1359,9 @@ endpoints:
         exampleWasSpecified: false
         custom: []
     cleanBodyParameters:
-      name: izdgawnhwoccqbyemyxebe
-      email: josie.zieme@example.org
-      phone: fyjwdbzgunfqbb
+      name: e
+      email: sadie.stehr@example.com
+      phone: x
       active: true
     fileParameters: []
     responses: []
@@ -989,13 +1392,13 @@ endpoints:
         name: id
         description: 'The ID of the customer.'
         required: true
-        example: tenetur
+        example: ducimus
         type: string
         enumValues: []
         exampleWasSpecified: false
         custom: []
     cleanUrlParameters:
-      id: tenetur
+      id: ducimus
     queryParameters: []
     cleanQueryParameters: []
     bodyParameters: []
@@ -1029,17 +1432,161 @@ endpoints:
         name: id
         description: 'The ID of the customer.'
         required: true
-        example: animi
+        example: dolore
         type: string
         enumValues: []
         exampleWasSpecified: false
         custom: []
     cleanUrlParameters:
-      id: animi
+      id: dolore
     queryParameters: []
     cleanQueryParameters: []
     bodyParameters: []
     cleanBodyParameters: []
+    fileParameters: []
+    responses: []
+    responseFields: []
+    auth: []
+    controller: null
+    method: null
+    route: null
+    custom: []
+  -
+    httpMethods:
+      - GET
+    uri: api/v1/vendor/business/settings/invite/team-members
+    metadata:
+      groupName: Endpoints
+      groupDescription: ''
+      subgroup: ''
+      subgroupDescription: ''
+      title: "Retrieve all team members for the authenticated user's business."
+      description: ''
+      authenticated: false
+      custom: []
+    headers:
+      Content-Type: application/json
+      Accept: application/json
+    urlParameters: []
+    cleanUrlParameters: []
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters: []
+    cleanBodyParameters: []
+    fileParameters: []
+    responses:
+      -
+        status: 401
+        content: '{"success":false,"message":"Unauthenticated."}'
+        headers:
+          cache-control: 'no-cache, private'
+          content-type: application/json
+          access-control-allow-origin: '*'
+          access-control-allow-methods: 'GET, POST, PUT, DELETE, OPTIONS'
+          access-control-allow-headers: 'X-Requested-With, Content-Type, X-Token-Auth, Authorization'
+        description: null
+        custom: []
+    responseFields: []
+    auth: []
+    controller: null
+    method: null
+    route: null
+    custom: []
+  -
+    httpMethods:
+      - GET
+    uri: api/v1/vendor/business/settings/invite
+    metadata:
+      groupName: Endpoints
+      groupDescription: ''
+      subgroup: ''
+      subgroupDescription: ''
+      title: "Retrieve all invite for the authenticated user's business."
+      description: ''
+      authenticated: false
+      custom: []
+    headers:
+      Content-Type: application/json
+      Accept: application/json
+    urlParameters: []
+    cleanUrlParameters: []
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters: []
+    cleanBodyParameters: []
+    fileParameters: []
+    responses:
+      -
+        status: 401
+        content: '{"success":false,"message":"Unauthenticated."}'
+        headers:
+          cache-control: 'no-cache, private'
+          content-type: application/json
+          access-control-allow-origin: '*'
+          access-control-allow-methods: 'GET, POST, PUT, DELETE, OPTIONS'
+          access-control-allow-headers: 'X-Requested-With, Content-Type, X-Token-Auth, Authorization'
+        description: null
+        custom: []
+    responseFields: []
+    auth: []
+    controller: null
+    method: null
+    route: null
+    custom: []
+  -
+    httpMethods:
+      - POST
+    uri: api/v1/vendor/business/settings/invite
+    metadata:
+      groupName: Endpoints
+      groupDescription: ''
+      subgroup: ''
+      subgroupDescription: ''
+      title: "Add a new team member/invite to the authenticated user's business."
+      description: |-
+        This method validates the incoming request, creates a new team member/invite
+        using the validated data, and returns a JSON response with the team member's/invite's details.
+      authenticated: false
+      custom: []
+    headers:
+      Content-Type: application/json
+      Accept: application/json
+    urlParameters: []
+    cleanUrlParameters: []
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters:
+      full_name:
+        name: full_name
+        description: 'Must not be greater than 255 characters.'
+        required: true
+        example: wwppwlgyzssdslqwzfpvnc
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        custom: []
+      email:
+        name: email
+        description: 'Must be a valid email address. Must not be greater than 255 characters.'
+        required: true
+        example: fschneider@example.net
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        custom: []
+      role_id:
+        name: role_id
+        description: ''
+        required: true
+        example: expedita
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        custom: []
+    cleanBodyParameters:
+      full_name: wwppwlgyzssdslqwzfpvnc
+      email: fschneider@example.net
+      role_id: expedita
     fileParameters: []
     responses: []
     responseFields: []
@@ -1073,7 +1620,7 @@ endpoints:
         name: file
         description: 'Must not be greater than 2048 characters.'
         required: true
-        example: omky
+        example: usxdswhxvpocisjpraucvvigs
         type: string
         enumValues: []
         exampleWasSpecified: false
@@ -1082,14 +1629,14 @@ endpoints:
         name: customerId
         description: ''
         required: true
-        example: et
+        example: minus
         type: string
         enumValues: []
         exampleWasSpecified: false
         custom: []
     cleanBodyParameters:
-      file: omky
-      customerId: et
+      file: usxdswhxvpocisjpraucvvigs
+      customerId: minus
     fileParameters: []
     responses: []
     responseFields: []
@@ -1123,13 +1670,13 @@ endpoints:
         name: transactionHistoryId
         description: ''
         required: true
-        example: ex
+        example: harum
         type: string
         enumValues: []
         exampleWasSpecified: false
         custom: []
     cleanBodyParameters:
-      transactionHistoryId: ex
+      transactionHistoryId: harum
     fileParameters: []
     responses: []
     responseFields: []
@@ -1163,7 +1710,7 @@ endpoints:
         name: file
         description: 'Must not be greater than 2048 characters.'
         required: true
-        example: hxsgvrtajyw
+        example: zofyq
         type: string
         enumValues: []
         exampleWasSpecified: false
@@ -1178,7 +1725,7 @@ endpoints:
         exampleWasSpecified: false
         custom: []
     cleanBodyParameters:
-      file: hxsgvrtajyw
+      file: zofyq
       customerId: aut
     fileParameters: []
     responses: []
@@ -1222,7 +1769,7 @@ endpoints:
         name: requestedAmount
         description: 'Must be at least 1.'
         required: true
-        example: 6
+        example: 52
         type: number
         enumValues: []
         exampleWasSpecified: false
@@ -1231,7 +1778,7 @@ endpoints:
         name: durationInMonths
         description: 'Must be at least 1. Must not be greater than 12.'
         required: true
-        example: 7
+        example: 11
         type: integer
         enumValues: []
         exampleWasSpecified: false
@@ -1246,8 +1793,8 @@ endpoints:
         exampleWasSpecified: false
         custom: []
     cleanBodyParameters:
-      requestedAmount: 6
-      durationInMonths: 7
+      requestedAmount: 52
+      durationInMonths: 11
     fileParameters: []
     responses: []
     responseFields: []
@@ -1322,13 +1869,13 @@ endpoints:
         name: customerId
         description: ''
         required: true
-        example: vel
+        example: voluptatem
         type: string
         enumValues: []
         exampleWasSpecified: false
         custom: []
     cleanBodyParameters:
-      customerId: vel
+      customerId: voluptatem
     fileParameters: []
     responses: []
     responseFields: []
@@ -1403,7 +1950,7 @@ endpoints:
         name: status
         description: ''
         required: false
-        example: rejected
+        example: approved
         type: string
         enumValues:
           - pending
@@ -1415,7 +1962,7 @@ endpoints:
         name: search
         description: ''
         required: false
-        example: quia
+        example: nobis
         type: string
         enumValues: []
         exampleWasSpecified: false
@@ -1424,7 +1971,7 @@ endpoints:
         name: dateFrom
         description: 'Must be a valid date.'
         required: false
-        example: '2024-09-29T19:12:22'
+        example: '2024-10-06T09:22:41'
         type: string
         enumValues: []
         exampleWasSpecified: false
@@ -1433,7 +1980,7 @@ endpoints:
         name: dateTo
         description: 'Must be a valid date.'
         required: false
-        example: '2024-09-29T19:12:22'
+        example: '2024-10-06T09:22:41'
         type: string
         enumValues: []
         exampleWasSpecified: false
@@ -1448,10 +1995,10 @@ endpoints:
         exampleWasSpecified: false
         custom: []
     cleanBodyParameters:
-      status: rejected
-      search: quia
-      dateFrom: '2024-09-29T19:12:22'
-      dateTo: '2024-09-29T19:12:22'
+      status: approved
+      search: nobis
+      dateFrom: '2024-10-06T09:22:41'
+      dateTo: '2024-10-06T09:22:41'
     fileParameters: []
     responses:
       -
@@ -1492,13 +2039,13 @@ endpoints:
         name: reference
         description: ''
         required: true
-        example: sequi
+        example: dolores
         type: string
         enumValues: []
         exampleWasSpecified: false
         custom: []
     cleanUrlParameters:
-      reference: sequi
+      reference: dolores
     queryParameters: []
     cleanQueryParameters: []
     bodyParameters: []
@@ -1543,13 +2090,13 @@ endpoints:
         name: customerId
         description: ''
         required: true
-        example: maxime
+        example: quas
         type: string
         enumValues: []
         exampleWasSpecified: false
         custom: []
     cleanUrlParameters:
-      customerId: maxime
+      customerId: quas
     queryParameters: []
     cleanQueryParameters: []
     bodyParameters: []
@@ -1594,13 +2141,13 @@ endpoints:
         name: id
         description: 'The ID of the view.'
         required: true
-        example: unde
+        example: quia
         type: string
         enumValues: []
         exampleWasSpecified: false
         custom: []
     cleanUrlParameters:
-      id: unde
+      id: quia
     queryParameters: []
     cleanQueryParameters: []
     bodyParameters: []
@@ -1645,13 +2192,13 @@ endpoints:
         name: id
         description: 'The ID of the loan application.'
         required: true
-        example: rerum
+        example: ratione
         type: string
         enumValues: []
         exampleWasSpecified: false
         custom: []
     cleanUrlParameters:
-      id: rerum
+      id: ratione
     queryParameters: []
     cleanQueryParameters: []
     bodyParameters: []
@@ -1685,13 +2232,13 @@ endpoints:
         name: applicationId
         description: ''
         required: true
-        example: hic
+        example: ut
         type: string
         enumValues: []
         exampleWasSpecified: false
         custom: []
     cleanUrlParameters:
-      applicationId: hic
+      applicationId: ut
     queryParameters: []
     cleanQueryParameters: []
     bodyParameters:
@@ -1699,7 +2246,7 @@ endpoints:
         name: status
         description: ''
         required: true
-        example: reject
+        example: approve
         type: string
         enumValues:
           - approve
@@ -1710,14 +2257,14 @@ endpoints:
         name: offerAmount
         description: 'Must be at least 1.'
         required: true
-        example: 28
+        example: 66
         type: number
         enumValues: []
         exampleWasSpecified: false
         custom: []
     cleanBodyParameters:
-      status: reject
-      offerAmount: 28
+      status: approve
+      offerAmount: 66
     fileParameters: []
     responses: []
     responseFields: []
@@ -1751,7 +2298,7 @@ endpoints:
         name: applicationId
         description: ''
         required: true
-        example: optio
+        example: suscipit
         type: string
         enumValues: []
         exampleWasSpecified: false
@@ -1760,14 +2307,14 @@ endpoints:
         name: offerAmount
         description: 'Must be at least 1.'
         required: true
-        example: 66
+        example: 54
         type: number
         enumValues: []
         exampleWasSpecified: false
         custom: []
     cleanBodyParameters:
-      applicationId: optio
-      offerAmount: 66
+      applicationId: suscipit
+      offerAmount: 54
     fileParameters: []
     responses: []
     responseFields: []
@@ -1797,13 +2344,13 @@ endpoints:
         name: offerReference
         description: ''
         required: true
-        example: aliquid
+        example: dolorum
         type: string
         enumValues: []
         exampleWasSpecified: false
         custom: []
     cleanUrlParameters:
-      offerReference: aliquid
+      offerReference: dolorum
     queryParameters: []
     cleanQueryParameters: []
     bodyParameters:
@@ -1811,7 +2358,7 @@ endpoints:
         name: action
         description: ''
         required: true
-        example: accept
+        example: reject
         type: string
         enumValues:
           - accept
@@ -1819,7 +2366,7 @@ endpoints:
         exampleWasSpecified: false
         custom: []
     cleanBodyParameters:
-      action: accept
+      action: reject
     fileParameters: []
     responses: []
     responseFields: []
@@ -1890,13 +2437,13 @@ endpoints:
         name: id
         description: 'The ID of the offer.'
         required: true
-        example: ducimus
+        example: eaque
         type: string
         enumValues: []
         exampleWasSpecified: false
         custom: []
     cleanUrlParameters:
-      id: ducimus
+      id: eaque
     queryParameters: []
     cleanQueryParameters: []
     bodyParameters: []
@@ -1941,13 +2488,13 @@ endpoints:
         name: id
         description: 'The ID of the offer.'
         required: true
-        example: rem
+        example: laudantium
         type: string
         enumValues: []
         exampleWasSpecified: false
         custom: []
     cleanUrlParameters:
-      id: rem
+      id: laudantium
     queryParameters: []
     cleanQueryParameters: []
     bodyParameters: []
@@ -1981,13 +2528,13 @@ endpoints:
         name: id
         description: 'The ID of the offer.'
         required: true
-        example: occaecati
+        example: illo
         type: string
         enumValues: []
         exampleWasSpecified: false
         custom: []
     cleanUrlParameters:
-      id: occaecati
+      id: illo
     queryParameters: []
     cleanQueryParameters: []
     bodyParameters:
@@ -1995,13 +2542,13 @@ endpoints:
         name: active
         description: ''
         required: true
-        example: false
+        example: true
         type: boolean
         enumValues: []
         exampleWasSpecified: false
         custom: []
     cleanBodyParameters:
-      active: false
+      active: true
     fileParameters: []
     responses: []
     responseFields: []
@@ -2031,13 +2578,13 @@ endpoints:
         name: customerId
         description: ''
         required: true
-        example: temporibus
+        example: voluptas
         type: string
         enumValues: []
         exampleWasSpecified: false
         custom: []
     cleanUrlParameters:
-      customerId: temporibus
+      customerId: voluptas
     queryParameters: []
     cleanQueryParameters: []
     bodyParameters: []
@@ -2086,13 +2633,13 @@ endpoints:
         name: offerReference
         description: ''
         required: true
-        example: eos
+        example: repudiandae
         type: string
         enumValues: []
         exampleWasSpecified: false
         custom: []
     cleanBodyParameters:
-      offerReference: eos
+      offerReference: repudiandae
     fileParameters: []
     responses: []
     responseFields: []
@@ -2126,13 +2673,13 @@ endpoints:
         name: mandateReference
         description: ''
         required: true
-        example: fuga
+        example: magni
         type: string
         enumValues: []
         exampleWasSpecified: false
         custom: []
     cleanBodyParameters:
-      mandateReference: fuga
+      mandateReference: magni
     fileParameters: []
     responses: []
     responseFields: []
@@ -2203,13 +2750,13 @@ endpoints:
         name: id
         description: 'The ID of the loan.'
         required: true
-        example: qui
+        example: rem
         type: string
         enumValues: []
         exampleWasSpecified: false
         custom: []
     cleanUrlParameters:
-      id: qui
+      id: rem
     queryParameters: []
     cleanQueryParameters: []
     bodyParameters: []
@@ -2254,13 +2801,13 @@ endpoints:
         name: id
         description: 'The ID of the loan.'
         required: true
-        example: omnis
+        example: non
         type: string
         enumValues: []
         exampleWasSpecified: false
         custom: []
     cleanUrlParameters:
-      id: omnis
+      id: non
     queryParameters: []
     cleanQueryParameters: []
     bodyParameters: []

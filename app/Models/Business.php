@@ -72,4 +72,9 @@ class Business extends Model
     {
         return $this->hasMany(Invite::class);
     }
+
+    public function logo()
+    {
+        return $this->morphOne(related: FileUpload::class, name: 'model');
+    }
 }

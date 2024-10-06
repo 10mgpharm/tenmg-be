@@ -47,7 +47,7 @@ class LoanApplicationRepository
 
     public function findByReference(string $reference): ?LoanApplication
     {
-        return LoanApplication::whereIdentifier($reference)->with('customer.lastEvaluationHistory.creditScore')->first();
+        return LoanApplication::whereIdentifier($reference)->with(['customer.lastEvaluationHistory.creditScore', 'business.logo'])->first();
     }
 
     public function getAll(): array
