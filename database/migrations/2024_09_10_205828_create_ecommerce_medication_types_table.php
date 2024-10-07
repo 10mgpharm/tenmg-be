@@ -19,8 +19,17 @@ return new class extends Migration
 
             $table->string('name');
             $table->string('slug')->unique();
-            $table->enum('status', ['ACTIVE', 'INACTIVE', 'ARCHIVED'])->default('ACTIVE');
-            
+            $table->boolean('active')->default(false);
+            $table->enum('status', [
+                'DRAFT',          // Not yet ready for public view
+                'PENDING',        // Waiting for approval
+                'APPROVED',       // Approved for use
+                'REJECTED',       // Rejected, not usable
+                'INACTIVE',       // Manually inactive
+                'SUSPENDED',      // Temporarily disabled due to issues
+                'ARCHIVED',       // Archived, kept for historical reasons
+            ])->default('PENDING');
+
             $table->softDeletes();
             $table->timestamps();
         });

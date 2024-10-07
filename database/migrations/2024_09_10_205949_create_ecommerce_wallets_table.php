@@ -14,7 +14,6 @@ return new class extends Migration
         Schema::create('ecommerce_wallets', function (Blueprint $table) {
             $table->id();
             $table->foreignId('business_id')->constrained('businesses')->nullOnDelete()->index();
-            $table->foreignId('wallet_id')->constrained('wallets')->nullOnDelete()->index();
             $table->decimal('previous_balance', 18, 2);
             $table->decimal('current_balance', 18, 2);
             $table->timestamps();
