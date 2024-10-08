@@ -6,7 +6,6 @@ use App\Models\User;
 use App\Services\OtpService;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Facades\Event;
-use Mockery;
 
 beforeEach(function () {
     $this->otpService = Mockery::mock(OtpService::class)->makePartial();

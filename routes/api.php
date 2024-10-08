@@ -1,11 +1,12 @@
 <?php
 
 use App\Http\Controllers\API\Account\AccountController;
+use App\Http\Controllers\API\Account\PasswordUpdateController;
+use App\Http\Controllers\API\Account\TwoFactorAuthenticationController;
 use App\Http\Controllers\API\Auth\AuthenticatedController;
 use App\Http\Controllers\API\Auth\PasswordController;
 use App\Http\Controllers\API\Auth\SignupUserController;
 use App\Http\Controllers\API\Auth\VerifyEmailController;
-use App\Http\Controllers\API\Business\VendorBusinessSettingController;
 use App\Http\Controllers\API\Credit\CustomerController;
 use App\Http\Controllers\API\Credit\LoanApplicationController;
 use App\Http\Controllers\API\Credit\LoanController;
@@ -13,17 +14,15 @@ use App\Http\Controllers\API\Credit\LoanOfferController;
 use App\Http\Controllers\API\Credit\TransactionHistoryController;
 use App\Http\Controllers\API\ProfileController;
 use App\Http\Controllers\API\ResendOtpController;
-use App\Http\Controllers\BusinessSettingController;
-use App\Http\Controllers\API\Account\TwoFactorAuthenticationController;
-use App\Http\Controllers\API\Account\PasswordUpdateController;
 use App\Http\Controllers\API\Webhooks\PaystackWebhookController;
+use App\Http\Controllers\BusinessSettingController;
 use App\Http\Controllers\InviteController;
 use Illuminate\Support\Facades\Route;
 
 Route::prefix('v1')->group(function () {
 
     // public routes
-    Route::prefix('auth')->name('guest.')->group(function () {
+    Route::prefix('auth')->group(function () {
         Route::post('/signup', [SignupUserController::class, 'store'])
             ->name('signup');
 
@@ -42,19 +41,19 @@ Route::prefix('v1')->group(function () {
         Route::post('/reset-password', [PasswordController::class, 'reset'])
             ->name('password.reset');
 
-            Route::middleware(['auth:api', 'scope:full'])->group(function () {
-                Route::post('/verify-email', VerifyEmailController::class)
-                    ->name('verification.verify');
+        Route::middleware(['auth:api', 'scope:full'])->group(function () {
+            Route::post('/verify-email', VerifyEmailController::class)
+                ->name('verification.verify');
 
-                Route::post('/signup/complete', [SignupUserController::class, 'complete'])
-                    ->name('signup.complete');
+            Route::post('/signup/complete', [SignupUserController::class, 'complete'])
+                ->name('signup.complete');
 
-                Route::post('/signout', [AuthenticatedController::class, 'destroy'])
-                    ->name('signout');
-            });
+            Route::post('/signout', [AuthenticatedController::class, 'destroy'])
+                ->name('signout');
+        });
 
-            Route::post('/resend-otp', ResendOtpController::class)
-                ->name('resend.otp')->middleware('throttle:5,1');
+        Route::post('/resend-otp', ResendOtpController::class)
+            ->name('resend.otp')->middleware('throttle:5,1');
 
         Route::get('invite/view', [InviteController::class, 'view'])->name('invite.view');
         Route::post('invite/accept', [InviteController::class, 'accept'])->name('invite.accept')->middleware('signed');
@@ -65,7 +64,7 @@ Route::prefix('v1')->group(function () {
     Route::prefix('account')->name('account.')->middleware(['auth:api'])->group(function () {
         Route::prefix('settings')->name('settings.')->group(function () {
 
-            Route::middleware('scope:full')->group(function(){
+            Route::middleware('scope:full')->group(function () {
 
                 // Update authenticated user's password
                 Route::patch('password', PasswordUpdateController::class);
@@ -73,18 +72,18 @@ Route::prefix('v1')->group(function () {
                 // Update authenticated user's profile
                 Route::match(['post', 'patch'], 'profile', [AccountController::class, 'profile']);
 
-                // 2FA 
+                // 2FA
                 Route::prefix('2fa')->controller(TwoFactorAuthenticationController::class)
-                ->group(function () {
-                    Route::get('setup', 'setup');
-                    Route::post('reset', 'reset');
-                    Route::post('toggle', 'toggle');  // Toggle 2FA (enable/disable)
-                });
+                    ->group(function () {
+                        Route::get('setup', 'setup');
+                        Route::post('reset', 'reset');
+                        Route::post('toggle', 'toggle');  // Toggle 2FA (enable/disable)
+                    });
             });
 
-            // 2FA 
+            // 2FA
             Route::post('2fa/verify', [TwoFactorAuthenticationController::class, 'verify'])
-            ->middleware(['scope:full,temp']);
+                ->middleware(['scope:full,temp']);
         });
     });
 
@@ -94,7 +93,7 @@ Route::prefix('v1')->group(function () {
         Route::post('/resend-otp', ResendOtpController::class)
             ->name('resend.otp')->middleware('throttle:5,1');
 
-         // Business specific operations
+        // Business specific operations
         Route::prefix('business')->group(function () {
 
             Route::prefix('settings')->controller(BusinessSettingController::class)
@@ -110,10 +109,9 @@ Route::prefix('v1')->group(function () {
         });
 
         // supplier specific operations
-        Route::prefix('supplier')->group(function(){
+        Route::prefix('supplier')->group(function () {
             Route::get('/{id}', [ProfileController::class, 'show']);
         });
-
 
         Route::prefix('customers')->group(function () {
             // List customers with pagination and filtering
@@ -179,7 +177,7 @@ Route::prefix('v1')->group(function () {
                 // Submit Loan Application from E-commerce Site
                 Route::post('/apply', [
                     LoanApplicationController::class,
-                    'applyFromEcommerce'
+                    'applyFromEcommerce',
                 ])->name('vendor.applications.apply')->withoutMiddleware(['auth:api', 'scope:full']);
 
                 // Retrieve Vendor Customizations
@@ -188,7 +186,7 @@ Route::prefix('v1')->group(function () {
                 // Filter Loan Applications
                 Route::get('/filter', [
                     LoanApplicationController::class,
-                    'filter'
+                    'filter',
                 ])->name('vendor.applications.filter');
 
                 // Enable/Disable Loan Application
@@ -208,13 +206,12 @@ Route::prefix('v1')->group(function () {
                 // Delete Loan Application
                 Route::delete('/{id}', [
                     LoanApplicationController::class,
-                    'destroy'
+                    'destroy',
                 ])->middleware('admin');
 
                 // Approve/Reject Loan Application (10mg Admins Only)
                 Route::post('/{applicationId}/review', [LoanApplicationController::class, 'review'])->name('vendor.applications.review')->middleware('admin');
             });
-
 
             // Loan Offer
             Route::prefix('offers')->group(function () {
@@ -239,7 +236,6 @@ Route::prefix('v1')->group(function () {
                 // Get all offers for a specific customer
                 Route::get('/{customerId}/customer', [LoanOfferController::class, 'getOffersByCustomer'])->name('offers.getByCustomer');
             });
-
 
             Route::post('/direct-debit/mandate/generate', [LoanOfferController::class, 'generateMandateForCustomer'])->name('mandate.generate');
             Route::post('/direct-debit/mandate/verify', [LoanOfferController::class, 'verifyMandateForCustomer'])->name('mandate.verify');

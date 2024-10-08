@@ -17,7 +17,7 @@ return new class extends Migration
             $table->string('email')->unique()->index();
             $table->enum('status', ['INVITED', 'ACCEPTED', 'REJECTED', 'REMOVED'])->default('INVITED');
             $table->foreignId('business_id')->constrained('businesses')->cascadeOnDelete();
-            $table->foreignId('creator_id')->constrained('users')->nullOnDelete();
+            $table->foreignId('creator_id')->constrained('users')->cascadeOnDelete();
             $table->timestamps();
         });
     }
