@@ -18,6 +18,7 @@ use App\Http\Controllers\API\Account\TwoFactorAuthenticationController;
 use App\Http\Controllers\API\Account\PasswordUpdateController;
 use App\Http\Controllers\API\Webhooks\PaystackWebhookController;
 use App\Http\Controllers\InviteController;
+use App\Http\Controllers\Supplier\DashboardController as SupplierDashboardController;
 use Illuminate\Support\Facades\Route;
 
 Route::prefix('v1')->group(function () {
@@ -111,6 +112,8 @@ Route::prefix('v1')->group(function () {
 
         // supplier specific operations
         Route::prefix('supplier')->group(function(){
+            Route::get('dashboard', SupplierDashboardController::class);
+            
             Route::get('/{id}', [ProfileController::class, 'show']);
         });
 
