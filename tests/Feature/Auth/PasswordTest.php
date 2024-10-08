@@ -5,7 +5,6 @@ namespace Tests\Feature\Auth;
 use App\Enums\OtpType;
 use App\Helpers\UtilityHelper;
 use App\Models\User;
-use App\Services\OtpService;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Notification;
@@ -50,13 +49,16 @@ test('forgot password with valid email', function () {
 test('forgot password with invalid email', function () {
     $response = $this->postJson($this->forgot, ['email' => fake()->email()]);
 
-    $response->assertStatus(Response::HTTP_UNPROCESSABLE_ENTITY)
-        ->assertJson(
-            fn (AssertableJson $json) => $json->where('message', 'The selected email is invalid.')
-                ->has('errors')
-                ->where('errors.email.0', 'The selected email is invalid.')
-        );
+    $responseData = $response->json();
 
+    expect($response->status())->toBe(Response::HTTP_BAD_REQUEST);
+
+    expect($responseData)
+        ->toHaveKey('message', 'Invalid parameters supplied.')
+        ->toHaveKey('errors')
+        ->toHaveKey('errors.email.0', 'The selected email is invalid.');
+
+    // Assert the database does not have the OTP
     $this->assertDatabaseMissing('otps', [
         'user_id' => $this->user->id,
         'type' => OtpType::RESET_PASSWORD_VERIFICATION->value,
@@ -95,12 +97,14 @@ test('reset password with invalid otp', function () {
         'password_confirmation' => 'newpassword123',
     ]);
 
-    $response->assertStatus(Response::HTTP_UNPROCESSABLE_ENTITY)
-        ->assertJson(
-            fn (AssertableJson $json) => $json->where('message', __('The OTP provided is incorrect or has expired. Please try again.'))
-                ->has('errors')
-                ->where('errors.otp.0', __('The OTP provided is incorrect or has expired. Please try again.'))
-        );
+    $responseData = $response->json();
+
+    expect($response->status())->toBe(Response::HTTP_BAD_REQUEST);
+
+    expect($responseData)
+        ->toHaveKey('message', 'Invalid parameters supplied.')
+        ->toHaveKey('errors')
+        ->toHaveKey('errors.otp.0', 'The OTP provided is incorrect or has expired. Please try again.');
 });
 
 test('reset password with non-existent email', function () {
@@ -111,12 +115,14 @@ test('reset password with non-existent email', function () {
         'password_confirmation' => 'newpassword123',
     ]);
 
-    $response->assertStatus(Response::HTTP_UNPROCESSABLE_ENTITY)
-        ->assertJson(
-            fn (AssertableJson $json) => $json->where('message', __('Invalid email or otp is incorrect. Please try again.'))
-                ->has('errors')
-                ->where('errors.otp.0', __('Invalid email or otp is incorrect. Please try again.'))
-        );
+    $responseData = $response->json();
+
+    expect($response->status())->toBe(Response::HTTP_BAD_REQUEST);
+
+    expect($responseData)
+        ->toHaveKey('message', 'Invalid parameters supplied.')
+        ->toHaveKey('errors')
+        ->toHaveKey('errors.otp.0', 'Invalid email or otp is incorrect. Please try again.');
 });
 
 afterEach(function () {

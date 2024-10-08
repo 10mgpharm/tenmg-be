@@ -27,7 +27,12 @@ class FileUpload extends Model
 
     public function getUrlAttribute()
     {
-        return $this->getTemporaryUrl($this->attributes['path']);
+        $path = $this->getAttribute('path');
+        if (! $path) {
+            return null;
+        }
+
+        return $this->getTemporaryUrl($this->getAttribute('path'));
     }
 
     protected function virtualName(): Attribute

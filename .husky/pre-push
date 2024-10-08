@@ -1,0 +1,5 @@
+# Run linting
+lint-staged
+
+# Run tests again
+php artisan test
