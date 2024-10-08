@@ -8,7 +8,6 @@ use App\Models\BusinessUser;
 use App\Models\Invite;
 use App\Models\Role;
 use App\Models\User;
-use App\Services\Contracts\InviteServiceInterface;
 use App\Services\Interfaces\IInviteService;
 use Exception;
 use Illuminate\Support\Facades\DB;
@@ -29,8 +28,8 @@ class InviteService implements IInviteService
     /**
      * Store a new invite in the database.
      *
-     * @param array $validated The validated data for creating the invite.
-     * @param \App\Models\User $user The user creating the invite.
+     * @param  array  $validated  The validated data for creating the invite.
+     * @param  \App\Models\User  $user  The user creating the invite.
      * @return \App\Models\Invite|null Returns the created invite model or null on failure.
      */
     public function store(array $validated, User $user): ?Invite
@@ -48,20 +47,21 @@ class InviteService implements IInviteService
 
                 if ($invite) {
                     $this->sendInviteLink($invite);
+
                     return $invite; // Return the created invite model
                 }
 
                 return null; // Return null on failure
             });
         } catch (Exception $e) {
-            throw new Exception('Failed to create invite: ' . $e->getMessage());
+            throw new Exception('Failed to create invite: '.$e->getMessage());
         }
     }
 
     /**
      * Send the invite link to the invited user.
      *
-     * @param \App\Models\Invite $invite The invite instance containing details of the invite.
+     * @param  \App\Models\Invite  $invite  The invite instance containing details of the invite.
      * @return void
      */
     protected function sendInviteLink(Invite $invite)
@@ -85,7 +85,7 @@ class InviteService implements IInviteService
      * Retrieve the invitation details for a guest user.
      *
      * This method fetches the invite using the invite token from the query string, then prepares
-     * and returns an array of the invite details, including role name, full name, email, and signed URLs 
+     * and returns an array of the invite details, including role name, full name, email, and signed URLs
      * for accepting or rejecting the invitation.
      *
      * @return array The invitation details including role, full name, email, and signed URLs.
@@ -109,7 +109,7 @@ class InviteService implements IInviteService
                 'guest.invite.reject',
                 $invite->expires_at,
                 ['inviteId' => $invite->id, 'inviteToken' => $invite->invite_token]
-            )
+            ),
         ];
 
         return $data;
@@ -118,16 +118,16 @@ class InviteService implements IInviteService
     /**
      * Accept an invite and create a new user based on the invite details.
      *
-     * @param array $validated The validated data, including password and other form fields.
-     * @param Invite $invite The invite model containing the invite details.
+     * @param  array  $validated  The validated data, including password and other form fields.
+     * @param  Invite  $invite  The invite model containing the invite details.
      * @return User The newly created user.
+     *
      * @throws Exception If the invite acceptance process fails.
      */
     public function accept(array $validated, Invite $invite): User
     {
         try {
             return DB::transaction(function () use ($validated, $invite) {
-
 
                 if (User::firstWhere('email', $invite->email)) {
                     throw ValidationException::withMessages([
@@ -163,7 +163,7 @@ class InviteService implements IInviteService
                 return $user->refresh(); // Return the updated user instance
             });
         } catch (Exception $e) {
-            throw new Exception('Failed to accept invite: ' . $e->getMessage());
+            throw new Exception('Failed to accept invite: '.$e->getMessage());
         }
     }
 
@@ -173,8 +173,8 @@ class InviteService implements IInviteService
      * This method performs the status update within a database transaction
      * to ensure data integrity. If the update fails, an exception is thrown.
      *
-     * @param Invite $invite The invite instance to be rejected.
-     * @return bool Returns true if the invite was successfully rejected; 
+     * @param  Invite  $invite  The invite instance to be rejected.
+     * @return bool Returns true if the invite was successfully rejected;
      *              otherwise, it will throw an exception.
      *
      * @throws Exception If the invite status update fails.
@@ -189,15 +189,14 @@ class InviteService implements IInviteService
                 return true;
             });
         } catch (Exception $e) {
-            throw new Exception('Failed to reject invite: ' . $e->getMessage());
+            throw new Exception('Failed to reject invite: '.$e->getMessage());
         }
     }
-
 
     /**
      * Resolve the appropriate role for the user based on the invite's role.
      *
-     * @param Role $role The role assigned in the invite.
+     * @param  Role  $role  The role assigned in the invite.
      * @return Role The resolved role for the user.
      */
     protected function resolveRole(Role $role): Role

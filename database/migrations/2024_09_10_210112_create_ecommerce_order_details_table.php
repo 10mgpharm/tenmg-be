@@ -21,10 +21,10 @@ return new class extends Migration
             $table->decimal('discount_price', 18, 2)->nullable();
             $table->decimal('tenmg_commission', 18, 2);
             $table->integer('quantity');
-            
+
             $table->timestamps();
         });
-        
+
     }
 
     /**

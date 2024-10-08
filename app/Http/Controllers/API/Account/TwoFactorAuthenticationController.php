@@ -2,13 +2,13 @@
 
 namespace App\Http\Controllers\API\Account;
 
-use App\Http\Controllers\Controller;
 use App\Enums\OtpType;
-use App\Http\Resources\UserResource;
+use App\Http\Controllers\Controller;
 use App\Http\Requests\ResetTwoFactorRequest;
 use App\Http\Requests\SetupTwoFactorRequest;
 use App\Http\Requests\ToggleTwoFactorRequest;
 use App\Http\Requests\VerifyTwoFactorRequest;
+use App\Http\Resources\UserResource;
 use App\Services\Interfaces\IAuthService;
 use App\Services\OtpService;
 use Illuminate\Support\Facades\DB;
@@ -34,8 +34,7 @@ class TwoFactorAuthenticationController extends Controller
         $two_factor_secret = $this->google2fa->generateSecretKey();
 
         DB::transaction(
-            fn() =>
-            $user->forceFill([
+            fn () => $user->forceFill([
                 'two_factor_secret' => encrypt($two_factor_secret),
                 'use_two_factor' => true,
             ])->save()
@@ -58,7 +57,7 @@ class TwoFactorAuthenticationController extends Controller
         }
 
         return $this->returnJsonResponse(
-            message: "Two-factor authentication setup completed.",
+            message: 'Two-factor authentication setup completed.',
             data: $data
         );
     }
@@ -66,7 +65,6 @@ class TwoFactorAuthenticationController extends Controller
     /**
      * Verify the provided multi-factor authentication token.
      *
-     * @param  \App\Http\Requests\VerifyTwoFactorRequest  $request
      * @return \Illuminate\Http\JsonResponse
      */
     public function verify(VerifyTwoFactorRequest $request)
@@ -94,7 +92,6 @@ class TwoFactorAuthenticationController extends Controller
     /**
      * Reset multi-factor authentication for the user.
      *
-     * @param  \App\Http\Requests\ResetTwoFactorRequest  $request
      * @return \Illuminate\Http\JsonResponse
      */
     public function reset(ResetTwoFactorRequest $request)
@@ -124,7 +121,7 @@ class TwoFactorAuthenticationController extends Controller
     /**
      * Toggle Two-Factor Authentication (2FA) on or off for the authenticated user.
      *
-     * @param App\Http\Requests\ToggleTwoFactorRequest $request
+     * @param  App\Http\Requests\ToggleTwoFactorRequest  $request
      * @return \Illuminate\Http\JsonResponse
      */
     public function toggle(ToggleTwoFactorRequest $request)
@@ -141,7 +138,7 @@ class TwoFactorAuthenticationController extends Controller
 
         // Return response with the updated user resource
         return $this->returnJsonResponse(
-            message: '2FA ' . $status . ' successfully.',
+            message: '2FA '.$status.' successfully.',
             data: new UserResource($user->refresh())
         );
     }

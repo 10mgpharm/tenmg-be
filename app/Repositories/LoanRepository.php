@@ -38,4 +38,24 @@ class LoanRepository
     {
         return Loan::all();
     }
+
+    public function getLoanWithRepaymentSchedules(int $loanId): Loan
+    {
+        return Loan::with('repaymentSchedule')->findOrFail($loanId);
+    }
+
+    public function markLoanAsPaid(Loan $loan): bool
+    {
+        return $loan->update([
+            'status' => 'PAID',
+            'repaymemt_end_date' => now(),
+        ]);
+    }
+
+    public function markLoanAsOngoingRepayment(Loan $loan): bool
+    {
+        return $loan->update([
+            'status' => 'ONGOING_REPAYMENT'
+        ]);
+    }
 }

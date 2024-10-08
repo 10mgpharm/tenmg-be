@@ -103,7 +103,7 @@ it('can sign in with valid credentials', function () {
 
     $response = $this->postJson($this->url, $data);
 
-    dump($response->json());
+    // dump($response->json());
 
     $response->assertStatus(Response::HTTP_OK)
         ->assertJson(
@@ -128,6 +128,7 @@ it('can sign in with valid credentials', function () {
                         ->where('businessName', 'Tuyil Pharmaceutical')
                         ->where('businessStatus', 'VERIFIED')
                         ->has('avatar')
+                        ->has('useTwoFactor')
                 )
         );
 });

@@ -46,5 +46,4 @@ class EcommerceProduct extends Model
     protected $casts = [
         'expired_at' => 'date',
     ];
-
 }

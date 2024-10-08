@@ -3,6 +3,7 @@
 namespace App\Repositories;
 
 use App\Models\DebitMandate;
+use Illuminate\Database\Eloquent\Collection;
 
 class CreditCustomerDebitMandateRepository
 {
@@ -14,6 +15,13 @@ class CreditCustomerDebitMandateRepository
         );
     }
 
+    public function updateById(int $mandateId, array $data): DebitMandate
+    {
+        $mandate = DebitMandate::findOrFail($mandateId);
+        $mandate->update($data);
+        return $mandate;
+    }
+
     public function findByAuthorizationCode($authorizationCode): ?DebitMandate
     {
         return DebitMandate::where('authorization_code', $authorizationCode)->first();
@@ -22,5 +30,10 @@ class CreditCustomerDebitMandateRepository
     public function findByReference($reference): ?DebitMandate
     {
         return DebitMandate::where('reference', $reference)->first();
+    }
+
+    public function findPendingMandate(): Collection
+    {
+        return DebitMandate::where('chargeable', false)->get();
     }
 }

@@ -3,19 +3,16 @@
 namespace App\Http\Controllers\API\Account;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Http\JsonResponse;
-use Illuminate\Support\Facades\Hash;
 use App\Http\Requests\PasswordUpdateRequest;
 use App\Http\Resources\UserResource;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
 
 class PasswordUpdateController extends Controller
 {
     /**
      * Update the authenticated user password.
-     *
-     * @param \App\Http\Requests\PasswordUpdateRequest $request
-     * @return \Illuminate\Http\JsonResponse
      */
     public function __invoke(PasswordUpdateRequest $request): JsonResponse
     {
@@ -23,7 +20,7 @@ class PasswordUpdateController extends Controller
             DB::transaction(function () use ($request) {
                 $user = $request->user();
                 $password = $request->input('newPassword') ?: $request->input('currentPassword');
-                
+
                 // Update password
                 $user->update([
                     'password' => Hash::make($password),

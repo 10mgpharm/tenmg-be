@@ -34,8 +34,6 @@ class Business extends Model
 
     /**
      * Get the CAC document associated with the business.
-     *
-     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
      */
     public function cac_document(): BelongsTo
     {
@@ -44,18 +42,16 @@ class Business extends Model
 
     /**
      * Get the URL of the CAC document if available.
-     *
-     * @return \Illuminate\Database\Eloquent\Casts\Attribute
      */
     protected function cac(): Attribute
     {
         $_this = $this;
 
         return new Attribute(
-            get: fn() => $_this->cac_document?->url
+            get: fn () => $_this->cac_document?->url
         );
     }
-    
+
     public function apiKeys()
     {
         return $this->hasMany(ApiKey::class);
@@ -75,5 +71,10 @@ class Business extends Model
     public function invites()
     {
         return $this->hasMany(Invite::class);
+    }
+
+    public function logo()
+    {
+        return $this->morphOne(related: FileUpload::class, name: 'model');
     }
 }

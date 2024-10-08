@@ -11,12 +11,12 @@ return new class extends Migration
      */
     public function up(): void
     {
-        if (!Schema::hasColumn('businesses', 'cac_document_id')) {
+        if (! Schema::hasColumn('businesses', 'cac_document_id')) {
             Schema::table('businesses', function (Blueprint $table) {
                 $table->foreignId('cac_document_id')->nullable()
-                ->after('expiry_date')
-                ->constrained('file_uploads')
-                ->nullOnDelete();
+                    ->after('expiry_date')
+                    ->constrained('file_uploads')
+                    ->nullOnDelete();
             });
         }
     }

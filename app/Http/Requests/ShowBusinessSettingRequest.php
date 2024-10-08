@@ -11,7 +11,7 @@ class ShowBusinessSettingRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return !! $this->user()->ownerBusinessType;
+        return (bool) $this->user()->ownerBusinessType;
     }
 
     /**

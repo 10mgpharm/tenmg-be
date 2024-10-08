@@ -2,7 +2,6 @@
 
 namespace App\Http\Requests\Auth;
 
-use App\Constants\PublicDomainConstants;
 use App\Enums\BusinessType;
 use App\Rules\BusinessEmail;
 use Illuminate\Foundation\Http\FormRequest;

@@ -2,7 +2,6 @@
 
 namespace App\Http\Requests;
 
-use App\Enums\BusinessStatus;
 use App\Rules\BusinessEmail;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
@@ -14,7 +13,7 @@ class BusinessSettingPersonalInformationRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return !! $this->user()->ownerBusinessType;
+        return (bool) $this->user()->ownerBusinessType;
     }
 
     /**

@@ -6,7 +6,6 @@ use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\Rules;
 
-
 class GuestAcceptInviteRequest extends FormRequest
 {
     /**
@@ -16,7 +15,6 @@ class GuestAcceptInviteRequest extends FormRequest
     {
         return true;
     }
-
 
     /**
      * Prepare the data for validation.
@@ -40,7 +38,7 @@ class GuestAcceptInviteRequest extends FormRequest
             'invite_id' => [
                 'required',
                 Rule::exists('invites', 'id')->where(
-                    fn($query) => $query
+                    fn ($query) => $query
                         ->where('invite_token', $this->query('inviteToken'))
                         ->where('status', 'INVITED')
                 ),
@@ -51,7 +49,6 @@ class GuestAcceptInviteRequest extends FormRequest
             'termsAndConditions' => ['required', 'accepted'],
         ];
     }
-
 
     /**
      * Custom error messages for validation failures.

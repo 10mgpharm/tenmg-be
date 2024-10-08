@@ -3,7 +3,6 @@
 namespace App\Mail;
 
 use App\Enums\MailType;
-use App\Models\User;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Mail\Mailable;
@@ -18,7 +17,7 @@ class Mailer extends Mailable implements ShouldQueue
     /**
      * Create a new message instance.
      */
-    public function __construct(private MailType $mailType, public  array $data) {}
+    public function __construct(private MailType $mailType, public array $data) {}
 
     /**
      * Get the message envelope.

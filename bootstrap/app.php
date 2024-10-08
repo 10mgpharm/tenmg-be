@@ -5,10 +5,10 @@ use App\Helpers\UtilityHelper;
 use App\Http\Middleware\CamelCaseMiddleware;
 use App\Http\Middleware\Cors;
 use App\Http\Middleware\ForceJsonResponse;
+use App\Http\Middleware\HandleAuthProvider;
 use App\Http\Middleware\IsAdmin;
 use Illuminate\Auth\AuthenticationException;
 use Illuminate\Database\QueryException;
-use App\Http\Middleware\HandleAuthProvider;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
@@ -23,9 +23,9 @@ use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
-        web: __DIR__ . '/../routes/web.php',
-        api: __DIR__ . '/../routes/api.php',
-        commands: __DIR__ . '/../routes/console.php',
+        web: __DIR__.'/../routes/web.php',
+        api: __DIR__.'/../routes/api.php',
+        commands: __DIR__.'/../routes/console.php',
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware) {
@@ -62,7 +62,7 @@ return Application::configure(basePath: dirname(__DIR__))
             switch (get_class($throwable)) {
                 case ValidationException::class:
                     $error['message'] = ResponseMessages::INVALID_PARAMS;
-                    $error['data'] = $throwable->errors();
+                    $error['errors'] = $throwable->errors();
                     $statusCode = 400;
                     break;
 
@@ -82,7 +82,7 @@ return Application::configure(basePath: dirname(__DIR__))
                     break;
 
                 case QueryException::class:
-                    Log::error('SQL Error: ' . $throwable->getMessage());
+                    Log::error('SQL Error: '.$throwable->getMessage());
                     $error['message'] = ResponseMessages::ERROR_PROCESSING_REQUEST;
                     $statusCode = 500;
                     break;

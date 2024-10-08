@@ -3,8 +3,8 @@
 namespace App\Http\Requests;
 
 use App\Enums\OtpType;
-use Illuminate\Validation\Rule;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class ResetTwoFactorRequest extends FormRequest
 {
@@ -13,7 +13,7 @@ class ResetTwoFactorRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return !! $this->user();
+        return (bool) $this->user();
     }
 
     /**
@@ -28,10 +28,10 @@ class ResetTwoFactorRequest extends FormRequest
                 'required',
                 'string',
                 Rule::exists('otps', 'code')
-                ->where('type', OtpType::RESET_MULTI_FACTOR_AUTHENTICATION->value)
-                ->where('user_id', $this->user()->id),
+                    ->where('type', OtpType::RESET_MULTI_FACTOR_AUTHENTICATION->value)
+                    ->where('user_id', $this->user()->id),
             ],
-            'password' => ['required','max:255', 'current_password:api'],
+            'password' => ['required', 'max:255', 'current_password:api'],
         ];
     }
 }

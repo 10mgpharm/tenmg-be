@@ -48,8 +48,17 @@ test('signup fails with missing or invalid data', function () {
 
     $response = $this->postJson($this->signupEndpoint, $requestData);
 
-    $response->assertStatus(Response::HTTP_UNPROCESSABLE_ENTITY)
-        ->assertJsonValidationErrors(['businessType', 'name', 'email', 'password', 'passwordConfirmation', 'termsAndConditions']);
+    $responseData = $response->json();
+
+    expect($response->status())->toBe(Response::HTTP_BAD_REQUEST);
+
+    expect($responseData)
+        ->toHaveKey('errors.businessType')
+        ->toHaveKey('errors.name')
+        ->toHaveKey('errors.email')
+        ->toHaveKey('errors.password')
+        ->toHaveKey('errors.passwordConfirmation')
+        ->toHaveKey('errors.termsAndConditions');
 });
 
 test('signup fails if user already exists', function () {
@@ -69,8 +78,12 @@ test('signup fails if user already exists', function () {
 
     $response = $this->postJson($this->signupEndpoint, $requestData);
 
-    $response->assertStatus(Response::HTTP_UNPROCESSABLE_ENTITY)
-        ->assertJsonValidationErrors(['email']);
+    $responseData = $response->json();
+
+    expect($response->status())->toBe(Response::HTTP_BAD_REQUEST);
+
+    expect($responseData)
+        ->toHaveKey('errors.email');
 });
 
 afterEach(function () {

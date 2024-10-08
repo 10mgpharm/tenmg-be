@@ -25,11 +25,11 @@ return new class extends Migration
             $table->integer('package_per_roll');
             $table->text('description')->nullable();
             $table->integer('weight');
-            
+
             $table->softDeletes();
             $table->timestamps();
         });
-        
+
     }
 
     /**

@@ -1,5 +1,6 @@
 <?php
 
+use App\Models\Business;
 use App\Models\Customer;
 use App\Models\FileUpload;
 use App\Models\User;
@@ -17,6 +18,12 @@ beforeEach(function () {
     $this->attachmentServiceMock = Mockery::mock(AttachmentService::class);
     $this->authServiceMock = Mockery::mock(AuthService::class);
     $this->activityLogServiceMock = Mockery::mock(ActivityLogService::class);
+
+    $this->businessMock = Mockery::mock(Business::class)->makePartial();
+    $this->businessMock->id = 1;
+    $this->authServiceMock
+        ->shouldReceive('getBusiness')
+        ->andReturn($this->businessMock);
 
     // Mock authenticated user
     $this->authUserMock = Mockery::mock(User::class)->makePartial();
@@ -38,11 +45,16 @@ beforeEach(function () {
 // Test: it can create a customer
 test('it can create a customer', function () {
     $data = [
-        'vendorId' => 1,
         'name' => 'John Doe',
         'email' => 'john.doe@example.com',
         'phone' => '123456789',
     ];
+
+    // Expected data after the service modifies it
+    $expectedData = array_merge($data, [
+        'vendorId' => 1,
+        'created_by' => 1,
+    ]);
 
     // Mock pagination to get the total customer count
     $paginationMock = Mockery::mock(LengthAwarePaginator::class);
@@ -53,18 +65,16 @@ test('it can create a customer', function () {
     $customerMock->id = 1;
     $customerMock->name = 'John Doe';
 
-    $this->customerRepositoryMock
-        ->shouldReceive('paginate')
-        ->once()
-        ->with(['vendorId' => $data['vendorId']], 1)
-        ->andReturn($paginationMock);
-
+    // Adjust the mock for `create` to match the expected arguments
     $this->customerRepositoryMock
         ->shouldReceive('create')
         ->once()
-        ->with(Mockery::on(function ($arg) use ($data) {
-            return isset($arg['identifier'], $arg['created_by']) &&
-                $arg['name'] === $data['name'];
+        ->with(Mockery::on(function ($arg) use ($expectedData) {
+            return $arg['vendorId'] === $expectedData['vendorId'] &&
+                $arg['created_by'] === $expectedData['created_by'] &&
+                $arg['name'] === $expectedData['name'] &&
+                $arg['email'] === $expectedData['email'] &&
+                $arg['phone'] === $expectedData['phone'];
         }))
         ->andReturn($customerMock);
 
@@ -72,8 +82,10 @@ test('it can create a customer', function () {
         ->shouldReceive('logActivity')
         ->once();
 
+    // Call the service method
     $createdCustomer = $this->customerService->createCustomer($data);
 
+    // Assert the returned result
     expect($createdCustomer)->toBeInstanceOf(Customer::class);
     expect($createdCustomer->name)->toBe('John Doe');
 });
@@ -87,10 +99,6 @@ test('it can update a customer', function () {
     $customerMock->id = 1;
     $customerMock->name = 'John Doe';
 
-    // Mock the avatar as an instance of FileUpload
-    $fileUploadMock = Mockery::mock(FileUpload::class)->makePartial();
-    $customerMock->avatar = $fileUploadMock;
-
     $this->customerRepositoryMock
         ->shouldReceive('findById')
         ->once()
@@ -100,12 +108,6 @@ test('it can update a customer', function () {
     $this->customerRepositoryMock
         ->shouldReceive('update')
         ->once();
-
-    // Ensure that the attachment service gets the correct model and file path
-    $this->attachmentServiceMock
-        ->shouldReceive('updateFile')
-        ->once()
-        ->with($fileUploadMock, $data['avatar']);
 
     $this->activityLogServiceMock
         ->shouldReceive('logActivity')

@@ -11,13 +11,14 @@ return new class extends Migration
      */
     public function up(): void
     {
+        Schema::dropIfExists('team_members');
         Schema::create('team_members', function (Blueprint $table) {
             $table->id();
             $table->string('full_name');
             $table->string('email')->unique()->index();
             $table->enum('status', ['INVITED', 'ACCEPTED', 'REJECTED', 'REMOVED'])->default('INVITED');
             $table->foreignId('business_id')->constrained('businesses')->cascadeOnDelete();
-            $table->foreignId('creator_id')->constrained('users')->nullOnDelete();
+            $table->foreignId('creator_id')->constrained('users')->cascadeOnDelete();
             $table->timestamps();
         });
     }

@@ -16,7 +16,7 @@ return new class extends Migration
             $table->foreignId('business_id')->constrained('businesses')->nullOnDelete()->index();
             $table->foreignId('created_by_id')->constrained('users')->nullOnDelete()->index();
             $table->foreignId('updated_by_id')->constrained('users')->nullOnDelete()->index();
-            
+
             $table->string('name');
             $table->string('slug')->unique();
 

@@ -20,19 +20,19 @@ return new class extends Migration
 
             $table->string('reference')->nullable();
             $table->string('txn_id')->unique()->index();
-            
+
             $table->enum('payout_type', ['TRANSFER', 'WITHDRAWAL', 'REFUND']);
             $table->string('channel')->index()->comment("['BANK', 'PAYSTACK', 'RAVEPAY', 'FLUTTERWAVE', 'MONO', 'MONNIFY', 'OTHER_PAYMENT_GATEWAY']");
             $table->enum('status', ['PENDING', 'PROCESSING', 'COMPLETED', 'FAILED', 'REVERSED'])->default('PENDING')->index();
-            
+
             $table->decimal('amount_sent', 18, 2);
             $table->decimal('channel_fee', 18, 2)->default(0.00);
             $table->json('channel_response')->nullable();
             $table->string('channel_reference')->nullable()->index();
-        
+
             $table->timestamps();
         });
-        
+
     }
 
     /**

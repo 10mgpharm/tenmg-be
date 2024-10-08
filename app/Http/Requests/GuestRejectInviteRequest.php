@@ -15,7 +15,6 @@ class GuestRejectInviteRequest extends FormRequest
         return true;
     }
 
-
     /**
      * Prepare the data for validation.
      */
@@ -38,7 +37,7 @@ class GuestRejectInviteRequest extends FormRequest
             'invite_id' => [
                 'required',
                 Rule::exists('invites', 'id')->where(
-                    fn($query) => $query
+                    fn ($query) => $query
                         ->where('invite_token', $this->query('inviteToken'))
                         ->where('status', 'INVITED')
                 ),

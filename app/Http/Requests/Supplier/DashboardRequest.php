@@ -20,7 +20,7 @@ class DashboardRequest extends FormRequest
 
         // Then, check if the user is a supplier.
         $entityType = $user->ownerBusinessType?->type ?? $user->businesses()->firstWhere('user_id', $this->id)?->type;
-        if ( $entityType !== 'SUPPLIER') {
+        if ($entityType !== 'SUPPLIER') {
             return false;
         }
 

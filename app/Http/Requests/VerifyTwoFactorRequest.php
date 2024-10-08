@@ -40,7 +40,7 @@ class VerifyTwoFactorRequest extends FormRequest
                 'required',
                 'size:6',
                 new VerifyTwoFactorCode,
-            ]
+            ],
         ];
     }
 
@@ -55,14 +55,14 @@ class VerifyTwoFactorRequest extends FormRequest
         // Check if the user is authenticated
         if (! $user) {
             abort(response()->json([
-                'message' => 'Unauthenticated.'
+                'message' => 'Unauthenticated.',
             ], 401));
         }
 
         // Check if the user has 2FA already set up
         if ($user->two_factor_secret) {
             abort(response()->json([
-                'message' => 'Two-factor authentication is not enabled for this account.'
+                'message' => 'Two-factor authentication is not enabled for this account.',
             ], 403));
         }
     }

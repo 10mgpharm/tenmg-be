@@ -24,7 +24,6 @@ class ViewInviteGuestRequest extends FormRequest
         ]);
     }
 
-
     /**
      * Get the validation rules that apply to the request.
      *
@@ -33,7 +32,7 @@ class ViewInviteGuestRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'invite_token' => ['required', 'string', 'exists:invites,invite_token']
+            'invite_token' => ['required', 'string', 'exists:invites,invite_token'],
         ];
     }
 }

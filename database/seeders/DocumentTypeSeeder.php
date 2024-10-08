@@ -3,7 +3,6 @@
 namespace Database\Seeders;
 
 use App\Models\DocumentType;
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
 class DocumentTypeSeeder extends Seeder
@@ -25,7 +24,7 @@ class DocumentTypeSeeder extends Seeder
                 'description' => 'Corporate Affairs Commission (CAC) document for business registration',
             ],
         ];
-        foreach($documentTypes as $documentType){
+        foreach ($documentTypes as $documentType) {
             DocumentType::firstOrCreate($documentType);
         }
     }

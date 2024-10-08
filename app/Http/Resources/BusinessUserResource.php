@@ -19,8 +19,9 @@ class BusinessUserResource extends JsonResource
             'role' => $this->role->name,
             'active' => $this->active,
             'email' => $this->user->email,
-            'name' => $this->user->name
+            'name' => $this->user->name,
         ];
+
         return parent::toArray($request);
     }
 }

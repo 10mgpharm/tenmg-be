@@ -2,9 +2,8 @@
 
 namespace App\Services;
 
-use App\Models\User;
-use App\Services\OtpService;
 use App\Enums\OtpType;
+use App\Models\User;
 use App\Services\Interfaces\IAccountService;
 use Illuminate\Support\Facades\DB;
 
@@ -14,10 +13,6 @@ class AccountService implements IAccountService
 
     /**
      * Update the user's profile with the provided data.
-     *
-     * @param User $user
-     * @param array $data
-     * @return User
      */
     public function updateProfile(User $user, array $data): User
     {

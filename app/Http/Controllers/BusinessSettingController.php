@@ -3,22 +3,20 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\BusinessSettingAccountSetupRequest;
-use App\Services\AttachmentService;
-use App\Http\Resources\BusinessResource;
-use App\Http\Requests\ShowBusinessSettingRequest;
 use App\Http\Requests\BusinessSettingPersonalInformationRequest;
-use App\Http\Resources\UserResource;
+use App\Http\Requests\ShowBusinessSettingRequest;
+use App\Http\Resources\BusinessResource;
 use App\Models\Business;
 use App\Models\User;
+use App\Services\AttachmentService;
 
 class BusinessSettingController extends Controller
 {
-    public function __construct(private AttachmentService $attachmentService,) {}
+    public function __construct(private AttachmentService $attachmentService) {}
 
     /**
      * Display the business details associated with the authenticated user.
      *
-     * @param \App\Http\Requests\ShowBusinessSettingRequest $request
      * @return \Illuminate\Http\JsonResponse
      */
     public function show(ShowBusinessSettingRequest $request)
@@ -34,7 +32,6 @@ class BusinessSettingController extends Controller
     /**
      * Update the business personal information details associated with the authenticated user.
      *
-     * @param \App\Http\Requests\BusinessSettingPersonalInformationRequest $request
      * @return \Illuminate\Http\JsonResponse
      */
     public function personalInformation(BusinessSettingPersonalInformationRequest $request)
@@ -57,10 +54,9 @@ class BusinessSettingController extends Controller
     }
 
     /**
-     * Update the business account license number, expiry date and cac doc 
+     * Update the business account license number, expiry date and cac doc
      * details associated with the authenticated user.
      *
-     * @param \App\Http\Requests\BusinessSettingAccountSetupRequest $request
      * @return \Illuminate\Http\JsonResponse
      */
     public function license(BusinessSettingAccountSetupRequest $request)
@@ -73,14 +69,14 @@ class BusinessSettingController extends Controller
             array_flip(['license_number', 'expiry_date'])
         ));  // since fillable isn't used.
 
-         // Save uploaded file
-        if($request->hasFile('cacDocument')){
+        // Save uploaded file
+        if ($request->hasFile('cacDocument')) {
             $created = $this->attachmentService->saveNewUpload(
                 $request->file('cacDocument'),
                 $user->ownerBusinessType->id,
                 Business::class,
             );
-            
+
             $data['cac_document_id'] = $created->id;
         }
 

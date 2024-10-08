@@ -12,9 +12,8 @@ class PasswordUpdateRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return !! $this->user();
+        return (bool) $this->user();
     }
-
 
     /**
      * Prepare the data for validation.
@@ -40,7 +39,7 @@ class PasswordUpdateRequest extends FormRequest
                 'required',
                 'string',
                 'max:255',
-                'current_password:api'
+                'current_password:api',
             ],
             'new_password' => [
                 'sometimes',
@@ -49,7 +48,7 @@ class PasswordUpdateRequest extends FormRequest
                 'string',
                 Rules\Password::default(),
                 'confirmed',
-                'different:current_password'
+                'different:current_password',
             ],
         ];
     }

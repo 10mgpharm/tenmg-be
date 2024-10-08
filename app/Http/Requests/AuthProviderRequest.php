@@ -2,8 +2,6 @@
 
 namespace App\Http\Requests;
 
-use App\Helpers\UtilityHelper;
-use App\Rules\BusinessEmail;
 use Illuminate\Foundation\Http\FormRequest;
 
 class AuthProviderRequest extends FormRequest

@@ -22,7 +22,7 @@ return new class extends Migration
                 $table->decimal('late_fee', 18, 2)->nullable();
                 $table->datetime('due_date')->nullable();
 
-                $table->string('payment_status')->nullable(); // PENDING, PAID
+                $table->string('payment_status')->nullable(); // PENDING, PROCESSING, PAID
 
                 $table->timestamps();
             });

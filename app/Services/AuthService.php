@@ -243,6 +243,7 @@ class AuthService implements IAuthService
             }
 
             $businessType = BusinessType::from(strtoupper($request['businessType'] ?: $user->ownerBusinessType->type));
+
             return $user;
         } catch (\Throwable $th) {
             DB::rollBack();

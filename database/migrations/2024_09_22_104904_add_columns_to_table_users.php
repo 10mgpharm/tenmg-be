@@ -11,7 +11,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        if (!Schema::hasColumns('users', ['use_two_factor', 'two_factor_secret'])){
+        if (! Schema::hasColumns('users', ['use_two_factor', 'two_factor_secret'])) {
             Schema::table('users', function (Blueprint $table) {
                 $table->boolean('use_two_factor')->default(false)->after('active');
                 $table->string('two_factor_secret')->nullable()->after('use_two_factor');
@@ -24,7 +24,7 @@ return new class extends Migration
      */
     public function down(): void
     {
-        if(Schema::hasColumns('users', ['use_two_factor', 'two_factor_secret'])){
+        if (Schema::hasColumns('users', ['use_two_factor', 'two_factor_secret'])) {
             Schema::table('users', function (Blueprint $table) {
                 $table->dropColumn(['use_two_factor', 'two_factor_secret']);
             });

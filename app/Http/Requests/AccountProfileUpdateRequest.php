@@ -36,7 +36,7 @@ class AccountProfileUpdateRequest extends FormRequest
                 'sometimes',
                 'nullable',
                 'image',
-                'max:10240'
+                'max:10240',
             ],
         ];
     }

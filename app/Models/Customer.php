@@ -27,6 +27,11 @@ class Customer extends Model
         return $this->belongsTo(Business::class);
     }
 
+    public function debitMandate()
+    {
+        return $this->hasOne(DebitMandate::class);
+    }
+
     public function avatar()
     {
         return $this->morphOne(FileUpload::class, 'model');

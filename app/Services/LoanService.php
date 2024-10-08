@@ -4,21 +4,26 @@ namespace App\Services;
 
 use App\Models\Loan;
 use App\Repositories\LoanRepository;
+use App\Repositories\RepaymentLogRepository;
 use App\Repositories\RepaymentScheduleRepository;
 use Carbon\Carbon;
+use Exception;
 use Illuminate\Support\Facades\Log;
 
 class LoanService
 {
     public function __construct(
         private LoanRepository $loanRepository,
-        private RepaymentScheduleRepository $repaymentScheduleRepository
+        private RepaymentScheduleRepository $repaymentScheduleRepository,
+        private RepaymentLogRepository $repaymentLogRepository,
+        private NotificationService $notificationService,
+        private PaystackService $paystackService,
     ) {}
 
     /**
      * Create a loan and generate repayment schedules.
      *
-     * @return CreditLoan
+     * @return Loan
      */
     public function createLoan(array $loanData, array $repaymentBreakdown): Loan
     {
@@ -34,7 +39,10 @@ class LoanService
             foreach ($repaymentBreakdown as $schedule) {
                 $this->repaymentScheduleRepository->store([
                     'loan_id' => $loan->id,
-                    'amount' => $schedule['totalPayment'],
+                    'total_amount' => $schedule['totalPayment'],
+                    'principal' => $schedule['principal'],
+                    'interest' => $schedule['interest'],
+                    'balance' => $schedule['balance'],
                     'due_date' => Carbon::parse($schedule['month'])->endOfMonth(),
                     'payment_status' => 'PENDING',
                 ]);
@@ -74,6 +82,33 @@ class LoanService
         return $this->loanRepository->findById($loanId);
     }
 
+    public function processLoanRepayment(int $repaymentScheduleId, bool $isLiquidation = false): array
+    {
+        $repaymentSchedule = $this->repaymentScheduleRepository->fetchRepaymentScheduleById($repaymentScheduleId);
+
+        if (!$repaymentSchedule) {
+            throw new Exception('Repayment schedule not found');
+        }
+
+        if ($repaymentSchedule->payment_status === 'PAID') {
+            throw new Exception('Repayment schedule has already been paid');
+        }    
+
+        $paymentResponse = $this->paystackService->debitCustomer(repayment: $repaymentSchedule, isLiquidation: $isLiquidation);
+
+        if ($paymentResponse->successful()) {
+
+            $this->loanRepository->markLoanAsPaid($repaymentSchedule->loan);
+            $this->repaymentScheduleRepository->markRepaymentsAsCancelled($repaymentSchedule->loan->id);
+            $this->notificationService->sendLoanLiquidationNotification($repaymentSchedule->loan->customer, $repaymentSchedule->loan);
+
+            return ['message' => 'Loan successfully liquidated'];
+        }
+
+        // Handle failed payment
+        throw new Exception('Payment failed, please try again.');
+    }
+
     /**
      * Fetch the repayment schedule for a loan.
      *
@@ -93,4 +128,5 @@ class LoanService
     {
         return $this->loanRepository->fetchAllLoans();
     }
+
 }

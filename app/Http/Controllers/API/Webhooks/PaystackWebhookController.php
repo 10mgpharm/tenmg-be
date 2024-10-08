@@ -40,6 +40,10 @@ class PaystackWebhookController extends Controller
                 $this->paystackWebhookService->handleMandateApproval($payload, $chargeable);
                 break;
 
+            case 'charge.success':
+                $this->paystackWebhookService->handleChargeSuccess($payload);
+                break;
+
             default:
                 Log::warning('Unhandled Paystack event', ['event' => $event]);
         }

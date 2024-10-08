@@ -40,15 +40,15 @@ class CreateInviteRequest extends FormRequest
      */
     public function rules(): array
     {
-        
+
         return [
-            'full_name' => ['required', 'string', 'max:255',],
+            'full_name' => ['required', 'string', 'max:255'],
             'email' => [
                 'required',
                 'string',
                 'email',
                 'max:255',
-                Rule::unique('invites')->where(fn($query) => $query->where('business_id', $this->user()->ownerBusinessType->id)->whereNotIn('status', ['REJECTED', 'REMOVED'])),
+                Rule::unique('invites')->where(fn ($query) => $query->where('business_id', $this->user()->ownerBusinessType->id)->whereNotIn('status', ['REJECTED', 'REMOVED'])),
             ],
             'role_id' => ['required', 'exists:roles,id'],
         ];

@@ -35,7 +35,6 @@ class AuthenticatedController extends Controller
 
             $user = $request->user();
             $tokenResult = $user->createToken('Full Access Token', ['full']);
-            
 
             return $this->authService->returnAuthResponse(
                 user: $user,

@@ -14,7 +14,7 @@ class AccountController extends Controller
     /**
      * Update the authenticated user's profile.
      *
-     * @param AccountProfileUpdateRequest $request Validated account update request.
+     * @param  AccountProfileUpdateRequest  $request  Validated account update request.
      * @return \Illuminate\Http\JsonResponse
      */
     public function profile(AccountProfileUpdateRequest $request)
@@ -25,7 +25,7 @@ class AccountController extends Controller
         // Filter non-empty fields from the validated data.
         $data = array_filter($validated);
         $user = $this->accountService->updateProfile($user, $data);
-    
+
         return $this->returnJsonResponse(
             message: 'Profile successfully updated.',
             data: (new UserResource($user))

@@ -68,5 +68,4 @@ class EcommercePayout extends Model
     {
         return $this->belongsTo(EcommerceBankAccount::class, 'recipient_bank_id');
     }
-
 }

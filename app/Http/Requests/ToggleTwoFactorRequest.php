@@ -11,9 +11,8 @@ class ToggleTwoFactorRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return !! $this->user();
+        return (bool) $this->user();
     }
-
 
     /**
      * Prepare the data for validation.
@@ -38,9 +37,9 @@ class ToggleTwoFactorRequest extends FormRequest
                 'required',
                 'string',
                 'max:255',
-                'current_password:api'
+                'current_password:api',
             ],
-            'use_two_factor' => ['required', 'boolean']
+            'use_two_factor' => ['required', 'boolean'],
         ];
     }
 }

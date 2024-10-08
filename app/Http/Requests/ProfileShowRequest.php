@@ -13,7 +13,7 @@ class ProfileShowRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return !!$this->user();
+        return (bool) $this->user();
     }
 
     /**
@@ -25,7 +25,7 @@ class ProfileShowRequest extends FormRequest
     protected function prepareForValidation()
     {
         $businessType = strtoupper(last(explode('/', $this->route()->getPrefix())));
-        
+
         $this->merge([
             'businessType' => $businessType,
             'id' => $this->route('id'),

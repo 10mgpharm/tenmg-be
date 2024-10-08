@@ -115,7 +115,7 @@ class OfferService
             throw new Exception('Mandate not found.');
         }
 
-        $response = $this->paystackService->verifyMandate($mandate->reference);
+        $response = $this->paystackService->verifyPaystackTransaction($mandate->reference);
         if ($response['status'] === 'success') {
             $payload = $response['data'];
 

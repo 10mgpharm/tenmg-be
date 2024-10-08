@@ -14,18 +14,15 @@ use App\Models\Invite;
 use App\Services\InviteService;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
-use Illuminate\Support\Facades\URL;
 
 class InviteController extends Controller
 {
-
-    public function __construct(private InviteService $inviteService,) {}
-
+    public function __construct(private InviteService $inviteService) {}
 
     /**
      * Retrieve all invite for the authenticated user's business.
      *
-     * @param ListInvitesRequest $request Validated request instance.
+     * @param  ListInvitesRequest  $request  Validated request instance.
      * @return \Illuminate\Http\JsonResponse
      */
     public function index(ListInvitesRequest $request)
@@ -43,7 +40,7 @@ class InviteController extends Controller
     /**
      * Retrieve all team members for the authenticated user's business.
      *
-     * @param ListInvitesRequest $request Validated request instance.
+     * @param  ListInvitesRequest  $request  Validated request instance.
      * @return \Illuminate\Http\JsonResponse
      */
     public function members(ListInvitesRequest $request)
@@ -62,11 +59,11 @@ class InviteController extends Controller
      * Retrieve and display invitation details for a guest user.
      *
      * This method processes the request to view an invitation, using the
-     * invite service to fetch the relevant invitation details. It returns 
-     * a JSON response containing the invite information, such as role, 
+     * invite service to fetch the relevant invitation details. It returns
+     * a JSON response containing the invite information, such as role,
      * full name, email, and action URLs for accepting or rejecting the invitation.
      *
-     * @param ViewInviteGuestRequest $request The validated request object containing invite query parameters.
+     * @param  ViewInviteGuestRequest  $request  The validated request object containing invite query parameters.
      * @return \Illuminate\Http\JsonResponse A JSON response with the invitation details.
      */
     public function view(ViewInviteGuestRequest $request)
@@ -79,15 +76,12 @@ class InviteController extends Controller
         );
     }
 
-
-
     /**
      * Add a new team member/invite to the authenticated user's business.
      *
      * This method validates the incoming request, creates a new team member/invite
      * using the validated data, and returns a JSON response with the team member's/invite's details.
      *
-     * @param CreateInviteRequest $request
      * @return \Illuminate\Http\JsonResponse
      */
     public function store(CreateInviteRequest $request)
@@ -97,7 +91,7 @@ class InviteController extends Controller
 
         $invite = $this->inviteService->store($validated, $user);
 
-        if (!$invite) {
+        if (! $invite) {
             return $this->returnJsonResponse(
                 message: 'Oops, can\'t add invite at the moment. Please try again later.'
             );
@@ -115,9 +109,7 @@ class InviteController extends Controller
      * This method validates the invitation details, ensures the token and invite are valid, and creates
      * a new user account if the invitation is successfully accepted. The invite token must not be expired.
      *
-     * @param  GuestAcceptInviteRequest  $request
      * @return \Illuminate\Http\JsonResponse
-     *
      */
     public function accept(GuestAcceptInviteRequest $request)
     {
@@ -145,7 +137,7 @@ class InviteController extends Controller
     /**
      * Reject an invitation for a guest user.
      *
-     * @param RejectInviteRequest $request Validated request instance.
+     * @param  RejectInviteRequest  $request  Validated request instance.
      * @return \Illuminate\Http\JsonResponse A JSON response indicating the rejection status.
      */
     public function reject(GuestRejectInviteRequest $request)

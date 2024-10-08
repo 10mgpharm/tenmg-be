@@ -12,7 +12,7 @@ class BusinessSettingAccountSetupRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return !! $this->user()->ownerBusinessType;
+        return (bool) $this->user()->ownerBusinessType;
     }
 
     /**
@@ -40,13 +40,13 @@ class BusinessSettingAccountSetupRequest extends FormRequest
                 'max:255',
                 Rule::unique('businesses', 'license_number')->ignore($this->user()->id, 'owner_id'),
             ],
-            'expiry_date' => ['sometimes', 'nullable', 'string', 'date',],
+            'expiry_date' => ['sometimes', 'nullable', 'string', 'date'],
             'cacDocument' => [
                 'sometimes',
                 'nullable',
                 'mimes:pdf,doc,docx',
                 'extensions:pdf,doc,docx',
-                'max:10240'
+                'max:10240',
             ],
 
         ];

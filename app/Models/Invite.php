@@ -23,7 +23,6 @@ class Invite extends Model
         'invite_token',
     ];
 
-
     /**
      * Get the attributes that should be cast.
      *

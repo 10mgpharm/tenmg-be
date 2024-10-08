@@ -13,7 +13,6 @@ class CustomerRepository
             'name' => $data['name'],
             'email' => $data['email'],
             'phone' => $data['phone'],
-            'identifier' => $data['identifier'],
             'active' => $data['active'] ?? true,
         ]);
     }

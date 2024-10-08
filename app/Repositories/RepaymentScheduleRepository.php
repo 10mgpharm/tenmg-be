@@ -3,6 +3,7 @@
 namespace App\Repositories;
 
 use App\Models\RepaymentSchedule;
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Collection;
 
 class RepaymentScheduleRepository
@@ -49,5 +50,29 @@ class RepaymentScheduleRepository
     public function deleteRepaymentScheduleByLoanId($loanId)
     {
         return RepaymentSchedule::where('loan_id', $loanId)->delete();
+    }
+
+    /**
+     * Get repayment schedules due on a specific date.
+     */
+    public function getRepaymentsDueOnDate(Carbon $dueDate)
+    {
+        return RepaymentSchedule::whereDate('due_date', $dueDate)
+            ->where('payment_status', 'PENDING')
+            ->with(['loan.customer']) // eager load related customer and loan info
+            ->get();
+    }
+
+    public function findProcessingRepayments(): Collection
+    {
+        return RepaymentSchedule::where('payment_status', 'PROCESSING')->get();
+    }
+
+    public function markRepaymentsAsCancelled(int $loanId): bool
+    {
+        return RepaymentSchedule::where('loan_id', $loanId)
+            ->where('payment_status', 'PENDING')
+            ->orWhere('payment_status', 'PROCESSING')
+            ->update(['payment_status' => 'CANCELLED']);
     }
 }

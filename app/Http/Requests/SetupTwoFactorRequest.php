@@ -47,14 +47,14 @@ class SetupTwoFactorRequest extends FormRequest
         // Check if the user is authenticated
         if (! $user) {
             abort(response()->json([
-                'message' => 'User is not authenticated.'
+                'message' => 'User is not authenticated.',
             ], 401));
         }
 
         // Check if the user has 2FA already set up
         if ($user->two_factor_secret) {
             abort(response()->json([
-                'message' => 'Two-factor authentication is already setup for this account.'
+                'message' => 'Two-factor authentication is already setup for this account.',
             ], 403));
         }
     }
