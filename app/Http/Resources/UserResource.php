@@ -19,7 +19,9 @@ class UserResource extends JsonResource
             'name' => $this->name,
             'email' => $this->email,
             'active' => (bool) $this->active == 1,
-            'useTwoFactor' => $this->use_two_factor,
+            'useTwoFactor' => $this->two_factor_secret ?
+                ($this->use_two_factor ? 'ACTIVE' : 'INACTIVE') :
+                'NOT_SETUP',
             'avatar' => $this->avatar,
             'emailVerifiedAt' => $this->email_verified_at,
             'owner' => (bool) ($this->ownerBusinessType?->type),
