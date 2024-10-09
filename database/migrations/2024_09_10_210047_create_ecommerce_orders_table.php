@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('ecommerce_orders', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('customer_id')->constrained('customers')->cascadeOnDelete()->index();
+            $table->foreignId('customer_id')->constrained('customers')->cascadeOnDelete();
             $table->foreignId('ecommerce_payment_method_id')->nullable()->constrained('ecommerce_payment_methods')->nullOnDelete();
             $table->integer('qty_total');
             $table->decimal('order_total', 18, 2);

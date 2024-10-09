@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
 
             $table->foreignId('initiated_by_id')->nullable()->constrained('users')->nullOnDelete();
-            $table->foreignId('recipient_business_id')->constrained('businesses')->cascadeOnDelete()->index();
+            $table->foreignId('recipient_business_id')->constrained('businesses')->cascadeOnDelete();
             $table->foreignId('recipient_bank_id')->nullable()->constrained('bank_accounts')->nullOnDelete();
 
             $table->string('reference')->nullable();
