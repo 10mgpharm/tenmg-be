@@ -13,9 +13,11 @@ return new class extends Migration
     {
         Schema::create('ecommerce_transactions', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('ecommerce_wallet_id')->constrained('ecommerce_wallets')->nullOnDelete()->index();
-            $table->foreignId('supplier_id')->constrained('users')->nullOnDelete()->index();
-            $table->foreignId('ecommerce_order_id')->constrained('ecommerce_orders')->nullOnDelete()->index();
+            $table->foreignId('ecommerce_wallet_id')->nullable()->constrained('ecommerce_wallets')->nullOnDelete()->index();
+
+            $table->foreignId('supplier_id')->nullable()->constrained('businesses')->nullOnDelete()->index();
+
+            $table->foreignId('ecommerce_order_id')->nullable()->constrained('ecommerce_orders')->nullOnDelete()->index();
             $table->enum('txn_type', ['CREDIT', 'DEBIT']);
             $table->string('txn_group')->comment("['ORDER_PAYMENT', 'REFUND', 'WITHDRAWAL', 'PAYOUT']");
             $table->decimal('amount', 18, 2);

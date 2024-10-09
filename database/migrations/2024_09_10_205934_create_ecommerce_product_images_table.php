@@ -13,8 +13,8 @@ return new class extends Migration
     {
         Schema::create('ecommerce_product_images', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('file_id')->constrained('files')->nullOnDelete()->index();
-            $table->foreignId('ecommerce_product_id')->constrained('ecommerce_products')->nullOnDelete()->index();
+            $table->foreignId('file_id')->nullable()->constrained('files')->nullOnDelete()->index();
+            $table->foreignId('ecommerce_product_id')->nullable()->constrained('ecommerce_products')->nullOnDelete()->index();
             $table->timestamps();
         });
     }

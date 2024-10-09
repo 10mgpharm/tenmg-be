@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('ecommerce_bank_accounts', function (Blueprint $table) {
             $table->id();
 
-            $table->foreignId('supplier_id')->constrained('users')->cascadeOnDelete()->index();
+            $table->foreignId('supplier_id')->constrained('businesses')->cascadeOnDelete()->index();
 
             $table->string('bank_name');
             $table->string('bank_code');
