@@ -92,7 +92,7 @@ Route::prefix('v1')->group(function () {
     Route::middleware(['auth:api', 'scope:full'])->group(function () {
 
         Route::post('/resend-otp', ResendOtpController::class)
-            ->name('resend.otp')->middleware('throttle:5,1');
+            ->name('resend.otp.auth')->middleware('throttle:5,1');
 
         // Business specific operations
         Route::prefix('business')->group(function () {
