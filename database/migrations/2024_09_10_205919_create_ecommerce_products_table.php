@@ -14,15 +14,15 @@ return new class extends Migration
         Schema::create('ecommerce_products', function (Blueprint $table) {
             $table->id();
 
-            $table->foreignId('business_id')->nullable()->constrained('businesses')->nullOnDelete()->index();
-            $table->foreignId('ecommerce_brand_id')->nullable()->constrained('ecommerce_brands')->nullOnDelete()->index();
-            $table->foreignId('thumbnail_file_id')->nullable()->constrained('files')->nullOnDelete()->index();
+            $table->foreignId('business_id')->nullable()->constrained('businesses')->nullOnDelete();
+            $table->foreignId('ecommerce_brand_id')->nullable()->constrained('ecommerce_brands')->nullOnDelete();
+            $table->foreignId('thumbnail_file_id')->nullable()->constrained('files')->nullOnDelete();
             $table->foreignId('ecommerce_medication_type_id')->constrained('ecommerce_medication_types')->cascadeOnDelete()->index();
             $table->foreignId('package_id')->constrained('packages')->cascadeOnDelete()->index();
             $table->foreignId('ecommerce_variation_id')->constrained('ecommerce_medication_variations')->cascadeOnDelete()->index();
 
-            $table->foreignId('created_by_id')->nullable()->constrained('users')->nullOnDelete()->index();
-            $table->foreignId('updated_by_id')->nullable()->constrained('users')->nullOnDelete()->index();
+            $table->foreignId('created_by_id')->nullable()->constrained('users')->nullOnDelete();
+            $table->foreignId('updated_by_id')->nullable()->constrained('users')->nullOnDelete();
 
             $table->integer('quantity');
             $table->decimal('actual_price', 18, 2);

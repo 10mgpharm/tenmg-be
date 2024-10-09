@@ -14,9 +14,9 @@ return new class extends Migration
         Schema::create('ecommerce_payouts', function (Blueprint $table) {
             $table->id();
 
-            $table->foreignId('initiated_by_id')->nullable()->constrained('users')->nullOnDelete()->index();
+            $table->foreignId('initiated_by_id')->nullable()->constrained('users')->nullOnDelete();
             $table->foreignId('recipient_business_id')->constrained('businesses')->cascadeOnDelete()->index();
-            $table->foreignId('recipient_bank_id')->nullable()->constrained('bank_accounts')->nullOnDelete()->index();
+            $table->foreignId('recipient_bank_id')->nullable()->constrained('bank_accounts')->nullOnDelete();
 
             $table->string('reference')->nullable();
             $table->string('txn_id')->unique()->index();

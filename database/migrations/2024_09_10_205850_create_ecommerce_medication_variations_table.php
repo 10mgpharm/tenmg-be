@@ -13,9 +13,9 @@ return new class extends Migration
     {
         Schema::create('ecommerce_medication_variations', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('business_id')->nullable()->constrained('businesses')->nullOnDelete()->index();
-            $table->foreignId('created_by_id')->nullable()->constrained('users')->nullOnDelete()->index();
-            $table->foreignId('updated_by_id')->nullable()->constrained('users')->nullOnDelete()->index();
+            $table->foreignId('business_id')->nullable()->constrained('businesses')->nullOnDelete();
+            $table->foreignId('created_by_id')->nullable()->constrained('users')->nullOnDelete();
+            $table->foreignId('updated_by_id')->nullable()->constrained('users')->nullOnDelete();
 
             $table->foreignId('ecommerce_medication_type_id')->constrained('ecommerce_medication_types')->cascadeOnDelete()->index();
 

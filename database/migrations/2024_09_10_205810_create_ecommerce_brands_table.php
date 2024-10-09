@@ -13,9 +13,9 @@ return new class extends Migration
     {
         Schema::create('ecommerce_brands', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('business_id')->nullable()->constrained('businesses')->nullOnDelete()->index();
-            $table->foreignId('created_by_id')->nullable()->constrained('users')->nullOnDelete()->index();
-            $table->foreignId('updated_by_id')->nullable()->constrained('users')->nullOnDelete()->index();
+            $table->foreignId('business_id')->nullable()->constrained('businesses')->nullOnDelete();
+            $table->foreignId('created_by_id')->nullable()->constrained('users')->nullOnDelete();
+            $table->foreignId('updated_by_id')->nullable()->constrained('users')->nullOnDelete();
 
             $table->string('name');
             $table->string('slug')->unique();
