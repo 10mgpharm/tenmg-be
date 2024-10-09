@@ -17,7 +17,7 @@ return new class extends Migration
             $table->foreignId('created_by_id')->nullable()->constrained('users')->nullOnDelete();
             $table->foreignId('updated_by_id')->nullable()->constrained('users')->nullOnDelete();
 
-            $table->foreignId('ecommerce_medication_type_id')->constrained('ecommerce_medication_types')->cascadeOnDelete();
+            $table->foreignId('ecommerce_medication_type_id')->constrained('ecommerce_medication_types')->cascadeOnDelete()->name('fk_med_type_id');
 
             $table->integer('strength_value');
             $table->string('strength', 50); // enum if strength (e.g., mg, mL)

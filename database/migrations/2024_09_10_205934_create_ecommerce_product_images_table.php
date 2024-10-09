@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('ecommerce_product_images', function (Blueprint $table) {
             $table->id();
             $table->foreignId('file_id')->nullable()->constrained('file_uploads')->nullOnDelete();
-            $table->foreignId('ecommerce_product_id')->nullable()->constrained('ecommerce_products')->nullOnDelete();
+            $table->foreignId('ecommerce_product_id')->nullable()->constrained('ecommerce_products')->nullOnDelete()->name('fk_product_image_id');
             $table->timestamps();
         });
     }

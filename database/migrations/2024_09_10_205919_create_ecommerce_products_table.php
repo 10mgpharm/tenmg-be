@@ -17,7 +17,7 @@ return new class extends Migration
             $table->foreignId('business_id')->nullable()->constrained('businesses')->nullOnDelete();
             $table->foreignId('ecommerce_brand_id')->nullable()->constrained('ecommerce_brands')->nullOnDelete();
             $table->foreignId('thumbnail_file_id')->nullable()->constrained('file_uploads')->nullOnDelete();
-            $table->foreignId('ecommerce_medication_type_id')->constrained('ecommerce_medication_types')->cascadeOnDelete();
+            $table->foreignId('ecommerce_medication_type_id')->constrained('ecommerce_medication_types')->cascadeOnDelete()->name('fk_product_med_type_id');
             $table->foreignId('package_id')->constrained('packages')->cascadeOnDelete();
             $table->foreignId('ecommerce_variation_id')->constrained('ecommerce_medication_variations')->cascadeOnDelete();
 
