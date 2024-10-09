@@ -21,7 +21,7 @@ return new class extends Migration
 
             $table->string('account_name');
             $table->string('account_number')->index();
-            $table->boolean('active')->default('active');
+            $table->boolean('active')->default(true);
             $table->timestamps();
         });
     }
