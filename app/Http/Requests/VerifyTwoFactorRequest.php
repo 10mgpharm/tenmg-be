@@ -52,6 +52,11 @@ class VerifyTwoFactorRequest extends FormRequest
     public function failedAuthorization()
     {
         $user = $this->user();
+
+        $twoFactorStatus = $user->two_factor_secret ?
+            ($user->use_two_factor ? 'ACTIVE' : 'INACTIVE') :
+                'NOT_SETUP';
+                
         // Check if the user is authenticated
         if (! $user) {
             abort(response()->json([
@@ -59,10 +64,17 @@ class VerifyTwoFactorRequest extends FormRequest
             ], 401));
         }
 
-        // Check if the user has 2FA already set up
-        if ($user->two_factor_secret) {
+        // Check if two factor is status
+        if ($twoFactorStatus == 'NOT_SETUP') {
             abort(response()->json([
                 'message' => 'Two-factor authentication is not enabled for this account.',
+            ], 403));
+        }
+
+        // Check if two factor is inactive
+        if ($twoFactorStatus == 'INACTIVE') {
+            abort(response()->json([
+                'message' => 'Two-factor authentication is deactivated for this account.',
             ], 403));
         }
     }

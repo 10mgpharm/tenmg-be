@@ -23,7 +23,7 @@ use Illuminate\Support\Facades\Route;
 Route::prefix('v1')->group(function () {
 
     // public routes
-    Route::prefix('auth')->group(function () {
+    Route::prefix('auth')->name('auth.')->group(function () {
         Route::post('/signup', [SignupUserController::class, 'store'])
             ->name('signup');
 
@@ -62,33 +62,6 @@ Route::prefix('v1')->group(function () {
         Route::post('invite/reject', [InviteController::class, 'reject'])->name('invite.reject')->middleware('signed');
     });
 
-    // Account specific operations
-    Route::prefix('account')->name('account.')->middleware(['auth:api'])->group(function () {
-        Route::prefix('settings')->name('settings.')->group(function () {
-
-            Route::middleware('scope:full')->group(function () {
-
-                // Update authenticated user's password
-                Route::patch('password', PasswordUpdateController::class);
-
-                // Update authenticated user's profile
-                Route::match(['post', 'patch'], 'profile', [AccountController::class, 'profile']);
-
-                // 2FA
-                Route::prefix('2fa')->controller(TwoFactorAuthenticationController::class)
-                    ->group(function () {
-                        Route::get('setup', 'setup');
-                        Route::post('reset', 'reset');
-                        Route::post('toggle', 'toggle');  // Toggle 2FA (enable/disable)
-                    });
-            });
-
-            // 2FA
-            Route::post('2fa/verify', [TwoFactorAuthenticationController::class, 'verify'])
-                ->middleware(['scope:full,temp']);
-        });
-    });
-
     // Protected routes
     Route::middleware(['auth:api', 'scope:full'])->group(function () {
 
@@ -98,22 +71,35 @@ Route::prefix('v1')->group(function () {
         // Business specific operations
         Route::prefix('business')->group(function () {
 
-            Route::prefix('settings')->controller(BusinessSettingController::class)
-                ->group(function () {
-                    Route::get('/', 'show');
-
-                    // Update business personal information
-                    Route::match(['post', 'patch'], 'personal-information', 'personalInformation');
-
-                    // Update business account license number, expiry date and cac doc
-                    Route::match(['post', 'patch'], 'license', 'accountSetup');
-                });
         });
 
         // supplier specific operations
         Route::prefix('supplier')->group(function () {
             Route::get('dashboard', SupplierDashboardController::class);
+            
+            Route::prefix('settings')->name('settings.')->group(function () {
+                Route::get('/', [BusinessSettingController::class, 'show']);
 
+                Route::patch('password', PasswordUpdateController::class);
+                Route::match(['post', 'patch'], 'profile', [AccountController::class, 'profile']);
+
+                // Update business personal information
+                Route::match(['post', 'patch'], 'personal-information', [BusinessSettingController::class,'personalInformation']);
+
+                // Update business account license number, expiry date and cac doc
+                Route::match(['post', 'patch'], 'license', [BusinessSettingController::class,'license']);
+    
+                // 2FA
+                Route::prefix('2fa')
+                    ->controller(TwoFactorAuthenticationController::class)
+                    ->group(function () {
+                        Route::get('setup', 'setup');
+                        Route::post('reset', 'reset');
+                        Route::post('toggle', 'toggle');  // Toggle 2FA (enable/disable)
+                        Route::post('verify', 'verify');
+                });
+            });
+            
             Route::get('/{id}', [ProfileController::class, 'show']);
         });
 
@@ -150,11 +136,32 @@ Route::prefix('v1')->group(function () {
 
             Route::get('/', action: [ProfileController::class, 'show']);
 
-            Route::prefix('business')->name('vendor.business.')->group(function () {
-                Route::prefix('settings')->name('settings.')->group(function () {
-                    Route::get('invite/team-members', [InviteController::class, 'members'])->name('invite.team-members');
-                    Route::apiResource('invite', InviteController::class);
+            Route::prefix('settings')->name('settings.')->group(function () {
+
+                Route::get('/', [BusinessSettingController::class, 'show']);
+
+                Route::patch('password', PasswordUpdateController::class);
+                Route::match(['post', 'patch'], 'profile', [AccountController::class, 'profile']);
+
+                // Update business personal information
+                Route::match(['post', 'patch'], 'personal-information', [BusinessSettingController::class,'personalInformation']);
+
+                // Update business account license number, expiry date and cac doc
+                Route::match(['post', 'patch'], 'license', [BusinessSettingController::class,'license']);
+                
+                // 2FA
+                Route::prefix('2fa')
+                    ->controller(TwoFactorAuthenticationController::class)
+                    ->group(function () {
+                        Route::get('setup', 'setup');
+                        Route::post('reset', 'reset');
+                        Route::post('toggle', 'toggle');  // Toggle 2FA (enable/disable)
+                        Route::post('verify', 'verify');
                 });
+
+                // Invites/Team members
+                Route::get('invite/team-members', [InviteController::class, 'members'])->name('invite.team-members');
+                Route::apiResource('invite', InviteController::class);
             });
 
             // Upload transaction history file (min of 6 months)
@@ -257,6 +264,25 @@ Route::prefix('v1')->group(function () {
             });
 
             Route::get('/{businessType}/{id}', [ProfileController::class, 'show']);
+        });
+
+        // Admin specific operations
+        Route::prefix('admin')->name('admin.')->group(function (){
+            Route::prefix('settings')->name('settings.')->group(function () {
+
+                Route::patch('password', PasswordUpdateController::class);
+                Route::match(['post', 'patch'], 'profile', [AccountController::class, 'profile']);
+
+                // 2FA
+                Route::prefix('2fa')
+                    ->controller(TwoFactorAuthenticationController::class)
+                    ->group(function () {
+                        Route::get('setup', 'setup');
+                        Route::post('reset', 'reset');
+                        Route::post('toggle', 'toggle');  // Toggle 2FA (enable/disable)
+                        Route::post('verify', 'verify');
+                });
+            });
         });
 
     });
