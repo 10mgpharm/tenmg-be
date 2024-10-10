@@ -164,13 +164,15 @@ class AuthService implements IAuthService
     /**
      * verifyUserEmail
      */
-    public function verifyUserEmail(User $user, string $code): ?User
+    public function verifyUserEmail(User $user, string $code, string $type): ?User
     {
         try {
             DB::beginTransaction();
 
+            $otpType = OtpType::from(strtoupper($type));
+
             $otp = (new OtpService)->forUser($user)
-                ->validate(OtpType::SIGNUP_EMAIL_VERIFICATION, $code);
+                ->validate($otpType, $code);
 
             $otp->delete();
 

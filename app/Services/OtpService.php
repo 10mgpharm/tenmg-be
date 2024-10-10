@@ -2,9 +2,9 @@
 
 namespace App\Services;
 
-use App\Models\Otp;
 use App\Enums\OtpType;
 use App\Helpers\UtilityHelper;
+use App\Models\Otp;
 use App\Models\User;
 use App\Services\Interfaces\IOtpService;
 use Illuminate\Support\Facades\DB;
@@ -24,27 +24,23 @@ class OtpService implements IOtpService
 
     /**
      * The user for whom the OTP operations are being performed.
-     * 
-     * @var User|null
      */
     protected ?User $user = null;
 
     /**
      * The generated or validated OTP instance.
-     * 
-     * @var Otp|null
      */
     protected ?Otp $otp = null;
 
     /**
      * Set the user for whom the OTP operations will be performed.
      *
-     * @param User|null $user The user instance.
-     * @return self
+     * @param  User|null  $user  The user instance.
      */
-    public function forUser(User $user = null): self
+    public function forUser(?User $user = null): self
     {
         $this->user = $user ?: request()->user();
+
         return $this;
     }
 
@@ -52,8 +48,8 @@ class OtpService implements IOtpService
      * Generate a new OTP for the specified type and user.
      * Saves the OTP in the database.
      *
-     * @param OtpType $type The type of OTP to generate.
-     * @return self
+     * @param  OtpType  $type  The type of OTP to generate.
+     *
      * @throws BadRequestHttpException If no user is set.
      */
     public function generate(OtpType $type): self
@@ -75,9 +71,9 @@ class OtpService implements IOtpService
      * Validate the provided OTP code for the authenticated or provided user.
      * Deletes the OTP after successful validation.
      *
-     * @param OtpType $type The type of OTP being validated.
-     * @param string $code The OTP code to validate.
-     * @return Otp
+     * @param  OtpType  $type  The type of OTP being validated.
+     * @param  string  $code  The OTP code to validate.
+     *
      * @throws ValidationException If the OTP has expired or is invalid.
      * @throws BadRequestHttpException If no user is set.
      */
@@ -99,8 +95,8 @@ class OtpService implements IOtpService
     /**
      * Regenerate a new OTP for the specified type, removing the old one if it exists for the user.
      *
-     * @param OtpType $type The type of OTP to regenerate.
-     * @return self
+     * @param  OtpType  $type  The type of OTP to regenerate.
+     *
      * @throws BadRequestHttpException If no user is set.
      */
     public function regenerate(OtpType $type): self
@@ -126,8 +122,8 @@ class OtpService implements IOtpService
      * Send an OTP email to the user based on the OTP type.
      * If no OTP has been generated yet, an exception will be thrown.
      *
-     * @param OtpType $type The type of OTP (e.g., RESET_PASSWORD_VERIFICATION).
-     * @return self
+     * @param  OtpType  $type  The type of OTP (e.g., RESET_PASSWORD_VERIFICATION).
+     *
      * @throws BadRequestHttpException If no OTP is available or no user is set.
      */
     public function sendMail(OtpType $type): self
@@ -163,17 +159,19 @@ class OtpService implements IOtpService
     /**
      * Check if the provided OTP has expired.
      *
-     * @param Otp|null $otp The OTP instance to check.
+     * @param  Otp|null  $otp  The OTP instance to check.
      * @return bool True if expired, false otherwise.
      */
-    private function isExpired(Otp $otp = null): bool
+    private function isExpired(?Otp $otp = null): bool
     {
         if (! $otp || $otp->updated_at->diffInMinutes(now()) > self::TOKEN_EXPIRED_AT) {
             if ($otp) {
                 $otp->delete();
             }
+
             return true;
         }
+
         return false;
     }
 
@@ -182,12 +180,13 @@ class OtpService implements IOtpService
      * Throws an exception if no user is available.
      *
      * @return User The authenticated user.
+     *
      * @throws BadRequestHttpException If no user is set.
      */
     private function user(): User
     {
         $this->user = $this->user ?: request()->user();
-        
+
         if (! $this->user) {
             throw new BadRequestHttpException('Authentication is required to proceed.');
         }

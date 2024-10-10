@@ -27,7 +27,7 @@ class VerifyEmailController extends Controller
             throw new HttpException(Response::HTTP_UNAUTHORIZED, 'Unauthenticated.');
         }
 
-        $verifiedUser = $this->authService->verifyUserEmail($user, $request->input('otp'));
+        $verifiedUser = $this->authService->verifyUserEmail($user, $request->input('otp'), $request->input('type'));
 
         return $this->returnJsonResponse(
             message: 'User verified',

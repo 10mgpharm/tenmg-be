@@ -4,6 +4,7 @@ namespace App\Http\Requests\Auth;
 
 use App\Enums\OtpType;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class VerifyEmailRequest extends FormRequest
 {
@@ -27,9 +28,21 @@ class VerifyEmailRequest extends FormRequest
                 'required',
                 'string',
                 'size:6',
-                'exists:otps,code,user_id,'.$this->user()->id.',type,'.OtpType::SIGNUP_EMAIL_VERIFICATION->value,
+                'exists:otps,code,user_id,'.$this->user()->id,
+            ],
+            'type' => [
+                'required',
+                'string',
+                Rule::in(OtpType::RESET_PASSWORD_VERIFICATION, OtpType::SIGNUP_EMAIL_VERIFICATION),
             ],
 
+        ];
+    }
+
+    public function messages(): array
+    {
+        return [
+            'otp.exists' => 'The provided OTP is invalid, try again.',
         ];
     }
 }

@@ -68,7 +68,7 @@ test('it can verify a user email', function () {
     $this->userMock->shouldReceive('hasVerifiedEmail')->andReturn(false);
     $this->userMock->shouldReceive('markEmailAsVerified')->andReturn(true);
 
-    $user = $this->authService->verifyUserEmail($this->userMock, $otpCode);
+    $user = $this->authService->verifyUserEmail($this->userMock, $otpCode, 'SIGNUP_EMAIL_VERIFICATION');
 
     Event::assertDispatched(Verified::class);
 
@@ -86,7 +86,7 @@ test('it throws exception if OTP is invalid or expired', function () {
 
     $this->expectException(ValidationException::class);
 
-    $this->authService->verifyUserEmail($this->userMock, $otpCode);
+    $this->authService->verifyUserEmail($this->userMock, $otpCode, 'SIGNUP_EMAIL_VERIFICATION');
 });
 
 test('it can resolve the signup role based on business type', function () {

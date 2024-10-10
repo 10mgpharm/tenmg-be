@@ -39,12 +39,13 @@ Route::prefix('v1')->group(function () {
 
         Route::post('/forgot-password', [PasswordController::class, 'forgot'])
             ->name('password.forgot');
-        Route::post('/reset-password', [PasswordController::class, 'reset'])
-            ->name('password.reset');
 
         Route::middleware(['auth:api', 'scope:full'])->group(function () {
             Route::post('/verify-email', VerifyEmailController::class)
                 ->name('verification.verify');
+
+            Route::post('/reset-password', [PasswordController::class, 'reset'])
+                ->name('password.reset');
 
             Route::post('/signup/complete', [SignupUserController::class, 'complete'])
                 ->name('signup.complete');
