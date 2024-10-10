@@ -259,6 +259,13 @@ Route::prefix('v1')->group(function () {
             Route::get('/{businessType}/{id}', [ProfileController::class, 'show']);
         });
 
+        Route::prefix('admin')->name('admin.')->group(function(){
+            Route::prefix('settings')->name('settings.')->group(function () {
+                Route::get('invite/team-members', [InviteController::class, 'members'])->name('invite.team-members');
+                Route::apiResource('invite', InviteController::class);
+            });
+        });
+
     });
 
     Route::post('/webhooks/vendor/direct-debit/mandate', [PaystackWebhookController::class, 'handle'])->name('webhooks.paystack.direct_debit');

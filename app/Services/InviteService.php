@@ -16,6 +16,7 @@ use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
+use Symfony\Component\HttpKernel\Exception\HttpException;
 
 /**
  * Class InviteService
@@ -144,14 +145,13 @@ class InviteService implements IInviteService
                 ]);
 
                 // Resolve role based on the invite and assign it to the user
-                $role = $this->resolveRole($invite->role);
-                $user->assignRole($role);
+                $user->assignRole($invite->role->name);
 
                 // Create BusinessUser entry to link the user to a business
                 BusinessUser::create([
                     'user_id' => $user->id,
                     'business_id' => $invite->business_id,
-                    'role_id' => $role->id,
+                    'role_id' => $invite->role_id,
                     'active' => 1,
                 ]);
 
@@ -162,8 +162,11 @@ class InviteService implements IInviteService
 
                 return $user->refresh(); // Return the updated user instance
             });
-        } catch (Exception $e) {
-            throw new Exception('Failed to accept invite: '.$e->getMessage());
+        } catch (HttpException $e) {
+            if ($e->getStatusCode() === 500) {
+                throw new Exception('Failed to accept invite: ' . $e->getMessage());
+            }
+            throw $e;
         }
     }
 
@@ -193,19 +196,4 @@ class InviteService implements IInviteService
         }
     }
 
-    /**
-     * Resolve the appropriate role for the user based on the invite's role.
-     *
-     * @param  Role  $role  The role assigned in the invite.
-     * @return Role The resolved role for the user.
-     */
-    protected function resolveRole(Role $role): Role
-    {
-        switch ($role->name) {
-            case 'admin':
-                return Role::where('name', 'vendor')->first(); // Example of role reassignment
-            default:
-                return $role;
-        }
-    }
 }
