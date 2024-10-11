@@ -20,6 +20,7 @@ class DatabaseSeeder extends Seeder
             PassportClientSeeder::class,
             AffordabilitySeeder::class,
             DocumentTypeSeeder::class,
+            NotificationSeeder::class,
         ]);
     }
 }
