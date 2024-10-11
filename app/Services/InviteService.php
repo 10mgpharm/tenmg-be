@@ -68,7 +68,7 @@ class InviteService implements IInviteService
     {
         // Send invite email with embedded token
         $invitationUrl = URL::temporarySignedRoute(
-            'guest.invite.view', // Define a named route for accepting the invitation
+            'auth.invite.view', // Define a named route for accepting the invitation
             $invite->expires_at,
             ['inviteId' => $invite->id, 'inviteToken' => $invite->invite_token] // Route parameters
         );
@@ -101,12 +101,12 @@ class InviteService implements IInviteService
             'fullName' => $invite->full_name,
             'email' => $invite->email,
             'acceptUrl' => URL::temporarySignedRoute(
-                'guest.invite.accept',
+                'auth.invite.accept',
                 $invite->expires_at,
                 ['inviteId' => $invite->id, 'inviteToken' => $invite->invite_token]
             ),
             'rejectUrl' => URL::temporarySignedRoute(
-                'guest.invite.reject',
+                'auth.invite.reject',
                 $invite->expires_at,
                 ['inviteId' => $invite->id, 'inviteToken' => $invite->invite_token]
             ),
