@@ -68,68 +68,37 @@ Route::prefix('v1')->group(function () {
         Route::post('/resend-otp', ResendOtpController::class)
             ->name('resend.otp.auth')->middleware('throttle:5,1');
 
-        // Business specific operations
-        Route::prefix('business')->group(function () {
+        // Account/Profile managment
+        Route::prefix('account')->group(function () {
+            Route::patch('password', PasswordUpdateController::class);
+            Route::match(['post', 'patch'], 'profile', [AccountController::class, 'profile']);
 
+            // 2FA
+            Route::prefix('2fa')
+                ->controller(TwoFactorAuthenticationController::class)
+                ->group(function () {
+                    Route::get('setup', 'setup');
+                    Route::post('reset', 'reset');
+                    Route::post('toggle', 'toggle');  // Toggle 2FA (enable/disable)
+                    Route::post('verify', 'verify');
+                });
         });
 
         // supplier specific operations
         Route::prefix('supplier')->group(function () {
             Route::get('dashboard', SupplierDashboardController::class);
-            
+
             Route::prefix('settings')->name('settings.')->group(function () {
                 Route::get('/', [BusinessSettingController::class, 'show']);
 
-                Route::patch('password', PasswordUpdateController::class);
-                Route::match(['post', 'patch'], 'profile', [AccountController::class, 'profile']);
-
-                // Update business personal information
-                Route::match(['post', 'patch'], 'personal-information', [BusinessSettingController::class,'personalInformation']);
+                // Update business information
+                Route::match(['post', 'patch'], 'business-information', [BusinessSettingController::class, 'businessInformation']);
 
                 // Update business account license number, expiry date and cac doc
-                Route::match(['post', 'patch'], 'license', [BusinessSettingController::class,'license']);
-    
-                // 2FA
-                Route::prefix('2fa')
-                    ->controller(TwoFactorAuthenticationController::class)
-                    ->group(function () {
-                        Route::get('setup', 'setup');
-                        Route::post('reset', 'reset');
-                        Route::post('toggle', 'toggle');  // Toggle 2FA (enable/disable)
-                        Route::post('verify', 'verify');
-                });
+                Route::match(['post', 'patch'], 'license', [BusinessSettingController::class, 'license']);
             });
-            
+
             Route::get('/{id}', [ProfileController::class, 'show']);
-        });
-
-        Route::prefix('customers')->group(function () {
-            // List customers with pagination and filtering
-            Route::get('/', [CustomerController::class, 'index'])->name('customers.index');
-
-            // Create a new customer
-            Route::post('/', [CustomerController::class, 'store'])->name('customers.store');
-
-            // Export customers to Excel
-            Route::get('/export', [CustomerController::class, 'export'])->name('customers.export');
-
-            // Import customers from Excel
-            Route::post('/import', [CustomerController::class, 'import'])->name('customers.import');
-
-            // Get a specific customer's details
-            Route::get('/{id}', [CustomerController::class, 'show'])->name('customers.show');
-
-            // Update a customer's details
-            Route::put('/{id}', [CustomerController::class, 'update'])->name('customers.update');
-
-            // Soft delete a customer
-            Route::delete(
-                '/{id}',
-                [CustomerController::class, 'destroy']
-            )->name('customers.destroy');
-
-            // Enable or disable a customer
-            Route::patch('/{id}', [CustomerController::class, 'toggleActive'])->name('customers.toggleActive');
         });
 
         Route::prefix('vendor')->group(function () {
@@ -137,31 +106,46 @@ Route::prefix('v1')->group(function () {
             Route::get('/', action: [ProfileController::class, 'show']);
 
             Route::prefix('settings')->name('settings.')->group(function () {
-
                 Route::get('/', [BusinessSettingController::class, 'show']);
 
-                Route::patch('password', PasswordUpdateController::class);
-                Route::match(['post', 'patch'], 'profile', [AccountController::class, 'profile']);
-
-                // Update business personal information
-                Route::match(['post', 'patch'], 'personal-information', [BusinessSettingController::class,'personalInformation']);
+                // Update business information
+                Route::match(['post', 'patch'], 'business-information', [BusinessSettingController::class, 'businessInformation']);
 
                 // Update business account license number, expiry date and cac doc
-                Route::match(['post', 'patch'], 'license', [BusinessSettingController::class,'license']);
-                
-                // 2FA
-                Route::prefix('2fa')
-                    ->controller(TwoFactorAuthenticationController::class)
-                    ->group(function () {
-                        Route::get('setup', 'setup');
-                        Route::post('reset', 'reset');
-                        Route::post('toggle', 'toggle');  // Toggle 2FA (enable/disable)
-                        Route::post('verify', 'verify');
-                });
+                Route::match(['post', 'patch'], 'license', [BusinessSettingController::class, 'license']);
 
                 // Invites/Team members
                 Route::get('invite/team-members', [InviteController::class, 'members'])->name('invite.team-members');
                 Route::apiResource('invite', InviteController::class);
+            });
+
+            Route::prefix('customers')->group(function () {
+                // List customers with pagination and filtering
+                Route::get('/', [CustomerController::class, 'index'])->name('customers.index');
+
+                // Create a new customer
+                Route::post('/', [CustomerController::class, 'store'])->name('customers.store');
+
+                // Export customers to Excel
+                Route::get('/export', [CustomerController::class, 'export'])->name('customers.export');
+
+                // Import customers from Excel
+                Route::post('/import', [CustomerController::class, 'import'])->name('customers.import');
+
+                // Get a specific customer's details
+                Route::get('/{id}', [CustomerController::class, 'show'])->name('customers.show');
+
+                // Update a customer's details
+                Route::put('/{id}', [CustomerController::class, 'update'])->name('customers.update');
+
+                // Soft delete a customer
+                Route::delete(
+                    '/{id}',
+                    [CustomerController::class, 'destroy']
+                )->name('customers.destroy');
+
+                // Enable or disable a customer
+                Route::patch('/{id}', [CustomerController::class, 'toggleActive'])->name('customers.toggleActive');
             });
 
             // Upload transaction history file (min of 6 months)
@@ -267,22 +251,8 @@ Route::prefix('v1')->group(function () {
         });
 
         // Admin specific operations
-        Route::prefix('admin')->name('admin.')->group(function (){
-            Route::prefix('settings')->name('settings.')->group(function () {
-
-                Route::patch('password', PasswordUpdateController::class);
-                Route::match(['post', 'patch'], 'profile', [AccountController::class, 'profile']);
-
-                // 2FA
-                Route::prefix('2fa')
-                    ->controller(TwoFactorAuthenticationController::class)
-                    ->group(function () {
-                        Route::get('setup', 'setup');
-                        Route::post('reset', 'reset');
-                        Route::post('toggle', 'toggle');  // Toggle 2FA (enable/disable)
-                        Route::post('verify', 'verify');
-                });
-            });
+        Route::prefix('admin')->name('admin.')->group(function () {
+            Route::prefix('settings')->name('settings.')->group(function () {});
         });
 
     });

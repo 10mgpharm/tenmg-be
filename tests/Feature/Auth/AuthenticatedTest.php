@@ -14,7 +14,7 @@ use Laravel\Passport\PersonalAccessTokenResult;
 use Mockery;
 
 beforeEach(function () {
-    $this->url = route('signin');
+    $this->url = route('auth.signin');
     $this->email = 'admin@example.com';
     $this->password = 'password';
 
@@ -153,7 +153,7 @@ it('can log out', function () {
     Passport::actingAs($this->user, ['full']);
 
     $this->withHeaders(['Authorization' => "Bearer $token"])
-        ->postJson(route('signout'))
+        ->postJson(route('auth.signout'))
         ->assertStatus(Response::HTTP_OK)
         ->assertJson(['message' => 'Logged out successfully']);
 });
