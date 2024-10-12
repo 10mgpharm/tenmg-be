@@ -34,7 +34,7 @@ class BusinessSettingController extends Controller
      *
      * @return \Illuminate\Http\JsonResponse
      */
-    public function personalInformation(BusinessSettingPersonalInformationRequest $request)
+    public function businessInformation(BusinessSettingPersonalInformationRequest $request)
     {
         $validated = $request->validated();
         $user = $request->user()->load('ownerBusinessType.owner');
