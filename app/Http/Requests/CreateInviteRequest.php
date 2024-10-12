@@ -15,7 +15,7 @@ class CreateInviteRequest extends FormRequest
     {
         $user = $this->user();
 
-        return $user && $user->ownerBusinessType && $user->hasRole('vendor');
+        return $user && $user->ownerBusinessType && ($user->hasRole('vendor') || $user->hasRole('admin'));
     }
 
     /**
@@ -23,8 +23,15 @@ class CreateInviteRequest extends FormRequest
      */
     protected function prepareForValidation(): void
     {
+        $roleName = $this->user()->roles()->first()->name;
+
+        if($this->input('role') == 'admin'){
+            $this->merge([
+                'role' => $roleName,
+            ]);
+        }
         $role = Role::where('name', $this->input('role'))
-            ->whereIn('name', ['admin', 'support', 'operation'])
+            ->whereIn('name', ['admin', 'vendor', 'support', 'operation'])
             ->first();
 
         $this->merge([

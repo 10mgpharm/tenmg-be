@@ -250,9 +250,11 @@ Route::prefix('v1')->group(function () {
             Route::get('/{businessType}/{id}', [ProfileController::class, 'show']);
         });
 
-        // Admin specific operations
         Route::prefix('admin')->name('admin.')->group(function () {
-            Route::prefix('settings')->name('settings.')->group(function () {});
+            Route::prefix('settings')->name('settings.')->group(function () {
+                Route::get('invite/team-members', [InviteController::class, 'members'])->name('invite.team-members');
+                Route::apiResource('invite', InviteController::class);
+            });
         });
 
     });

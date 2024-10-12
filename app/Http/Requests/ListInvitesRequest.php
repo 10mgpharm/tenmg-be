@@ -13,7 +13,7 @@ class ListInvitesRequest extends FormRequest
     {
         $user = $this->user();
 
-        return $user && $user->ownerBusinessType && $user->hasRole('vendor');
+        return $user && $user->ownerBusinessType && ($user->hasRole('vendor') || $user->hasRole('admin'));
     }
 
     /**

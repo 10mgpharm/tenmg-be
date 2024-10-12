@@ -56,7 +56,7 @@ class VerifyTwoFactorRequest extends FormRequest
         $twoFactorStatus = $user->two_factor_secret ?
             ($user->use_two_factor ? 'ACTIVE' : 'INACTIVE') :
                 'NOT_SETUP';
-                
+
         // Check if the user is authenticated
         if (! $user) {
             abort(response()->json([
