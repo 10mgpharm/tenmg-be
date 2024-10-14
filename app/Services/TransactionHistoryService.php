@@ -122,7 +122,7 @@ class TransactionHistoryService implements ITxnHistoryService
         ) {
             $transactions = $this->attachmentService->parseCsvFromContents($fileContents);
         } elseif (in_array($extension, ['xlsx', 'xls'])) {
-            $transactions = $this->attachmentService->parseExcelFromContents($fileUploadModel->url); // Excel files need file path
+            $transactions = $this->attachmentService->parseExcelFromContents(fileContents: $fileContents, fileName: $fileUploadModel->name); // Excel files need file path
         } elseif ($extension === 'json') {
             $transactions = $this->attachmentService->parseJsonFromContents($fileContents);
         } else {

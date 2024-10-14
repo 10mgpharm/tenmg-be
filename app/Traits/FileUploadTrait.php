@@ -6,7 +6,6 @@ use App\Models\FileUpload;
 use App\Services\AttachmentService;
 use Carbon\Carbon;
 use Exception;
-use Illuminate\Filesystem\FilesystemManager;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
@@ -50,7 +49,7 @@ trait FileUploadTrait
     public function getTemporaryUrl(string $path, int $expiration = 30, array $options = []): string
     {
         return config('filesystems.default') === 's3' ?
-            Storage::disk(config('filesystems.default'))->temporaryUrl($path, Carbon::now()->addMinutes($expiration), $options) :
-            config('app.url').'/'.Storage::disk(config('filesystems.default'))->url($path);
+            Storage::disk(config('filesystems.default'))->temporaryUrl(path: $path, expiration: Carbon::now()->addMinutes($expiration), options: $options) :
+            config('app.url').Storage::disk(config('filesystems.default'))->url($path);
     }
 }
