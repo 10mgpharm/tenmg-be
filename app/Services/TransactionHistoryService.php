@@ -5,8 +5,8 @@ namespace App\Services;
 use App\Models\CreditTxnHistoryEvaluation;
 use App\Repositories\CreditBusinessRuleRepository;
 use App\Repositories\CreditScoreRepository;
-use App\Repositories\FileUploadRepository;
 use App\Repositories\CustomerRepository;
+use App\Repositories\FileUploadRepository;
 use App\Repositories\LoanRepository;
 use App\Repositories\RepaymentScheduleRepository;
 use App\Repositories\TransactionHistoryRepository;
@@ -54,7 +54,7 @@ class TransactionHistoryService implements ITxnHistoryService
         $evaluationData = [
             'business_id' => $customer->business_id,
             'customer_id' => $customer->id,
-            'file_format' => strtoupper($file->getClientOriginalExtension()),
+            'file_format' => strtoupper($file->getClientOriginalExtension()) == 'XLSX' ? 'EXCEL' : strtoupper($file->getClientOriginalExtension()),
             'source' => 'API',
             'status' => 'PENDING',
             'created_by_id' => $this->authService->getId(),
