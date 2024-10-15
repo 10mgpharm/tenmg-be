@@ -70,7 +70,7 @@ class UserService implements IUserService
                 return null; // Return null on failure
             });
         } catch (Exception $e) {
-            throw new Exception('Failed to create invite: ' . $e->getMessage());
+            throw new Exception('Failed to create user: ' . $e->getMessage());
         }
     }
 
