@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Admin\NotificationController;
 use App\Http\Controllers\API\Account\AccountController;
 use App\Http\Controllers\API\Account\PasswordUpdateController;
 use App\Http\Controllers\API\Account\TwoFactorAuthenticationController;
@@ -103,7 +104,7 @@ Route::prefix('v1')->group(function () {
 
         Route::prefix('vendor')->group(function () {
 
-            Route::get('/', action: [ProfileController::class, 'show']);
+            // Route::get('/', action: [ProfileController::class, 'show']);
 
             Route::prefix('settings')->name('settings.')->group(function () {
                 Route::get('/', [BusinessSettingController::class, 'show']);
@@ -247,13 +248,15 @@ Route::prefix('v1')->group(function () {
                 });
             });
 
-            Route::get('/{businessType}/{id}', [ProfileController::class, 'show']);
+            Route::get('/{id}', [ProfileController::class, 'show']);
         });
 
         Route::prefix('admin')->name('admin.')->group(function () {
             Route::prefix('settings')->name('settings.')->group(function () {
                 Route::get('invite/team-members', [InviteController::class, 'members'])->name('invite.team-members');
                 Route::apiResource('invite', InviteController::class);
+
+                Route::apiResource('notification', NotificationController::class);
             });
         });
 
