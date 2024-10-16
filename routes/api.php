@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Admin\NotificationController;
 use App\Http\Controllers\API\Account\AccountController;
+use App\Http\Controllers\API\Account\NotificationController as AccountNotificationController;
 use App\Http\Controllers\API\Account\PasswordUpdateController;
 use App\Http\Controllers\API\Account\TwoFactorAuthenticationController;
 use App\Http\Controllers\API\Auth\AuthenticatedController;
@@ -83,6 +84,11 @@ Route::prefix('v1')->group(function () {
                     Route::post('toggle', 'toggle');  // Toggle 2FA (enable/disable)
                     Route::post('verify', 'verify');
                 });
+
+            Route::prefix('notifications')->group(function (){
+                Route::get('/', [AccountNotificationController::class, 'index']);
+                Route::patch('{notification}/subscription', [AccountNotificationController::class, 'subscription']);
+            });
         });
 
         // supplier specific operations
