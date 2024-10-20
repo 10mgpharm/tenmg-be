@@ -1,0 +1,56 @@
+<?php
+
+namespace App\Http\Requests\Admin;
+
+use App\Enums\StatusEnum;
+use App\Models\EcommerceBrand;
+use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
+use Illuminate\Validation\Rules\Enum;
+
+class UpdateEcommerceBrandRequest extends FormRequest
+{
+    /**
+     * Determine if the user is authorized to make this request.
+     */
+    public function authorize(): bool
+    {
+        $user = $this->user();
+
+        return $user && $user->hasRole('admin');
+    }
+
+    /**
+     * Get the validation rules that apply to the request.
+     *
+     * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
+     */
+    public function rules(): array
+    {
+        // Retrieve the current medication type from the route
+        $brand = $this->route('brand');
+
+        return [
+            'name' => [
+                'required',
+                'string',
+                'max:255',
+                Rule::unique(EcommerceBrand::class)->ignore($brand->id)
+            ],
+            'status' => [
+                'sometimes',
+                'string',
+                new Enum(StatusEnum::class),
+                function ($attribute, $value, $fail) {
+                    if ($this->active && !in_array($value, [StatusEnum::APPROVED->value, null])) {
+                        $fail('The status must be "APPROVED" or null when active is true.');
+                    }
+                },
+            ],
+            'active' => [
+                'sometimes',
+                'boolean',
+            ],
+        ];
+    }
+}
