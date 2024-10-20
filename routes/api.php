@@ -3,6 +3,7 @@
 use App\Http\Controllers\API\Account\AccountController;
 use App\Http\Controllers\API\Account\PasswordUpdateController;
 use App\Http\Controllers\API\Account\TwoFactorAuthenticationController;
+use App\Http\Controllers\API\Admin\EcommerceCategoryController;
 use App\Http\Controllers\API\Auth\AuthenticatedController;
 use App\Http\Controllers\API\Auth\PasswordController;
 use App\Http\Controllers\API\Auth\SignupUserController;
@@ -254,6 +255,8 @@ Route::prefix('v1')->group(function () {
             Route::prefix('settings')->name('settings.')->group(function () {
                 Route::get('invite/team-members', [InviteController::class, 'members'])->name('invite.team-members');
                 Route::apiResource('invite', InviteController::class);
+
+                Route::apiResource('categories', EcommerceCategoryController::class);
             });
         });
 
