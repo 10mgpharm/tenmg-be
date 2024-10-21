@@ -1,0 +1,73 @@
+<?php
+
+namespace App\Services\Admin;
+
+use App\Enums\StatusEnum;
+use App\Models\EcommerceBrand;
+use App\Models\User;
+use App\Services\Interfaces\IEcommerceBrandService;
+use Exception;
+use Illuminate\Support\Str;
+use Illuminate\Support\Facades\DB;
+
+class EcommerceBrandService implements IEcommerceBrandService
+{
+    /**
+     * Store a new ecommerce brand in the database.
+     *
+     * This method stores a new ecommerce brand using the provided validated data.
+     * It wraps the operation in a database transaction to ensure atomicity.
+     * The slug is generated automatically from the name if not provided.
+     *
+     * @param array $validated Array of validated data, including fields like 'name', 'status', and 'active'.
+     * @param User $user The authenticated user who is creating the brand. The user is used to set the business and creator.
+     * @return EcommerceBrand|null Returns the created EcommerceBrand instance on success, or null on failure.
+     * @throws \Exception Throws an exception if the transaction or creation process fails.
+     */
+    public function store(array $validated, User $user): ?EcommerceBrand
+    {
+        try {
+            return DB::transaction(function () use ($validated, $user) {
+                return $user->brands()->create([
+                    ...$validated,
+                    'status' => $validated['status'] ?? StatusEnum::APPROVED->value,
+                    'active' => $validated['active'] ?? false,
+                    'slug' => Str::slug($validated['name']),
+                    'business_id' => $user->ownerBusinessType->id,
+                    'created_by_id' => $user->id,
+                ]);
+            });
+        } catch (Exception $e) {
+            throw new Exception('Failed to create a brand: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Update an existing ecommerce brand in the database.
+     *
+     * This method updates an existing ecommerce brand with new validated data. It handles updates within a database transaction to ensure data consistency.
+     * If the name is updated, a new slug will be generated. 
+     * 
+     * @param array $validated Array of validated data to update the brand, such as 'name', 'status', and 'active'.
+     * @param User $user The authenticated user performing the update. The user's ID is recorded as the updater.
+     * @param EcommerceBrand $brand The existing EcommerceBrand instance that needs to be updated.
+     * @return bool|null Returns true if the brand is successfully updated, or null on failure.
+     * @throws \Exception Throws an exception if the transaction or update process fails.
+     */
+    public function update(array $validated, User $user, EcommerceBrand $brand): ?bool
+    {
+        try {
+            return DB::transaction(function () use ($validated, $user, $brand) {
+                return $brand->update([
+                    ...$validated,
+                    'status' => $validated['status'] ?? $brand->status,
+                    'active' => $validated['active'] ?? $brand->active,
+                    'slug' => Str::slug($validated['name'] ?? $brand->name),
+                    'updated_by_id' => $user->id,
+                ]);
+            });
+        } catch (Exception $e) {
+            throw new Exception('Failed to update brand: ' . $e->getMessage());
+        }
+    }
+}
