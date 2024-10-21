@@ -7,6 +7,7 @@ use Illuminate\Http\Response;
 enum MailType: string
 {
     case SEND_INVITATION = 'send_invitation';
+    case ADMIN_CREATE_USER = 'admin_create_user';
 
     /**
      * Get the HTTP status code associated with the mail type.
@@ -15,6 +16,7 @@ enum MailType: string
     {
         return match ($this) {
             self::SEND_INVITATION => Response::HTTP_CREATED,
+            self::ADMIN_CREATE_USER => Response::HTTP_CREATED,
         };
     }
 
@@ -25,6 +27,7 @@ enum MailType: string
     {
         return match ($this) {
             self::SEND_INVITATION => 'You have been invited',
+            self::ADMIN_CREATE_USER => 'An account has been created for you',
         };
     }
 
@@ -35,6 +38,7 @@ enum MailType: string
     {
         return match ($this) {
             self::SEND_INVITATION => 'mail.view.send_invitation',
+            self::ADMIN_CREATE_USER => 'mail.view.admin_create_user',
         };
     }
 
@@ -43,8 +47,9 @@ enum MailType: string
      */
     public function text(): string
     {
-        return match ($this) {
+        return match($this) {
             self::SEND_INVITATION => 'mail.text.send_invitation',
+            self::ADMIN_CREATE_USER => 'mail.text.admin_create_user',
         };
     }
 }
