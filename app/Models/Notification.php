@@ -60,7 +60,7 @@ class Notification extends Model
     /**
      * Get the notification settings associated with the notification.
      */
-    public function notificationSettings()
+    public function subscribers()
     {
         return $this->hasMany(NotificationSetting::class);
     }
