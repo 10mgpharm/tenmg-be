@@ -15,6 +15,7 @@ use App\Http\Controllers\API\Credit\LoanOfferController;
 use App\Http\Controllers\API\Credit\TransactionHistoryController;
 use App\Http\Controllers\API\ProfileController;
 use App\Http\Controllers\API\ResendOtpController;
+use App\Http\Controllers\API\Admin\UsersController;
 use App\Http\Controllers\API\Webhooks\PaystackWebhookController;
 use App\Http\Controllers\BusinessSettingController;
 use App\Http\Controllers\InviteController;
@@ -258,6 +259,8 @@ Route::prefix('v1')->group(function () {
 
                 Route::apiResource('brands', EcommerceBrandController::class);
             });
+
+            Route::apiResource('users', UsersController::class);
         });
 
     });
