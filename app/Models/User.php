@@ -226,4 +226,12 @@ class User extends Authenticatable implements MustVerifyEmail
     {
         return $this->hasMany(Invite::class, 'creator_id');
     }
+
+    /**
+     * Get the ecommerce brands created by the user.
+     */
+    public function brands()
+    {
+        return $this->hasMany(EcommerceBrand::class, 'created_by_id');
+    }
 }
