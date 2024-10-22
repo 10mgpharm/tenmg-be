@@ -18,8 +18,6 @@ class NotificationController extends Controller
 {
     /**
      * Display a listing of notifications.
-     *
-     * @return JsonResponse
      */
     public function index(ListAllNotificationsRequest $request): JsonResponse
     {
@@ -34,8 +32,7 @@ class NotificationController extends Controller
     /**
      * Store a newly created notification in storage.
      *
-     * @param Request $request
-     * @return JsonResponse
+     * @param  Request  $request
      */
     public function store(StoreNotificationRequest $request): JsonResponse
     {
@@ -52,9 +49,6 @@ class NotificationController extends Controller
 
     /**
      * Display the specified notification.
-     *
-     * @param Notification $notification
-     * @return JsonResponse
      */
     public function show(ShowNotificationRequest $request, Notification $notification): JsonResponse
     {
@@ -67,9 +61,7 @@ class NotificationController extends Controller
     /**
      * Update the specified notification in storage.
      *
-     * @param Request $request
-     * @param Notification $notification
-     * @return JsonResponse
+     * @param  Request  $request
      */
     public function update(UpdateNotificationRequest $request, Notification $notification): JsonResponse
     {
@@ -85,9 +77,6 @@ class NotificationController extends Controller
 
     /**
      * Remove the specified notification from storage.
-     *
-     * @param Notification $notification
-     * @return JsonResponse
      */
     public function destroy(DeleteNotificationRequest $request, Notification $notification): JsonResponse
     {

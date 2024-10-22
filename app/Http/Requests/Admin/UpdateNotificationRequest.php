@@ -42,7 +42,7 @@ class UpdateNotificationRequest extends FormRequest
                 'required',
                 'string',
                 'max:255',
-                'unique:notifications,name,' . $this->notification->id,
+                'unique:notifications,name,'.$this->notification->id,
             ],
             'description' => ['string', 'nullable', 'sometimes'],
             'is_admin' => ['required_if:is_supplier,true', 'required_if:is_pharmacy,true', 'required_if:is_vendor,true'],

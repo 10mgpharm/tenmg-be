@@ -14,8 +14,6 @@ class NotificationController extends Controller
 {
     /**
      * Display a listing of notifications.
-     *
-     * @return JsonResponse
      */
     public function index(ListAllNotificationsRequest $request): JsonResponse
     {
@@ -44,13 +42,10 @@ class NotificationController extends Controller
         );
     }
 
-
     /**
      * Toggle subscription for a notification.
      *
-     * @param Request $request
-     * @param Notification $notification
-     * @return JsonResponse
+     * @param  Request  $request
      */
     public function subscription(NotificationSubscriptionRequest $request, Notification $notification): JsonResponse
     {
@@ -64,12 +59,12 @@ class NotificationController extends Controller
                 message: 'You have successfully unsubscribed from the notification.',
             );
         }
-        
+
         // Subscribe the user
         $notification->subscribers()->create([
             'user_id' => $user->id,
         ]);
-        
+
         return $this->returnJsonResponse(
             message: 'You have successfully subscribed to the notification.',
         );

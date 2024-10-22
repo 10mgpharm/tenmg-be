@@ -6,6 +6,8 @@ use App\Http\Controllers\API\Account\NotificationController as AccountNotificati
 use App\Http\Controllers\API\Account\PasswordUpdateController;
 use App\Http\Controllers\API\Account\TwoFactorAuthenticationController;
 use App\Http\Controllers\API\Admin\EcommerceBrandController;
+use App\Http\Controllers\API\Admin\MedicationTypeController as AdminMedicationTypeController;
+use App\Http\Controllers\API\Admin\UsersController;
 use App\Http\Controllers\API\Auth\AuthenticatedController;
 use App\Http\Controllers\API\Auth\PasswordController;
 use App\Http\Controllers\API\Auth\SignupUserController;
@@ -17,7 +19,6 @@ use App\Http\Controllers\API\Credit\LoanOfferController;
 use App\Http\Controllers\API\Credit\TransactionHistoryController;
 use App\Http\Controllers\API\ProfileController;
 use App\Http\Controllers\API\ResendOtpController;
-use App\Http\Controllers\API\Admin\UsersController;
 use App\Http\Controllers\API\Webhooks\PaystackWebhookController;
 use App\Http\Controllers\BusinessSettingController;
 use App\Http\Controllers\InviteController;
@@ -87,7 +88,7 @@ Route::prefix('v1')->group(function () {
                     Route::post('verify', 'verify');
                 });
 
-            Route::prefix('notifications')->group(function (){
+            Route::prefix('notifications')->group(function () {
                 Route::get('/', [AccountNotificationController::class, 'index']);
                 Route::patch('{notification}/subscription', [AccountNotificationController::class, 'subscription']);
             });
@@ -264,6 +265,7 @@ Route::prefix('v1')->group(function () {
                 Route::get('invite/team-members', [InviteController::class, 'members'])->name('invite.team-members');
                 Route::apiResource('invite', InviteController::class);
 
+                Route::apiResource('medication-types', AdminMedicationTypeController::class);
                 Route::apiResource('notification', NotificationController::class);
                 Route::apiResource('brands', EcommerceBrandController::class);
             });

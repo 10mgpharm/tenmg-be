@@ -39,7 +39,7 @@ class DeleteNotificationRequest extends FormRequest
     /**
      * Configure the validator instance.
      *
-     * @param \Illuminate\Contracts\Validation\Validator $validator
+     * @param  \Illuminate\Contracts\Validation\Validator  $validator
      * @return void
      */
     protected function withValidator($validator)

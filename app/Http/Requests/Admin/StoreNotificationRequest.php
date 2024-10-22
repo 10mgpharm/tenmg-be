@@ -14,14 +14,13 @@ class StoreNotificationRequest extends FormRequest
         $user = $this->user();
 
         // check if user is authenticated.
-        if (!$user) {
+        if (! $user) {
             return false;
         }
 
         // check if user is an admin.
         return $user->hasRole('admin');
     }
-
 
     /**
      * Prepare the data for validation.

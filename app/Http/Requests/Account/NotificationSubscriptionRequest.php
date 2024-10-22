@@ -8,14 +8,12 @@ class NotificationSubscriptionRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
-     *
-     * @return bool
      */
     public function authorize(): bool
     {
         $user = $this->user();
 
-        if (!$user) {
+        if (! $user) {
             return false;
         }
 
@@ -42,8 +40,6 @@ class NotificationSubscriptionRequest extends FormRequest
 
     /**
      * Get the validation rules that apply to the request.
-     *
-     * @return array
      */
     public function rules(): array
     {
@@ -54,8 +50,6 @@ class NotificationSubscriptionRequest extends FormRequest
 
     /**
      * Custom error message for unauthorized access.
-     *
-     * @return array
      */
     public function messages(): array
     {

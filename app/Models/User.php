@@ -228,6 +228,13 @@ class User extends Authenticatable implements MustVerifyEmail
     }
 
     /**
+     * Get the ecommerce medication types created by the user.
+     */
+    public function medicationTypes()
+    {
+        return $this->hasMany(EcommerceMedicationType::class, 'created_by_id');
+    }
+    /**
      * Get the ecommerce brands created by the user.
      */
     public function brands()

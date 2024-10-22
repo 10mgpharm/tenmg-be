@@ -11,7 +11,7 @@ class ListAllNotificationsRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return !! $this->user();
+        return (bool) $this->user();
     }
 
     /**

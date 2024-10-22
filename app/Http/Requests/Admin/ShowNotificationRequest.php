@@ -13,8 +13,8 @@ class ShowNotificationRequest extends FormRequest
     {
         $user = $this->user();
 
-         // check if user is authenticated.
-        if(!$user){
+        // check if user is authenticated.
+        if (! $user) {
             return false;
         }
 

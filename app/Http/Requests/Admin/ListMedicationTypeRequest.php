@@ -4,7 +4,7 @@ namespace App\Http\Requests\Admin;
 
 use Illuminate\Foundation\Http\FormRequest;
 
-class ListAllNotificationsRequest extends FormRequest
+class ListMedicationTypeRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -13,13 +13,7 @@ class ListAllNotificationsRequest extends FormRequest
     {
         $user = $this->user();
 
-        // check if user is authenticated.
-        if (! $user) {
-            return false;
-        }
-
-        // check if user is an admin.
-        return $user->hasRole('admin');
+        return $user && $user->hasRole('admin');
     }
 
     /**
