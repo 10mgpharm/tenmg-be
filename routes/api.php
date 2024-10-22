@@ -1,10 +1,13 @@
 <?php
 
+use App\Http\Controllers\Admin\NotificationController;
 use App\Http\Controllers\API\Account\AccountController;
+use App\Http\Controllers\API\Account\NotificationController as AccountNotificationController;
 use App\Http\Controllers\API\Account\PasswordUpdateController;
 use App\Http\Controllers\API\Account\TwoFactorAuthenticationController;
-use App\Http\Controllers\API\Admin\MedicationTypeController as AdminMedicationTypeController;
 use App\Http\Controllers\API\Admin\EcommerceBrandController;
+use App\Http\Controllers\API\Admin\MedicationTypeController as AdminMedicationTypeController;
+use App\Http\Controllers\API\Admin\UsersController;
 use App\Http\Controllers\API\Auth\AuthenticatedController;
 use App\Http\Controllers\API\Auth\PasswordController;
 use App\Http\Controllers\API\Auth\SignupUserController;
@@ -16,7 +19,6 @@ use App\Http\Controllers\API\Credit\LoanOfferController;
 use App\Http\Controllers\API\Credit\TransactionHistoryController;
 use App\Http\Controllers\API\ProfileController;
 use App\Http\Controllers\API\ResendOtpController;
-use App\Http\Controllers\API\Admin\UsersController;
 use App\Http\Controllers\API\Webhooks\PaystackWebhookController;
 use App\Http\Controllers\BusinessSettingController;
 use App\Http\Controllers\InviteController;
@@ -85,6 +87,11 @@ Route::prefix('v1')->group(function () {
                     Route::post('toggle', 'toggle');  // Toggle 2FA (enable/disable)
                     Route::post('verify', 'verify');
                 });
+
+            Route::prefix('notifications')->group(function () {
+                Route::get('/', [AccountNotificationController::class, 'index']);
+                Route::patch('{notification}/subscription', [AccountNotificationController::class, 'subscription']);
+            });
         });
 
         // supplier specific operations
@@ -106,7 +113,7 @@ Route::prefix('v1')->group(function () {
 
         Route::prefix('vendor')->group(function () {
 
-            Route::get('/', action: [ProfileController::class, 'show']);
+            // Route::get('/', action: [ProfileController::class, 'show']);
 
             Route::prefix('settings')->name('settings.')->group(function () {
                 Route::get('/', [BusinessSettingController::class, 'show']);
@@ -250,7 +257,7 @@ Route::prefix('v1')->group(function () {
                 });
             });
 
-            Route::get('/{businessType}/{id}', [ProfileController::class, 'show']);
+            Route::get('/{id}', [ProfileController::class, 'show']);
         });
 
         Route::prefix('admin')->name('admin.')->group(function () {
@@ -259,6 +266,7 @@ Route::prefix('v1')->group(function () {
                 Route::apiResource('invite', InviteController::class);
 
                 Route::apiResource('medication-types', AdminMedicationTypeController::class);
+                Route::apiResource('notification', NotificationController::class);
                 Route::apiResource('brands', EcommerceBrandController::class);
             });
 
