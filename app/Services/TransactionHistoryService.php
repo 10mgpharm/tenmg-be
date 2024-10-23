@@ -34,6 +34,19 @@ class TransactionHistoryService implements ITxnHistoryService
         private IActivityLogService $activityLogService,
     ) {}
 
+    public function getTransactionHistories(int $customerId): array
+    {
+        $customer = $this->customerRepository->findById($customerId);
+
+        if (! $customer) {
+            throw new \Exception('Customer not found');
+        }
+
+        $transactionHistories = $this->transactionHistoryRepository->getTransactionHistoryEvaluationByCustomerId(customerId: $customerId);
+
+        return $transactionHistories;
+    }
+
     public function uploadTransactionHistory(File|UploadedFile|string $file, int $customerId): array
     {
         $customer = $this->customerRepository->findById($customerId);

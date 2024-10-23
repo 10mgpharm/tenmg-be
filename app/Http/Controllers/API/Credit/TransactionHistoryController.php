@@ -11,6 +11,13 @@ class TransactionHistoryController extends Controller
 {
     public function __construct(private ITxnHistoryService $txnHistoryService) {}
 
+    public function index(int $customerId): JsonResponse
+    {
+        $transactionHistories = $this->txnHistoryService->getTransactionHistories($customerId);
+
+        return $this->returnJsonResponse(message: 'Transaction histories retrieved successfully.', data: $transactionHistories);
+    }
+
     public function uploadTransactionHistory(Request $request): JsonResponse
     {
         $request->validate([
