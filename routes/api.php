@@ -158,18 +158,21 @@ Route::prefix('v1')->group(function () {
                 Route::patch('/{id}', [CustomerController::class, 'toggleActive'])->name('customers.toggleActive');
             });
 
-            // Upload transaction history file (min of 6 months)
-            Route::post('/txn_history/upload', [TransactionHistoryController::class, 'uploadTransactionHistory'])
-                ->name('vendor.txn_history.upload');
+            Route::prefix('txn_history')->group(function () {
+                // Upload transaction history file (min of 6 months)
+                Route::post('/upload', [TransactionHistoryController::class, 'uploadTransactionHistory'])
+                    ->name('vendor.txn_history.upload');
 
-            // Evaluate existing uploaded file
-            Route::post('/txn_history/evaluate', [TransactionHistoryController::class, 'evaluateTransactionHistory'])
-                ->name('vendor.txn_history.evaluate');
+                // Evaluate existing uploaded file
+                Route::post('/evaluate', [TransactionHistoryController::class, 'evaluateTransactionHistory'])
+                    ->name('vendor.txn_history.evaluate');
 
-            // Create customer, upload txn history, and evaluate in one go
-            Route::post('/txn_history/upload_and_evaluate', [TransactionHistoryController::class, 'uploadAndEvaluate'])
-                ->name('vendor.txn_history.upload_and_evaluate');
+                // Create customer, upload txn history, and evaluate in one go
+                Route::post('/upload_and_evaluate', [TransactionHistoryController::class, 'uploadAndEvaluate'])
+                    ->name('vendor.txn_history.upload_and_evaluate');
 
+                Route::get('/{customerId}', [TransactionHistoryController::class, 'index'])->name('vendor.txn_history');
+            });
             // Loan Application
             Route::prefix('loan-applications')->group(function () {
 

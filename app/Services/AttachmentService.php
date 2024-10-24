@@ -13,7 +13,7 @@ use Illuminate\Support\Facades\Storage as FacadeStorage;
 use Illuminate\Support\Str;
 use League\Flysystem\CorruptedPathDetected;
 use LogicException;
-use Maatwebsite\Excel\Facades\Excel;
+use PhpOffice\PhpSpreadsheet\IOFactory;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 
 class AttachmentService
@@ -309,18 +309,60 @@ class AttachmentService
         return $transactions;
     }
 
-    public function parseExcelFromContents(string $filePath)
+    public function parseExcelFromContents(string $fileContents, string $fileName)
     {
-        $transactions = [];
-        $spreadsheet = Excel::toArray(null, $filePath);
+        try {
+            // Create a temporary file
+            $tempPath = tempnam(sys_get_temp_dir(), 'excel_');
+            file_put_contents($tempPath, $fileContents);
 
-        // Assuming data is in the first sheet and the first row contains headers
-        $header = array_shift($spreadsheet[0]);
-        foreach ($spreadsheet[0] as $row) {
-            $transactions[] = array_combine($header, $row);
+            // Determine the file type based on the extension
+            $fileExtension = pathinfo($fileName, PATHINFO_EXTENSION);
+            $readerType = $this->getReaderType($fileExtension);
+
+            // Read the spreadsheet
+            $spreadsheet = IOFactory::createReader($readerType)->load($tempPath);
+            $worksheet = $spreadsheet->getActiveSheet();
+            $rows = $worksheet->toArray();
+
+            if (empty($rows)) {
+                throw new Exception('Excel file is empty or has no data.');
+            }
+
+            // Assuming the first row contains headers
+            $header = array_shift($rows);
+            $transactions = [];
+
+            foreach ($rows as $row) {
+                if (count($header) === count($row)) {
+                    $transactions[] = array_combine($header, $row);
+                } else {
+                    // Log or handle rows that don't match the header count
+                    \Log::warning('Row skipped due to mismatch with header count', ['row' => $row]);
+                }
+            }
+
+            // Clean up the temporary file
+            unlink($tempPath);
+
+            return $transactions;
+        } catch (Exception $e) {
+            throw new Exception('Error parsing Excel file: '.$e->getMessage());
         }
+    }
 
-        return $transactions;
+    private function getReaderType(string $extension): string
+    {
+        switch (strtolower($extension)) {
+            case 'xlsx':
+                return 'Xlsx';
+            case 'xls':
+                return 'Xls';
+            case 'csv':
+                return 'Csv';
+            default:
+                throw new Exception('Unsupported file type: '.$extension);
+        }
     }
 
     public function parseJsonFromContents($fileContents)

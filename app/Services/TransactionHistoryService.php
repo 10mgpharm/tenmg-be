@@ -34,6 +34,19 @@ class TransactionHistoryService implements ITxnHistoryService
         private IActivityLogService $activityLogService,
     ) {}
 
+    public function getTransactionHistories(int $customerId): array
+    {
+        $customer = $this->customerRepository->findById($customerId);
+
+        if (! $customer) {
+            throw new \Exception('Customer not found');
+        }
+
+        $transactionHistories = $this->transactionHistoryRepository->getTransactionHistoryEvaluationByCustomerId(customerId: $customerId);
+
+        return $transactionHistories;
+    }
+
     public function uploadTransactionHistory(File|UploadedFile|string $file, int $customerId): array
     {
         $customer = $this->customerRepository->findById($customerId);
@@ -122,7 +135,7 @@ class TransactionHistoryService implements ITxnHistoryService
         ) {
             $transactions = $this->attachmentService->parseCsvFromContents($fileContents);
         } elseif (in_array($extension, ['xlsx', 'xls'])) {
-            $transactions = $this->attachmentService->parseExcelFromContents($fileUploadModel->url); // Excel files need file path
+            $transactions = $this->attachmentService->parseExcelFromContents(fileContents: $fileContents, fileName: $fileUploadModel->name); // Excel files need file path
         } elseif ($extension === 'json') {
             $transactions = $this->attachmentService->parseJsonFromContents($fileContents);
         } else {

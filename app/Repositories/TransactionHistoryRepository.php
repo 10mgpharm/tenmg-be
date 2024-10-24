@@ -6,6 +6,11 @@ use App\Models\CreditTxnHistoryEvaluation;
 
 class TransactionHistoryRepository
 {
+    public function getTransactionHistoryEvaluationByCustomerId(int $customerId): array
+    {
+        return CreditTxnHistoryEvaluation::where('customer_id', $customerId)->get()->toArray();
+    }
+
     public function createTransactionHistoryEvaluation(array $data): CreditTxnHistoryEvaluation
     {
         return CreditTxnHistoryEvaluation::create($data);
