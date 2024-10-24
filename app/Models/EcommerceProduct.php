@@ -46,4 +46,61 @@ class EcommerceProduct extends Model
     protected $casts = [
         'expired_at' => 'date',
     ];
+
+
+    /**
+     * Get the category associated with the product.
+     */
+    public function category()
+    {
+        return $this->belongsTo(EcommerceCategory::class, 'ecommerce_category_id');
+    }
+
+    /**
+     * Get the branch associated with the product.
+     */
+    public function branch()
+    {
+        return $this->belongsTo(EcommerceBrand::class, 'ecommerce_branch_id');
+    }
+
+    /**
+     * Get the medication type associated with the product.
+     */
+    public function medicationType()
+    {
+        return $this->belongsTo(EcommerceMedicationType::class, 'ecommerce_medication_type_id');
+    }
+
+    /**
+     * Get the brand associated with the product.
+     */
+    public function brand()
+    {
+        return $this->belongsTo(EcommerceBrand::class, 'ecommerce_brand_id');
+    }
+
+    /**
+     * Get the thumbnail file associated with the product.
+     */
+    public function thumbnailFile()
+    {
+        return $this->belongsTo(FileUpload::class, 'thumbnail_file_id');
+    }
+
+    /**
+     * Get the variation associated with the product.
+     */
+    public function variation()
+    {
+        return $this->belongsTo(EcommerceMedicationVariation::class, 'ecommerce_variation_id');
+    }
+
+    /**
+     * Get the package associated with the product.
+     */
+    public function package()
+    {
+        return $this->belongsTo(EcommercePackage::class, 'package_id');
+    }
 }
