@@ -6,6 +6,7 @@ use App\Http\Controllers\API\Account\NotificationController as AccountNotificati
 use App\Http\Controllers\API\Account\PasswordUpdateController;
 use App\Http\Controllers\API\Account\TwoFactorAuthenticationController;
 use App\Http\Controllers\API\Admin\EcommerceCategoryController;
+use App\Http\Controllers\API\Admin\EcommerceProductController;
 use App\Http\Controllers\API\Admin\EcommerceBrandController;
 use App\Http\Controllers\API\Admin\MedicationTypeController as AdminMedicationTypeController;
 use App\Http\Controllers\API\Admin\UsersController;
@@ -272,6 +273,7 @@ Route::prefix('v1')->group(function () {
                 Route::apiResource('medication-types', AdminMedicationTypeController::class);
                 Route::apiResource('notification', NotificationController::class);
                 Route::apiResource('categories', EcommerceCategoryController::class);
+                Route::apiResource('products', EcommerceProductController::class);
                 Route::apiResource('brands', EcommerceBrandController::class);
             });
 
