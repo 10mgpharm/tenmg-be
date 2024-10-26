@@ -8,13 +8,6 @@ use Illuminate\Validation\ValidationException;
 
 class DeleteNotificationRequest extends FormRequest
 {
-    protected $notification;
-
-    public function __construct(Notification $notification)
-    {
-        $this->notification = $notification;
-    }
-
     /**
      * Determine if the user is authorized to make this request.
      */
@@ -45,7 +38,8 @@ class DeleteNotificationRequest extends FormRequest
     protected function withValidator($validator)
     {
         $validator->after(function ($validator) {
-            if ($this->notification->notificationSettings()->exists()) {
+            $notification = $this->route('notification');
+            if ($notification->subscribers()->exists()) {
                 $validator->errors()->add('notification', 'The notification has associated notification settings and cannot be deleted.');
             }
         });
