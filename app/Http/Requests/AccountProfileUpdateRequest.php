@@ -23,21 +23,25 @@ class AccountProfileUpdateRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'name' => ['string', 'required', 'min:3', 'max:255'],
-            'email' => [
-                'required',
+            'name' => [
+                $this->isMethod('patch') ? 'required' : 'sometimes',
                 'string',
                 'min:3',
                 'max:255',
-                Rule::unique('users', 'email')
-                    ->ignore($this->user()->id),
+            ],
+            'email' => [
+                $this->isMethod('patch') ? 'required' : 'sometimes',
+                'string',
+                'min:3',
+                'max:255',
+                Rule::unique('users', 'email')->ignore($this->user()->id),
             ],
             'profilePicture' => [
-                'sometimes',
-                'nullable',
+                $this->isMethod('post') ? 'required' : 'sometimes',
                 'image',
                 'max:10240',
             ],
         ];
+        
     }
 }
