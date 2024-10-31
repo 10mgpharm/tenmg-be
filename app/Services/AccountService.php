@@ -30,7 +30,7 @@ class AccountService implements IAccountService
                 }
 
                 // Check if email has changed.
-                if ($data['email'] !== $user->email) {
+                if (isset($data['email']) && $data['email'] !== $user->email) {
                     // Send OTP to the new email.
                     $this->otpService->forUser($user)
                         ->generate(OtpType::CHANGE_EMAIL_VERIFICATION)
