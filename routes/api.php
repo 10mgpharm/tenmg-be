@@ -92,6 +92,7 @@ Route::prefix('v1')->group(function () {
 
             Route::prefix('notifications')->group(function () {
                 Route::get('/', [AccountNotificationController::class, 'index']);
+                Route::patch('subscriptions', [AccountNotificationController::class, 'subscriptions']);
                 Route::patch('{notification}/subscription', [AccountNotificationController::class, 'subscription']);
             });
         });
