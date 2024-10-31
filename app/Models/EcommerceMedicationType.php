@@ -39,7 +39,7 @@ class EcommerceMedicationType extends Model
      * @var array
      */
     protected $attributes = [
-        'status' => 'ACTIVE',
+        'status' => 'PENDING',
     ];
 
     /**
