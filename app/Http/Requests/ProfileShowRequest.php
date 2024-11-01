@@ -17,22 +17,6 @@ class ProfileShowRequest extends FormRequest
     }
 
     /**
-     * Prepare the data for validation.
-     *
-     * This method merges route parameters into the request data, so that they
-     * can be validated as part of the request body.
-     */
-    protected function prepareForValidation()
-    {
-        $businessType = strtoupper(last(explode('/', $this->route()->getPrefix())));
-
-        $this->merge([
-            'businessType' => $businessType,
-            'id' => $this->route('id'),
-        ]);
-    }
-
-    /**
      * Get the validation rules that apply to the request.
      *
      * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
@@ -40,17 +24,6 @@ class ProfileShowRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'businessType' => [
-                'required',
-                'string',
-                new Enum(BusinessType::class),
-                "exists:businesses,type,owner_id,{$this->id}",
-            ],
-            'id' => [
-                'required',
-                'integer',
-                "exists:users,id,id,{$this->user()->id}",
-            ],
         ];
     }
 
@@ -62,8 +35,6 @@ class ProfileShowRequest extends FormRequest
     public function messages()
     {
         return [
-            'businessType.exists' => 'The selected business type does not match the provided user ID.',
-            'id.exists' => 'The provided ID does not match the authenticated user.',
         ];
     }
 }
