@@ -9,6 +9,8 @@ use App\Services\ActivityLogService;
 use App\Services\AttachmentService;
 use App\Services\AuthService;
 use App\Services\CustomerService;
+use App\Services\TransactionHistoryService;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Pagination\LengthAwarePaginator;
 
 // Set up mocks for the dependencies
@@ -18,6 +20,7 @@ beforeEach(function () {
     $this->attachmentServiceMock = Mockery::mock(AttachmentService::class);
     $this->authServiceMock = Mockery::mock(AuthService::class);
     $this->activityLogServiceMock = Mockery::mock(ActivityLogService::class);
+    $this->TransactionHistoryServiceMock = Mockery::mock(TransactionHistoryService::class);
 
     $this->businessMock = Mockery::mock(Business::class)->makePartial();
     $this->businessMock->id = 1;
@@ -38,7 +41,8 @@ beforeEach(function () {
         $this->customerRepositoryMock,
         $this->attachmentServiceMock,
         $this->authServiceMock,
-        $this->activityLogServiceMock
+        $this->activityLogServiceMock,
+        $this->TransactionHistoryServiceMock,
     );
 });
 
@@ -55,6 +59,8 @@ test('it can create a customer', function () {
         'vendorId' => 1,
         'created_by' => 1,
     ]);
+
+    $file = UploadedFile::fake()->create('txn.csv');
 
     // Mock pagination to get the total customer count
     $paginationMock = Mockery::mock(LengthAwarePaginator::class);

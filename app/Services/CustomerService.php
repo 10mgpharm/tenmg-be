@@ -5,6 +5,8 @@ namespace App\Services;
 use App\Models\Customer;
 use App\Repositories\CustomerRepository;
 use App\Services\Interfaces\ICustomerService;
+use File;
+use Illuminate\Http\UploadedFile;
 
 class CustomerService implements ICustomerService
 {
@@ -13,13 +15,19 @@ class CustomerService implements ICustomerService
         private AttachmentService $attachmentService,
         private AuthService $authService,
         private ActivityLogService $activityLogService,
+        private TransactionHistoryService $transactionHistoryService,
     ) {}
 
-    public function createCustomer(array $data): Customer
+    public function createCustomer(array $data, File|UploadedFile|string|null $file = null): Customer
     {
         $data['vendorId'] = $this->authService->getBusiness()?->id;
         $data['created_by'] = $this->authService->getUser()->id;
+
         $customer = $this->customerRepository->create($data);
+
+        if ($file?->isValid() && $customer) {
+            $this->transactionHistoryService->uploadTransactionHistory(file: $file, customerId: $customer->id);
+        }
 
         $this->activityLogService->logActivity(model: $customer, causer: $this->authService->getUser(), action: 'created', properties: ['attributes' => $data]);
 

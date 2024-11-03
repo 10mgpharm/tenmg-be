@@ -3,10 +3,12 @@
 namespace App\Services\Interfaces;
 
 use App\Models\Customer;
+use File;
+use Illuminate\Http\UploadedFile;
 
 interface ICustomerService
 {
-    public function createCustomer(array $data): Customer;
+    public function createCustomer(array $data, File|UploadedFile|string|null $file = null): Customer;
 
     public function getCustomerById(int $id): ?Customer;
 

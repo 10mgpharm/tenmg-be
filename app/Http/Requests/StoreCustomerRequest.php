@@ -22,9 +22,11 @@ class StoreCustomerRequest extends FormRequest
     public function rules(): array
     {
         return [
+            'vendorId' => 'required|integer|exists:businesses,id',
             'name' => 'required|string|max:255',
-            'email' => 'required|email|max:255|unique:credit_customers,email,NULL,id,business_id,' . $this->vendorId,
+            'email' => 'required|email|max:255|unique:credit_customers,email,NULL,id,business_id,'.$this->vendorId,
             'phone' => 'nullable|string|max:15',
+            'file' => 'nullable|mimes:csv,xlsx,json|max:2048',
         ];
     }
 
@@ -37,6 +39,8 @@ class StoreCustomerRequest extends FormRequest
             'email.required' => 'The customer email is required.',
             'phone.string' => 'The phone number must be a string.',
             'phone.max' => 'The phone number should not exceed 15 characters.',
+            'file.mimes' => 'The file must be a file of type: csv, xlsx, json.',
+            'file.max' => 'The file size should not exceed 2048 kilobytes.',
         ];
     }
 }
