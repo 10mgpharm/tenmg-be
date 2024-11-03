@@ -79,6 +79,7 @@ Route::prefix('v1')->group(function () {
         Route::prefix('account')->group(function () {
             Route::patch('password', PasswordUpdateController::class);
             Route::match(['post', 'patch'], 'profile', [AccountController::class, 'profile']);
+            Route::get('/profile', [ProfileController::class, 'show']);
 
             // 2FA
             Route::prefix('2fa')
@@ -111,7 +112,6 @@ Route::prefix('v1')->group(function () {
                 Route::match(['post', 'patch'], 'license', [BusinessSettingController::class, 'license']);
             });
 
-            Route::get('/{id}', [ProfileController::class, 'show']);
         });
 
         Route::prefix('vendor')->group(function () {
@@ -263,7 +263,6 @@ Route::prefix('v1')->group(function () {
                 });
             });
 
-            Route::get('/{id}', [ProfileController::class, 'show']);
         });
 
         Route::prefix('admin')->name('admin.')->group(function () {
