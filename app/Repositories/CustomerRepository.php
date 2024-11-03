@@ -60,6 +60,10 @@ class CustomerRepository
             return $query->whereBetween('created_at', [$filters['createdAtStart'], $filters['createdAtEnd']]);
         });
 
+        $query->when(isset($filters['vendorId']), function ($query) use ($filters) {
+            return $query->where('business_id', $filters['vendorId']);
+        });
+
         return $query->paginate($perPage);
     }
 }

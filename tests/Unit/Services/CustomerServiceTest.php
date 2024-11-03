@@ -156,7 +156,7 @@ test('it can delete a customer', function () {
 
 // Test: it can list customers with pagination
 test('it can list customers with pagination', function () {
-    $filters = ['name' => 'Jane Doe'];
+    $filters = ['name' => 'Jane Doe', 'vendorId' => 1];
     $paginationResult = Mockery::mock(LengthAwarePaginator::class);
 
     $this->customerRepositoryMock
