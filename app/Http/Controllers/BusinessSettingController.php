@@ -80,7 +80,13 @@ class BusinessSettingController extends Controller
             $data['cac_document_id'] = $created->id;
         }
 
-        $user->ownerBusinessType()->update($data);
+        $updated = $user->ownerBusinessType()->update($data);
+        if($updated){
+            $user->ownerBusinessType()->update([
+                'license_verification_status' => 'PENDING',
+            ]);
+            // are we to unverify the business status when the update license
+        }
 
         return $this->returnJsonResponse(
             message: 'Business license details successfully updated.',
