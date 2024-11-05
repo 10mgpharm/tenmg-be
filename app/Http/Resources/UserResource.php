@@ -14,6 +14,8 @@ class UserResource extends JsonResource
      */
     public function toArray(Request $request): array
     {
+        $ownerBusinessType = $this->ownerBusinessType;
+
         return [
             'id' => $this->id,
             'name' => $this->name,
@@ -24,17 +26,24 @@ class UserResource extends JsonResource
                 'NOT_SETUP',
             'avatar' => $this->avatar,
             'emailVerifiedAt' => $this->email_verified_at,
-            'owner' => (bool) ($this->ownerBusinessType?->type),
+            'owner' => (bool) ($ownerBusinessType?->type),
 
-            'entityType' => $this->ownerBusinessType?->type ?? $this->businesses()->firstWhere('user_id', $this->id)?->type,
-            'businessName' => $this->ownerBusinessType?->name ?? $this->businesses()->firstWhere('user_id', $this->id)?->name,
-            'businessStatus' => $this->ownerBusinessType?->status ?? $this->businesses()->firstWhere('user_id', $this->id)?->status,
-
+            'entityType' => $ownerBusinessType?->type ?? $this->businesses()
+                ->firstWhere('user_id', $this->id)?->type,
+            'businessName' => $ownerBusinessType?->name ?? $this->businesses()
+                ->firstWhere('user_id', $this->id)?->name,
+            'businessStatus' => match ($ownerBusinessType?->license_verification_status) {
+                null, 'PENDING' => 'PENDING_APPROVAL',
+                'REJECTED' => 'REJECTED',
+                default => now()->greaterThan($ownerBusinessType?->expiry_date) 
+                    ? 'EXPIRED' 
+                    : 'VERIFIED'
+            },
             'completeProfile' => (bool) (
-                $this->ownerBusinessType &&
-                $this->ownerBusinessType?->contact_person &&
-                $this->ownerBusinessType?->contact_phone &&
-                $this->ownerBusinessType?->contact_email
+                $ownerBusinessType
+                && $ownerBusinessType?->contact_person
+                && $ownerBusinessType?->contact_phone
+                && $ownerBusinessType?->contact_email
             ),
         ];
     }
