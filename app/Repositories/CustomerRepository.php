@@ -44,20 +44,20 @@ class CustomerRepository
     {
         $query = Customer::query();
 
-        $query->when(isset($filters['search']), function ($query, $search) {
+        $query->when(isset($filters['search']), function ($query) use ($filters) {
             return $query
-                ->where('name', 'like', "%{$search}%")
-                ->orWhere('identifier', 'like', "%{$search}%")
-                ->orWhere('email', 'like', "%{$search}%")
-                ->orWhere('phone', 'like', "%{$search}%");
+                ->where('name', 'like', "%{$filters['search']}%")
+                ->orWhere('identifier', 'like', "%{$filters['search']}%")
+                ->orWhere('email', 'like', "%{$filters['search']}%")
+                ->orWhere('phone', 'like', "%{$filters['search']}%");
         });
 
-        $query->when(isset($filters['status']), function ($query, $statusFilter) {
-            return $query->where('active', $statusFilter === 'active' ? 1 : 0);
+        $query->when(isset($filters['status']), function ($query) use ($filters) {
+            return $query->where('active', $filters['status'] === 'active' ? 1 : 0);
         });
 
-        $query->when(isset($filters['vendorId']), function ($query, $vendorId) {
-            return $query->where('business_id', $vendorId);
+        $query->when(isset($filters['vendorId']), function ($query) use ($filters) {
+            return $query->where('business_id', $filters['vendorId']);
         });
 
         $query->when(isset($filters['createdAtStart']) && isset($filters['createdAtEnd']), function ($query) use ($filters) {
