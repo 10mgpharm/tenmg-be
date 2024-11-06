@@ -16,7 +16,7 @@ class CustomersImport implements ToModel, WithHeadingRow
     public function model(array $row)
     {
         $business = Business::where('code', $row['vendor_code'])->first();
-        $count = Customer::paginate(['business_id' => $$business->id], 1)->total() + 1;
+        $count = Customer::paginate(['business_id' => $business->id], 1)->total() + 1;
         $code = strtoupper($business->code).'-CUS-'.str_pad($count, 3, '0', STR_PAD_LEFT);
 
         return new Customer([
