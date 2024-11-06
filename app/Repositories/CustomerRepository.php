@@ -44,16 +44,20 @@ class CustomerRepository
     {
         $query = Customer::query();
 
-        $query->when(isset($filters['name']), function ($query) use ($filters) {
-            return $query->where('name', 'like', '%'.$filters['name'].'%');
+        $query->when(isset($filters['search']), function ($query, $search) {
+            return $query
+                ->where('name', 'like', "%{$search}%")
+                ->orWhere('identifier', 'like', "%{$search}%")
+                ->orWhere('email', 'like', "%{$search}%")
+                ->orWhere('phone', 'like', "%{$search}%");
         });
 
-        $query->when(isset($filters['email']), function ($query) use ($filters) {
-            return $query->where('email', 'like', '%'.$filters['email'].'%');
+        $query->when(isset($filters['status']), function ($query, $statusFilter) {
+            return $query->where('active', $statusFilter === 'active' ? 1 : 0);
         });
 
-        $query->when(isset($filters['vendorId']), function ($query) use ($filters) {
-            return $query->where('business_id', $filters['vendorId']);
+        $query->when(isset($filters['vendorId']), function ($query, $vendorId) {
+            return $query->where('business_id', $vendorId);
         });
 
         $query->when(isset($filters['createdAtStart']) && isset($filters['createdAtEnd']), function ($query) use ($filters) {
