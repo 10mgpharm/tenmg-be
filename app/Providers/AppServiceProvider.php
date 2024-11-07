@@ -8,11 +8,7 @@ use App\Models\PassportClient;
 use App\Models\PassportPersonalAccessClient;
 use App\Models\PassportRefreshToken;
 use App\Models\PassportToken;
-use App\Repositories\ApiKeyRepository;
-use App\Repositories\CreditCustomerDebitMandateRepository;
 use App\Repositories\CustomerRepository;
-use App\Repositories\LoanApplicationRepository;
-use App\Repositories\OfferRepository;
 use App\Services\ActivityLogService;
 use App\Services\AffordabilityService;
 use App\Services\AttachmentService;
@@ -24,11 +20,6 @@ use App\Services\Interfaces\IAuthService;
 use App\Services\Interfaces\ICustomerService;
 use App\Services\Interfaces\IRuleEngineService;
 use App\Services\Interfaces\ITxnHistoryService;
-use App\Services\LoanApplicationService;
-use App\Services\LoanService;
-use App\Services\NotificationService;
-use App\Services\OfferService;
-use App\Services\PaystackService;
 use App\Services\RuleEngineService;
 use App\Services\TransactionHistoryService;
 use Illuminate\Auth\Events\Verified;
@@ -53,6 +44,7 @@ class AppServiceProvider extends ServiceProvider
                 attachmentService: $app->make(AttachmentService::class),
                 authService: $app->make(AuthService::class),
                 activityLogService: $app->make(ActivityLogService::class),
+                transactionHistoryService: $app->make(TransactionHistoryService::class),
             );
         }, shared: true);
 
