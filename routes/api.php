@@ -8,6 +8,7 @@ use App\Http\Controllers\API\Account\TwoFactorAuthenticationController;
 use App\Http\Controllers\API\Admin\EcommerceCategoryController;
 use App\Http\Controllers\API\Admin\EcommerceProductController;
 use App\Http\Controllers\API\Admin\EcommerceBrandController;
+use App\Http\Controllers\API\Admin\BusinessLicenseController;
 use App\Http\Controllers\API\Admin\MedicationTypeController as AdminMedicationTypeController;
 use App\Http\Controllers\API\Admin\UsersController;
 use App\Http\Controllers\API\Auth\AuthenticatedController;
@@ -278,6 +279,9 @@ Route::prefix('v1')->group(function () {
             });
 
             Route::apiResource('users', UsersController::class);
+            
+            Route::get('business/licenses', [BusinessLicenseController::class, 'index']);
+            Route::match(['put', 'patch'], 'business/licenses/{business}/status', [BusinessLicenseController::class, 'update']);
         });
 
     });
