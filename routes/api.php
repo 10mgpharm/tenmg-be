@@ -113,6 +113,7 @@ Route::prefix('v1')->group(function () {
                 Route::match(['post', 'patch'], 'license', [BusinessSettingController::class, 'license']);
             });
 
+            Route::apiResource('products', EcommerceProductController::class);
         });
 
         Route::prefix('vendor')->group(function () {
