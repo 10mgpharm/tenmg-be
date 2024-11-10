@@ -36,6 +36,8 @@ class EcommerceProduct extends Model
         'min_delivery_duration',
         'max_delivery_duration',
         'expired_at',
+        'commission',
+        'status',
     ];
 
     /**
@@ -72,13 +74,6 @@ class EcommerceProduct extends Model
         return $this->belongsTo(EcommerceMedicationType::class, 'ecommerce_medication_type_id');
     }
 
-    /**
-     * Get the brand associated with the product.
-     */
-    public function brand()
-    {
-        return $this->belongsTo(EcommerceBrand::class, 'ecommerce_brand_id');
-    }
 
     /**
      * Get the thumbnail file associated with the product.
