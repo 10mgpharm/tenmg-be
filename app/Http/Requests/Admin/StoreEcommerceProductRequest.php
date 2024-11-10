@@ -60,6 +60,11 @@ class StoreEcommerceProductRequest extends FormRequest
                 'mimes:jpg,jpeg,png,gif',
                 'max:10240',
             ],
+            'max_delivery_duration' => ['required', 'integer', 'min:0'],
+            'productEssential' => ['nullable', 'string', 'min:3'],
+            'startingStock' => ['nullable', 'numeric', 'min:0'],
+            'currentStock' => ['nullable', 'numeric', 'min:0'],
+            'stockStatus' => ['nullable', Rule::in(['AVAILABLE', 'UNAVAILABLE'])],
         ];
     }
 }
