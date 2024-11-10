@@ -88,4 +88,20 @@ class EcommerceProductController extends Controller
             data: new EcommerceProductResource($product->refresh())
         );
     }
+
+    /**
+     * Retrieve a paginated list of products for the authenticated user's business.
+     *
+     * @param  \App\Http\Requests\Admin\ListEcommerceProductRequest  $request  Validated request instance.
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function search(ListEcommerceProductRequest $request): JsonResponse
+    {
+        $products = $this->productService->search($request);
+
+        return $this->returnJsonResponse(
+            message: 'Products successfully fetched.',
+            data: EcommerceProductResource::collection($products)->response()->getData(true)
+        );
+    }
 }
