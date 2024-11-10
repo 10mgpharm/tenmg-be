@@ -26,6 +26,15 @@ class EcommerceProductResource extends JsonResource
             'minDeliveryDuration' => $this->min_delivery_duration,
             'maxDeliveryDuration' => $this->max_delivery_duration,
             'expiredAt' => $this->expired_at,
+            'status' =>  in_array($this->status, ['ACTIVE', 'INACTIVE', 'SUSPENDED', 'ARCHIVED'], true)
+            ? $this->status
+            : 'DRAFTED',
+            'inventory' => match (true) {
+                $this->current_stock === null || $this->current_stock === 0 => 'OUT OF STOCK',
+                $this->starting_stock === null || $this->current_stock <= $this->starting_stock / 2 => 'LOW STOCK',
+                default => 'IN STOCK',
+            },
+
         ];
     }
 }
