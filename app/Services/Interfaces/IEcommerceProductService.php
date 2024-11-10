@@ -4,6 +4,8 @@ namespace App\Services\Interfaces;
 
 use App\Models\EcommerceProduct;
 use App\Models\User;
+use Illuminate\Http\Request;
+use Illuminate\Pagination\LengthAwarePaginator;
 
 interface IEcommerceProductService
 {
@@ -35,4 +37,15 @@ interface IEcommerceProductService
      * @throws Exception If the product update fails.
      */
     public function update(array $validated, User $user, EcommerceProduct $product): ?bool;
+
+    /**
+     * Retrieve a paginated list of products based on the provided filters, such as inventory status, category,
+     * branch, medication type, variation, and package.
+     *
+     * The filters support both arrays and comma-separated values for multiple options.
+     * Duplicates in array inputs are removed before processing.
+     *
+     * @return LengthAwarePaginator Paginated list of filtered products.
+     */
+    public function search(Request $request): LengthAwarePaginator;
 }
