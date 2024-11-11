@@ -113,6 +113,8 @@ Route::prefix('v1')->group(function () {
                 Route::match(['post', 'patch'], 'license', [BusinessSettingController::class, 'license']);
             });
 
+            Route::get('products/search', [EcommerceProductController::class, 'search']);
+            Route::apiResource('products', EcommerceProductController::class);
         });
 
         Route::prefix('vendor')->group(function () {
@@ -274,7 +276,10 @@ Route::prefix('v1')->group(function () {
                 Route::apiResource('medication-types', AdminMedicationTypeController::class);
                 Route::apiResource('notification', NotificationController::class);
                 Route::apiResource('categories', EcommerceCategoryController::class);
+
+                Route::get('products/search', [EcommerceProductController::class, 'search']);
                 Route::apiResource('products', EcommerceProductController::class);
+                
                 Route::apiResource('brands', EcommerceBrandController::class);
             });
 

@@ -15,7 +15,7 @@ class StoreEcommerceProductRequest extends FormRequest
     {
         $user = $this->user();
 
-        return $user && $user->hasRole('admin');
+        return $user && ($user->hasRole('admin') || $user->hasRole('supplier'));
     }
 
     /**
@@ -33,6 +33,7 @@ class StoreEcommerceProductRequest extends FormRequest
             'max_delivery_duration' => $this->input('maxDeliveryDuration'),
             'expired_at' => $this->input('expiredAt'),
             'thumbnailFile' => $this->file('thumbnailFile'),
+            'status' => $this->user()->hasRole('admin') ? ($this->status ?? 'ACTIVE') : 'DRAFTED',
         ]);
     }
 
@@ -60,7 +61,7 @@ class StoreEcommerceProductRequest extends FormRequest
                 'mimes:jpg,jpeg,png,gif',
                 'max:10240',
             ],
-            'max_delivery_duration' => ['required', 'integer', 'min:0'],
+            'status' => ['nullable', Rule::in(['ACTIVE', 'DRAFTED'])],
             'productEssential' => ['nullable', 'string', 'min:3'],
             'startingStock' => ['nullable', 'numeric', 'min:0'],
             'currentStock' => ['nullable', 'numeric', 'min:0'],

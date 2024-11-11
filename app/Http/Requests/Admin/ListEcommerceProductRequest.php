@@ -13,7 +13,7 @@ class ListEcommerceProductRequest extends FormRequest
     {
         $user = $this->user();
 
-        return $user && $user->hasRole('admin');
+        return $user && ($user->hasRole('admin') || $user->hasRole('supplier'));
     }
 
     /**
