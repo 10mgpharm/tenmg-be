@@ -98,4 +98,11 @@ class EcommerceProduct extends Model
     {
         return $this->belongsTo(EcommercePackage::class, 'package_id');
     }
+    /**
+     * Get the product details associated with the product.
+     */
+    public function productDetails()
+    {
+        return $this->hasOne(EcommerceProductDetail::class, 'ecommerce_product_id');
+    }
 }

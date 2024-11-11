@@ -84,6 +84,8 @@ class EcommerceProductService implements IEcommerceProductService
                     'slug' => Str::slug($validated['name']),
                 ]);
 
+                $product->productDetails()->create($validated);
+
                 // Save uploaded file
                 if (request()->hasFile('thumbnailFile')) {
                     $created = $this->attachmentService->saveNewUpload(
@@ -165,7 +167,8 @@ class EcommerceProductService implements IEcommerceProductService
                     $validated['thumbnail_file_id'] = $created->id;
                 }
 
-                return $product->update([
+                
+                $updateProduct = $product->update([
                     ...$validated,
                     'business_id' => $user->ownerBusinessType->id,
                     'ecommerce_category_id' => $category->id,
@@ -174,6 +177,11 @@ class EcommerceProductService implements IEcommerceProductService
                     'updated_by_id' => $user->id,
                     'slug' => Str::slug($validated['name'] ?? $product->name),
                 ]);
+                
+                $updateProductDetails = $product->productDetails()->update($validated);
+                
+                return $updateProduct || $updateProductDetails;
+                
             });
         } catch (Exception $e) {
             throw new Exception('Failed to update product: ' . $e->getMessage());
