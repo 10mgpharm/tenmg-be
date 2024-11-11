@@ -14,8 +14,14 @@ return new class extends Migration
         Schema::create('ecommerce_products', function (Blueprint $table) {
             $table->id();
 
+            $table->string('name');
+            $table->string('slug')->unique();
+
             $table->foreignId('business_id')->nullable()->constrained('businesses')->nullOnDelete();
+
             $table->foreignId('ecommerce_brand_id')->nullable()->constrained('ecommerce_brands')->nullOnDelete();
+            $table->foreignId('ecommerce_category_id')->nullable()->constrained('ecommerce_categories')->nullOnDelete();
+
             $table->foreignId('thumbnail_file_id')->nullable()->constrained('file_uploads')->nullOnDelete();
             $table->foreignId('ecommerce_medication_type_id')->constrained('ecommerce_medication_types')->cascadeOnDelete()->name('fk_product_med_type_id');
             $table->foreignId('ecommerce_variation_id')->constrained('ecommerce_medication_variations')->cascadeOnDelete();
