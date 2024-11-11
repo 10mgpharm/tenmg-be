@@ -20,8 +20,8 @@ class EcommerceCategoryResource extends JsonResource
             'slug' => $this->slug,
             'active' => $this->active,
             'status' => $this->status,
-            'createdBy' => new UserResource($this->createdBy),
-            'updatedBy' => new UserResource($this->updatedBy),
+            // 'createdBy' => new UserResource($this->createdBy),
+            // 'updatedBy' => new UserResource($this->updatedBy),
         ];
     }
 }
