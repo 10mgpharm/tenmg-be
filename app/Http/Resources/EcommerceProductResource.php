@@ -26,6 +26,8 @@ class EcommerceProductResource extends JsonResource
             'minDeliveryDuration' => $this->min_delivery_duration,
             'maxDeliveryDuration' => $this->max_delivery_duration,
             'expiredAt' => $this->expired_at,
+            'commission' => $this->commission,
+            'productDetails' => $this->productDetails,
         ];
     }
 }
