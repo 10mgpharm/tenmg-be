@@ -243,17 +243,17 @@ class EcommerceProductService implements IEcommerceProductService
             });
         }
 
-        if ($branchName = $request->input('branch')) {
-            $branches = is_array($branchName) ? $branchName : explode(',', $branchName);
-            $branches = array_unique(array_map('trim', $branches));  // Remove duplicates and trim values
-            $query->whereHas('branch', function ($q) use ($branches) {
-                foreach ($branches as $branch) {
-                    $q->orWhere('name', 'like', '%' . $branch . '%');
+        if ($brandName = $request->input('brand')) {
+            $brands = is_array($brandName) ? $brandName : explode(',', $brandName);
+            $brands = array_unique(array_map('trim', $brands));  // Remove duplicates and trim values
+            $query->whereHas('brand', function ($q) use ($brands) {
+                foreach ($brands as $brand) {
+                    $q->orWhere('name', 'like', '%' . $brand . '%');
                 }
             });
         }
 
-        if ($medicationTypeName = $request->input('medication_type')) {
+        if ($medicationTypeName = $request->input('medicationType')) {
             $medicationTypes = is_array($medicationTypeName) ? $medicationTypeName : explode(',', $medicationTypeName);
             $medicationTypes = array_unique(array_map('trim', $medicationTypes));  // Remove duplicates and trim values
             $query->whereHas('medicationType', function ($q) use ($medicationTypes) {
@@ -283,11 +283,11 @@ class EcommerceProductService implements IEcommerceProductService
             });
         }
 
-        if ($from = $request->input('from_date')) {
+        if ($from = $request->input('fromDate')) {
             $query->whereDate('created_at', '>=', $from);
         }
 
-        if ($to = $request->input('to_date')) {
+        if ($to = $request->input('toDate')) {
             $query->whereDate('created_at', '<=', $to);
         }
 
