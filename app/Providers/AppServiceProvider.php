@@ -3,6 +3,8 @@
 namespace App\Providers;
 
 use App\Listeners\SignupEmailVerifiedListener;
+use App\Models\EcommerceCategory;
+use App\Models\EcommerceProduct;
 use App\Models\PassportAuthCode;
 use App\Models\PassportClient;
 use App\Models\PassportPersonalAccessClient;
@@ -24,6 +26,7 @@ use App\Services\RuleEngineService;
 use App\Services\TransactionHistoryService;
 use Illuminate\Auth\Events\Verified;
 use Illuminate\Support\Facades\Event;
+use Illuminate\Support\Facades\Route;
 use Illuminate\Support\ServiceProvider;
 use Laravel\Passport\Passport;
 
@@ -80,5 +83,25 @@ class AppServiceProvider extends ServiceProvider
             Verified::class,
             SignupEmailVerifiedListener::class,
         );
+
+        Route::bind('category', function ($value) {
+            // Check if the value is numeric (ID)
+            if (is_numeric($value)) {
+                return EcommerceCategory::findOrFail($value);
+            }
+    
+            // Otherwise, assume it's a slug
+            return EcommerceCategory::where('slug', $value)->firstOrFail();
+        });
+
+        Route::bind('product', function ($value) {
+            // Check if the value is numeric (ID)
+            if (is_numeric($value)) {
+                return EcommerceProduct::findOrFail($value);
+            }
+    
+            // Otherwise, assume it's a slug
+            return EcommerceProduct::where('slug', $value)->firstOrFail();
+        });
     }
 }
