@@ -22,6 +22,9 @@ use App\Http\Controllers\API\Credit\LoanOfferController;
 use App\Http\Controllers\API\Credit\TransactionHistoryController;
 use App\Http\Controllers\API\ProfileController;
 use App\Http\Controllers\API\ResendOtpController;
+use App\Http\Controllers\API\Storefront\CategoryController;
+use App\Http\Controllers\API\Storefront\ProductController;
+use App\Http\Controllers\API\Storefront\StorefrontController;
 use App\Http\Controllers\API\Webhooks\PaystackWebhookController;
 use App\Http\Controllers\BusinessSettingController;
 use App\Http\Controllers\InviteController;
@@ -287,6 +290,15 @@ Route::prefix('v1')->group(function () {
             
             Route::get('business/licenses', [BusinessLicenseController::class, 'index']);
             Route::match(['put', 'patch'], 'business/licenses/{business}/status', [BusinessLicenseController::class, 'update']);
+        });
+
+        Route::prefix('storefront')->name('storefront.')->group(function(){
+            Route::get('/', StorefrontController::class);
+            Route::get('/categories/search', [CategoryController::class, 'search']);
+            Route::get('/categories/{category}', [CategoryController::class, 'products']);
+
+            Route::get('/products/search', [ProductController::class, 'search']);
+            Route::get('/products/{product}', [ProductController::class, 'show']);
         });
 
     });
