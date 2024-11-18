@@ -9,6 +9,7 @@ use App\Http\Controllers\API\Admin\EcommerceCategoryController;
 use App\Http\Controllers\API\Admin\EcommerceProductController;
 use App\Http\Controllers\API\Admin\EcommerceBrandController;
 use App\Http\Controllers\API\Admin\BusinessLicenseController;
+use App\Http\Controllers\API\Admin\CarouselImageController;
 use App\Http\Controllers\API\Admin\MedicationTypeController as AdminMedicationTypeController;
 use App\Http\Controllers\API\Admin\UsersController;
 use App\Http\Controllers\API\Auth\AuthenticatedController;
@@ -69,6 +70,8 @@ Route::prefix('v1')->group(function () {
         Route::post('invite/accept', [InviteController::class, 'accept'])->name('invite.accept')->middleware('signed');
         Route::post('invite/reject', [InviteController::class, 'reject'])->name('invite.reject')->middleware('signed');
     });
+
+    Route::get('storefront-images', [CarouselImageController::class, 'index']);
 
     // Protected routes
     Route::middleware(['auth:api', 'scope:full'])->group(function () {
@@ -268,6 +271,7 @@ Route::prefix('v1')->group(function () {
 
         });
 
+
         Route::prefix('admin')->name('admin.')->group(function () {
             Route::prefix('settings')->name('settings.')->group(function () {
                 Route::get('invite/team-members', [InviteController::class, 'members'])->name('invite.team-members');
@@ -287,6 +291,11 @@ Route::prefix('v1')->group(function () {
             
             Route::get('business/licenses', [BusinessLicenseController::class, 'index']);
             Route::match(['put', 'patch'], 'business/licenses/{business}/status', [BusinessLicenseController::class, 'update']);
+
+            Route::prefix('system-setup')->name('system-setup.')->group(function(){
+                Route::get('storefront-images/search', [CarouselImageController::class, 'search']);
+                Route::apiResource('storefront-images', CarouselImageController::class);
+            });
         });
 
     });
