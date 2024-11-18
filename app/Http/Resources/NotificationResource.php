@@ -23,7 +23,7 @@ class NotificationResource extends JsonResource
             'isPharmacy' => $this->is_pharmacy,
             'isVendor' => $this->is_vendor,
             'active' => $this->active,
-            'isSubscribed' => $this->whenLoaded('subscribers')->isNotEmpty(),
+            'isSubscribed' => $this->whenLoaded('subscribers', fn () => $this->subscribers->isNotEmpty()),
         ];
     }
 }
