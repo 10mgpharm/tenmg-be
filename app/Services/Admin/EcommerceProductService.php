@@ -7,6 +7,7 @@ use App\Enums\StatusEnum;
 use App\Models\EcommerceBrand;
 use App\Models\EcommerceCategory;
 use App\Models\EcommerceMedicationType;
+use App\Models\EcommerceMedicationVariation;
 use App\Models\EcommerceProduct;
 use App\Models\User;
 use App\Services\AttachmentService;
@@ -43,7 +44,8 @@ class EcommerceProductService implements IEcommerceProductService
                     ['name' => $validated['category_name']],
                     [
                         'slug' => Str::slug($validated['category_name']),
-                        'business_id' => $user->ownerBusinessType->id,
+                        'business_id' =>  $user->ownerBusinessType?->id ?? $user->businesses()
+                        ->firstWhere('user_id', $user->id)?->id,
                         'created_by_id' => $user->id,
                         'status' => StatusEnum::APPROVED->value,
                         'active' => true,
@@ -55,7 +57,8 @@ class EcommerceProductService implements IEcommerceProductService
                     ['name' => $validated['brand_name']],
                     [
                         'slug' => Str::slug($validated['brand_name']),
-                        'business_id' => $user->ownerBusinessType->id,
+                        'business_id' =>  $user->ownerBusinessType?->id ?? $user->businesses()
+                        ->firstWhere('user_id', $user->id)?->id,
                         'created_by_id' => $user->id,
                         'status' => StatusEnum::APPROVED->value,
                         'active' => true,
@@ -67,7 +70,8 @@ class EcommerceProductService implements IEcommerceProductService
                     ['name' => $validated['medication_type_name']],
                     [
                         'slug' => Str::slug($validated['medication_type_name']),
-                        'business_id' => $user->ownerBusinessType->id,
+                        'business_id' =>  $user->ownerBusinessType?->id ?? $user->businesses()
+                        ->firstWhere('user_id', $user->id)?->id,
                         'created_by_id' => $user->id,
                         'status' => StatusEnum::APPROVED->value,
                         'active' => true,
@@ -76,7 +80,8 @@ class EcommerceProductService implements IEcommerceProductService
 
                 $product = $user->products()->create([
                     ...$validated,
-                    'business_id' => $user->ownerBusinessType->id,
+                    'business_id' => $user->ownerBusinessType?->id ?? $user->businesses()
+                    ->firstWhere('user_id', $user->id)?->id,
                     'ecommerce_category_id' => $category->id,
                     'ecommerce_brand_id' => $brand->id,
                     'ecommerce_medication_type_id' => $medicationType->id,
@@ -125,7 +130,8 @@ class EcommerceProductService implements IEcommerceProductService
                     ['name' => $validated['category_name']],
                     [
                         'slug' => Str::slug($validated['category_name']),
-                        'business_id' => $user->ownerBusinessType->id,
+                        'business_id' =>  $user->ownerBusinessType?->id ?? $user->businesses()
+                        ->firstWhere('user_id', $user->id)?->id,
                         'created_by_id' => $user->id,
                         'status' => StatusEnum::APPROVED->value,
                         'active' => true,
@@ -137,7 +143,8 @@ class EcommerceProductService implements IEcommerceProductService
                     ['name' => $validated['brand_name']],
                     [
                         'slug' => Str::slug($validated['brand_name']),
-                        'business_id' => $user->ownerBusinessType->id,
+                        'business_id' =>  $user->ownerBusinessType?->id ?? $user->businesses()
+                        ->firstWhere('user_id', $user->id)?->id,
                         'created_by_id' => $user->id,
                         'status' => StatusEnum::APPROVED->value,
                         'active' => true,
@@ -149,7 +156,8 @@ class EcommerceProductService implements IEcommerceProductService
                     ['name' => $validated['medication_type_name']],
                     [
                         'slug' => Str::slug($validated['medication_type_name']),
-                        'business_id' => $user->ownerBusinessType->id,
+                        'business_id' =>  $user->ownerBusinessType?->id ?? $user->businesses()
+                        ->firstWhere('user_id', $user->id)?->id,
                         'created_by_id' => $user->id,
                         'status' => StatusEnum::APPROVED->value,
                         'active' => true,
@@ -170,7 +178,8 @@ class EcommerceProductService implements IEcommerceProductService
                 
                 $updateProduct = $product->update([
                     ...$validated,
-                    'business_id' => $user->ownerBusinessType->id,
+                    'business_id' => $user->ownerBusinessType?->id ?? $user->businesses()
+                    ->firstWhere('user_id', $user->id)?->id,
                     'ecommerce_category_id' => $category->id,
                     'ecommerce_brand_id' => $brand->id,
                     'ecommerce_medication_type_id' => $medicationType->id,
@@ -234,17 +243,17 @@ class EcommerceProductService implements IEcommerceProductService
             });
         }
 
-        if ($branchName = $request->input('branch')) {
-            $branches = is_array($branchName) ? $branchName : explode(',', $branchName);
-            $branches = array_unique(array_map('trim', $branches));  // Remove duplicates and trim values
-            $query->whereHas('branch', function ($q) use ($branches) {
-                foreach ($branches as $branch) {
-                    $q->orWhere('name', 'like', '%' . $branch . '%');
+        if ($brandName = $request->input('brand')) {
+            $brands = is_array($brandName) ? $brandName : explode(',', $brandName);
+            $brands = array_unique(array_map('trim', $brands));  // Remove duplicates and trim values
+            $query->whereHas('brand', function ($q) use ($brands) {
+                foreach ($brands as $brand) {
+                    $q->orWhere('name', 'like', '%' . $brand . '%');
                 }
             });
         }
 
-        if ($medicationTypeName = $request->input('medication_type')) {
+        if ($medicationTypeName = $request->input('medicationType')) {
             $medicationTypes = is_array($medicationTypeName) ? $medicationTypeName : explode(',', $medicationTypeName);
             $medicationTypes = array_unique(array_map('trim', $medicationTypes));  // Remove duplicates and trim values
             $query->whereHas('medicationType', function ($q) use ($medicationTypes) {
@@ -274,11 +283,11 @@ class EcommerceProductService implements IEcommerceProductService
             });
         }
 
-        if ($from = $request->input('from_date')) {
+        if ($from = $request->input('fromDate')) {
             $query->whereDate('created_at', '>=', $from);
         }
 
-        if ($to = $request->input('to_date')) {
+        if ($to = $request->input('toDate')) {
             $query->whereDate('created_at', '<=', $to);
         }
 

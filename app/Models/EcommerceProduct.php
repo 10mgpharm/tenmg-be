@@ -26,6 +26,7 @@ class EcommerceProduct extends Model
         'ecommerce_brand_id',
         'thumbnail_file_id',
         'ecommerce_medication_type_id',
+        'ecommerce_category_id',
         'package_id',
         'ecommerce_variation_id',
         'created_by_id',
@@ -38,6 +39,8 @@ class EcommerceProduct extends Model
         'expired_at',
         'commission',
         'status',
+        'name',
+        'slug',
     ];
 
     /**
@@ -61,9 +64,9 @@ class EcommerceProduct extends Model
     /**
      * Get the branch associated with the product.
      */
-    public function branch()
+    public function brand()
     {
-        return $this->belongsTo(EcommerceBrand::class, 'ecommerce_branch_id');
+        return $this->belongsTo(EcommerceBrand::class, 'ecommerce_brand_id');
     }
 
     /**

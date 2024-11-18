@@ -34,6 +34,7 @@ class StoreEcommerceProductRequest extends FormRequest
             'expired_at' => $this->input('expiredAt'),
             'thumbnailFile' => $this->file('thumbnailFile'),
             'status' => $this->user()->hasRole('admin') ? ($this->status ?? 'ACTIVE') : 'DRAFTED',
+            // 'ecommerce_variation' => $this->input('ecommerceVariation'),
         ]);
     }
 
@@ -66,6 +67,7 @@ class StoreEcommerceProductRequest extends FormRequest
             'startingStock' => ['nullable', 'numeric', 'min:0'],
             'currentStock' => ['nullable', 'numeric', 'min:0'],
             'stockStatus' => ['nullable', Rule::in(['AVAILABLE', 'UNAVAILABLE'])],
+            // 'ecommerce_variation' => ['required', 'string', 'max:255'],
         ];
     }
 }
