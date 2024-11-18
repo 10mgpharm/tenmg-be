@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
@@ -84,6 +85,16 @@ class EcommerceProduct extends Model
     public function thumbnailFile()
     {
         return $this->belongsTo(FileUpload::class, 'thumbnail_file_id');
+    }
+
+    /**
+     * Get the URL of the thumbnail.
+     */
+    public function thumbnailUrl(): Attribute
+    {
+        return new Attribute(
+            get: fn () => $this->thumbnailFile?->url
+        );
     }
 
     /**
