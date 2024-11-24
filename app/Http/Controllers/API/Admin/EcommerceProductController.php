@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\API\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Admin\DeleteEcommerceProductRequest;
 use App\Http\Requests\Admin\ListEcommerceProductRequest;
 use App\Http\Requests\Admin\StoreEcommerceProductRequest;
 use App\Http\Requests\Admin\UpdateEcommerceProductRequest;
@@ -102,6 +103,22 @@ class EcommerceProductController extends Controller
         return $this->returnJsonResponse(
             message: 'Products successfully fetched.',
             data: EcommerceProductResource::collection($products)->response()->getData(true)
+        );
+    }
+
+    /**
+     * Soft delete the specified e-commerce product.
+     *
+     * @param DeleteEcommerceProductRequest $request The HTTP request for deleting the product.
+     * @param EcommerceProduct $product The product instance to be deleted.
+     * 
+     * @return JsonResponse JSON response confirming the deletion.
+     */
+    public function destroy(DeleteEcommerceProductRequest $request, EcommerceProduct $product){
+        $product->delete();
+
+        return $this->returnJsonResponse(
+            message: 'Product successfully deleted.',
         );
     }
 }

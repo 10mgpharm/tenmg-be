@@ -33,6 +33,7 @@ class EcommerceProductResource extends JsonResource
                 $this->starting_stock === null || $this->current_stock <= $this->starting_stock / 2 => 'LOW STOCK',
                 default => 'IN STOCK',
             },
+            'comment' => $this->comment,
         ];
     }
 }
