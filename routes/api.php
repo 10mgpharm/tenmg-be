@@ -294,6 +294,7 @@ Route::prefix('v1')->group(function () {
                 Route::apiResource('products', EcommerceProductController::class);
                 
                 Route::apiResource('brands', EcommerceBrandController::class);
+                Route::apiResource('faqs', FaqController::class);
                 Route::get('audit-logs', [AuditLogController::class, 'index']);
                 Route::get('audit-logs/search', [AuditLogController::class, 'search']);
             });
