@@ -6,6 +6,7 @@ use App\Http\Controllers\API\Account\AccountController;
 use App\Http\Controllers\API\Account\NotificationController as AccountNotificationController;
 use App\Http\Controllers\API\Account\PasswordUpdateController;
 use App\Http\Controllers\API\Account\TwoFactorAuthenticationController;
+use App\Http\Controllers\API\Admin\AuditLogController;
 use App\Http\Controllers\API\Admin\EcommerceCategoryController;
 use App\Http\Controllers\API\Admin\EcommerceProductController;
 use App\Http\Controllers\API\Admin\EcommerceBrandController;
@@ -293,6 +294,8 @@ Route::prefix('v1')->group(function () {
                 Route::apiResource('products', EcommerceProductController::class);
                 
                 Route::apiResource('brands', EcommerceBrandController::class);
+                Route::get('audit-logs', [AuditLogController::class, 'index']);
+                Route::get('audit-logs/search', [AuditLogController::class, 'search']);
             });
 
             Route::apiResource('users', UsersController::class);
