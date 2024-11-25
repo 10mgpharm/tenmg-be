@@ -19,4 +19,6 @@ interface ICustomerService
     public function listCustomers(array $filters, int $perPage): \Illuminate\Contracts\Pagination\LengthAwarePaginator;
 
     public function toggleCustomerActiveStatus(int $id): ?Customer;
+
+    public function getAllCustomers(): ?array;
 }

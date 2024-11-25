@@ -94,4 +94,10 @@ class CustomerService implements ICustomerService
 
         return null;
     }
+
+    public function getAllCustomers(): array
+    {
+        $customerList = $this->customerRepository->getAllCustomers();
+        return $customerList;
+    }
 }

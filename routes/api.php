@@ -151,6 +151,9 @@ Route::prefix('v1')->group(function () {
                 // List customers with pagination and filtering
                 Route::get('/', [CustomerController::class, 'index'])->name('customers.index');
 
+                // List all customers
+                Route::get('/get-all', [CustomerController::class, 'getAllCustomers'])->name('customers.getAllCustomers');
+
                 // Create a new customer
                 Route::post('/', [CustomerController::class, 'store'])->name('customers.store');
 
@@ -292,7 +295,7 @@ Route::prefix('v1')->group(function () {
 
                 Route::get('products/search', [EcommerceProductController::class, 'search']);
                 Route::apiResource('products', EcommerceProductController::class);
-                
+
                 Route::apiResource('brands', EcommerceBrandController::class);
                 Route::apiResource('faqs', FaqController::class);
                 Route::get('audit-logs', [AuditLogController::class, 'index']);
@@ -300,7 +303,7 @@ Route::prefix('v1')->group(function () {
             });
 
             Route::apiResource('users', UsersController::class);
-            
+
             Route::get('business/licenses', [BusinessLicenseController::class, 'index']);
             Route::match(['put', 'patch'], 'business/licenses/{business}/status', [BusinessLicenseController::class, 'update']);
 

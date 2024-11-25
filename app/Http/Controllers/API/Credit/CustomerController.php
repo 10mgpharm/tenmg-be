@@ -106,4 +106,12 @@ class CustomerController extends Controller
             message: 'Customers imported successfully',
         );
     }
+
+    public function getAllCustomers():JsonResponse
+    {
+        $customer = $this->customerService->getAllCustomers();
+        return $this->returnJsonResponse(
+            data: $customer,
+        );
+    }
 }
