@@ -17,4 +17,9 @@ class CreditTxnHistoryEvaluation extends Model
     {
         return $this->hasOne(CreditScore::class, 'txn_evaluation_id');
     }
+
+    public function customerRecord()
+    {
+        return $this->hasOne(User::class, 'id', 'customer_id');
+    }
 }

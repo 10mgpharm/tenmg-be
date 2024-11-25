@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\API\Credit;
 
 use App\Http\Controllers\Controller;
+use App\Http\Resources\TxnHistoryResource;
 use App\Services\Interfaces\ITxnHistoryService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -16,6 +17,15 @@ class TransactionHistoryController extends Controller
         $transactionHistories = $this->txnHistoryService->getTransactionHistories($customerId);
 
         return $this->returnJsonResponse(message: 'Transaction histories retrieved successfully.', data: $transactionHistories);
+    }
+
+    public function listAllTransactions(Request $request) : JsonResponse
+    {
+        $txnHistories = $this->txnHistoryService->listAllTransactions($request->all(), $request->perPage ?? 10);
+
+        return $this->returnJsonResponse(
+            data: TxnHistoryResource::collection($txnHistories)->response()->getData(true)
+        );
     }
 
     public function uploadTransactionHistory(Request $request): JsonResponse

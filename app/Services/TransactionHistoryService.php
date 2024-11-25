@@ -47,6 +47,11 @@ class TransactionHistoryService implements ITxnHistoryService
         return $transactionHistories;
     }
 
+    public function listAllTransactions(array $filters, int $perPage): \Illuminate\Contracts\Pagination\LengthAwarePaginator
+    {
+        return $this->transactionHistoryRepository->paginate($filters, $perPage);
+    }
+
     public function uploadTransactionHistory(File|UploadedFile|string $file, int $customerId): array
     {
         $customer = $this->customerRepository->findById($customerId);

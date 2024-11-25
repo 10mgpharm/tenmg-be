@@ -9,6 +9,8 @@ interface ITxnHistoryService
 {
     public function getTransactionHistories(int $customerId): array;
 
+    public function listAllTransactions(array $filters, int $perPage):\Illuminate\Contracts\Pagination\LengthAwarePaginator;
+
     public function uploadTransactionHistory(File|UploadedFile|string $file, int $customerId): array;
 
     public function uploadAndEvaluateTransactionHistory(File|UploadedFile|string $file, int $customerId): array;
