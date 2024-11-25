@@ -8,7 +8,7 @@ You can log in using the following details:
 **Email:** {{ $user->email }}  
 **Password:** {{ $password }}
 
-@component('mail::button', ['url' => route('auth.signin')])
+@component('mail::button', ['url' => config('app.frontend_url') . '/auth/signin' ])
 Access Your Account
 @endcomponent
 

@@ -2,9 +2,11 @@
 
 namespace App\Http\Requests\Admin;
 
+use App\Enums\StatusEnum;
 use App\Models\EcommerceProduct;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
+use Illuminate\Validation\Rules\Enum;
 
 class UpdateEcommerceProductRequest extends FormRequest
 {
@@ -43,10 +45,11 @@ class UpdateEcommerceProductRequest extends FormRequest
             'max_delivery_duration' => $this->input('maxDeliveryDuration'),
             'expired_at' => $this->input('expiredAt'),
             'status' => $this->user()->hasRole('admin')
-                ? ($this->input('status') ?? 'ACTIVE')
-                : (in_array($this->input('status'), ['DRAFTED', 'INACTIVE'])
+                ? ($this->input('status') ?? StatusEnum::ACTIVE->value)
+                : (in_array($this->input('status'), [StatusEnum::DRAFT->value, StatusEnum::INACTIVE->value, StatusEnum::PENDING->value])
                     ? $this->input('status')
-                    : 'DRAFTED'),
+                    : StatusEnum::PENDING->value),
+            'status_comment' => $this->input('comment'),
 
         ]);
     }
@@ -62,16 +65,16 @@ class UpdateEcommerceProductRequest extends FormRequest
         $product = $this->route('product');
 
         return [
-            'name' => ['required', 'string', 'max:255', Rule::unique(EcommerceProduct::class)->ignore($product->id)],
-            'category_name' => ['required', 'string', 'max:255'],
-            'brand_name' => ['required', 'string', 'max:255'],
-            'medication_type_name' => ['required', 'string', 'max:255'],
-            'quantity' => ['required', 'integer', 'min:1'],
-            'actual_price' => ['required', 'numeric', 'min:0'],
-            'discount_price' => ['nullable', 'numeric', 'min:0'],
-            'min_delivery_duration' => ['required', 'integer', 'min:0'],
-            'max_delivery_duration' => ['required', 'integer', 'min:0'],
-            'expired_at' => ['required', 'date'],
+            'name' => ['sometimes', 'string', 'max:255', Rule::unique(EcommerceProduct::class)->ignore($product->id)],
+            'category_name' => ['sometimes', 'string', 'max:255'],
+            'brand_name' => ['sometimes', 'string', 'max:255'],
+            'medication_type_name' => ['sometimes', 'string', 'max:255'],
+            'quantity' => ['sometimes', 'integer', 'min:1'],
+            'actual_price' => ['sometimes', 'numeric', 'min:0'],
+            'discount_price' => ['sometimes', 'nullable', 'numeric', 'min:0'],
+            'min_delivery_duration' => ['sometimes', 'integer', 'min:0'],
+            'max_delivery_duration' => ['sometimes', 'integer', 'min:0'],
+            'expired_at' => ['sometimes', 'date'],
             'thumbnailFile' => [
                 'sometimes',
                 'nullable',
@@ -79,7 +82,12 @@ class UpdateEcommerceProductRequest extends FormRequest
                 'mimes:jpg,jpeg,png,gif',
                 'max:10240',
             ],
-            'status' => ['nullable', Rule::in(['ACTIVE', 'INACTIVE', 'SUSPENDED', 'DRAFTED', 'ARCHIVED'])]
+            'status' => ['sometimes', 'nullable', new Enum(StatusEnum::class)],
+            'statusComment' => ['sometimes', 'nullable', 'required_if:status,' . implode(',', [
+                StatusEnum::REJECTED->value,
+                StatusEnum::INACTIVE->value,
+                StatusEnum::SUSPENDED->value,
+            ]), ]
         ];
     }
 

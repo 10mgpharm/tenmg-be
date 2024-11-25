@@ -1,10 +1,12 @@
 <?php
 
+use App\Http\Controllers\API\Admin\FaqController;
 use App\Http\Controllers\Admin\NotificationController;
 use App\Http\Controllers\API\Account\AccountController;
 use App\Http\Controllers\API\Account\NotificationController as AccountNotificationController;
 use App\Http\Controllers\API\Account\PasswordUpdateController;
 use App\Http\Controllers\API\Account\TwoFactorAuthenticationController;
+use App\Http\Controllers\API\Admin\AuditLogController;
 use App\Http\Controllers\API\Admin\EcommerceCategoryController;
 use App\Http\Controllers\API\Admin\EcommerceProductController;
 use App\Http\Controllers\API\Admin\EcommerceBrandController;
@@ -24,6 +26,7 @@ use App\Http\Controllers\API\Credit\TransactionHistoryController;
 use App\Http\Controllers\API\ProfileController;
 use App\Http\Controllers\API\ResendOtpController;
 use App\Http\Controllers\API\Storefront\CategoryController;
+use App\Http\Controllers\API\Storefront\FaqController as StorefrontFaqController;
 use App\Http\Controllers\API\Storefront\ProductController;
 use App\Http\Controllers\API\Storefront\StorefrontController;
 use App\Http\Controllers\API\Webhooks\PaystackWebhookController;
@@ -74,7 +77,10 @@ Route::prefix('v1')->group(function () {
         Route::post('invite/reject', [InviteController::class, 'reject'])->name('invite.reject')->middleware('signed');
     });
 
-    Route::get('storefront-images', [CarouselImageController::class, 'index']);
+    Route::prefix('storefront')->name('storefront.')->group(function (){
+        Route::get('images', [CarouselImageController::class, 'index']);
+        Route::get('faqs', [StorefrontFaqController::class, 'index']);
+    });
 
     // Protected routes
     Route::middleware(['auth:api', 'scope:full'])->group(function () {
@@ -288,6 +294,9 @@ Route::prefix('v1')->group(function () {
                 Route::apiResource('products', EcommerceProductController::class);
                 
                 Route::apiResource('brands', EcommerceBrandController::class);
+                Route::apiResource('faqs', FaqController::class);
+                Route::get('audit-logs', [AuditLogController::class, 'index']);
+                Route::get('audit-logs/search', [AuditLogController::class, 'search']);
             });
 
             Route::apiResource('users', UsersController::class);
