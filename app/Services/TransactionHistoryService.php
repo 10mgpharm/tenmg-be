@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Models\CreditScore;
 use App\Models\CreditTxnHistoryEvaluation;
 use App\Repositories\CreditBusinessRuleRepository;
 use App\Repositories\CreditScoreRepository;
@@ -45,6 +46,11 @@ class TransactionHistoryService implements ITxnHistoryService
         $transactionHistories = $this->transactionHistoryRepository->getTransactionHistoryEvaluationByCustomerId(customerId: $customerId);
 
         return $transactionHistories;
+    }
+
+    public function listAllTransactions(array $filters, int $perPage): \Illuminate\Contracts\Pagination\LengthAwarePaginator
+    {
+        return $this->transactionHistoryRepository->paginate($filters, $perPage);
     }
 
     public function uploadTransactionHistory(File|UploadedFile|string $file, int $customerId): array
@@ -196,6 +202,11 @@ class TransactionHistoryService implements ITxnHistoryService
             'creditScore' => $creditScore,
             'affordability' => $affordability,
         ];
+    }
+
+    public function creditScoreBreakDown(int $txnEvaluationId): ?CreditScore
+    {
+        return $this->transactionHistoryRepository->creditScoreBreakDown($txnEvaluationId);
     }
 
     public function uploadAndEvaluateTransactionHistory(File|UploadedFile|string $file, int $customerId): array
