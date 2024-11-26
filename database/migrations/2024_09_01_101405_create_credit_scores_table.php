@@ -30,7 +30,7 @@ return new class extends Migration
                 $table->float('score_value')->nullable();
                 $table->float('score_total')->nullable();
 
-                $table->foreignId('created_by_id')->nullable()->constrained('business_users')->onDelete('cascade');
+                $table->foreignId('created_by_id')->nullable()->constrained('users')->onDelete('cascade');
 
                 $table->enum('source', ['DASHBOARD', 'API']);
 

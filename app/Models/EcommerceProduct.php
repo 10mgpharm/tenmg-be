@@ -2,12 +2,14 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class EcommerceProduct extends Model
 {
-    use HasFactory;
+    use HasFactory, SoftDeletes;
 
     /**
      * The table associated with the model.
@@ -26,6 +28,7 @@ class EcommerceProduct extends Model
         'ecommerce_brand_id',
         'thumbnail_file_id',
         'ecommerce_medication_type_id',
+        'ecommerce_category_id',
         'package_id',
         'ecommerce_variation_id',
         'created_by_id',
@@ -36,6 +39,10 @@ class EcommerceProduct extends Model
         'min_delivery_duration',
         'max_delivery_duration',
         'expired_at',
+        'commission',
+        'status',
+        'name',
+        'slug',
     ];
 
     /**
@@ -46,7 +53,6 @@ class EcommerceProduct extends Model
     protected $casts = [
         'expired_at' => 'date',
     ];
-
 
     /**
      * Get the category associated with the product.
@@ -59,9 +65,9 @@ class EcommerceProduct extends Model
     /**
      * Get the branch associated with the product.
      */
-    public function branch()
+    public function brand()
     {
-        return $this->belongsTo(EcommerceBrand::class, 'ecommerce_branch_id');
+        return $this->belongsTo(EcommerceBrand::class, 'ecommerce_brand_id');
     }
 
     /**
@@ -73,19 +79,21 @@ class EcommerceProduct extends Model
     }
 
     /**
-     * Get the brand associated with the product.
-     */
-    public function brand()
-    {
-        return $this->belongsTo(EcommerceBrand::class, 'ecommerce_brand_id');
-    }
-
-    /**
      * Get the thumbnail file associated with the product.
      */
     public function thumbnailFile()
     {
         return $this->belongsTo(FileUpload::class, 'thumbnail_file_id');
+    }
+
+    /**
+     * Get the URL of the thumbnail.
+     */
+    public function thumbnailUrl(): Attribute
+    {
+        return new Attribute(
+            get: fn () => $this->thumbnailFile?->url
+        );
     }
 
     /**
@@ -102,5 +110,13 @@ class EcommerceProduct extends Model
     public function package()
     {
         return $this->belongsTo(EcommercePackage::class, 'package_id');
+    }
+
+    /**
+     * Get the product details associated with the product.
+     */
+    public function productDetails()
+    {
+        return $this->hasOne(EcommerceProductDetail::class, 'ecommerce_product_id');
     }
 }

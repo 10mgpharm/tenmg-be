@@ -67,4 +67,12 @@ class EcommerceCategory extends Model
     {
         return $this->belongsTo(User::class, 'updated_by_id');
     }
+
+    /**
+     * Get the products associated with this category
+     */
+    public function products()
+    {
+        return $this->hasMany(EcommerceProduct::class)->latest();
+    }
 }

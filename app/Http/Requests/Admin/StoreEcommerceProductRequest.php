@@ -15,7 +15,7 @@ class StoreEcommerceProductRequest extends FormRequest
     {
         $user = $this->user();
 
-        return $user && $user->hasRole('admin');
+        return $user && ($user->hasRole('admin') || $user->hasRole('supplier'));
     }
 
     /**
@@ -33,6 +33,8 @@ class StoreEcommerceProductRequest extends FormRequest
             'max_delivery_duration' => $this->input('maxDeliveryDuration'),
             'expired_at' => $this->input('expiredAt'),
             'thumbnailFile' => $this->file('thumbnailFile'),
+            'status' => $this->user()->hasRole('admin') ? ($this->status ?? 'ACTIVE') : 'DRAFTED',
+            // 'ecommerce_variation' => $this->input('ecommerceVariation'),
         ]);
     }
 
@@ -49,7 +51,7 @@ class StoreEcommerceProductRequest extends FormRequest
             'brand_name' => ['required', 'string', 'max:255'],
             'medication_type_name' => ['required', 'string', 'max:255'],
             'quantity' => ['required', 'integer', 'min:1'],
-            'actual_price' =>['required', 'numeric', 'min:0'],
+            'actual_price' => ['required', 'numeric', 'min:0'],
             'discount_price' => ['nullable', 'numeric', 'min:0'],
             'min_delivery_duration' => ['required', 'integer', 'min:0'],
             'max_delivery_duration' => ['required', 'integer', 'min:0'],
@@ -60,6 +62,12 @@ class StoreEcommerceProductRequest extends FormRequest
                 'mimes:jpg,jpeg,png,gif',
                 'max:10240',
             ],
+            'status' => ['nullable', Rule::in(['ACTIVE', 'DRAFTED'])],
+            'productEssential' => ['nullable', 'string', 'min:3'],
+            'startingStock' => ['nullable', 'numeric', 'min:0'],
+            'currentStock' => ['nullable', 'numeric', 'min:0'],
+            'stockStatus' => ['nullable', Rule::in(['AVAILABLE', 'UNAVAILABLE'])],
+            // 'ecommerce_variation' => ['required', 'string', 'max:255'],
         ];
     }
 }

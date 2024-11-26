@@ -4,7 +4,7 @@ namespace App\Http\Requests\Admin;
 
 use Illuminate\Foundation\Http\FormRequest;
 
-class ListEcommerceProductRequest extends FormRequest
+class ListFaqRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -13,7 +13,7 @@ class ListEcommerceProductRequest extends FormRequest
     {
         $user = $this->user();
 
-        return $user && ($user->hasRole('admin') || $user->hasRole('supplier'));
+        return $user && $user->hasRole('admin');
     }
 
     /**

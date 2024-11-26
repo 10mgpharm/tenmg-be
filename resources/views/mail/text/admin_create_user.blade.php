@@ -9,7 +9,7 @@ You can log in using the following details:
 
 Use the link below to access your account:
 
-{{ route('auth.signin') }}
+{{ config('app.frontend_url') . '/auth/signin' }}
 
 Please make sure to change your password after logging in for security purposes.
 

@@ -2,20 +2,32 @@
 
 namespace App\Http\Requests\Admin;
 
+use App\Enums\StatusEnum;
 use App\Models\EcommerceProduct;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
+use Illuminate\Validation\Rules\Enum;
 
 class UpdateEcommerceProductRequest extends FormRequest
 {
-/**
+    /**
      * Determine if the user is authorized to make this request.
      */
     public function authorize(): bool
     {
         $user = $this->user();
+        $product = $this->route('product');
 
-        return $user && $user->hasRole('admin');
+        if ($user->hasRole('admin')) {
+            return true;
+        }
+
+        // Suppliers can only update products created by their business
+        if ($user->hasRole('supplier') && $product->business_id === $user->ownerBusinessType->id) {
+            return true;
+        }
+
+        return false;
     }
 
     /**
@@ -32,6 +44,13 @@ class UpdateEcommerceProductRequest extends FormRequest
             'min_delivery_duration' => $this->input('minDeliveryDuration'),
             'max_delivery_duration' => $this->input('maxDeliveryDuration'),
             'expired_at' => $this->input('expiredAt'),
+            'status' => $this->user()->hasRole('admin')
+                ? ($this->input('status') ?? StatusEnum::ACTIVE->value)
+                : (in_array($this->input('status'), [StatusEnum::DRAFT->value, StatusEnum::INACTIVE->value, StatusEnum::PENDING->value])
+                    ? $this->input('status')
+                    : StatusEnum::PENDING->value),
+            'status_comment' => $this->input('comment'),
+
         ]);
     }
 
@@ -42,20 +61,20 @@ class UpdateEcommerceProductRequest extends FormRequest
      */
     public function rules(): array
     {
-         // Retrieve the current medication type from the route
+        // Retrieve the current medication type from the route
         $product = $this->route('product');
 
         return [
-            'name' => ['required', 'string', 'max:255', Rule::unique(EcommerceProduct::class)->ignore($product->id)],
-            'category_name' => ['required', 'string', 'max:255'],
-            'brand_name' => ['required', 'string', 'max:255'],
-            'medication_type_name' => ['required', 'string', 'max:255'],
-            'quantity' => ['required', 'integer', 'min:1'],
-            'actual_price' =>['required', 'numeric', 'min:0'],
-            'discount_price' => ['nullable', 'numeric', 'min:0'],
-            'min_delivery_duration' => ['required', 'integer', 'min:0'],
-            'max_delivery_duration' => ['required', 'integer', 'min:0'],
-            'expired_at' => ['required', 'date'],
+            'name' => ['sometimes', 'string', 'max:255', Rule::unique(EcommerceProduct::class)->ignore($product->id)],
+            'category_name' => ['sometimes', 'string', 'max:255'],
+            'brand_name' => ['sometimes', 'string', 'max:255'],
+            'medication_type_name' => ['sometimes', 'string', 'max:255'],
+            'quantity' => ['sometimes', 'integer', 'min:1'],
+            'actual_price' => ['sometimes', 'numeric', 'min:0'],
+            'discount_price' => ['sometimes', 'nullable', 'numeric', 'min:0'],
+            'min_delivery_duration' => ['sometimes', 'integer', 'min:0'],
+            'max_delivery_duration' => ['sometimes', 'integer', 'min:0'],
+            'expired_at' => ['sometimes', 'date'],
             'thumbnailFile' => [
                 'sometimes',
                 'nullable',
@@ -63,6 +82,24 @@ class UpdateEcommerceProductRequest extends FormRequest
                 'mimes:jpg,jpeg,png,gif',
                 'max:10240',
             ],
+            'status' => ['sometimes', 'nullable', new Enum(StatusEnum::class)],
+            'statusComment' => ['sometimes', 'nullable', 'required_if:status,'.implode(',', [
+                StatusEnum::REJECTED->value,
+                StatusEnum::INACTIVE->value,
+                StatusEnum::SUSPENDED->value,
+            ]), ],
         ];
+    }
+
+    /**
+     * Custom response for failed authorization.
+     *
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function failedAuthorization()
+    {
+        abort(response()->json([
+            'message' => 'You are not authorized to update this product.',
+        ], 403));
     }
 }

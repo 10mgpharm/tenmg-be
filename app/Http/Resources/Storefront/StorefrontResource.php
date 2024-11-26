@@ -1,11 +1,11 @@
 <?php
 
-namespace App\Http\Resources;
+namespace App\Http\Resources\Storefront;
 
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
-class EcommerceMedicationTypeResource extends JsonResource
+class StorefrontResource extends JsonResource
 {
     /**
      * Transform the resource into an array.
@@ -18,10 +18,7 @@ class EcommerceMedicationTypeResource extends JsonResource
             'id' => $this->id,
             'name' => $this->name,
             'slug' => $this->slug,
-            'active' => $this->active,
-            'status' => $this->status,
-            // 'createdBy' => new UserResource($this->createdBy),
-            // 'updatedBy' => new UserResource($this->updatedBy),
+            'products' => EcommerceProductResource::collection($this->whenLoaded('products')),
         ];
     }
 }

@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Resources;
+namespace App\Http\Resources\Storefront;
 
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
@@ -17,19 +17,14 @@ class EcommerceProductResource extends JsonResource
         return [
             'id' => $this->id,
             'name' => $this->name,
-            'slug' => $this->slug,
-            'category' => new EcommerceCategoryResource($this->category),
-            'brand' => new EcommerceBrandResource($this->brand),
-            'medicationType' => new EcommerceMedicationTypeResource($this->medicationType),
-            'thumbnailFile' => $this->thumbnailFile?->url,
             'quantity' => $this->quantity,
             'actualPrice' => $this->actual_price,
             'discountPrice' => $this->discount_price,
             'minDeliveryDuration' => $this->min_delivery_duration,
             'maxDeliveryDuration' => $this->max_delivery_duration,
+            'thumbnailUrl' => $this->thumbnailUrl,
             'expiredAt' => $this->expired_at,
-            'commission' => $this->commission,
-            'productDetails' => $this->productDetails,
+            'productDetails' => $this->productDetails->only('essential', 'starting_stock', 'current_stock'),
             'status' => in_array($this->status, ['ACTIVE', 'INACTIVE', 'SUSPENDED', 'ARCHIVED'], true)
             ? $this->status
             : 'DRAFTED',
