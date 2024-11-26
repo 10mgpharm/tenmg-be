@@ -194,6 +194,8 @@ Route::prefix('v1')->group(function () {
 
                 Route::get('get-all-txn', [TransactionHistoryController::class, 'listAllTransactions'])->name('vendor.txn_history.listAllTransactions');
 
+                Route::get('creditscore-breakdown/{txnEvaluationId}', [TransactionHistoryController::class, 'creditScoreBreakDown'])->name('vendor.txn_history.creditScoreBreakDown');
+
                 Route::get('/{customerId}', [TransactionHistoryController::class, 'index'])->name('vendor.txn_history');
 
             });

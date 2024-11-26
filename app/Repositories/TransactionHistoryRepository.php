@@ -2,7 +2,9 @@
 
 namespace App\Repositories;
 
+use App\Models\CreditScore;
 use App\Models\CreditTxnHistoryEvaluation;
+use Illuminate\Http\JsonResponse;
 
 class TransactionHistoryRepository
 {
@@ -60,5 +62,10 @@ class TransactionHistoryRepository
     public function getTxnHistoryEvaluationById(int $id): ?CreditTxnHistoryEvaluation
     {
         return CreditTxnHistoryEvaluation::findOrFail($id);
+    }
+
+    public function creditScoreBreakDown($txnEvaluationId):?CreditScore
+    {
+        return CreditScore::findOrFail($txnEvaluationId);
     }
 }
