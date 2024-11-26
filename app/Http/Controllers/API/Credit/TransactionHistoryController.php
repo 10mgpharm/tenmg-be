@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\API\Credit;
 
 use App\Http\Controllers\Controller;
+use App\Http\Resources\CreditScoreResource;
 use App\Http\Resources\TxnHistoryResource;
 use App\Models\CreditScore;
 use App\Services\Interfaces\ITxnHistoryService;
@@ -63,7 +64,7 @@ class TransactionHistoryController extends Controller
     {
         $creditScore = $this->txnHistoryService->creditScoreBreakDown($txnEvaluationId);
 
-        return $this->returnJsonResponse(message: 'Transaction history evaluated successfully.', data: $creditScore);
+        return $this->returnJsonResponse(message: 'Credit score fetched', data: new CreditScoreResource($creditScore));
     }
 
     // uploadAndEvaluate

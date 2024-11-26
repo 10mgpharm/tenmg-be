@@ -66,6 +66,6 @@ class TransactionHistoryRepository
 
     public function creditScoreBreakDown($txnEvaluationId):?CreditScore
     {
-        return CreditScore::findOrFail($txnEvaluationId);
+        return CreditScore::where('txn_evaluation_id', $txnEvaluationId)->firstOrFail();
     }
 }
