@@ -152,6 +152,9 @@ Route::prefix('v1')->group(function () {
                 // List customers with pagination and filtering
                 Route::get('/', [CustomerController::class, 'index'])->name('customers.index');
 
+                // List all customers
+                Route::get('/get-all', [CustomerController::class, 'getAllCustomers'])->name('customers.getAllCustomers');
+
                 // Create a new customer
                 Route::post('/', [CustomerController::class, 'store'])->name('customers.store');
 

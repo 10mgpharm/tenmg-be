@@ -70,4 +70,10 @@ class CustomerRepository
 
         return $query->paginate($perPage);
     }
+
+    function getAllCustomers():array
+    {
+        $customers = Customer::all()->toArray();
+        return $customers;
+    }
 }
