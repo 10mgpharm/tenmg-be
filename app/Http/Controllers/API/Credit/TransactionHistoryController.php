@@ -78,6 +78,31 @@ class TransactionHistoryController extends Controller
         return response($fileContent, 200)->header('Content-Type', $mimeType);
     }
 
+    public function viewTransactionHistory(Request $request)
+    {
+        $request->validate([
+            'transactionHistoryId' => 'required|exists:credit_txn_history_evaluations,id',
+        ]);
+
+        $evaluation = CreditTxnHistoryEvaluation::findOrFail($request->transactionHistoryId);
+        $fileId = $evaluation->transaction_file_id;
+        //get file upload entry
+        $fileUploaded = FileUpload::findOrFail($fileId);
+
+        if (!Storage::exists($fileUploaded->path)){
+            return $this->returnJsonResponse(
+                message: 'File not found',
+                statusCode: Response::HTTP_NOT_FOUND,
+                status:'failed'
+            );
+        }
+
+        $txnHistories = $this->txnHistoryService->viewTransactionHistory($fileUploaded);
+
+        return $this->returnJsonResponse(message: 'Transaction history fetched successfully.', data: $txnHistories);
+
+    }
+
     public function evaluateTransactionHistory(Request $request): JsonResponse
     {
         // Validate the request parameters

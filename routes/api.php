@@ -189,6 +189,10 @@ Route::prefix('v1')->group(function () {
                 Route::post('/download/{txnEvaluationId}', [TransactionHistoryController::class, 'downloadTransactionHistory'])
                     ->name('vendor.txn_history.download');
 
+                //view uploaded transaction history
+                Route::post('/view', [TransactionHistoryController::class, 'viewTransactionHistory'])
+                    ->name('vendor.txn_history.view');
+
                 // Evaluate existing uploaded file
                 Route::post('/evaluate', [TransactionHistoryController::class, 'evaluateTransactionHistory'])
                     ->name('vendor.txn_history.evaluate');

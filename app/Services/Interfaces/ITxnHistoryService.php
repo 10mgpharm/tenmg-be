@@ -3,6 +3,7 @@
 namespace App\Services\Interfaces;
 
 use App\Models\CreditScore;
+use App\Models\FileUpload;
 use Illuminate\Http\File;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\UploadedFile;
@@ -15,7 +16,7 @@ interface ITxnHistoryService
 
     public function uploadTransactionHistory(File|UploadedFile|string $file, int $customerId): array;
 
-    // public function downloadTransactionHistory(int $txnEvaluationId);
+    public function viewTransactionHistory(FileUpload $fileUpload):array;
 
     public function uploadAndEvaluateTransactionHistory(File|UploadedFile|string $file, int $customerId): array;
 
