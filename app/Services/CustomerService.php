@@ -100,4 +100,15 @@ class CustomerService implements ICustomerService
         $customerList = $this->customerRepository->getAllCustomers();
         return $customerList;
     }
+
+    public function checkIfVendor(): bool
+    {
+        $type = $this->authService->getBusiness()?->type;
+
+        if ($type == 'VENDOR') {
+            return true;
+        } else {
+            return false;
+        }
+    }
 }

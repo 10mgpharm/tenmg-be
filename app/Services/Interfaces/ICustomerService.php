@@ -21,4 +21,6 @@ interface ICustomerService
     public function toggleCustomerActiveStatus(int $id): ?Customer;
 
     public function getAllCustomers(): ?array;
+
+    public function checkIfVendor(): bool;
 }
