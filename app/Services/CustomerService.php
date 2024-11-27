@@ -97,7 +97,8 @@ class CustomerService implements ICustomerService
 
     public function getAllCustomers(): array
     {
-        $customerList = $this->customerRepository->getAllCustomers();
+        $vendorId = $this->authService->getBusiness()?->id;
+        $customerList = $this->customerRepository->getAllCustomers($vendorId);
         return $customerList;
     }
 
