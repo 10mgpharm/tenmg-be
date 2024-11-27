@@ -15,6 +15,8 @@ interface ITxnHistoryService
 
     public function uploadTransactionHistory(File|UploadedFile|string $file, int $customerId): array;
 
+    // public function downloadTransactionHistory(int $txnEvaluationId);
+
     public function uploadAndEvaluateTransactionHistory(File|UploadedFile|string $file, int $customerId): array;
 
     public function creditScoreBreakDown(int $txnEvaluationId): ?CreditScore;

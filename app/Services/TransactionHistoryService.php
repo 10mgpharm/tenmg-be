@@ -17,6 +17,7 @@ use App\Services\Interfaces\IRuleEngineService;
 use App\Services\Interfaces\ITxnHistoryService;
 use Illuminate\Http\File;
 use Illuminate\Http\UploadedFile;
+// use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class TransactionHistoryService implements ITxnHistoryService
 {
@@ -109,6 +110,11 @@ class TransactionHistoryService implements ITxnHistoryService
             'txn_history_evaluation' => $txnHistoryEvaluation,
         ];
     }
+
+    // public function downloadTransactionHistory(int $txnEvaluationId):StreamedResponse
+    // {
+    //     return $this->transactionHistoryRepository->downloadTransactionHistory($txnEvaluationId);
+    // }
 
     public function evaluateTransactionHistory(int $transactionHistoryId): array
     {

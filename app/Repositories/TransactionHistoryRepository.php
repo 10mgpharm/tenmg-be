@@ -4,7 +4,9 @@ namespace App\Repositories;
 
 use App\Models\CreditScore;
 use App\Models\CreditTxnHistoryEvaluation;
+use App\Models\FileUpload;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Facades\Storage;
 
 class TransactionHistoryRepository
 {
@@ -68,4 +70,24 @@ class TransactionHistoryRepository
     {
         return CreditScore::where('txn_evaluation_id', $txnEvaluationId)->firstOrFail();
     }
+
+    // public function downloadTransactionHistory(int $txnEvaluationId): StreamedResponse
+    // {
+    //     $evaluation = CreditTxnHistoryEvaluation::findOrFail($txnEvaluationId);
+    //     $fileId = $evaluation->transaction_file_id;
+    //     //get file upload entry
+    //     $fileUpload = FileUpload::findOrFail($fileId);
+
+    //     $filePath = $fileUpload->path;
+
+    //     if (!Storage::exists($filePath)){
+    //         return response()->json(['message' => 'File not found'], 404);
+    //     }
+
+    //     if (!file_exists($filePath)) {
+    //         return response()->json(['message' => 'File not found'], 404);
+    //     }
+    //     return Storage::download($filePath);
+
+    // }
 }

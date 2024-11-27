@@ -6,9 +6,14 @@ use App\Http\Controllers\Controller;
 use App\Http\Resources\CreditScoreResource;
 use App\Http\Resources\TxnHistoryResource;
 use App\Models\CreditScore;
+use App\Models\CreditTxnHistoryEvaluation;
+use App\Models\FileUpload;
 use App\Services\Interfaces\ITxnHistoryService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
+use Illuminate\Support\Facades\Storage;
+use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
 class TransactionHistoryController extends Controller
 {
@@ -45,6 +50,32 @@ class TransactionHistoryController extends Controller
 
         // Return a success response with file and evaluation details
         return $this->returnJsonResponse(message: 'Transaction history uploaded successfully', data: $result);
+    }
+
+    public function downloadTransactionHistory($txnEvaluationId)
+    {
+
+        $evaluation = CreditTxnHistoryEvaluation::findOrFail($txnEvaluationId);
+        $fileId = $evaluation->transaction_file_id;
+        //get file upload entry
+        $fileUpload = FileUpload::findOrFail($fileId);
+
+        $filePath = $fileUpload->path;
+
+        if (!Storage::exists($filePath)){
+            return $this->returnJsonResponse(
+                message: 'File not found',
+                statusCode: Response::HTTP_NOT_FOUND,
+                status:'failed'
+            );
+        }
+
+        // Get the file's content and MIME type
+        $fileContent = Storage::disk(env('FILESYSTEM_DISK'))->get($filePath);
+        $mimeType = Storage::disk(env('FILESYSTEM_DISK'))->mimeType($filePath);
+
+        // Return the file content as a response with the correct headers
+        return response($fileContent, 200)->header('Content-Type', $mimeType);
     }
 
     public function evaluateTransactionHistory(Request $request): JsonResponse
