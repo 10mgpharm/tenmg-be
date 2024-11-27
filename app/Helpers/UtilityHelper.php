@@ -3,12 +3,12 @@
 namespace App\Helpers;
 
 use App\Common\ResponseMessages;
+use App\Enums\BusinessType;
 use Carbon\Carbon;
 use Exception;
 use Illuminate\Http\Response;
 use Symfony\Component\HttpKernel\Exception\HttpException;
 use Throwable;
-use App\Enums\BusinessType;
 
 class UtilityHelper
 {
@@ -25,8 +25,8 @@ class UtilityHelper
      */
     public static function generateOtp(): string
     {
-        $numbers = array_map(fn() => random_int(0, 9), range(1, 3));
-        $letters = array_map(fn() => chr(random_int(65, 90)), range(1, 3));
+        $numbers = array_map(fn () => random_int(0, 9), range(1, 3));
+        $letters = array_map(fn () => chr(random_int(65, 90)), range(1, 3));
 
         $shuffled = array_merge($numbers, $letters);
         shuffle($shuffled);
@@ -143,6 +143,49 @@ class UtilityHelper
      */
     public static function getAllowedBusinessTypes(): array
     {
-        return array_map(fn($type) => $type->toLowerCase(), BusinessType::allowedForRegistration());
+        return array_map(fn ($type) => $type->toLowerCase(), BusinessType::allowedForRegistration());
+    }
+
+    /**
+     * generate slug reference
+     *
+     * @param  string  $prefix
+     * @return void
+     */
+    public static function generateSlug($prefix = 'CL')
+    {
+        // Current date in the format YYYYMMDD
+        $date = date('Ymd');
+
+        // Current time in the format HHMMSS
+        $time = date('His');
+
+        // Generate a 4-character unique string
+        // $uniqueString = strtoupper(substr(uniqid(), -4));
+
+        // Generate a 4-character unique string with alphabets only
+        $uniqueString = self::generateAlphaString(4);
+
+        // Combine parts to form the slug
+        $slug = sprintf('%s-%s-%s-%s', $prefix, $date, $time, $uniqueString);
+
+        return $slug; //CL-20241103-162103-UXYV
+    }
+
+    /**
+     * Generate a random alphabetic string of given length
+     *
+     * @param  int  $length
+     * @return string
+     */
+    public static function generateAlphaString($length)
+    {
+        $characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+        $alphaString = '';
+        for ($i = 0; $i < $length; $i++) {
+            $alphaString .= $characters[rand(0, strlen($characters) - 1)];
+        }
+
+        return $alphaString;
     }
 }

@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Helpers\UtilityHelper;
 use App\Models\CreditScore;
 use App\Models\CreditTxnHistoryEvaluation;
 use App\Repositories\CreditBusinessRuleRepository;
@@ -71,6 +72,7 @@ class TransactionHistoryService implements ITxnHistoryService
         );
 
         $evaluationData = [
+            'identifier' => UtilityHelper::generateSlug('EVAL'),
             'business_id' => $customer->business_id,
             'customer_id' => $customer->id,
             'file_format' => strtoupper($file->getClientOriginalExtension()) == 'XLSX' ? 'EXCEL' : strtoupper($file->getClientOriginalExtension()),
