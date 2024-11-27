@@ -4,7 +4,12 @@ namespace App\Repositories;
 
 use App\Models\CreditScore;
 use App\Models\CreditTxnHistoryEvaluation;
+use App\Models\FileUpload;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Facades\Storage;
+use League\Csv\Reader;
+use Maatwebsite\Excel\Facades\Excel;
+use Maatwebsite\Excel\Reader as ExcelReader;
 
 class TransactionHistoryRepository
 {
@@ -67,5 +72,62 @@ class TransactionHistoryRepository
     public function creditScoreBreakDown($txnEvaluationId):?CreditScore
     {
         return CreditScore::where('txn_evaluation_id', $txnEvaluationId)->firstOrFail();
+    }
+
+    public function viewTransactionHistory(FileUpload $fileUpload): array
+    {
+
+
+        $filePath = $fileUpload->path;
+
+        if($fileUpload->extension == "json"){
+
+            $fileContent = Storage::disk(env('FILESYSTEM_DISK'))->get($filePath);
+            $decodedContent = json_decode($fileContent, true);
+
+            if (json_last_error() !== JSON_ERROR_NONE) {
+                return response()->json(['error' => 'Invalid JSON content'], 400);
+            }
+
+            return $decodedContent;
+
+        }else if($fileUpload->extension == "csv"){
+
+            $csvContent = Storage::disk(env('FILESYSTEM_DISK'))->get($filePath);
+            $csv = Reader::createFromString($csvContent);
+            $csv->setHeaderOffset(0); // Use the first row as headers
+
+            $records = [];
+            foreach ($csv->getRecords() as $record) {
+                $records[] = $record;
+            }
+
+            return $records;
+
+        }else if($fileUpload->extension == "xlsx" || $fileUpload->extension == "xls"){
+
+            $absolutePath = Storage::disk(env('FILESYSTEM_DISK'))->path($filePath);
+
+            $sheets = Excel::toArray([], $absolutePath);
+
+
+            if (!empty($sheets) && count($sheets) > 0) {
+                $data = $sheets[0]; // Assuming you want the first sheet
+                $headers = array_shift($data); // Use the first row as headers
+
+                // Transform into an array of JSON
+                $jsonArray = array_map(function ($row) use ($headers) {
+                    return array_combine($headers, $row);
+                }, $data);
+
+                return $jsonArray;
+            }
+
+            return [];
+
+        }else{
+            return [];
+        }
+
     }
 }
