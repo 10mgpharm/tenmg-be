@@ -100,6 +100,16 @@ class CustomerController extends Controller
             'file' => 'required|mimes:xlsx|max:20024',
         ]);
 
+        $isVendor = $this->customerService->checkIfVendor();
+
+        //check if user type performing this operation is a vendor
+        if (!$isVendor) {
+            return $this->returnJsonResponse(
+                message: 'You are not authorized to perform this operation',
+                statusCode: Response::HTTP_UNAUTHORIZED,
+            );
+        }
+
         Excel::import(new CustomersImport, $request->file('file'));
 
         return $this->returnJsonResponse(
