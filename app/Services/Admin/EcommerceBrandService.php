@@ -33,7 +33,8 @@ class EcommerceBrandService implements IEcommerceBrandService
                     'status' => $validated['status'] ?? StatusEnum::APPROVED->value,
                     'active' => $validated['active'] ?? false,
                     'slug' => Str::slug($validated['name']),
-                    'business_id' => $user->ownerBusinessType->id,
+                    'business_id' => $user->ownerBusinessType?->id ?: $user->businesses()
+                    ->firstWhere('user_id', $user->id)?->id,
                     'created_by_id' => $user->id,
                 ]);
             });
