@@ -22,31 +22,42 @@ class TransactionHistoryRepository
     {
         $query = CreditTxnHistoryEvaluation::query();
 
+        // Join the credit_customers table
+        $query->join('credit_customers', 'credit_customers.id', '=', 'credit_txn_history_evaluations.customer_id');
+
+        // Search logic
         $query->when(isset($filters['search']), function ($query) use ($filters) {
-            return $query
-                ->where('name', 'like', "%{$filters['search']}%")
-                ->orWhere('identifier', 'like', "%{$filters['search']}%")
-                ->orWhere('status', 'like', "%{$filters['search']}%")
-                ->orWhere('source', 'like', "%{$filters['search']}%")
-                ->orWhere('file_format', 'like', "%{$filters['search']}%");
+            $searchTerm = "%{$filters['search']}%";
+            return $query->where(function ($query) use ($searchTerm) {
+                $query->where('credit_txn_history_evaluations.identifier', 'like', $searchTerm)
+                    ->orWhere('credit_txn_history_evaluations.status', 'like', $searchTerm)
+                    ->orWhere('credit_txn_history_evaluations.source', 'like', $searchTerm)
+                    ->orWhere('credit_txn_history_evaluations.file_format', 'like', $searchTerm)
+                    ->orWhereHas('customerRecord', function ($q) use ($searchTerm) {
+                        $q->where('name', 'like', $searchTerm);
+                    });
+            });
         });
 
+        // Filter by status
         $query->when(isset($filters['status']), function ($query) use ($filters) {
-            return $query->where('status', $filters['status']);
+            return $query->where('credit_txn_history_evaluations.status', $filters['status']);
         });
 
+        // Filter by vendor ID
         $query->when(isset($filters['vendorId']), function ($query) use ($filters) {
-            return $query->where('business_id', $filters['vendorId']);
+            return $query->where('credit_txn_history_evaluations.business_id', $filters['vendorId']);
         });
 
-        // $query->when(isset($filters['createdAtStart']) && isset($filters['createdAtEnd']), function ($query) use ($filters) {
-        //     return $query->whereBetween('created_at', [$filters['createdAtStart'], $filters['createdAtEnd']]);
-        // });
-
+        // Filter by customer ID
         $query->when(isset($filters['customerId']), function ($query) use ($filters) {
-            return $query->where('customer_id', $filters['customerId']);
+            return $query->where('credit_txn_history_evaluations.customer_id', $filters['customerId']);
         });
 
+        // Prevent column conflicts by selecting specific fields
+        $query->select('credit_txn_history_evaluations.*');
+
+        // Paginate results
         return $query->paginate($perPage);
 
     }
