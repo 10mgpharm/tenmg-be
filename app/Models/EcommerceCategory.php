@@ -75,5 +75,4 @@ class EcommerceCategory extends Model
     {
         return $this->hasMany(EcommerceProduct::class)->latest();
     }
-    
 }

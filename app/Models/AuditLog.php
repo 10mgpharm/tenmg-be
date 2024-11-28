@@ -29,7 +29,7 @@ class AuditLog extends Model
     ];
 
     protected $hidden = [
-        'creatable_type', 'creatable_id', 'targetable_type', 'targetable_id'
+        'creatable_type', 'creatable_id', 'targetable_type', 'targetable_id',
     ];
 
     /**

@@ -14,25 +14,25 @@ use Illuminate\Support\Facades\DB;
 class FaqService implements IFaqService
 {
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      */
     public function index(ListFaqRequest $request): LengthAwarePaginator
     {
         $query = Faq::query();
 
         if ($question = $request->input('question')) {
-            $query->where('name', 'LIKE', '%' . $question . '%');
+            $query->where('name', 'LIKE', '%'.$question.'%');
         }
 
         if ($answer = $request->input('answer')) {
-            $query->where('name', 'LIKE', '%' . $answer . '%');
+            $query->where('name', 'LIKE', '%'.$answer.'%');
         }
 
         return $query->latest()->paginate();
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      */
     public function store(array $validated, User $user): Faq
     {
@@ -44,38 +44,38 @@ class FaqService implements IFaqService
                 ]);
             });
         } catch (Exception $e) {
-            throw new Exception('Failed to create FAQ: ' . $e->getMessage());
+            throw new Exception('Failed to create FAQ: '.$e->getMessage());
         }
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      */
     public function update(array $validated, User $user, Faq $faq): bool
     {
         try {
-            return DB::transaction(fn() => $faq->update([
+            return DB::transaction(fn () => $faq->update([
                 ...$validated,
                 'updated_by_id' => $user->id,
             ]));
         } catch (Exception $e) {
-            throw new Exception('Failed to update the FAQ: ' . $e->getMessage());
+            throw new Exception('Failed to update the FAQ: '.$e->getMessage());
         }
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      */
     public function search(Request $request): LengthAwarePaginator
     {
         $query = Faq::query();
 
         if ($question = $request->input('question')) {
-            $query->where('name', 'LIKE', '%' . $question . '%');
+            $query->where('name', 'LIKE', '%'.$question.'%');
         }
 
         if ($answer = $request->input('answer')) {
-            $query->where('name', 'LIKE', '%' . $answer . '%');
+            $query->where('name', 'LIKE', '%'.$answer.'%');
         }
 
         return $query->latest()->paginate();

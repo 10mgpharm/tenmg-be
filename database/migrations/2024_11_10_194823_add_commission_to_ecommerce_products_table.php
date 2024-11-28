@@ -11,7 +11,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        if(!Schema::hasColumn('ecommerce_products', 'commission')){
+        if (! Schema::hasColumn('ecommerce_products', 'commission')) {
             Schema::table('ecommerce_products', function (Blueprint $table) {
                 $table->decimal('commission', 18)->nullable();
             });
@@ -23,7 +23,7 @@ return new class extends Migration
      */
     public function down(): void
     {
-        if(Schema::hasColumn('ecommerce_products', 'commission')){
+        if (Schema::hasColumn('ecommerce_products', 'commission')) {
             Schema::table('ecommerce_products', function (Blueprint $table) {
                 $table->dropColumn('commission');
             });

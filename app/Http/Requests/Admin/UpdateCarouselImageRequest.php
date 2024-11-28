@@ -24,8 +24,8 @@ class StoreCarouselImageRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'title' => ['sometimes', 'nullable', 'string', 'max:255',],
-            'description' => ['sometimes', 'nullable', 'string', 'max:255',],
+            'title' => ['sometimes', 'nullable', 'string', 'max:255'],
+            'description' => ['sometimes', 'nullable', 'string', 'max:255'],
             'image' => [
                 'sometimes',
                 'image',
@@ -36,7 +36,7 @@ class StoreCarouselImageRequest extends FormRequest
                 'nullable',
                 'sometimes',
                 'boolean',
-            ]
+            ],
         ];
     }
 }

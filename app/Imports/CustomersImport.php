@@ -15,7 +15,8 @@ class CustomersImport implements ToModel, WithHeadingRow
      */
     public function model(array $row)
     {
-        $business = Business::where('code', $row['vendor_code'])->first();
+        $vendorId = auth()->user()->id;
+        $business = Business::where('owner_id', $vendorId)->where('type', 'VENDOR')->first();
         $count = Customer::count() + 1;
         $code = strtoupper($business->code).'-CUS-'.str_pad($count, 3, '0', STR_PAD_LEFT);
 

@@ -11,14 +11,14 @@ use Illuminate\Pagination\LengthAwarePaginator;
 class EcommerceCategoryService implements IEcommerceCategoryService
 {
     /**
-     * Retrieve a paginated list of products within a specific category, 
+     * Retrieve a paginated list of products within a specific category,
      * filtered by various parameters such as product name, amount, date range, and brand.
      *
-     * This method allows filtering products by product name/slug, amount range, date range, and brand. 
+     * This method allows filtering products by product name/slug, amount range, date range, and brand.
      * It processes both arrays and comma-separated values for multiple filter options.
      *
-     * @param Request $request The incoming HTTP request containing filter parameters.
-     * @param EcommerceCategory $category The category to filter products by.
+     * @param  Request  $request  The incoming HTTP request containing filter parameters.
+     * @param  EcommerceCategory  $category  The category to filter products by.
      * @return LengthAwarePaginator A paginated list of filtered products.
      */
     public function products(Request $request, EcommerceCategory $category): LengthAwarePaginator
@@ -66,7 +66,7 @@ class EcommerceCategoryService implements IEcommerceCategoryService
 
             $query->whereHas('brand', function ($q) use ($brands) {
                 foreach ($brands as $brand) {
-                    $q->orWhere('name', 'like', '%' . $brand . '%');
+                    $q->orWhere('name', 'like', '%'.$brand.'%');
                 }
             });
         }
@@ -82,7 +82,7 @@ class EcommerceCategoryService implements IEcommerceCategoryService
      * The filters support both arrays and comma-separated values for multiple options.
      * Duplicates in array inputs are removed before processing.
      *
-     * @param Request $request The incoming HTTP request containing filter parameters.
+     * @param  Request  $request  The incoming HTTP request containing filter parameters.
      * @return LengthAwarePaginator A paginated list of filtered products.
      */
     public function search(Request $request): LengthAwarePaginator
@@ -98,7 +98,7 @@ class EcommerceCategoryService implements IEcommerceCategoryService
             $query->whereHas('category', function ($q) use ($categories) {
                 foreach ($categories as $category) {
                     $q->orWhere('name', 'LIKE', "%{$category}%")
-                    ->orWhere('slug', 'LIKE', "%{$category}%");
+                        ->orWhere('slug', 'LIKE', "%{$category}%");
                 }
             });
         }
@@ -111,7 +111,7 @@ class EcommerceCategoryService implements IEcommerceCategoryService
             $query->where(function ($q) use ($product_names) {
                 foreach ($product_names as $name) {
                     $q->orWhere('name', 'LIKE', "%{$name}%")
-                    ->orWhere('slug', 'LIKE', "%{$name}%");
+                        ->orWhere('slug', 'LIKE', "%{$name}%");
                 }
             });
         }

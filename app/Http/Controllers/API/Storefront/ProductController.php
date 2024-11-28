@@ -17,8 +17,8 @@ class ProductController extends Controller
     /**
      * Retrieve details of a single product.
      *
-     * @param  \Illuminate\Http\Request $request Request instance.
-     * @param  EcommerceProduct $product Product to show.
+     * @param  \Illuminate\Http\Request  $request  Request instance.
+     * @param  EcommerceProduct  $product  Product to show.
      * @return \Illuminate\Http\JsonResponse JSON response with product details.
      */
     public function show(Request $request, EcommerceProduct $product): JsonResponse
@@ -34,7 +34,7 @@ class ProductController extends Controller
     /**
      * Retrieve a paginated list of products based on the search criteria.
      *
-     * @param  \Illuminate\Http\Request $request Request instance.
+     * @param  \Illuminate\Http\Request  $request  Request instance.
      * @return \Illuminate\Http\JsonResponse JSON response with paginated product data.
      */
     public function search(Request $request): JsonResponse

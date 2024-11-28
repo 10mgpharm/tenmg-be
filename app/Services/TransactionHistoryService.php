@@ -2,7 +2,10 @@
 
 namespace App\Services;
 
+use App\Helpers\UtilityHelper;
+use App\Models\CreditScore;
 use App\Models\CreditTxnHistoryEvaluation;
+use App\Models\FileUpload;
 use App\Repositories\CreditBusinessRuleRepository;
 use App\Repositories\CreditScoreRepository;
 use App\Repositories\CustomerRepository;
@@ -15,7 +18,9 @@ use App\Services\Interfaces\IAffordabilityService;
 use App\Services\Interfaces\IRuleEngineService;
 use App\Services\Interfaces\ITxnHistoryService;
 use Illuminate\Http\File;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\UploadedFile;
+// use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class TransactionHistoryService implements ITxnHistoryService
 {
@@ -47,6 +52,11 @@ class TransactionHistoryService implements ITxnHistoryService
         return $transactionHistories;
     }
 
+    public function listAllTransactions(array $filters, int $perPage): \Illuminate\Contracts\Pagination\LengthAwarePaginator
+    {
+        return $this->transactionHistoryRepository->paginate($filters, $perPage);
+    }
+
     public function uploadTransactionHistory(File|UploadedFile|string $file, int $customerId): array
     {
         $customer = $this->customerRepository->findById($customerId);
@@ -65,6 +75,7 @@ class TransactionHistoryService implements ITxnHistoryService
         );
 
         $evaluationData = [
+            'identifier' => UtilityHelper::generateSlug('EVAL'),
             'business_id' => $customer->business_id,
             'customer_id' => $customer->id,
             'file_format' => strtoupper($file->getClientOriginalExtension()) == 'XLSX' ? 'EXCEL' : strtoupper($file->getClientOriginalExtension()),
@@ -102,6 +113,11 @@ class TransactionHistoryService implements ITxnHistoryService
             'file' => $fileUpload,
             'txn_history_evaluation' => $txnHistoryEvaluation,
         ];
+    }
+
+    public function viewTransactionHistory(FileUpload $fileUpload):array
+    {
+        return $this->transactionHistoryRepository->viewTransactionHistory($fileUpload);
     }
 
     public function evaluateTransactionHistory(int $transactionHistoryId): array
@@ -196,6 +212,11 @@ class TransactionHistoryService implements ITxnHistoryService
             'creditScore' => $creditScore,
             'affordability' => $affordability,
         ];
+    }
+
+    public function creditScoreBreakDown(int $txnEvaluationId): ?CreditScore
+    {
+        return $this->transactionHistoryRepository->creditScoreBreakDown($txnEvaluationId);
     }
 
     public function uploadAndEvaluateTransactionHistory(File|UploadedFile|string $file, int $customerId): array

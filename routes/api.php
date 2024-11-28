@@ -1,17 +1,17 @@
 <?php
 
-use App\Http\Controllers\API\Admin\FaqController;
 use App\Http\Controllers\Admin\NotificationController;
 use App\Http\Controllers\API\Account\AccountController;
 use App\Http\Controllers\API\Account\NotificationController as AccountNotificationController;
 use App\Http\Controllers\API\Account\PasswordUpdateController;
 use App\Http\Controllers\API\Account\TwoFactorAuthenticationController;
 use App\Http\Controllers\API\Admin\AuditLogController;
-use App\Http\Controllers\API\Admin\EcommerceCategoryController;
-use App\Http\Controllers\API\Admin\EcommerceProductController;
-use App\Http\Controllers\API\Admin\EcommerceBrandController;
 use App\Http\Controllers\API\Admin\BusinessLicenseController;
 use App\Http\Controllers\API\Admin\CarouselImageController;
+use App\Http\Controllers\API\Admin\EcommerceBrandController;
+use App\Http\Controllers\API\Admin\EcommerceCategoryController;
+use App\Http\Controllers\API\Admin\EcommerceProductController;
+use App\Http\Controllers\API\Admin\FaqController;
 use App\Http\Controllers\API\Admin\MedicationTypeController as AdminMedicationTypeController;
 use App\Http\Controllers\API\Admin\UsersController;
 use App\Http\Controllers\API\Auth\AuthenticatedController;
@@ -77,7 +77,7 @@ Route::prefix('v1')->group(function () {
         Route::post('invite/reject', [InviteController::class, 'reject'])->name('invite.reject')->middleware('signed');
     });
 
-    Route::prefix('storefront')->name('storefront.')->group(function (){
+    Route::prefix('storefront')->name('storefront.')->group(function () {
         Route::get('images', [CarouselImageController::class, 'index']);
         Route::get('faqs', [StorefrontFaqController::class, 'index']);
     });
@@ -111,7 +111,7 @@ Route::prefix('v1')->group(function () {
             });
         });
 
-        // supplier specific operations
+        // SUPPLIER specific routes
         Route::prefix('supplier')->group(function () {
             Route::get('dashboard', SupplierDashboardController::class);
 
@@ -129,6 +129,7 @@ Route::prefix('v1')->group(function () {
             Route::apiResource('products', EcommerceProductController::class);
         });
 
+        // VENDOR specific routes
         Route::prefix('vendor')->group(function () {
 
             // Route::get('/', action: [ProfileController::class, 'show']);
@@ -150,6 +151,9 @@ Route::prefix('v1')->group(function () {
             Route::prefix('customers')->group(function () {
                 // List customers with pagination and filtering
                 Route::get('/', [CustomerController::class, 'index'])->name('customers.index');
+
+                // List all customers
+                Route::get('/get-all', [CustomerController::class, 'getAllCustomers'])->name('customers.getAllCustomers');
 
                 // Create a new customer
                 Route::post('/', [CustomerController::class, 'store'])->name('customers.store');
@@ -181,6 +185,14 @@ Route::prefix('v1')->group(function () {
                 Route::post('/upload', [TransactionHistoryController::class, 'uploadTransactionHistory'])
                     ->name('vendor.txn_history.upload');
 
+                //download uploaded transaction history file
+                Route::post('/download/{txnEvaluationId}', [TransactionHistoryController::class, 'downloadTransactionHistory'])
+                    ->name('vendor.txn_history.download');
+
+                //view uploaded transaction history
+                Route::post('/view', [TransactionHistoryController::class, 'viewTransactionHistory'])
+                    ->name('vendor.txn_history.view');
+
                 // Evaluate existing uploaded file
                 Route::post('/evaluate', [TransactionHistoryController::class, 'evaluateTransactionHistory'])
                     ->name('vendor.txn_history.evaluate');
@@ -189,7 +201,12 @@ Route::prefix('v1')->group(function () {
                 Route::post('/upload_and_evaluate', [TransactionHistoryController::class, 'uploadAndEvaluate'])
                     ->name('vendor.txn_history.upload_and_evaluate');
 
+                Route::get('get-all-txn', [TransactionHistoryController::class, 'listAllTransactions'])->name('vendor.txn_history.listAllTransactions');
+
+                Route::get('creditscore-breakdown/{txnEvaluationId}', [TransactionHistoryController::class, 'creditScoreBreakDown'])->name('vendor.txn_history.creditScoreBreakDown');
+
                 Route::get('/{customerId}', [TransactionHistoryController::class, 'index'])->name('vendor.txn_history');
+
             });
             // Loan Application
             Route::prefix('loan-applications')->group(function () {
@@ -280,7 +297,7 @@ Route::prefix('v1')->group(function () {
 
         });
 
-
+        // ADMIN specific routes
         Route::prefix('admin')->name('admin.')->group(function () {
             Route::prefix('settings')->name('settings.')->group(function () {
                 Route::get('invite/team-members', [InviteController::class, 'members'])->name('invite.team-members');
@@ -292,7 +309,7 @@ Route::prefix('v1')->group(function () {
 
                 Route::get('products/search', [EcommerceProductController::class, 'search']);
                 Route::apiResource('products', EcommerceProductController::class);
-                
+
                 Route::apiResource('brands', EcommerceBrandController::class);
                 Route::apiResource('faqs', FaqController::class);
                 Route::get('audit-logs', [AuditLogController::class, 'index']);
@@ -300,17 +317,18 @@ Route::prefix('v1')->group(function () {
             });
 
             Route::apiResource('users', UsersController::class);
-            
+
             Route::get('business/licenses', [BusinessLicenseController::class, 'index']);
             Route::match(['put', 'patch'], 'business/licenses/{business}/status', [BusinessLicenseController::class, 'update']);
 
-            Route::prefix('system-setup')->name('system-setup.')->group(function(){
+            Route::prefix('system-setup')->name('system-setup.')->group(function () {
                 Route::get('storefront-images/search', [CarouselImageController::class, 'search']);
                 Route::apiResource('storefront-images', CarouselImageController::class);
             });
         });
 
-        Route::prefix('storefront')->name('storefront.')->group(function(){
+        // STOREFRONTS specific routes
+        Route::prefix('storefront')->name('storefront.')->group(function () {
             Route::get('/', StorefrontController::class);
             Route::get('/categories/search', [CategoryController::class, 'search']);
             Route::get('/categories/{category}', [CategoryController::class, 'products']);

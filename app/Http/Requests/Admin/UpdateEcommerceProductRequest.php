@@ -83,11 +83,11 @@ class UpdateEcommerceProductRequest extends FormRequest
                 'max:10240',
             ],
             'status' => ['sometimes', 'nullable', new Enum(StatusEnum::class)],
-            'statusComment' => ['sometimes', 'nullable', 'required_if:status,' . implode(',', [
+            'statusComment' => ['sometimes', 'nullable', 'required_if:status,'.implode(',', [
                 StatusEnum::REJECTED->value,
                 StatusEnum::INACTIVE->value,
                 StatusEnum::SUSPENDED->value,
-            ]), ]
+            ]), ],
         ];
     }
 

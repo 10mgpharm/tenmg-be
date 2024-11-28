@@ -16,12 +16,12 @@ class CategoryController extends Controller
     /**
      * Retrieve a paginated list of products for a specific category.
      *
-     * This method fetches all products associated with the provided category 
+     * This method fetches all products associated with the provided category
      * and returns them in a paginated format, wrapped in a JSON response.
      *
      * @param  \Illuminate\Http\Request  $request  The incoming request instance containing query parameters.
      * @param  \App\Models\EcommerceCategory  $category  The category for which to fetch products.
-     * @return \Illuminate\Http\JsonResponse  Returns a JSON response with a paginated list of products.
+     * @return \Illuminate\Http\JsonResponse Returns a JSON response with a paginated list of products.
      */
     public function products(Request $request, EcommerceCategory $category): JsonResponse
     {
@@ -41,7 +41,7 @@ class CategoryController extends Controller
      * The results are returned in a paginated JSON format.
      *
      * @param  \Illuminate\Http\Request  $request  The incoming request instance containing search parameters.
-     * @return \Illuminate\Http\JsonResponse  Returns a JSON response with a paginated list of search results.
+     * @return \Illuminate\Http\JsonResponse Returns a JSON response with a paginated list of search results.
      */
     public function search(Request $request): JsonResponse
     {

@@ -14,24 +14,24 @@ return new class extends Migration
     {
         Schema::table('ecommerce_products', function (Blueprint $table) {
             // Add 'status' column if it doesn't exist
-            if (!Schema::hasColumn('ecommerce_products', 'status')) {
-                $table->enum('status', array_map(fn($status) => $status->value, StatusEnum::cases()))
+            if (! Schema::hasColumn('ecommerce_products', 'status')) {
+                $table->enum('status', array_map(fn ($status) => $status->value, StatusEnum::cases()))
                     ->default(StatusEnum::PENDING->value)
                     ->nullable();
             } else {
                 // Update 'status' column if it exists
-                $table->enum('status', array_map(fn($status) => $status->value, StatusEnum::cases()))
+                $table->enum('status', array_map(fn ($status) => $status->value, StatusEnum::cases()))
                     ->default(StatusEnum::PENDING->value)
                     ->nullable()
                     ->change();
             }
-        
+
             // Add 'status_comment' column if it doesn't exist
-            if (!Schema::hasColumn('ecommerce_products', 'status_comment')) {
+            if (! Schema::hasColumn('ecommerce_products', 'status_comment')) {
                 $table->text('status_comment')->nullable();
             }
         });
-        
+
     }
 
     /**

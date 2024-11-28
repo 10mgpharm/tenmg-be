@@ -2,14 +2,14 @@
 
 namespace App\Http\Controllers\API\Admin;
 
-use App\Models\Faq;
-use App\Services\Admin\FaqService;
 use App\Http\Controllers\Controller;
-use App\Http\Resources\Admin\FaqResource;
 use App\Http\Requests\Admin\DeleteFaqRequest;
 use App\Http\Requests\Admin\ListFaqRequest;
 use App\Http\Requests\Admin\StoreFaqRequest;
 use App\Http\Requests\Admin\UpdateFaqRequest;
+use App\Http\Resources\Admin\FaqResource;
+use App\Models\Faq;
+use App\Services\Admin\FaqService;
 use Illuminate\Http\JsonResponse;
 
 class FaqController extends Controller
@@ -19,8 +19,7 @@ class FaqController extends Controller
     /**
      * Display a listing of FAQs.
      *
-     * @param ListFaqRequest $request The request object containing filters for FAQs.
-     * 
+     * @param  ListFaqRequest  $request  The request object containing filters for FAQs.
      * @return JsonResponse Paginated list of FAQs with success message.
      */
     public function index(ListFaqRequest $request): JsonResponse
@@ -36,8 +35,7 @@ class FaqController extends Controller
     /**
      * Store a newly created FAQ.
      *
-     * @param StoreFaqRequest $request The request object containing FAQ data.
-     * 
+     * @param  StoreFaqRequest  $request  The request object containing FAQ data.
      * @return JsonResponse JSON response confirming creation or an error message.
      */
     public function store(StoreFaqRequest $request): JsonResponse
@@ -47,7 +45,7 @@ class FaqController extends Controller
 
         $faq = $this->faqService->store($validated, $user);
 
-        if (!$faq) {
+        if (! $faq) {
             return $this->returnJsonResponse(
                 message: 'Oops, can\'t create FAQ at the moment. Please try again later.'
             );
@@ -62,9 +60,8 @@ class FaqController extends Controller
     /**
      * Update the specified FAQ.
      *
-     * @param UpdateFaqRequest $request The request object containing updated FAQ data.
-     * @param Faq $faq The FAQ instance to update.
-     * 
+     * @param  UpdateFaqRequest  $request  The request object containing updated FAQ data.
+     * @param  Faq  $faq  The FAQ instance to update.
      * @return JsonResponse JSON response confirming the update or an error message.
      */
     public function update(UpdateFaqRequest $request, Faq $faq): JsonResponse
@@ -74,7 +71,7 @@ class FaqController extends Controller
 
         $isUpdated = $this->faqService->update($validated, $user, $faq);
 
-        if (!$isUpdated) {
+        if (! $isUpdated) {
             return $this->returnJsonResponse(
                 message: 'Oops, can\'t update FAQ at the moment. Please try again later.'
             );
@@ -89,9 +86,8 @@ class FaqController extends Controller
     /**
      * Remove the specified FAQ.
      *
-     * @param DeleteFaqRequest $request The request object for deleting the FAQ.
-     * @param Faq $faq The FAQ instance to delete.
-     * 
+     * @param  DeleteFaqRequest  $request  The request object for deleting the FAQ.
+     * @param  Faq  $faq  The FAQ instance to delete.
      * @return JsonResponse JSON response confirming deletion.
      */
     public function destroy(DeleteFaqRequest $request, Faq $faq): JsonResponse

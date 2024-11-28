@@ -51,7 +51,7 @@ class StoreEcommerceProductRequest extends FormRequest
             'brand_name' => ['required', 'string', 'max:255'],
             'medication_type_name' => ['required', 'string', 'max:255'],
             'quantity' => ['required', 'integer', 'min:1'],
-            'actual_price' =>['required', 'numeric', 'min:0'],
+            'actual_price' => ['required', 'numeric', 'min:0'],
             'discount_price' => ['nullable', 'numeric', 'min:0'],
             'min_delivery_duration' => ['required', 'integer', 'min:0'],
             'max_delivery_duration' => ['required', 'integer', 'min:0'],

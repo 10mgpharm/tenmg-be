@@ -1,4 +1,4 @@
-<?
+<?php
 
 namespace App\Services;
 
@@ -7,19 +7,18 @@ use Illuminate\Database\Eloquent\Model;
 
 class LogService
 {
-    
     /**
      * Logs to database for admins
-     * 
-     * @param Model $creatable The user who is performing the action.
-     * @param Model|null $targetable The resource/model the user performed action on. 
-     * @param string $event Short event of action being carried out. 
-     * @param string $action Action being carried out. 
-     * @param string $description Description of action being carried out. 
-     * @param string $crud_type Action type in UPDATE, CREATE or DELETE 
-     * @param int|null $company_id Auth user company id 
+     *
+     * @param  Model  $creatable  The user who is performing the action.
+     * @param  Model|null  $targetable  The resource/model the user performed action on.
+     * @param  string  $event  Short event of action being carried out.
+     * @param  string  $action  Action being carried out.
+     * @param  string  $description  Description of action being carried out.
+     * @param  string  $crud_type  Action type in UPDATE, CREATE or DELETE
+     * @param  int|null  $company_id  Auth user company id
      */
-    static function log(Model $creatable, ?Model $targetable = null, string $event, string $action, string $description, string $crud_type)
+    public static function log(Model $creatable, ?Model $targetable, string $event, string $action, string $description, string $crud_type)
     {
         AuditLog::create([
             'creatable_type' => get_class($creatable),

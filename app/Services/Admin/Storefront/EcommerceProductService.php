@@ -13,8 +13,8 @@ class EcommerceProductService implements IEcommerceProductService
     /**
      * Show details of a single product.
      *
-     * @param Request $request The request object.
-     * @param EcommerceProduct $product The product to show.
+     * @param  Request  $request  The request object.
+     * @param  EcommerceProduct  $product  The product to show.
      * @return EcommerceProductResource A resource representing the product.
      */
     public function show(Request $request, EcommerceProduct $product): EcommerceProductResource
@@ -29,7 +29,7 @@ class EcommerceProductService implements IEcommerceProductService
      * The filters support both arrays and comma-separated values for multiple options.
      * Duplicates in array inputs are removed before processing.
      *
-     * @param Request $request The request object with filtering parameters.
+     * @param  Request  $request  The request object with filtering parameters.
      * @return LengthAwarePaginator Paginated list of filtered products.
      */
     public function search(Request $request): LengthAwarePaginator
@@ -45,7 +45,7 @@ class EcommerceProductService implements IEcommerceProductService
             $query->whereHas('category', function ($q) use ($categories) {
                 foreach ($categories as $category) {
                     $q->orWhere('name', 'LIKE', "%{$category}%")
-                    ->orWhere('slug', 'LIKE', "%{$category}%");
+                        ->orWhere('slug', 'LIKE', "%{$category}%");
                 }
             });
         }
@@ -58,7 +58,7 @@ class EcommerceProductService implements IEcommerceProductService
             $query->where(function ($q) use ($product_names) {
                 foreach ($product_names as $name) {
                     $q->orWhere('name', 'LIKE', "%{$name}%")
-                    ->orWhere('slug', 'LIKE', "%{$name}%");
+                        ->orWhere('slug', 'LIKE', "%{$name}%");
                 }
             });
         }

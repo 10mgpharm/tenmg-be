@@ -25,7 +25,7 @@ class EcommerceProductResource extends JsonResource
             'thumbnailUrl' => $this->thumbnailUrl,
             'expiredAt' => $this->expired_at,
             'productDetails' => $this->productDetails->only('essential', 'starting_stock', 'current_stock'),
-            'status' =>  in_array($this->status, ['ACTIVE', 'INACTIVE', 'SUSPENDED', 'ARCHIVED'], true)
+            'status' => in_array($this->status, ['ACTIVE', 'INACTIVE', 'SUSPENDED', 'ARCHIVED'], true)
             ? $this->status
             : 'DRAFTED',
             'inventory' => match (true) {

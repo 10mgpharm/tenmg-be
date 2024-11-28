@@ -20,7 +20,6 @@ class EcommerceProductController extends Controller
      * Retrieve a paginated list of products for the authenticated user's business.
      *
      * @param  \App\Http\Requests\Admin\ListEcommerceProductRequest  $request  Validated request instance.
-     * @return \Illuminate\Http\JsonResponse
      */
     public function index(ListEcommerceProductRequest $request): JsonResponse
     {
@@ -32,15 +31,11 @@ class EcommerceProductController extends Controller
         );
     }
 
-
     /**
      * Store a new product.
      *
      * This method handles the creation of a new product. It calls the product service to
      * ensure category, brand, and medication type exist and creates them if necessary.
-     *
-     * @param StoreEcommerceProductRequest $request
-     * @return JsonResponse
      */
     public function store(StoreEcommerceProductRequest $request): JsonResponse
     {
@@ -66,10 +61,6 @@ class EcommerceProductController extends Controller
      *
      * This method updates an existing product. It ensures that category, brand,
      * and medication type exist and creates them if necessary.
-     *
-     * @param UpdateEcommerceProductRequest $request
-     * @param EcommerceProduct $product
-     * @return JsonResponse
      */
     public function update(UpdateEcommerceProductRequest $request, EcommerceProduct $product): JsonResponse
     {
@@ -94,7 +85,6 @@ class EcommerceProductController extends Controller
      * Retrieve a paginated list of products for the authenticated user's business.
      *
      * @param  \App\Http\Requests\Admin\ListEcommerceProductRequest  $request  Validated request instance.
-     * @return \Illuminate\Http\JsonResponse
      */
     public function search(ListEcommerceProductRequest $request): JsonResponse
     {
@@ -109,12 +99,12 @@ class EcommerceProductController extends Controller
     /**
      * Soft delete the specified e-commerce product.
      *
-     * @param DeleteEcommerceProductRequest $request The HTTP request for deleting the product.
-     * @param EcommerceProduct $product The product instance to be deleted.
-     * 
+     * @param  DeleteEcommerceProductRequest  $request  The HTTP request for deleting the product.
+     * @param  EcommerceProduct  $product  The product instance to be deleted.
      * @return JsonResponse JSON response confirming the deletion.
      */
-    public function destroy(DeleteEcommerceProductRequest $request, EcommerceProduct $product){
+    public function destroy(DeleteEcommerceProductRequest $request, EcommerceProduct $product)
+    {
         $product->delete();
 
         return $this->returnJsonResponse(

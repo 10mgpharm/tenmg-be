@@ -54,7 +54,6 @@ class EcommerceProduct extends Model
         'expired_at' => 'date',
     ];
 
-
     /**
      * Get the category associated with the product.
      */
@@ -78,7 +77,6 @@ class EcommerceProduct extends Model
     {
         return $this->belongsTo(EcommerceMedicationType::class, 'ecommerce_medication_type_id');
     }
-
 
     /**
      * Get the thumbnail file associated with the product.
@@ -113,6 +111,7 @@ class EcommerceProduct extends Model
     {
         return $this->belongsTo(EcommercePackage::class, 'package_id');
     }
+
     /**
      * Get the product details associated with the product.
      */

@@ -11,7 +11,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        if(Schema::hasColumn('ecommerce_products', 'ecommerce_variation_id')){
+        if (Schema::hasColumn('ecommerce_products', 'ecommerce_variation_id')) {
             Schema::table('ecommerce_products', function (Blueprint $table) {
                 $table->foreignId('ecommerce_variation_id')->change()->nullable()->constrained('ecommerce_medication_variations')->nullOnDelete();
             });
@@ -21,8 +21,5 @@ return new class extends Migration
     /**
      * Reverse the migrations.
      */
-    public function down(): void
-    {
-        
-    }
+    public function down(): void {}
 };

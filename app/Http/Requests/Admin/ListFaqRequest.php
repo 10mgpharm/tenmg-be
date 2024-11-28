@@ -15,6 +15,7 @@ class ListFaqRequest extends FormRequest
 
         return $user && $user->hasRole('admin');
     }
+
     /**
      * Get the validation rules that apply to the request.
      *

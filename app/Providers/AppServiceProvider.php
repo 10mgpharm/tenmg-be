@@ -89,7 +89,7 @@ class AppServiceProvider extends ServiceProvider
             if (is_numeric($value)) {
                 return EcommerceCategory::findOrFail($value);
             }
-    
+
             // Otherwise, assume it's a slug
             return EcommerceCategory::where('slug', $value)->firstOrFail();
         });
@@ -99,7 +99,7 @@ class AppServiceProvider extends ServiceProvider
             if (is_numeric($value)) {
                 return EcommerceProduct::findOrFail($value);
             }
-    
+
             // Otherwise, assume it's a slug
             return EcommerceProduct::where('slug', $value)->firstOrFail();
         });

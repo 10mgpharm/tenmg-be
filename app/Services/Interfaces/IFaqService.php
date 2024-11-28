@@ -18,7 +18,7 @@ interface IFaqService
     /**
      * Fetch a paginated list of FAQs based on the provided filters.
      *
-     * @param ListFaqRequest $request The request containing filter parameters.
+     * @param  ListFaqRequest  $request  The request containing filter parameters.
      * @return LengthAwarePaginator Paginated FAQs list.
      */
     public function index(ListFaqRequest $request): LengthAwarePaginator;
@@ -26,9 +26,10 @@ interface IFaqService
     /**
      * Store a new FAQ with the given validated data.
      *
-     * @param array $validated Validated FAQ data.
-     * @param User $user The user creating the FAQ.
+     * @param  array  $validated  Validated FAQ data.
+     * @param  User  $user  The user creating the FAQ.
      * @return Faq The newly created FAQ instance.
+     *
      * @throws \Exception If the FAQ creation fails.
      */
     public function store(array $validated, User $user): Faq;
@@ -36,10 +37,11 @@ interface IFaqService
     /**
      * Update an existing FAQ with the given validated data.
      *
-     * @param array $validated Validated FAQ data.
-     * @param User $user The user updating the FAQ.
-     * @param Faq $faq The FAQ instance to update.
+     * @param  array  $validated  Validated FAQ data.
+     * @param  User  $user  The user updating the FAQ.
+     * @param  Faq  $faq  The FAQ instance to update.
      * @return bool True if the update was successful.
+     *
      * @throws \Exception If the FAQ update fails.
      */
     public function update(array $validated, User $user, Faq $faq): bool;
@@ -47,7 +49,7 @@ interface IFaqService
     /**
      * Search FAQs based on specific parameters.
      *
-     * @param Request $request The request containing search parameters.
+     * @param  Request  $request  The request containing search parameters.
      * @return LengthAwarePaginator Paginated search results.
      */
     public function search(Request $request): LengthAwarePaginator;

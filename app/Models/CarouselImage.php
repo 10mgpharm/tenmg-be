@@ -30,7 +30,6 @@ class CarouselImage extends Model
         'updated_by_id',
     ];
 
-
     /**
      * Get the image file associated with the product.
      */

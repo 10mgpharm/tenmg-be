@@ -18,7 +18,7 @@ class StorefrontResource extends JsonResource
             'id' => $this->id,
             'name' => $this->name,
             'slug' => $this->slug,
-            'products' =>  EcommerceProductResource::collection($this->whenLoaded('products')),
+            'products' => EcommerceProductResource::collection($this->whenLoaded('products')),
         ];
     }
 }

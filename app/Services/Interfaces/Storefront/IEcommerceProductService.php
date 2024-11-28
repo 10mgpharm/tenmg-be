@@ -15,8 +15,8 @@ interface IEcommerceProductService
      * This method returns the resource representation of a product, including its attributes
      * and any associated resources, based on the provided product instance.
      *
-     * @param Request $request The incoming HTTP request.
-     * @param EcommerceProduct $product The product to retrieve details for.
+     * @param  Request  $request  The incoming HTTP request.
+     * @param  EcommerceProduct  $product  The product to retrieve details for.
      * @return EcommerceProductResource The resource representing the product details.
      */
     public function show(Request $request, EcommerceProduct $product): EcommerceProductResource;
@@ -33,8 +33,8 @@ interface IEcommerceProductService
      * - inventory status
      * - category or branch
      * - various product attributes like medication type, variation, and package
-     * 
-     * @param Request $request The incoming HTTP request containing filter parameters.
+     *
+     * @param  Request  $request  The incoming HTTP request containing filter parameters.
      * @return LengthAwarePaginator A paginated list of filtered products.
      */
     public function search(Request $request): LengthAwarePaginator;

@@ -30,7 +30,7 @@ class EcommerceProductResource extends JsonResource
             'expiredAt' => $this->expired_at,
             'commission' => $this->commission,
             'productDetails' => $this->productDetails,
-            'status' =>  in_array($this->status, ['ACTIVE', 'INACTIVE', 'SUSPENDED', 'ARCHIVED'], true)
+            'status' => in_array($this->status, ['ACTIVE', 'INACTIVE', 'SUSPENDED', 'ARCHIVED'], true)
             ? $this->status
             : 'DRAFTED',
             'inventory' => match (true) {

@@ -27,7 +27,7 @@ return new class extends Migration
                 $table->enum('status', ['PENDING', 'IN_PROGRESS', 'FAILED', 'DONE'])->default('PENDING');
                 $table->json('evaluation_result')->nullable()->comment('store result of the evaluation from AI-model response');
 
-                $table->foreignId('created_by_id')->nullable()->constrained('business_users')->onDelete('cascade');
+                $table->foreignId('created_by_id')->nullable()->constrained('users')->onDelete('cascade');
 
                 $table->unique(['business_id', 'customer_id', 'transaction_file_id'], 'evaluation_business_customer_file_unique');
                 $table->timestamps();

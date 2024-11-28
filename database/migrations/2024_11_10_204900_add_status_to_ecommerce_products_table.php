@@ -11,7 +11,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        If(!Schema::hasColumn('ecommerce_products', 'status')){
+        if (! Schema::hasColumn('ecommerce_products', 'status')) {
             Schema::table('ecommerce_products', function (Blueprint $table) {
                 $table->enum('status', ['ACTIVE', 'INACTIVE', 'SUSPENDED', 'DRAFTED', 'ARCHIVED'])->nullable();
             });
@@ -23,7 +23,7 @@ return new class extends Migration
      */
     public function down(): void
     {
-        If(!Schema::hasColumn('ecommerce_products', 'status')){
+        if (! Schema::hasColumn('ecommerce_products', 'status')) {
             Schema::table('ecommerce_products', function (Blueprint $table) {
                 $table->dropColumn('status');
             });
