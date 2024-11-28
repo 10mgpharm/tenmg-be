@@ -31,6 +31,16 @@ class CreditScore extends Model
         return $this->belongsTo(CreditTxnHistoryEvaluation::class, 'txn_evaluation_id');
     }
 
+    public function customer()
+    {
+        return $this->belongsTo(Customer::class, 'customer_id');
+    }
+
+    public function vendor()
+    {
+        return $this->belongsTo(Business::class, 'business_id');
+    }
+
     public static function boot()
     {
         parent::boot();
