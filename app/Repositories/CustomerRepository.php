@@ -71,9 +71,9 @@ class CustomerRepository
         return $query->paginate($perPage);
     }
 
-    function getAllCustomers():array
+    function getAllCustomers($vendorId):array
     {
-        $customers = Customer::all()->toArray();
+        $customers = Customer::where('business_id', $vendorId)->get()->toArray();
         return $customers;
     }
 }
