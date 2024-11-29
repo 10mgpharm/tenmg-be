@@ -112,7 +112,7 @@ Route::prefix('v1')->group(function () {
         });
 
         // SUPPLIER specific routes
-        Route::prefix('supplier')->group(function () {
+        Route::prefix('supplier')->middleware(['roleCheck:supplier'])->group(function () {
             Route::get('dashboard', SupplierDashboardController::class);
 
             Route::prefix('settings')->name('settings.')->group(function () {
@@ -130,7 +130,8 @@ Route::prefix('v1')->group(function () {
         });
 
         // VENDOR specific routes
-        Route::prefix('vendor')->group(function () {
+
+        Route::prefix('vendor')->middleware(['roleCheck:vendor'])->group(function () {
 
             // Route::get('/', action: [ProfileController::class, 'show']);
 
@@ -297,8 +298,10 @@ Route::prefix('v1')->group(function () {
 
         });
 
+
         // ADMIN specific routes
-        Route::prefix('admin')->name('admin.')->group(function () {
+
+        Route::prefix('admin')->name('admin.')->middleware(['roleCheck:admin'])->group(function () {
             Route::prefix('settings')->name('settings.')->group(function () {
                 Route::get('invite/team-members', [InviteController::class, 'members'])->name('invite.team-members');
                 Route::apiResource('invite', InviteController::class);
@@ -326,6 +329,7 @@ Route::prefix('v1')->group(function () {
                 Route::apiResource('storefront-images', CarouselImageController::class);
             });
         });
+
 
         // STOREFRONTS specific routes
         Route::prefix('storefront')->name('storefront.')->group(function () {
