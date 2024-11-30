@@ -7,6 +7,7 @@ use App\Http\Middleware\Cors;
 use App\Http\Middleware\ForceJsonResponse;
 use App\Http\Middleware\HandleAuthProvider;
 use App\Http\Middleware\IsAdmin;
+use App\Http\Middleware\RoleCheckMiddleware;
 use Illuminate\Auth\AuthenticationException;
 use Illuminate\Database\QueryException;
 use Illuminate\Foundation\Application;
@@ -44,6 +45,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'camel.case' => CamelCaseMiddleware::class,
             'admin' => IsAdmin::class,
             'auth.provider' => HandleAuthProvider::class,
+            'roleCheck' => RoleCheckMiddleware::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {
