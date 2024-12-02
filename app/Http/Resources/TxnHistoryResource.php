@@ -23,7 +23,7 @@ class TxnHistoryResource extends JsonResource
             'fileFormat'=>$this->file_format,
             'source'=>$this->source,
             'status'=>$this->status,
-            'evaluationResult'=>$this->evaluation_result,
+            'evaluationResult'=>json_decode($this->evaluation_result),
             'createdById'=>$this->created_by_id,
             'createdAt'=>$this->updated_at,
             'updatedAt'=>$this->updated_at,
