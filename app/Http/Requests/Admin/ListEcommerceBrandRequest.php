@@ -27,4 +27,16 @@ class ListEcommerceBrandRequest extends FormRequest
             //
         ];
     }
+
+    /**
+     * Custom response for failed authorization.
+     *
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function failedAuthorization()
+    {
+        abort(response()->json([
+            'message' => 'You are not authorized to list these resources.',
+        ], 403));
+    }
 }

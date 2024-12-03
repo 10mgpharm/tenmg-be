@@ -8,9 +8,9 @@ use App\Http\Controllers\API\Account\TwoFactorAuthenticationController;
 use App\Http\Controllers\API\Admin\AuditLogController;
 use App\Http\Controllers\API\Admin\BusinessLicenseController;
 use App\Http\Controllers\API\Admin\CarouselImageController;
-use App\Http\Controllers\API\Admin\EcommerceBrandController;
-use App\Http\Controllers\API\Admin\EcommerceCategoryController;
-use App\Http\Controllers\API\Admin\EcommerceProductController;
+use App\Http\Controllers\API\Admin\EcommerceBrandController as AdminEcommerceBrandController;
+use App\Http\Controllers\API\Admin\EcommerceCategoryController as AdminEcommerceCategoryController;
+use App\Http\Controllers\API\Admin\EcommerceProductController as AdminEcommerceProductController;
 use App\Http\Controllers\API\Admin\FaqController;
 use App\Http\Controllers\API\Admin\MedicationTypeController as AdminMedicationTypeController;
 use App\Http\Controllers\API\Admin\UsersController;
@@ -29,6 +29,10 @@ use App\Http\Controllers\API\Storefront\CategoryController;
 use App\Http\Controllers\API\Storefront\FaqController as StorefrontFaqController;
 use App\Http\Controllers\API\Storefront\ProductController;
 use App\Http\Controllers\API\Storefront\StorefrontController;
+use App\Http\Controllers\API\Supplier\EcommerceBrandController as SupplierEcommerceBrandController;
+use App\Http\Controllers\API\Supplier\EcommerceCategoryController as SupplierEcommerceCategoryController;
+use App\Http\Controllers\API\Supplier\EcommerceProductController as SupplierEcommerceProductController;
+use App\Http\Controllers\API\Supplier\MedicationTypeController as SupplierMedicationTypeController;
 use App\Http\Controllers\API\Webhooks\PaystackWebhookController;
 use App\Http\Controllers\BusinessSettingController;
 use App\Http\Controllers\InviteController;
@@ -125,8 +129,14 @@ Route::prefix('v1')->group(function () {
                 Route::match(['post', 'patch'], 'license', [BusinessSettingController::class, 'license']);
             });
 
-            Route::get('products/search', [EcommerceProductController::class, 'search']);
-            Route::apiResource('products', EcommerceProductController::class);
+            Route::get('products/search', [SupplierEcommerceProductController::class, 'search']);
+            Route::apiResource('products', SupplierEcommerceProductController::class);
+
+            Route::apiResource('medication-types', SupplierMedicationTypeController::class);
+            Route::apiResource('categories', SupplierEcommerceCategoryController::class);
+            Route::apiResource('brands', SupplierEcommerceBrandController::class);
+
+
         });
 
         // VENDOR specific routes
@@ -308,12 +318,12 @@ Route::prefix('v1')->group(function () {
 
                 Route::apiResource('medication-types', AdminMedicationTypeController::class);
                 Route::apiResource('notification', NotificationController::class);
-                Route::apiResource('categories', EcommerceCategoryController::class);
+                Route::apiResource('categories', AdminEcommerceCategoryController::class);
 
-                Route::get('products/search', [EcommerceProductController::class, 'search']);
-                Route::apiResource('products', EcommerceProductController::class);
+                Route::get('products/search', [AdminEcommerceProductController::class, 'search']);
+                Route::apiResource('products', AdminEcommerceProductController::class);
 
-                Route::apiResource('brands', EcommerceBrandController::class);
+                Route::apiResource('brands', AdminEcommerceBrandController::class);
                 Route::apiResource('faqs', FaqController::class);
                 Route::get('audit-logs', [AuditLogController::class, 'index']);
                 Route::get('audit-logs/search', [AuditLogController::class, 'search']);

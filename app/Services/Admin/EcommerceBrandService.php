@@ -71,4 +71,23 @@ class EcommerceBrandService implements IEcommerceBrandService
             throw new Exception('Failed to update brand: ' . $e->getMessage());
         }
     }
+
+    /**
+     * Delete an existing ecommerce brand.
+     *
+     * Prevents deletion if the brand has associated products.
+     *
+     * @param EcommerceBrand $brand The brand to be deleted.
+     * @return bool Returns true if the brand was deleted, or false if it cannot be deleted due to associated products.
+     */
+    public function delete(EcommerceBrand $brand): bool
+    {
+        // Check if the brand has associated products
+        if ($brand->products()->exists()) {
+            return false; // Prevent deletion
+        }
+
+        // Proceed with deletion
+        return $brand->delete();
+    }
 }
