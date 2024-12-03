@@ -7,9 +7,50 @@ use App\Models\Customer;
 use Illuminate\Support\Collection;
 use Maatwebsite\Excel\Concerns\ToModel;
 use Maatwebsite\Excel\Concerns\WithHeadingRow;
+use Maatwebsite\Excel\HeadingRowImport;
+use Illuminate\Validation\ValidationException;
 
 class CustomersImport implements ToModel, WithHeadingRow
 {
+
+    /**
+     * Define the required headers.
+     *
+     * @var array
+     */
+    protected $requiredHeaders = ['name', 'email', 'phone', 'reference'];
+
+    /**
+     * Validate the headers before import.
+     *
+     * @param  string  $filePath
+     * @throws \Illuminate\Validation\ValidationException
+     */
+    public function validateHeaders($filePath)
+    {
+        $headings = (new HeadingRowImport)->toArray($filePath);
+        $fileHeaders = array_map('strtolower', $headings[0][0]);
+
+        $missingHeaders = array_diff($this->requiredHeaders, $fileHeaders);
+
+        if (!empty($missingHeaders)) {
+            throw ValidationException::withMessages([
+                'file' => 'The uploaded Excel file is missing the following headers: ' . implode(', ', $missingHeaders),
+            ]);
+        }
+    }
+
+
+    /**
+     * Specify the heading row number.
+     *
+     * @return int
+     */
+    public function headingRow(): int
+    {
+        return 1;
+    }
+
     /**
      * @param  Collection  $collection
      */
@@ -26,7 +67,8 @@ class CustomersImport implements ToModel, WithHeadingRow
             'email' => $row['email'],
             'phone' => $row['phone'],
             'identifier' => $code,
-            'active' => $row['active'],
+            'active' => true,
+            'reference' => $row['reference']
         ]);
     }
 }

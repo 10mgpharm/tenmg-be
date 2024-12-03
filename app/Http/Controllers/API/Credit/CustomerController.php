@@ -110,7 +110,18 @@ class CustomerController extends Controller
             );
         }
 
-        Excel::import(new CustomersImport, $request->file('file'));
+        $import = new CustomersImport();
+
+        // Validate headers
+        $error = $import->validateHeaders($request->file('file'));
+
+        if($error != ""){
+            return $this->returnJsonResponse(
+                message: $error ?? "-",
+            );
+        }
+
+        Excel::import($import, $request->file('file'));
 
         return $this->returnJsonResponse(
             message: 'Customers imported successfully',

@@ -19,6 +19,7 @@ class Customer extends Model
         'email',
         'phone',
         'identifier',
+        'reference',
         'active',
     ];
 
