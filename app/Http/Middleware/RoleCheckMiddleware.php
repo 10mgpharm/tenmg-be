@@ -25,7 +25,7 @@ class RoleCheckMiddleware
             ], 401);
         }
 
-        $business = $user->businesses->first();
+        $business = $user->ownerBusinessType ?: $user->businesses->first();
 
         if (strtolower($business->type) !== strtolower($role)) {
             return response()->json([
