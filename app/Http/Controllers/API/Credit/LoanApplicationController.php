@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\API\Credit;
 
 use App\Http\Controllers\Controller;
+use App\Http\Resources\LoadApplicationResource;
 use App\Services\LoanApplicationService;
 use App\Services\OfferService;
 use Illuminate\Http\JsonResponse;
@@ -67,15 +68,15 @@ class LoanApplicationController extends Controller
         return $this->returnJsonResponse('Application deleted successfully');
     }
 
-    public function index()
+    public function index(Request $request)
     {
-        $applications = $this->loanApplicationService->getLoanApplications();
+        $applications = $this->loanApplicationService->getLoanApplications($request->all(), $request->perPage ?? 10);
 
-        return $this->returnJsonResponse(data: $applications);
+        return $this->returnJsonResponse(data: LoadApplicationResource::collection($applications)->response()->getData(true));
     }
 
     // Filter Loan Applications
-    public function filter(Request $request)
+    public function filter(Request $request):JsonResponse
     {
         $request->validate([
             'status' => 'nullable|in:pending,approved,rejected',
@@ -85,9 +86,9 @@ class LoanApplicationController extends Controller
             'businessId' => 'nullable|exists:businesses,id',
         ]);
 
-        $applications = $this->loanApplicationService->getLoanApplicationsByFilter($request->all());
+        $applications = $this->loanApplicationService->getLoanApplicationsByFilter($request->all(), $request->perPage ?? 10);
 
-        return $this->returnJsonResponse(data: $applications);
+        return $this->returnJsonResponse(data: LoadApplicationResource::collection($applications)->response()->getData(true));
     }
 
     // View Loan Application Details

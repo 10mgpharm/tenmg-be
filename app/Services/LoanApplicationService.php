@@ -105,26 +105,24 @@ class LoanApplicationService
     }
 
     // Retrive All Loan Applications
-    public function getLoanApplications(): array
+    public function getLoanApplications(array $filter, int $perPage): \Illuminate\Contracts\Pagination\LengthAwarePaginator
     {
         $business = $this->authService->getBusiness();
         if ($business->type == 'ADMIN') {
-            return $this->loanApplicationRepository->getAll();
+            return $this->loanApplicationRepository->getAll($filter, $perPage);
         }
 
-        return $this->getLoanApplicationsByFilter([
-            'businessId' => $business->id,
-        ]);
+        return $this->getLoanApplicationsByFilter($filter, $perPage);
     }
 
-    public function getLoanApplicationsByFilter(array $filter): array
+    public function getLoanApplicationsByFilter(array $filter, int $perPage): \Illuminate\Contracts\Pagination\LengthAwarePaginator
     {
         $business = $this->authService->getBusiness();
         if ($business->type != 'ADMIN') {
             $filter['businessId'] = $business->id;
         }
 
-        $applications = $this->loanApplicationRepository->filter($filter);
+        $applications = $this->loanApplicationRepository->filter($filter, $perPage);
 
         return $applications;
     }
