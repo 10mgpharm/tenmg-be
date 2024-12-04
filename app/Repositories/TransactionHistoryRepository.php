@@ -54,8 +54,50 @@ class TransactionHistoryRepository
             return $query->where('credit_txn_history_evaluations.customer_id', $filters['customerId']);
         });
 
+        $query->orderBy('credit_txn_history_evaluations.created_at', 'desc');
+
         // Prevent column conflicts by selecting specific fields
         $query->select('credit_txn_history_evaluations.*');
+
+        // Paginate results
+        return $query->paginate($perPage);
+
+    }
+
+    public function listAllCreditScore(array $filters, int $perPage = 15):\Illuminate\Contracts\Pagination\LengthAwarePaginator
+    {
+
+        $query = CreditScore::query();
+
+        // Join the credit_customers table
+        $query->join('credit_customers', 'credit_customers.id', '=', 'credit_scores.customer_id');
+
+        // Search logic
+        $query->when(isset($filters['search']), function ($query) use ($filters) {
+            $searchTerm = "%{$filters['search']}%";
+            return $query->where(function ($query) use ($searchTerm) {
+                $query->where('credit_scores.identifier', 'like', $searchTerm)
+                    ->orWhere('credit_scores.source', 'like', $searchTerm)
+                    ->orWhereHas('customer', function ($q) use ($searchTerm) {
+                        $q->where('name', 'like', $searchTerm);
+                    });
+            });
+        });
+
+        // Filter by vendor ID
+        $query->when(isset($filters['vendorId']), function ($query) use ($filters) {
+            return $query->where('credit_scores.business_id', $filters['vendorId']);
+        });
+
+        // Filter by customer ID
+        $query->when(isset($filters['customerId']), function ($query) use ($filters) {
+            return $query->where('credit_scores.customer_id', $filters['customerId']);
+        });
+
+        $query->orderBy('credit_scores.created_at', 'desc');
+
+        // Prevent column conflicts by selecting specific fields
+        $query->select('credit_scores.*');
 
         // Paginate results
         return $query->paginate($perPage);

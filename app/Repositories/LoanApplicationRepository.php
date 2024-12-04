@@ -52,7 +52,7 @@ class LoanApplicationRepository
 
     public function getAll(): array
     {
-        return LoanApplication::all()->toArray();
+        return LoanApplication::orderBy("created_at", 'desc')->toArray();
     }
 
     public function deleteById(int $id)
@@ -83,6 +83,8 @@ class LoanApplicationRepository
         if (isset($criteria['businessId'])) {
             $query->where('business_id', $criteria['businessId']);
         }
+
+        $query->orderBy('created_at', 'desc');
 
         return $query->get()->toArray();
     }

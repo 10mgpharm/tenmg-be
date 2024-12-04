@@ -14,6 +14,8 @@ interface ITxnHistoryService
 
     public function listAllTransactions(array $filters, int $perPage):\Illuminate\Contracts\Pagination\LengthAwarePaginator;
 
+    public function listAllCreditScore(array $filters, int $perPage):\Illuminate\Contracts\Pagination\LengthAwarePaginator;
+
     public function uploadTransactionHistory(File|UploadedFile|string $file, int $customerId): array;
 
     public function viewTransactionHistory(FileUpload $fileUpload):array;

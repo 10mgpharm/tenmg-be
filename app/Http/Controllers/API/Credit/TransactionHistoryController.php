@@ -35,6 +35,15 @@ class TransactionHistoryController extends Controller
         );
     }
 
+    public function listAllCreditScore(Request $request):JsonResponse
+    {
+        $creditScoresList = $this->txnHistoryService->listAllCreditScore($request->all(), $request->perPage ?? 10);
+
+        return $this->returnJsonResponse(
+            data: CreditScoreResource::collection($creditScoresList)->response()->getData(true)
+        );
+    }
+
     public function uploadTransactionHistory(Request $request): JsonResponse
     {
         $request->validate([
