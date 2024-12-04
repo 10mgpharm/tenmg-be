@@ -50,9 +50,33 @@ class LoanApplicationRepository
         return LoanApplication::whereIdentifier($reference)->with(['customer.lastEvaluationHistory.creditScore', 'business.logo'])->first();
     }
 
-    public function getAll(): array
+    public function getAll(array $criteria, int $perPage = 15):\Illuminate\Contracts\Pagination\LengthAwarePaginator
     {
-        return LoanApplication::orderBy("created_at", 'desc')->toArray();
+        $query = LoanApplication::query();
+
+        if (isset($criteria['search'])) {
+            $query->whereHas('customer', function ($q) use ($criteria) {
+                $q->where('email', 'like', '%'.$criteria['search'].'%');
+            });
+        }
+
+        if (isset($criteria['search'])) {
+            $query->where('identifier', 'like', '%'.$criteria['search'].'%');
+        }
+
+        if (isset($criteria['dateFrom']) && isset($criteria['dateTo'])) {
+            $query->whereBetween('created_at', [$criteria['dateFrom'], $criteria['dateTo']]);
+        }
+        if (isset($criteria['status'])) {
+            $query->where('status', $criteria['status']);
+        }
+        // if (isset($criteria['businessId'])) {
+        //     $query->where('business_id', $criteria['businessId']);
+        // }
+
+        $query->orderBy('created_at', 'desc');
+
+        return $query->paginate($perPage);
     }
 
     public function deleteById(int $id)
@@ -60,7 +84,7 @@ class LoanApplicationRepository
         return LoanApplication::destroy($id);
     }
 
-    public function filter(array $criteria): array
+    public function filter(array $criteria, int $perPage = 15):\Illuminate\Contracts\Pagination\LengthAwarePaginator
     {
         $query = LoanApplication::query();
 
@@ -86,7 +110,7 @@ class LoanApplicationRepository
 
         $query->orderBy('created_at', 'desc');
 
-        return $query->get()->toArray();
+        return $query->paginate($perPage);
     }
 
     public function review(int $id, string $status): LoanApplication
