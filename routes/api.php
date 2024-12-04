@@ -206,6 +206,8 @@ Route::prefix('v1')->group(function () {
 
                 Route::get('creditscore-breakdown/{txnEvaluationId}', [TransactionHistoryController::class, 'creditScoreBreakDown'])->name('vendor.txn_history.creditScoreBreakDown');
 
+                Route::get('get-all-creditscore', [TransactionHistoryController::class, 'listAllCreditScore'])->name('vendor.txn_history.listAllCreditScore');
+
                 Route::get('/{customerId}', [TransactionHistoryController::class, 'index'])->name('vendor.txn_history');
 
             });
