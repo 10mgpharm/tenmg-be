@@ -4,7 +4,7 @@ namespace App\Http\Requests\Admin;
 
 use Illuminate\Foundation\Http\FormRequest;
 
-class ListEcommerceProductRequest extends FormRequest
+class DeleteEcommerceCategoryRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -13,7 +13,7 @@ class ListEcommerceProductRequest extends FormRequest
     {
         $user = $this->user();
 
-        return $user && ($user->hasRole('admin'));
+        return $user && $user->hasRole('admin');
     }
 
     /**
@@ -36,7 +36,7 @@ class ListEcommerceProductRequest extends FormRequest
     public function failedAuthorization()
     {
         abort(response()->json([
-            'message' => 'You are not authorized to list these resources.',
+            'message' => 'You are not authorized to delete this resource.',
         ], 403));
     }
 }

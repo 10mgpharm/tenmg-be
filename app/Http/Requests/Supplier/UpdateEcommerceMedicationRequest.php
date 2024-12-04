@@ -1,14 +1,14 @@
 <?php
 
-namespace App\Http\Requests\Admin;
+namespace App\Http\Requests\Supplier;
 
 use App\Enums\StatusEnum;
-use App\Models\EcommerceBrand;
+use App\Models\EcommerceMedicationType;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\Rules\Enum;
 
-class UpdateEcommerceBrandRequest extends FormRequest
+class UpdateEcommerceMedicationRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -16,8 +16,14 @@ class UpdateEcommerceBrandRequest extends FormRequest
     public function authorize(): bool
     {
         $user = $this->user();
+        $medication_type = $this->route('medication_type');
 
-        return $user && $user->hasRole('admin');
+        // Suppliers can only update products created by their business
+        if ($user && $user->hasRole('supplier') && $medication_type && $medication_type->business_id === $user->ownerBusinessType?->id) {
+            return true;
+        }
+
+        return false;
     }
 
     /**
@@ -28,14 +34,14 @@ class UpdateEcommerceBrandRequest extends FormRequest
     public function rules(): array
     {
         // Retrieve the current medication type from the route
-        $brand = $this->route('brand');
+        $medication_type = $this->route('medication_type');
 
         return [
             'name' => [
                 'required',
                 'string',
                 'max:255',
-                Rule::unique(EcommerceBrand::class)->ignore($brand->id)
+                Rule::unique(EcommerceMedicationType::class)->ignore($medication_type->id)
             ],
             'status' => [
                 'sometimes',

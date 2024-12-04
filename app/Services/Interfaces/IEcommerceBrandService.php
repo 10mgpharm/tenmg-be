@@ -35,4 +35,14 @@ interface IEcommerceBrandService
      * @throws \Exception Throws an exception if the transaction or update process fails.
      */
     public function update(array $validated, User $user, EcommerceBrand $brand): ?bool;
+
+    /**
+     * Delete an existing ecommerce brand.
+     *
+     * Prevents deletion if the brand has associated products.
+     *
+     * @param EcommerceBrand $brand The brand to be deleted.
+     * @return bool Returns true if the brand was deleted, or false if it cannot be deleted due to associated products.
+     */
+    public function delete(EcommerceBrand $brand): bool;
 }

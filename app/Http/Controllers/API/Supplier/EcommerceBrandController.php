@@ -1,16 +1,17 @@
 <?php
 
-namespace App\Http\Controllers\API\Admin;
+namespace App\Http\Controllers\API\Supplier;
 
 use App\Http\Controllers\Controller;
-use App\Http\Requests\Admin\DeleteEcommerceBrandRequest;
-use App\Http\Requests\Admin\ListEcommerceBrandRequest;
-use App\Http\Requests\Admin\StoreEcommerceBrandRequest;
-use App\Http\Requests\Admin\UpdateEcommerceBrandRequest;
+use App\Http\Requests\Supplier\DeleteEcommerceBrandRequest;
+use App\Http\Requests\Supplier\ListEcommerceBrandRequest;
+use App\Http\Requests\Supplier\StoreEcommerceBrandRequest;
+use App\Http\Requests\Supplier\UpdateEcommerceBrandRequest;
 use App\Http\Resources\EcommerceBrandResource;
 use App\Models\EcommerceBrand;
 use App\Services\Admin\EcommerceBrandService;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 
 class EcommerceBrandController extends Controller

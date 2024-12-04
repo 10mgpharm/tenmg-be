@@ -7,6 +7,7 @@ use App\Models\EcommerceBrand;
 use App\Models\EcommerceCategory;
 use App\Models\EcommerceMedicationType;
 use App\Models\EcommerceProduct;
+use App\Models\EcommerceProductDetail;
 use App\Models\User;
 use App\Services\AttachmentService;
 use App\Services\Interfaces\IEcommerceProductService;
@@ -176,8 +177,6 @@ class EcommerceProductService implements IEcommerceProductService
 
                 $updateProduct = $product->update([
                     ...$validated,
-                    'business_id' => $user->ownerBusinessType?->id ?? $user->businesses()
-                        ->firstWhere('user_id', $user->id)?->id,
                     'ecommerce_category_id' => $category->id,
                     'ecommerce_brand_id' => $brand->id,
                     'ecommerce_medication_type_id' => $medicationType->id,
@@ -185,7 +184,7 @@ class EcommerceProductService implements IEcommerceProductService
                     'slug' => Str::slug($validated['name'] ?? $product->name),
                 ]);
 
-                $updateProductDetails = $product->productDetails()->update($validated);
+                $updateProductDetails = $product->productDetails?->update($validated);
 
                 return $updateProduct || $updateProductDetails;
 

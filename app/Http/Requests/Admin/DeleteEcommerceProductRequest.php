@@ -18,11 +18,6 @@ class DeleteEcommerceProductRequest extends FormRequest
             return true;
         }
 
-        // Suppliers can only update products created by their business
-        if ($user->hasRole('supplier') && $product->business_id === $user->ownerBusinessType->id) {
-            return true;
-        }
-
         return false;
     }
 

@@ -75,4 +75,23 @@ class EcommerceCategoryService implements IEcommerceCategoryService
             throw new Exception('Failed to update category: ' . $e->getMessage());
         }
     }
+
+    /**
+     * Delete an existing ecommerce category.
+     *
+     * Prevents deletion if the category has associated products.
+     *
+     * @param EcommerceCategory $category The category to be deleted.
+     * @return bool Returns true if the category was deleted, or false if it cannot be deleted due to associated products.
+     */
+    public function delete(EcommerceCategory $category): bool
+    {
+        // Check if the brand has associated products
+        if ($category->products()->exists()) {
+            return false; // Prevent deletion
+        }
+
+        // Proceed with deletion
+        return $category->delete();
+    }
 }

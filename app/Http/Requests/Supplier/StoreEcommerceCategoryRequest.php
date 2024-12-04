@@ -1,14 +1,14 @@
 <?php
 
-namespace App\Http\Requests\Admin;
+namespace App\Http\Requests\Supplier;
 
 use App\Enums\StatusEnum;
-use App\Models\EcommerceBrand;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
+use App\Models\EcommerceCategory;
 use Illuminate\Validation\Rules\Enum;
 
-class UpdateEcommerceBrandRequest extends FormRequest
+class StoreEcommerceCategoryRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -17,7 +17,7 @@ class UpdateEcommerceBrandRequest extends FormRequest
     {
         $user = $this->user();
 
-        return $user && $user->hasRole('admin');
+        return $user && $user->hasRole('supplier');
     }
 
     /**
@@ -27,16 +27,8 @@ class UpdateEcommerceBrandRequest extends FormRequest
      */
     public function rules(): array
     {
-        // Retrieve the current medication type from the route
-        $brand = $this->route('brand');
-
         return [
-            'name' => [
-                'required',
-                'string',
-                'max:255',
-                Rule::unique(EcommerceBrand::class)->ignore($brand->id)
-            ],
+            'name' => ['required', 'string', 'max:255', Rule::unique(EcommerceCategory::class)],
             'status' => [
                 'sometimes',
                 'string',
@@ -50,7 +42,7 @@ class UpdateEcommerceBrandRequest extends FormRequest
             'active' => [
                 'sometimes',
                 'boolean',
-            ],
+            ]
         ];
     }
 
@@ -62,7 +54,7 @@ class UpdateEcommerceBrandRequest extends FormRequest
     public function failedAuthorization()
     {
         abort(response()->json([
-            'message' => 'You are not authorized to update this resource.',
+            'message' => 'You are not authorized to create this resource.',
         ], 403));
     }
 }

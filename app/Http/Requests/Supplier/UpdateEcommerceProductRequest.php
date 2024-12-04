@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Requests\Admin;
+namespace App\Http\Requests\Supplier;
 
 use App\Enums\StatusEnum;
 use App\Models\EcommerceProduct;
@@ -18,7 +18,8 @@ class UpdateEcommerceProductRequest extends FormRequest
         $user = $this->user();
         $product = $this->route('product');
 
-        if ($user->hasRole('admin')) {
+        // Suppliers can only update products created by their business
+        if ($user->hasRole('supplier') && $product->business_id === $user->ownerBusinessType->id) {
             return true;
         }
 
@@ -39,7 +40,9 @@ class UpdateEcommerceProductRequest extends FormRequest
             'min_delivery_duration' => $this->input('minDeliveryDuration'),
             'max_delivery_duration' => $this->input('maxDeliveryDuration'),
             'expired_at' => $this->input('expiredAt'),
-            'status' => $this->input('status') ?? StatusEnum::ACTIVE->value,
+            'status' =>in_array($this->input('status'), [StatusEnum::DRAFT->value, StatusEnum::INACTIVE->value, StatusEnum::PENDING->value])
+                    ? $this->input('status')
+                    : StatusEnum::PENDING->value,
             'status_comment' => $this->input('comment'),
 
         ]);

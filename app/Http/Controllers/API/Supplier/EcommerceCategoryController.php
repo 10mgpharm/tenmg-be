@@ -1,16 +1,17 @@
 <?php
 
-namespace App\Http\Controllers\API\Admin;
+namespace App\Http\Controllers\API\Supplier;
 
 use App\Http\Controllers\Controller;
-use App\Http\Requests\Admin\DeleteEcommerceCategoryRequest;
-use App\Http\Requests\Admin\ListEcommerceCategoryRequest;
-use App\Http\Requests\Admin\StoreEcommerceCategoryRequest;
-use App\Http\Requests\Admin\UpdateEcommerceCategoryRequest;
+use App\Http\Requests\Supplier\DeleteEcommerceCategoryRequest;
+use App\Http\Requests\Supplier\ListEcommerceCategoryRequest;
+use App\Http\Requests\Supplier\StoreEcommerceCategoryRequest;
+use App\Http\Requests\Supplier\UpdateEcommerceCategoryRequest;
 use App\Http\Resources\EcommerceCategoryResource;
 use App\Models\EcommerceCategory;
 use App\Services\Admin\EcommerceCategoryService;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 
 class EcommerceCategoryController extends Controller
