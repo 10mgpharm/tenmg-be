@@ -127,7 +127,7 @@ class LoanApplicationService
         return $applications;
     }
 
-    // Review Loan Application (approve/reject)
+    // Review Loan Application (approve/reject) //
     public function reviewApplication(int $applicationId, string $status, $offerAmount = null)
     {
         $application = $this->loanApplicationRepository->findById($applicationId);
