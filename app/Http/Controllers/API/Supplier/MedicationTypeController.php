@@ -1,16 +1,17 @@
 <?php
 
-namespace App\Http\Controllers\API\Admin;
+namespace App\Http\Controllers\API\Supplier;
 
 use App\Http\Controllers\Controller;
-use App\Http\Requests\Admin\DeleteEcommerceMedicationRequest;
-use App\Http\Requests\Admin\ListMedicationTypeRequest;
-use App\Http\Requests\Admin\StoreEcommerceMedicationRequest;
-use App\Http\Requests\Admin\UpdateEcommerceMedicationRequest;
+use App\Http\Requests\Supplier\DeleteEcommerceMedicationRequest;
+use App\Http\Requests\Supplier\ListMedicationTypeRequest;
+use App\Http\Requests\Supplier\StoreEcommerceMedicationRequest;
+use App\Http\Requests\Supplier\UpdateEcommerceMedicationRequest;
 use App\Http\Resources\EcommerceMedicationTypeResource;
 use App\Models\EcommerceMedicationType;
 use App\Services\Admin\EcommerceMedicationTypeService;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 
 class MedicationTypeController extends Controller
@@ -42,7 +43,7 @@ class MedicationTypeController extends Controller
     /**
      * Store a new medication type for the authenticated user's business.
      *
-     * @param  \App\Http\Requests\Admin\StoreEcommerceMedicationRequest  $request  Validated request instance.
+     * @param  \App\Http\Requests\Supplier\StoreEcommerceMedicationRequest  $request  Validated request instance.
      * @return \Illuminate\Http\JsonResponse
      */
     public function store(StoreEcommerceMedicationRequest $request): JsonResponse

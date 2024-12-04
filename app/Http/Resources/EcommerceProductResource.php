@@ -32,7 +32,7 @@ class EcommerceProductResource extends JsonResource
             'productDetails' => $this->productDetails,
             'status' => in_array($this->status, ['ACTIVE', 'INACTIVE', 'SUSPENDED', 'ARCHIVED'], true)
             ? $this->status
-            : 'DRAFTED',
+            : 'PENDING',
             'inventory' => match (true) {
                 $this->current_stock === null || $this->current_stock === 0 => 'OUT OF STOCK',
                 $this->starting_stock === null || $this->current_stock <= $this->starting_stock / 2 => 'LOW STOCK',

@@ -1,10 +1,10 @@
 <?php
 
-namespace App\Http\Requests\Admin;
+namespace App\Http\Requests\Supplier;
 
 use Illuminate\Foundation\Http\FormRequest;
 
-class ListEcommerceProductRequest extends FormRequest
+class ListMedicationTypeRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -13,7 +13,7 @@ class ListEcommerceProductRequest extends FormRequest
     {
         $user = $this->user();
 
-        return $user && ($user->hasRole('admin'));
+        return $user && $user->hasRole('supplier');
     }
 
     /**

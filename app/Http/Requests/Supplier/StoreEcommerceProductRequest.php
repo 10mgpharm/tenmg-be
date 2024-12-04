@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Requests\Admin;
+namespace App\Http\Requests\Supplier;
 
 use App\Models\EcommerceProduct;
 use Illuminate\Foundation\Http\FormRequest;
@@ -15,7 +15,7 @@ class StoreEcommerceProductRequest extends FormRequest
     {
         $user = $this->user();
 
-        return $user && ($user->hasRole('admin'));
+        return $user && ($user->hasRole('supplier'));
     }
 
     /**
@@ -33,7 +33,7 @@ class StoreEcommerceProductRequest extends FormRequest
             'max_delivery_duration' => $this->input('maxDeliveryDuration'),
             'expired_at' => $this->input('expiredAt'),
             'thumbnailFile' => $this->file('thumbnailFile'),
-            'status' => $this->status ?? 'ACTIVE',
+            'status' => 'PENDING',
             // 'ecommerce_variation' => $this->input('ecommerceVariation'),
         ]);
     }
@@ -62,7 +62,7 @@ class StoreEcommerceProductRequest extends FormRequest
                 'mimes:jpg,jpeg,png,gif',
                 'max:10240',
             ],
-            'status' => ['nullable', Rule::in(['ACTIVE', 'DRAFTED'])],
+            'status' => ['nullable', Rule::in(['ACTIVE', 'PENDING'])],
             'productEssential' => ['nullable', 'string', 'min:3'],
             'startingStock' => ['nullable', 'numeric', 'min:0'],
             'currentStock' => ['nullable', 'numeric', 'min:0'],

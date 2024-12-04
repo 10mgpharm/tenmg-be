@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Requests\Admin;
+namespace App\Http\Requests\Supplier;
 
 use App\Enums\StatusEnum;
 use App\Models\EcommerceBrand;
@@ -16,8 +16,14 @@ class UpdateEcommerceBrandRequest extends FormRequest
     public function authorize(): bool
     {
         $user = $this->user();
+        $brand = $this->route('brand');
 
-        return $user && $user->hasRole('admin');
+        // Suppliers can only delete brands created by their business
+        if ($user->hasRole('supplier') && $brand->business_id === ($user->ownerBusinessType->id ?: $user->businesses()->first()->id)) {
+            return true;
+        }
+
+        return false;
     }
 
     /**

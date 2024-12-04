@@ -66,4 +66,14 @@ class EcommerceMedicationType extends Model
     {
         return $this->belongsTo(User::class, 'updated_by_id');
     }
+
+    /**
+     * Get the products associated with the medication type.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
+    public function products()
+    {
+        return $this->hasMany(EcommerceProduct::class)->latest();
+    }
 }

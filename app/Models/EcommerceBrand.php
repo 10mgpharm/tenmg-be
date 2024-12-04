@@ -67,4 +67,14 @@ class EcommerceBrand extends Model
     {
         return $this->belongsTo(User::class, 'updated_by_id');
     }
+
+    /**
+     * Get the products associated with the brand.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
+    public function products()
+    {
+        return $this->hasMany(EcommerceProduct::class)->latest();
+    }
 }

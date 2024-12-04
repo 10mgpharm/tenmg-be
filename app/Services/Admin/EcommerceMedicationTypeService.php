@@ -65,4 +65,23 @@ class EcommerceMedicationTypeService implements IEcommerceMedicationTypeService
             throw new Exception('Failed to update the medication type: ' . $e->getMessage());
         }
     }
+
+    /**
+     * Delete an existing ecommerce medicationType.
+     *
+     * Prevents deletion if the medicationType has associated products.
+     *
+     * @param EcommerceMedicationType $medicationType The medicationType to be deleted.
+     * @return bool Returns true if the medicationType was deleted, or false if it cannot be deleted due to associated products.
+     */
+    public function delete(EcommerceMedicationType $medicationType): bool
+    {
+        // Check if the brand has associated products
+        if ($medicationType->products()->exists()) {
+            return false; // Prevent deletion
+        }
+
+        // Proceed with deletion
+        return $medicationType->delete();
+    }
 }
