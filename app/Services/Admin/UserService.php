@@ -29,7 +29,7 @@ class UserService implements IUserService
             // Start a database transaction
             return DB::transaction(function () use ($validated) {
 
-                $businessType = BusinessType::from(strtoupper($validated['business_type']));
+                $businessType = BusinessType::from(strtoupper($validated['business_type'] == 'pharmacy' ? 'customer_pharmacy' : $validated['business_type']));
                 $password = Str::random(15);
 
                 // create user
@@ -100,6 +100,9 @@ class UserService implements IUserService
 
             case BusinessType::VENDOR:
                 return Role::where('name', 'vendor')->first();
+
+            case BusinessType::CUSTOMER_PHARMACY:
+                return Role::where('name', 'customer')->first();
 
             default:
                 return Role::where('name', 'vendor')->first();

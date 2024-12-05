@@ -30,10 +30,10 @@ class CreateUserRequest extends FormRequest
      */
     protected function prepareForValidation(): void
     {
-        $role = Role::where('name', $this->input('businessType'))
-        ->whereIn('name', ['vendor', 'supplier', 'pharmacy'])
+        $roleName = $this->input('businessType') == 'pharmacy' ? 'customer' : $this->input('businessType');
+        $role = Role::where('name', $roleName)
+        ->whereIn('name', ['vendor', 'supplier', 'customer'])
         ->first();
-
 
         $this->merge([
             'business_type' => $this->input('businessType'),
@@ -71,7 +71,7 @@ class CreateUserRequest extends FormRequest
     public function messages()
     {
         return [
-            'email.unique' => 'This email is already associated to a business.',
+            'email.unique' => 'This business email is already associated to a business.',
             'email.required' => 'The business email field is required.',
             'email.max' => 'The business email field must not be greater than 255 characters.',
             'email.string' => 'The business email field must be a string.',
