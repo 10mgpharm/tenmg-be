@@ -20,6 +20,6 @@ class CreditTxnHistoryEvaluation extends Model
 
     public function customerRecord()
     {
-        return $this->hasOne(User::class, 'id', 'customer_id');
+        return $this->hasOne(Customer::class, 'id', 'customer_id');
     }
 }
