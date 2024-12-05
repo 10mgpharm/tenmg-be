@@ -41,7 +41,7 @@ class InviteService implements IInviteService
                 $invite = $user->invites()->create([
                     ...$validated,
                     'status' => 'INVITED',
-                    'business_id' => $user->ownerBusinessType->id,
+                    'business_id' =>  $user->ownerBusinessType?->id ?: $user->businesses()->firstWhere('user_id', $user->id)?->id,
                     'invite_token' => Str::random(32),
                     'expires_at' => now()->addHours(24),
                 ]);
@@ -68,11 +68,16 @@ class InviteService implements IInviteService
     protected function sendInviteLink(Invite $invite)
     {
         // Send invite email with embedded token
-        $invitationUrl = URL::temporarySignedRoute(
+        $signedUrl = URL::temporarySignedRoute(
             'auth.invite.view', // Define a named route for accepting the invitation
             $invite->expires_at,
             ['inviteId' => $invite->id, 'inviteToken' => $invite->invite_token] // Route parameters
         );
+
+        $frontendBaseUrl = config('app.frontend_url') . '/auth/invite';
+        $queryParams = parse_url($signedUrl, PHP_URL_QUERY);
+
+        $invitationUrl = $frontendBaseUrl . '?' . $queryParams;
 
         $data = [
             'invite' => $invite,
