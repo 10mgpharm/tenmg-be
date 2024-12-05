@@ -99,6 +99,7 @@ class CustomerService implements ICustomerService
     {
         $vendorId = $this->authService->getBusiness()?->id;
         $customerList = $this->customerRepository->getAllCustomers($vendorId);
+
         return $customerList;
     }
 
@@ -106,10 +107,6 @@ class CustomerService implements ICustomerService
     {
         $type = $this->authService->getBusiness()?->type;
 
-        if ($type == 'VENDOR') {
-            return true;
-        } else {
-            return false;
-        }
+        return (bool) ($type == 'VENDOR');
     }
 }
