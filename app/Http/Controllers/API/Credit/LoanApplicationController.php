@@ -29,15 +29,15 @@ class LoanApplicationController extends Controller
         return $this->returnJsonResponse('Loan application submitted successfully', $application, 201);
     }
 
-    // Submit Loan Application from E-commerce Site
-    public function applyFromEcommerce(Request $request)
+    // Submit Loan Application link
+    public function sendApplicationLink(Request $request)
     {
         $request->validate([
             'customerId' => 'required|exists:credit_customers,id',
         ]);
 
         // Call service to generate the application link
-        $referenceLink = $this->loanApplicationService->createEcommerceApplication([
+        $referenceLink = $this->loanApplicationService->sendApplicationLink([
             'vendorId' => $request->headers->get('x-vendor-key'),
             'vendorSecret' => $request->headers->get('x-vendor-secret'),
             'customerId' => $request->customerId,

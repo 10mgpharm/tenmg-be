@@ -2,6 +2,7 @@
 
 namespace App\Repositories;
 
+use App\Helpers\UtilityHelper;
 use App\Models\LoanApplication;
 
 class LoanApplicationRepository
@@ -10,6 +11,7 @@ class LoanApplicationRepository
     {
         return LoanApplication::create([
             'business_id' => $data['businessId'],
+            'identifier' => UtilityHelper::generateSlug('APP'),
             'customer_id' => $data['customerId'],
             'requested_amount' => $data['requestedAmount'] ?? null,
             'interest_amount' => $data['interestAmount'] ?? 0,
