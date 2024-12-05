@@ -72,6 +72,7 @@ class RuleEngineService implements IRuleEngineService
 
         // Track monthly totals
         $monthlyTotals = [];
+        // $monthSumPair = [];
 
         foreach ($transactions as $transaction) {
             $purchasePattern['totalTransactionVolume'] += $transaction['Amount'];
@@ -84,10 +85,18 @@ class RuleEngineService implements IRuleEngineService
             }
             $monthlyTotals[$monthYear] += $transaction['Amount'];
 
-            if (! in_array($monthYear, $purchasePattern['listOfTransactingMonths'])) {
-                $purchasePattern['listOfTransactingMonths'][] = $monthYear;
-            }
+            // if (! in_array($monthYear, $purchasePattern['listOfTransactingMonths'])) {
+            //     // $purchasePattern['listOfTransactingMonths'][] = $monthYear;
+            // }
         }
+
+        $listOfTransactingMonths = [];
+
+        foreach ($monthlyTotals as $key => $value) {
+            array_push($listOfTransactingMonths, ["month"=>$key, "sum"=>$value]);
+        }
+
+        $purchasePattern['listOfTransactingMonths'] = $listOfTransactingMonths;
 
         // Set transacting months
         $purchasePattern['noOfTransactingMonths'] = count($purchasePattern['listOfTransactingMonths']);
