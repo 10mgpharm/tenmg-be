@@ -15,6 +15,20 @@ class StoreCustomerRequest extends FormRequest
     }
 
     /**
+     * Prepare the data for validation.
+     */
+    protected function prepareForValidation(): void
+    {
+        $vendorBusiness = auth()->user()?->businesses()
+            ->where('type', 'VENDOR')
+            ->first();
+
+        $this->merge([
+            'vendorId' => $vendorBusiness?->id,
+        ]);
+    }
+
+    /**
      * Get the validation rules that apply to the request.
      *
      * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
@@ -22,7 +36,6 @@ class StoreCustomerRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'vendorId' => 'required|integer|exists:businesses,id',
             'name' => 'required|string|max:255',
             'email' => 'required|email|max:255|unique:credit_customers,email,NULL,id,business_id,'.$this->vendorId,
             'phone' => 'nullable|string|max:15',
