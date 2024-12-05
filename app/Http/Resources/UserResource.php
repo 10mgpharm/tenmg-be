@@ -16,6 +16,17 @@ class UserResource extends JsonResource
     {
         $ownerBusinessType = $this->ownerBusinessType;
 
+        $businessStatus = 'PENDING_VERIFICATION';
+        if ($ownerBusinessType?->license_verification_status) {
+            $businessStatus = match ($ownerBusinessType?->license_verification_status) {
+                'PENDING' => 'PENDING_APPROVAL',
+                'REJECTED' => 'REJECTED',
+                default => now()->greaterThan($ownerBusinessType?->expiry_date)
+                    ? 'LICENSE_EXPIRED'
+                    : 'VERIFIED'
+            };
+        }
+
         return [
             'id' => $this->id,
             'name' => $this->name,
@@ -32,13 +43,7 @@ class UserResource extends JsonResource
                 ->firstWhere('user_id', $this->id)?->type,
             'businessName' => $ownerBusinessType?->name ?? $this->businesses()
                 ->firstWhere('user_id', $this->id)?->name,
-            'businessStatus' => match ($ownerBusinessType?->license_verification_status) {
-                null, 'PENDING' => 'PENDING_APPROVAL',
-                'REJECTED' => 'REJECTED',
-                default => now()->greaterThan($ownerBusinessType?->expiry_date) 
-                    ? 'EXPIRED' 
-                    : 'VERIFIED'
-            },
+            'businessStatus' => $businessStatus,
             'completeProfile' => (bool) (
                 $ownerBusinessType
                 && $ownerBusinessType?->contact_person
