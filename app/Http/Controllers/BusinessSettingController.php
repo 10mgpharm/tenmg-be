@@ -9,6 +9,8 @@ use App\Http\Resources\BusinessResource;
 use App\Models\Business;
 use App\Models\User;
 use App\Services\AttachmentService;
+use Illuminate\Http\Request;
+use Illuminate\Http\Response;
 
 class BusinessSettingController extends Controller
 {
@@ -81,16 +83,54 @@ class BusinessSettingController extends Controller
         }
 
         $updated = $user->ownerBusinessType()->update($data);
-        if($updated){
+        if ($updated) {
             $user->ownerBusinessType()->update([
                 'license_verification_status' => 'PENDING',
             ]);
-            // are we to unverify the business status when the update license
         }
+
+        $ownerBusiness = $user->ownerBusinessType()->first();
+        $licenseFile = $ownerBusiness->cac ?? null;
 
         return $this->returnJsonResponse(
             message: 'Business license details successfully updated.',
-            data: (new BusinessResource($user->ownerBusinessType->refresh()))
+            data: [
+                'license_number' => $ownerBusiness?->license_number,
+                'expiry_date' => $ownerBusiness?->expiry_date,
+                'license_file' => $licenseFile,
+                'license_verification_status' => $ownerBusiness?->license_verification_status,
+            ]
+        );
+    }
+
+    /**
+     * Get license status and cac doc details associated with the authenticated user.
+     *
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function getBusinessStatus(Request $request)
+    {
+        $user = $request->user();
+        $ownerBusiness = $user->ownerBusinessType;
+
+        if (! $ownerBusiness) {
+            return $this->returnJsonResponse(
+                message: 'You do not have access to view this business resource. Only business owner is permitted',
+                data: null,
+                statusCode: Response::HTTP_UNAUTHORIZED,
+            );
+        }
+
+        $licenseFile = $ownerBusiness?->cac ?? null;
+
+        return $this->returnJsonResponse(
+            message: 'Business status successfully retrieved.',
+            data: [
+                'license_number' => $ownerBusiness?->license_number,
+                'expiry_date' => $ownerBusiness?->expiry_date,
+                'license_file' => $licenseFile,
+                'license_verification_status' => $ownerBusiness?->license_verification_status,
+            ]
         );
     }
 }

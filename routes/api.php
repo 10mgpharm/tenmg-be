@@ -127,6 +127,7 @@ Route::prefix('v1')->group(function () {
 
                 // Update business account license number, expiry date and cac doc
                 Route::match(['post', 'patch'], 'license', [BusinessSettingController::class, 'license']);
+                Route::get('license', [BusinessSettingController::class, 'getBusinessStatus']);
             });
 
             Route::get('products/search', [SupplierEcommerceProductController::class, 'search']);
@@ -136,11 +137,9 @@ Route::prefix('v1')->group(function () {
             Route::apiResource('categories', SupplierEcommerceCategoryController::class);
             Route::apiResource('brands', SupplierEcommerceBrandController::class);
 
-
         });
 
         // VENDOR specific routes
-
         Route::prefix('vendor')->middleware(['roleCheck:vendor'])->group(function () {
 
             // Route::get('/', action: [ProfileController::class, 'show']);
@@ -153,6 +152,7 @@ Route::prefix('v1')->group(function () {
 
                 // Update business account license number, expiry date and cac doc
                 Route::match(['post', 'patch'], 'license', [BusinessSettingController::class, 'license']);
+                Route::get('license', [BusinessSettingController::class, 'getBusinessStatus']);
 
                 // Invites/Team members
                 Route::get('invite/team-members', [InviteController::class, 'members'])->name('invite.team-members');
@@ -310,9 +310,7 @@ Route::prefix('v1')->group(function () {
 
         });
 
-
         // ADMIN specific routes
-
         Route::prefix('admin')->name('admin.')->middleware(['roleCheck:admin'])->group(function () {
             Route::prefix('settings')->name('settings.')->group(function () {
                 Route::get('invite/team-members', [InviteController::class, 'members'])->name('invite.team-members');
@@ -341,7 +339,6 @@ Route::prefix('v1')->group(function () {
                 Route::apiResource('storefront-images', CarouselImageController::class);
             });
         });
-
 
         // STOREFRONTS specific routes
         Route::prefix('storefront')->name('storefront.')->group(function () {
