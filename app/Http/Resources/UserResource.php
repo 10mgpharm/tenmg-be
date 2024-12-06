@@ -46,10 +46,16 @@ class UserResource extends JsonResource
             'businessName' => $ownerBusinessType?->name ?? $business?->name,
             'businessStatus' => $businessStatus,
             'completeProfile' => (bool) (
-                $ownerBusinessType
+                ($ownerBusinessType
                 && $ownerBusinessType?->contact_person
                 && $ownerBusinessType?->contact_phone
                 && $ownerBusinessType?->contact_email
+                ) || (
+                    $business
+                    && $business?->contact_person
+                    && $business?->contact_phone
+                    && $business?->contact_email
+                )
             ),
         ];
     }
