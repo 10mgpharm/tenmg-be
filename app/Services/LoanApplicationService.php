@@ -58,8 +58,8 @@ class LoanApplicationService
         return $this->loanApplicationRepository->update(id: $application->id, data: $data);
     }
 
-    // Submit Loan Application from E-commerce
-    public function createEcommerceApplication(array $data)
+    // Submit Loan Application link
+    public function sendApplicationLink(array $data)
     {
 
         $apikey = $this->apiKeyRepository->verifyApiKey(key: $data['vendorId'], secret: $data['vendorSecret']);

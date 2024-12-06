@@ -230,11 +230,11 @@ Route::prefix('v1')->group(function () {
                 // View All Loan Applications
                 Route::get('/', [LoanApplicationController::class, 'index'])->name('vendor.applications');
 
-                // Submit Loan Application from E-commerce Site
-                Route::post('/apply', [
+                // Submit Loan Application link
+                Route::post('/send-application-link', [
                     LoanApplicationController::class,
-                    'applyFromEcommerce',
-                ])->name('vendor.applications.apply')->withoutMiddleware(['auth:api', 'scope:full']);
+                    'sendApplicationLink',
+                ])->name('vendor.applications.apply');
 
                 // Retrieve Vendor Customizations
                 Route::get('/customisations', [LoanApplicationController::class, 'getCustomisations'])->name('vendor.applications.customisations');
