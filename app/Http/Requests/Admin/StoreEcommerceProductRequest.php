@@ -2,9 +2,11 @@
 
 namespace App\Http\Requests\Admin;
 
+use App\Enums\StatusEnum;
 use App\Models\EcommerceProduct;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
+use Illuminate\Validation\Rules\Enum;
 
 class StoreEcommerceProductRequest extends FormRequest
 {
@@ -24,16 +26,24 @@ class StoreEcommerceProductRequest extends FormRequest
     protected function prepareForValidation(): void
     {
         $this->merge([
+            'product_name' => $this->input('productName'),
+            'product_description' => $this->input('productDescription'),
+            'medication_type_name' => $this->input('medicationTypeName'),
             'category_name' => $this->input('categoryName'),
             'brand_name' => $this->input('brandName'),
-            'medication_type_name' => $this->input('medicationTypeName'),
+
+            'measurement_name' => $this->input('measurementName'),
+            'presentation_name' => $this->input('presentationName'),
+            'package_name' => $this->input('packageName'),
+            'strength_value' => $this->input('strengthValue'),
+
             'actual_price' => $this->input('actualPrice'),
             'discount_price' => $this->input('discountPrice'),
             'min_delivery_duration' => $this->input('minDeliveryDuration'),
             'max_delivery_duration' => $this->input('maxDeliveryDuration'),
             'expired_at' => $this->input('expiredAt'),
             'thumbnailFile' => $this->file('thumbnailFile'),
-            'status' => $this->status ?? 'ACTIVE',
+            'status' => $this->status ?? StatusEnum::ACTIVE->value,
             // 'ecommerce_variation' => $this->input('ecommerceVariation'),
         ]);
     }
@@ -46,27 +56,43 @@ class StoreEcommerceProductRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'name' => ['required', 'string', 'max:255', Rule::unique(EcommerceProduct::class)],
+            // Product Basic
+            'product_name' => ['required', 'string', 'max:255', Rule::unique(EcommerceProduct::class, 'name')],
+            'product_description' => ['required', 'string', 'max:255', ],
+            'medication_type_name' => ['required', 'string', 'max:255'],
             'category_name' => ['required', 'string', 'max:255'],
             'brand_name' => ['required', 'string', 'max:255'],
-            'medication_type_name' => ['required', 'string', 'max:255'],
-            'quantity' => ['required', 'integer', 'min:1'],
-            'actual_price' => ['required', 'numeric', 'min:0'],
-            'discount_price' => ['nullable', 'numeric', 'min:0'],
-            'min_delivery_duration' => ['required', 'integer', 'min:0'],
-            'max_delivery_duration' => ['required', 'integer', 'min:0'],
-            'expired_at' => ['required', 'date'],
             'thumbnailFile' => [
                 'required',
                 'image',
                 'mimes:jpg,jpeg,png,gif',
                 'max:10240',
             ],
-            'status' => ['nullable', Rule::in(['ACTIVE', 'DRAFTED'])],
-            'productEssential' => ['nullable', 'string', 'min:3'],
-            'startingStock' => ['nullable', 'numeric', 'min:0'],
-            'currentStock' => ['nullable', 'numeric', 'min:0'],
-            'stockStatus' => ['nullable', Rule::in(['AVAILABLE', 'UNAVAILABLE'])],
+
+            // Product Essentials
+            'measurement_name' => ['required', 'string', 'max:255'],
+            'presentation_name' => ['required', 'string', 'max:255'],
+            'package_name' => ['required', 'string', 'max:255'],
+            'strength_value' => ['required', 'string', 'max:255'],
+            'weight' => ['required', 'string', 'max:255'],
+
+            // Product Inventory
+            'quantity' => ['required', 'integer', 'min:1'],
+            'low_stock_level' => ['nullable', 'sometimes', 'integer', 'min:0'],
+            'out_stock_level' => ['nullable', 'sometimes', 'integer', 'min:0'],
+            'actual_price' => ['required', 'numeric', 'min:0'],
+            'discount_price' => ['nullable', 'numeric', 'min:0'],
+            'expired_at' => ['required', 'date'],
+
+            'status' => ['nullable', new Enum(StatusEnum::class),],
+
+            // 'min_delivery_duration' => ['required', 'integer', 'min:0'],
+            // 'max_delivery_duration' => ['required', 'integer', 'min:0'],
+            // 'productEssential' => ['nullable', 'string', 'min:3'],
+            // 'startingStock' => ['nullable', 'numeric', 'min:0'],
+            // 'currentStock' => ['nullable', 'numeric', 'min:0'],
+            // 'stockStatus' => ['nullable', Rule::in(['AVAILABLE', 'UNAVAILABLE'])],
+
             // 'ecommerce_variation' => ['required', 'string', 'max:255'],
         ];
     }

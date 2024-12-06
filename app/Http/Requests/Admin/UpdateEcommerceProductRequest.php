@@ -16,13 +16,8 @@ class UpdateEcommerceProductRequest extends FormRequest
     public function authorize(): bool
     {
         $user = $this->user();
-        $product = $this->route('product');
 
-        if ($user->hasRole('admin')) {
-            return true;
-        }
-
-        return false;
+        return $user && ($user->hasRole('admin'));
     }
 
     /**
@@ -31,15 +26,24 @@ class UpdateEcommerceProductRequest extends FormRequest
     protected function prepareForValidation(): void
     {
         $this->merge([
+            'product_name' => $this->input('productName'),
+            'product_description' => $this->input('productDescription'),
+            'medication_type_name' => $this->input('medicationTypeName'),
             'category_name' => $this->input('categoryName'),
             'brand_name' => $this->input('brandName'),
-            'medication_type_name' => $this->input('medicationTypeName'),
+
+            'measurement_name' => $this->input('measurementName'),
+            'presentation_name' => $this->input('presentationName'),
+            'package_name' => $this->input('packageName'),
+            'strength_value' => $this->input('strengthValue'),
+
             'actual_price' => $this->input('actualPrice'),
             'discount_price' => $this->input('discountPrice'),
             'min_delivery_duration' => $this->input('minDeliveryDuration'),
             'max_delivery_duration' => $this->input('maxDeliveryDuration'),
             'expired_at' => $this->input('expiredAt'),
-            'status' => $this->input('status') ?? StatusEnum::ACTIVE->value,
+            'thumbnailFile' => $this->file('thumbnailFile'),
+            'status' => $this->status ?? StatusEnum::ACTIVE->value,
             'status_comment' => $this->input('comment'),
 
         ]);
@@ -56,16 +60,13 @@ class UpdateEcommerceProductRequest extends FormRequest
         $product = $this->route('product');
 
         return [
-            'name' => ['sometimes', 'string', 'max:255', Rule::unique(EcommerceProduct::class)->ignore($product->id)],
-            'category_name' => ['sometimes', 'string', 'max:255'],
-            'brand_name' => ['sometimes', 'string', 'max:255'],
-            'medication_type_name' => ['sometimes', 'string', 'max:255'],
-            'quantity' => ['sometimes', 'integer', 'min:1'],
-            'actual_price' => ['sometimes', 'numeric', 'min:0'],
-            'discount_price' => ['sometimes', 'nullable', 'numeric', 'min:0'],
-            'min_delivery_duration' => ['sometimes', 'integer', 'min:0'],
-            'max_delivery_duration' => ['sometimes', 'integer', 'min:0'],
-            'expired_at' => ['sometimes', 'date'],
+
+            // Product Basic
+            'product_name' => ['sometimes', 'nullable', 'string', 'max:255', Rule::unique(EcommerceProduct::class, 'name')->ignore($product->id)],
+            'product_description' => ['sometimes',  'nullable', 'string', 'max:255',],
+            'medication_type_name' => ['sometimes', 'nullable', 'string', 'max:255'],
+            'category_name' => ['sometimes',  'nullable', 'string', 'max:255'],
+            'brand_name' => ['sometimes',  'nullable', 'string', 'max:255'],
             'thumbnailFile' => [
                 'sometimes',
                 'nullable',
@@ -73,12 +74,28 @@ class UpdateEcommerceProductRequest extends FormRequest
                 'mimes:jpg,jpeg,png,gif',
                 'max:10240',
             ],
-            'status' => ['sometimes', 'nullable', new Enum(StatusEnum::class)],
-            'statusComment' => ['sometimes', 'nullable', 'required_if:status,'.implode(',', [
+
+            // Product Essentials
+            'measurement_name' => ['sometimes',  'nullable', 'string', 'max:255'],
+            'presentation_name' => ['sometimes',  'nullable', 'string', 'max:255'],
+            'package_name' => ['sometimes',  'nullable', 'string', 'max:255'],
+            'strength_value' => ['sometimes',  'nullable', 'string', 'max:255'],
+            'weight' => ['sometimes',  'nullable', 'string', 'max:255'],
+
+            // Product Inventory
+            'quantity' => ['sometimes',  'nullable', 'integer', 'min:1'],
+            'low_stock_level' => ['sometimes',  'nullable', 'nullable', 'sometimes', 'integer', 'min:0'],
+            'out_stock_level' => ['sometimes', 'nullable', 'sometimes', 'integer', 'min:0'],
+            'actual_price' => ['sometimes',  'nullable', 'numeric', 'min:0'],
+            'discount_price' => ['sometimes', 'nullable', 'numeric', 'min:0'],
+            'expired_at' => ['sometimes', 'nullable', 'date'],
+
+            'status' => ['sometimes',  'nullable', new Enum(StatusEnum::class),],
+            'statusComment' => ['sometimes', 'nullable', 'required_if:status,' . implode(',', [
                 StatusEnum::REJECTED->value,
                 StatusEnum::INACTIVE->value,
                 StatusEnum::SUSPENDED->value,
-            ]), ],
+            ]),],
         ];
     }
 
