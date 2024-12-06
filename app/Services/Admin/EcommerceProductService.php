@@ -5,7 +5,11 @@ namespace App\Services\Admin;
 use App\Enums\StatusEnum;
 use App\Models\EcommerceBrand;
 use App\Models\EcommerceCategory;
+use App\Models\EcommerceMeasurement;
 use App\Models\EcommerceMedicationType;
+use App\Models\EcommerceMedicationVariation;
+use App\Models\EcommercePackage;
+use App\Models\EcommercePresentation;
 use App\Models\EcommerceProduct;
 use App\Models\EcommerceProductDetail;
 use App\Models\User;
@@ -38,15 +42,18 @@ class EcommerceProductService implements IEcommerceProductService
     {
         try {
             return DB::transaction(function () use ($validated, $user) {
+
+                $business = $user->ownerBusinessType ?? $user->businesses()
+                    ->firstWhere('user_id', $user->id);
+
                 // Ensure category exists or create it
                 $category = EcommerceCategory::firstOrCreate(
                     ['name' => $validated['category_name']],
                     [
                         'slug' => Str::slug($validated['category_name']),
-                        'business_id' => $user->ownerBusinessType?->id ?? $user->businesses()
-                            ->firstWhere('user_id', $user->id)?->id,
+                        'business_id' => $business?->id,
                         'created_by_id' => $user->id,
-                        'status' => StatusEnum::APPROVED->value,
+                        'status' => $user->hasRole('admin') ? StatusEnum::ACTIVE->value : StatusEnum::APPROVED->value,
                         'active' => true,
                     ]
                 );
@@ -56,10 +63,9 @@ class EcommerceProductService implements IEcommerceProductService
                     ['name' => $validated['brand_name']],
                     [
                         'slug' => Str::slug($validated['brand_name']),
-                        'business_id' => $user->ownerBusinessType?->id ?? $user->businesses()
-                            ->firstWhere('user_id', $user->id)?->id,
+                        'business_id' => $business?->id,
                         'created_by_id' => $user->id,
-                        'status' => StatusEnum::APPROVED->value,
+                        'status' => $user->hasRole('admin') ? StatusEnum::ACTIVE->value : StatusEnum::APPROVED->value,
                         'active' => true,
                     ]
                 );
@@ -69,23 +75,88 @@ class EcommerceProductService implements IEcommerceProductService
                     ['name' => $validated['medication_type_name']],
                     [
                         'slug' => Str::slug($validated['medication_type_name']),
-                        'business_id' => $user->ownerBusinessType?->id ?? $user->businesses()
-                            ->firstWhere('user_id', $user->id)?->id,
+                        'business_id' => $business?->id,
                         'created_by_id' => $user->id,
-                        'status' => StatusEnum::APPROVED->value,
+                        'status' => $user->hasRole('admin') ? StatusEnum::ACTIVE->value : StatusEnum::APPROVED->value,
+                        'active' => true,
+                    ]
+                );
+
+                // Ensure measurement exists or create it
+                $measurement = EcommerceMeasurement::firstOrCreate(
+                    ['name' => $validated['measurement_name']],
+                    [
+                        'business_id' => $business?->id,
+                        'created_by_id' => $user->id,
+                        'status' => $user->hasRole('admin') ? StatusEnum::ACTIVE->value : StatusEnum::APPROVED->value,
+                        'active' => true,
+                    ]
+                );
+
+                // Ensure presentation exists or create it
+                $presentation = EcommercePresentation::firstOrCreate(
+                    ['name' => $validated['presentation_name']],
+                    [
+                        'business_id' => $business?->id,
+                        'created_by_id' => $user->id,
+                        'status' => $user->hasRole('admin') ? StatusEnum::ACTIVE->value : StatusEnum::APPROVED->value,
+                        'active' => true,
+                    ]
+                );
+
+                // Ensure package exists or create it
+                $package = EcommercePackage::firstOrCreate(
+                    ['name' => $validated['package_name']],
+                    [
+                        'business_id' => $business?->id,
+                        'created_by_id' => $user->id,
+                        'status' => $user->hasRole('admin') ? StatusEnum::ACTIVE->value : StatusEnum::APPROVED->value,
+                        'active' => true,
+                    ]
+                );
+
+                // Ensure variation exists or create it
+                $variation = EcommerceMedicationVariation::firstOrCreate(
+                    [
+                        'weight' => $validated['weight'],
+                        'strength_value' => $validated['strength_value'],
+                        'strength' => $validated['strength_value'],
+                        'ecommerce_presentation_id' => $presentation->id,
+                        'ecommerce_package_id' => $package->id,
+                        'ecommerce_medication_type_id' => $medicationType->id,
+                    ],
+                    [
+                        'business_id' => $business?->id,
+                        'created_by_id' => $user->id,
+                        'status' => $user->hasRole('admin') ? StatusEnum::ACTIVE->value : StatusEnum::APPROVED->value,
                         'active' => true,
                     ]
                 );
 
                 $product = $user->products()->create([
-                    ...$validated,
-                    'business_id' => $user->ownerBusinessType?->id ?? $user->businesses()
-                        ->firstWhere('user_id', $user->id)?->id,
+                    'business_id' => $business?->id,
+
                     'ecommerce_category_id' => $category->id,
                     'ecommerce_brand_id' => $brand->id,
                     'ecommerce_medication_type_id' => $medicationType->id,
+                    'ecommerce_package_id' => $package->id,
+                    'ecommerce_variation_id' => $variation->id,
+                    'ecommerce_presentation_id' => $presentation->id,
+                    'ecommerce_measurement_id' => $measurement->id,
+
                     'created_by_id' => $user->id,
-                    'slug' => Str::slug($validated['name']),
+
+                    'quantity' => $validated['quantity'],
+                    'actual_price' => $validated['actual_price'],
+                    'discount_price' => $validated['discount_price'],
+
+                    'name' => $validated['product_name'],
+                    'description' => $validated['product_description'],
+                    'slug' => Str::slug($validated['product_name']),
+
+                    'status' => $user->hasRole('admin') ? StatusEnum::ACTIVE->value : StatusEnum::APPROVED->value,
+                    'active' => true,
+
                 ]);
 
                 $product->productDetails()->create($validated);
@@ -104,7 +175,7 @@ class EcommerceProductService implements IEcommerceProductService
                 return $product;
             });
         } catch (Exception $e) {
-            throw new Exception('Failed to create product: '.$e->getMessage());
+            throw new Exception('Failed to create product: ' . $e->getMessage());
         }
     }
 
@@ -125,44 +196,131 @@ class EcommerceProductService implements IEcommerceProductService
     {
         try {
             return DB::transaction(function () use ($validated, $user, $product) {
+
+                // Filter out empty/null values.
+                $validated = array_filter($validated);
+
+                // Extract business information
+                $business = $user->ownerBusinessType
+                    ?? $user->businesses()->firstWhere('user_id', $user->id);
+
                 // Ensure category exists or create it
-                $category = EcommerceCategory::firstOrCreate(
-                    ['name' => $validated['category_name']],
-                    [
-                        'slug' => Str::slug($validated['category_name']),
-                        'business_id' => $user->ownerBusinessType?->id ?? $user->businesses()
-                            ->firstWhere('user_id', $user->id)?->id,
-                        'created_by_id' => $user->id,
-                        'status' => StatusEnum::APPROVED->value,
-                        'active' => true,
-                    ]
-                );
+                if (!empty($validated['category_name'])) {
+                    $category = EcommerceCategory::firstOrCreate(
+                        ['name' => $validated['category_name']],
+                        [
+                            'slug' => Str::slug($validated['category_name']),
+                            'business_id' => $business?->id,
+                            'created_by_id' => $user->id,
+                            'status' => StatusEnum::APPROVED->value,
+                            'active' => true,
+                        ]
+                    );
+
+                    $validated['ecommerce_category_id'] = $category->id;
+                }
 
                 // Ensure brand exists or create it
-                $brand = EcommerceBrand::firstOrCreate(
-                    ['name' => $validated['brand_name']],
-                    [
-                        'slug' => Str::slug($validated['brand_name']),
-                        'business_id' => $user->ownerBusinessType?->id ?? $user->businesses()
-                            ->firstWhere('user_id', $user->id)?->id,
-                        'created_by_id' => $user->id,
-                        'status' => StatusEnum::APPROVED->value,
-                        'active' => true,
-                    ]
-                );
+                if (!empty($validated['brand_name'])) {
+                    $brand = EcommerceBrand::firstOrCreate(
+                        ['name' => $validated['brand_name']],
+                        [
+                            'slug' => Str::slug($validated['brand_name']),
+                            'business_id' => $business?->id,
+                            'created_by_id' => $user->id,
+                            'status' => StatusEnum::APPROVED->value,
+                            'active' => true,
+                        ]
+                    );
+
+                    $validated['ecommerce_brand_id'] = $brand->id;
+                }
 
                 // Ensure medication type exists or create it
-                $medicationType = EcommerceMedicationType::firstOrCreate(
-                    ['name' => $validated['medication_type_name']],
-                    [
-                        'slug' => Str::slug($validated['medication_type_name']),
-                        'business_id' => $user->ownerBusinessType?->id ?? $user->businesses()
-                            ->firstWhere('user_id', $user->id)?->id,
-                        'created_by_id' => $user->id,
-                        'status' => StatusEnum::APPROVED->value,
-                        'active' => true,
-                    ]
-                );
+                if (!empty($validated['medication_type_name'])) {
+                    $medicationType = EcommerceMedicationType::firstOrCreate(
+                        ['name' => $validated['medication_type_name']],
+                        [
+                            'slug' => Str::slug($validated['medication_type_name']),
+                            'business_id' => $business?->id,
+                            'created_by_id' => $user->id,
+                            'status' => $user->hasRole('admin') ? StatusEnum::ACTIVE->value : StatusEnum::APPROVED->value,
+                            'active' => true,
+                        ]
+                    );
+
+                    $validated['ecommerce_medication_type_id'] = $medicationType->id;
+                }
+
+                // Ensure measurement exists or create it
+                if (!empty($validated['measurement_name'])) {
+                    $measurement = EcommerceMeasurement::firstOrCreate(
+                        ['name' => $validated['measurement_name']],
+                        [
+                            'business_id' => $business?->id,
+                            'created_by_id' => $user->id,
+                            'status' => $user->hasRole('admin') ? StatusEnum::ACTIVE->value : StatusEnum::APPROVED->value,
+                            'active' => true,
+                        ]
+                    );
+
+                    $validated['ecommerce_measurement_id'] = $measurement->id;
+                }
+
+                // Ensure presentation exists or create it
+                if (!empty($validated['presentation_name'])) {
+                    $presentation = EcommercePresentation::firstOrCreate(
+                        ['name' => $validated['presentation_name']],
+                        [
+                            'business_id' => $business?->id,
+                            'created_by_id' => $user->id,
+                            'status' => $user->hasRole('admin') ? StatusEnum::ACTIVE->value : StatusEnum::APPROVED->value,
+                            'active' => true,
+                        ]
+                    );
+
+                    $validated['ecommerce_presentation_id'] = $presentation->id;
+                }
+
+
+                // Ensure package exists or create it
+                if (!empty($validated['package_name'])) {
+                    $package = EcommercePackage::firstOrCreate(
+                        ['name' => $validated['package_name']],
+                        [
+                            'business_id' => $business?->id,
+                            'created_by_id' => $user->id,
+                            'status' => $user->hasRole('admin') ? StatusEnum::ACTIVE->value : StatusEnum::APPROVED->value,
+                            'active' => true,
+                        ]
+                    );
+
+                    $validated['ecommerce_package_id'] = $package->id;
+                }
+
+
+                // Ensure variation exists or create it
+                if (!empty($validated['weight']) || !empty($validated['strength_value'])) {
+                    $variation = EcommerceMedicationVariation::firstOrCreate(
+                        array_filter([ // Include only non-empty keys
+                            'weight' => $validated['weight'] ?? null,
+                            'strength_value' => $validated['strength_value'] ?? null,
+                            'ecommerce_presentation_id' => $presentation->id ?? null,
+                            'ecommerce_package_id' => $package->id ?? null,
+                            'ecommerce_medication_type_id' => $medicationType->id ?? null,
+                        ]),
+                        [
+                            'business_id' => $business?->id,
+                            'updated_by_id' => $user->id,
+                            'status' => $user->hasRole('admin') ? StatusEnum::ACTIVE->value : StatusEnum::APPROVED->value,
+                            'active' => true,
+                        ]
+                    );
+
+                    $validated['ecommerce_variation_id'] = $variation->id;
+                }
+
+
 
                 // Save uploaded file
                 if (request()->hasFile('thumbnailFile')) {
@@ -176,21 +334,17 @@ class EcommerceProductService implements IEcommerceProductService
                 }
 
                 $updateProduct = $product->update([
-                    ...$validated,
-                    'ecommerce_category_id' => $category->id,
-                    'ecommerce_brand_id' => $brand->id,
-                    'ecommerce_medication_type_id' => $medicationType->id,
+                    ...array_filter($validated),
                     'updated_by_id' => $user->id,
-                    'slug' => Str::slug($validated['name'] ?? $product->name),
+                    'slug' => Str::slug($validated['product_name'] ?? $product->name),
                 ]);
 
                 $updateProductDetails = $product->productDetails?->update($validated);
 
                 return $updateProduct || $updateProductDetails;
-
             });
         } catch (Exception $e) {
-            throw new Exception('Failed to update product: '.$e->getMessage());
+            throw new Exception('Failed to update product: ' . $e->getMessage());
         }
     }
 
@@ -235,7 +389,7 @@ class EcommerceProductService implements IEcommerceProductService
             $categories = array_unique(array_map('trim', $categories));  // Remove duplicates and trim values
             $query->whereHas('category', function ($q) use ($categories) {
                 foreach ($categories as $category) {
-                    $q->orWhere('name', 'like', '%'.$category.'%');
+                    $q->orWhere('name', 'like', '%' . $category . '%');
                 }
             });
         }
@@ -245,7 +399,7 @@ class EcommerceProductService implements IEcommerceProductService
             $brands = array_unique(array_map('trim', $brands));  // Remove duplicates and trim values
             $query->whereHas('brand', function ($q) use ($brands) {
                 foreach ($brands as $brand) {
-                    $q->orWhere('name', 'like', '%'.$brand.'%');
+                    $q->orWhere('name', 'like', '%' . $brand . '%');
                 }
             });
         }
@@ -255,7 +409,7 @@ class EcommerceProductService implements IEcommerceProductService
             $medicationTypes = array_unique(array_map('trim', $medicationTypes));  // Remove duplicates and trim values
             $query->whereHas('medicationType', function ($q) use ($medicationTypes) {
                 foreach ($medicationTypes as $medicationType) {
-                    $q->orWhere('name', 'like', '%'.$medicationType.'%');
+                    $q->orWhere('name', 'like', '%' . $medicationType . '%');
                 }
             });
         }
@@ -265,7 +419,7 @@ class EcommerceProductService implements IEcommerceProductService
             $variations = array_unique(array_map('trim', $variations));  // Remove duplicates and trim values
             $query->whereHas('variation', function ($q) use ($variations) {
                 foreach ($variations as $variation) {
-                    $q->orWhere('name', 'like', '%'.$variation.'%');
+                    $q->orWhere('name', 'like', '%' . $variation . '%');
                 }
             });
         }
@@ -275,7 +429,7 @@ class EcommerceProductService implements IEcommerceProductService
             $packages = array_unique(array_map('trim', $packages));  // Remove duplicates and trim values
             $query->whereHas('package', function ($q) use ($packages) {
                 foreach ($packages as $package) {
-                    $q->orWhere('name', 'like', '%'.$package.'%');
+                    $q->orWhere('name', 'like', '%' . $package . '%');
                 }
             });
         }
