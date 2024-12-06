@@ -46,6 +46,24 @@ class LoanApplicationController extends Controller
         return $this->returnJsonResponse('Application link generated', ['link' => $referenceLink]);
     }
 
+    public function verifyApplicationLink(Request $request)
+    {
+
+        $request->validate([
+            'reference' => 'required|exists:credit_applications,identifier',
+        ]);
+
+        $token = $request->bearerToken();
+        if (!$token) {
+            return $this->returnJsonResponse(message:"Token not provided", status:400);
+        }
+
+        $data = $this->loanApplicationService->verifyApplicationLink($request);
+
+        return $this->returnJsonResponse(data: $data);
+
+    }
+
     // Retrieve Vendor Customizations
     public function getCustomisations(Request $request)
     {
