@@ -26,7 +26,8 @@ class CustomerService implements ICustomerService
         $customer = $this->customerRepository->create($data);
 
         if ($file?->isValid() && $customer) {
-            $this->transactionHistoryService->uploadTransactionHistory(file: $file, customerId: $customer->id);
+            $evaluationData = $this->transactionHistoryService->uploadTransactionHistory(file: $file, customerId: $customer->id);
+            $this->transactionHistoryService->evaluateTransactionHistory($evaluationData['txn_history_evaluation']?->id);
         }
 
         $this->activityLogService->logActivity(model: $customer, causer: $this->authService->getUser(), action: 'created', properties: ['attributes' => $data]);

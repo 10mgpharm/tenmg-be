@@ -15,7 +15,7 @@ class CreateInviteRequest extends FormRequest
     {
         $user = $this->user();
 
-        return $user && $user->ownerBusinessType && ($user->hasRole('vendor') || $user->hasRole('admin'));
+        return $user && ($user->ownerBusinessType || $user->businesses()->firstWhere('user_id', $this->id)) && ($user->hasRole('vendor') || $user->hasRole('admin'));
     }
 
     /**
@@ -47,6 +47,7 @@ class CreateInviteRequest extends FormRequest
      */
     public function rules(): array
     {
+        $user = $this->user();
 
         return [
             'full_name' => ['required', 'string', 'max:255'],
@@ -55,7 +56,7 @@ class CreateInviteRequest extends FormRequest
                 'string',
                 'email',
                 'max:255',
-                Rule::unique('invites')->where(fn ($query) => $query->where('business_id', $this->user()->ownerBusinessType->id)->whereNotIn('status', ['REJECTED', 'REMOVED'])),
+                Rule::unique('invites')->where(fn ($query) => $query->where('business_id', $user->ownerBusinessType?->id ?: $user->businesses()->firstWhere('user_id', $this->id)?->id)->whereNotIn('status', ['REJECTED', 'REMOVED'])),
             ],
             'role_id' => ['required', 'exists:roles,id'],
         ];
