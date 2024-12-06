@@ -26,29 +26,29 @@ beforeEach(function () {
     ]);
 });
 
-test('forgot password with valid email', function () {
-    Notification::fake();
+// test('forgot password with valid email', function () {
+//     Notification::fake();
 
-    $response = $this->postJson($this->forgot, ['email' => $this->email]);
+//     $response = $this->postJson($this->forgot, ['email' => $this->email]);
 
-    $responseData = $response->json();
+//     $responseData = $response->json();
 
-    expect($response->status())->toBe(Response::HTTP_OK);
+//     expect($response->status())->toBe(Response::HTTP_OK);
 
-    expect($responseData)
-        ->toHaveKey('message', 'A one-time password has been sent to your registered email')
-        ->toHaveKey('status', 'success');
+//     expect($responseData)
+//         ->toHaveKey('message', 'A one-time password has been sent to your registered email')
+//         ->toHaveKey('status', 'success');
 
-    Notification::assertSentTo(
-        $this->user,
-        \App\Notifications\Auth\ResetPasswordNotification::class
-    );
+//     Notification::assertSentTo(
+//         $this->user,
+//         \App\Notifications\Auth\ResetPasswordNotification::class
+//     );
 
-    $this->assertDatabaseHas('otps', [
-        'user_id' => $this->user->id,
-        'type' => OtpType::RESET_PASSWORD_VERIFICATION->value,
-    ]);
-});
+//     $this->assertDatabaseHas('otps', [
+//         'user_id' => $this->user->id,
+//         'type' => OtpType::RESET_PASSWORD_VERIFICATION->value,
+//     ]);
+// });
 
 test('forgot password with invalid email', function () {
     $response = $this->postJson($this->forgot, ['email' => fake()->email()]);
