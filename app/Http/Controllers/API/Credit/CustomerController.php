@@ -33,6 +33,7 @@ class CustomerController extends Controller
 
     public function store(StoreCustomerRequest $request): JsonResponse
     {
+
         $customer = $this->customerService->createCustomer(data: $request->validated(), file: $request->file('file'));
 
         return $this->returnJsonResponse(

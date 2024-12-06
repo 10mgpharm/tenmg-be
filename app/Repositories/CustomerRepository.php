@@ -31,6 +31,7 @@ class CustomerRepository
         isset($data['email']) && $payload['email'] = $data['email'];
         isset($data['phone']) && $payload['phone'] = $data['phone'];
         isset($data['identifier']) && $payload['identifier'] = $data['identifier'];
+        isset($data['reference']) && $payload['reference'] = $data['reference'];
         isset($data['active']) && $payload['active'] = $data['active'];
 
         return $customer->update($payload);
