@@ -44,7 +44,7 @@ return new class extends Migration
                 // Indexing for performance
                 $table->index(['event', 'action']); // For filtering logs by event and action
                 $table->index(['creatable_business_id', 'targetable_business_id']);
-                $table->index(['ip']);
+                $table->index(['ip_address']);
             });
         }
     }
