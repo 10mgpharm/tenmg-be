@@ -20,7 +20,6 @@ class UserResource extends JsonResource
         $businessStatus = $business?->status ?? 'PENDING_VERIFICATION';
 
         if ($business->type != 'ADMIN') {
-
             if ($ownerBusinessType?->license_verification_status) {
                 $businessStatus = match ($ownerBusinessType?->license_verification_status) {
                     'PENDING' => 'PENDING_APPROVAL',
