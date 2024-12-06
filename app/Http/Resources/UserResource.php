@@ -16,7 +16,10 @@ class UserResource extends JsonResource
     {
         $ownerBusinessType = $this->ownerBusinessType;
 
-        $businessStatus = 'PENDING_VERIFICATION';
+        $businessStatus = $this->businesses()
+            ->firstWhere('user_id', $this->id)?->status ??
+                'PENDING_VERIFICATION';
+
         if ($ownerBusinessType?->license_verification_status) {
             $businessStatus = match ($ownerBusinessType?->license_verification_status) {
                 'PENDING' => 'PENDING_APPROVAL',
