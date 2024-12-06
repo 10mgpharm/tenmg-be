@@ -6,6 +6,7 @@ use App\Helpers\UtilityHelper;
 use App\Models\LoanApplication;
 use Illuminate\Http\Request;
 use Laravel\Passport\Token;
+use Lcobucci\JWT\Parser;
 
 class LoanApplicationRepository
 {
@@ -137,6 +138,10 @@ class LoanApplicationRepository
     {
 
         $token = $request->bearerToken();
+
+        if($token){
+            $tokenId = (new Parser())->parse($token)->getClaim('jti');
+        }
 
         $validToken = Token::where('id', $token)
         ->where('revoked', false) // Ensure the token is not revoked

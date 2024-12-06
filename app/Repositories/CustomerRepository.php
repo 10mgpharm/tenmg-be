@@ -13,7 +13,8 @@ class CustomerRepository
             'name' => $data['name'],
             'email' => $data['email'],
             'phone' => $data['phone'],
-            'active' => $data['active'] ?? true,
+            'reference' => $data['reference'],
+            'active' => true,
         ]);
     }
 
@@ -67,6 +68,8 @@ class CustomerRepository
         $query->when(isset($filters['vendorId']), function ($query) use ($filters) {
             return $query->where('business_id', $filters['vendorId']);
         });
+
+        $query->orderBy('created_at', 'desc');
 
         return $query->paginate($perPage);
     }
