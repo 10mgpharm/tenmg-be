@@ -16,18 +16,20 @@ class UserResource extends JsonResource
     {
         $ownerBusinessType = $this->ownerBusinessType;
 
-        $businessStatus = $this->businesses()
-            ->firstWhere('user_id', $this->id)?->status ??
-                'PENDING_VERIFICATION';
+        $business = $this->businesses()->firstWhere('user_id', $this->id);
+        $businessStatus = $business?->status ?? 'PENDING_VERIFICATION';
 
-        if ($ownerBusinessType?->license_verification_status) {
-            $businessStatus = match ($ownerBusinessType?->license_verification_status) {
-                'PENDING' => 'PENDING_APPROVAL',
-                'REJECTED' => 'REJECTED',
-                default => now()->greaterThan($ownerBusinessType?->expiry_date)
-                    ? 'LICENSE_EXPIRED'
-                    : 'VERIFIED'
-            };
+        if ($business->type != 'ADMIN') {
+
+            if ($ownerBusinessType?->license_verification_status) {
+                $businessStatus = match ($ownerBusinessType?->license_verification_status) {
+                    'PENDING' => 'PENDING_APPROVAL',
+                    'REJECTED' => 'REJECTED',
+                    default => now()->greaterThan($ownerBusinessType?->expiry_date)
+                        ? 'LICENSE_EXPIRED'
+                        : 'VERIFIED'
+                };
+            }
         }
 
         return [
@@ -40,12 +42,9 @@ class UserResource extends JsonResource
                 'NOT_SETUP',
             'avatar' => $this->avatar,
             'emailVerifiedAt' => $this->email_verified_at,
-            'owner' => (bool) ($ownerBusinessType?->type),
-
-            'entityType' => $ownerBusinessType?->type ?? $this->businesses()
-                ->firstWhere('user_id', $this->id)?->type,
-            'businessName' => $ownerBusinessType?->name ?? $this->businesses()
-                ->firstWhere('user_id', $this->id)?->name,
+            'owner' => (bool) ($ownerBusinessType),
+            'entityType' => $ownerBusinessType?->type ?? $business?->type,
+            'businessName' => $ownerBusinessType?->name ?? $business?->name,
             'businessStatus' => $businessStatus,
             'completeProfile' => (bool) (
                 $ownerBusinessType
