@@ -9,6 +9,7 @@ use App\Repositories\ApiKeyRepository;
 use App\Repositories\LoanApplicationRepository;
 use Exception;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Notification;
 
@@ -85,6 +86,11 @@ class LoanApplicationService
         ])->notify(new CustomerLoanApplicationNotification($link));
 
         return $link;
+    }
+
+    public function verifyApplicationLink(Request $request)
+    {
+        return $this->loanApplicationRepository->verifyApplicationLink($request);
     }
 
     // Retrieve Customizations
