@@ -56,6 +56,8 @@ class CustomersImport implements ToModel, WithBatchInserts, WithChunkReading, Wi
             return null;
         }
 
+        $row = array_change_key_case($row, CASE_LOWER);
+
         //Excel Columns: Name, Email, Phone, Reference
         $currentRowNumber = $this->getRowNumber();
         if ($currentRowNumber == 1) {
@@ -63,13 +65,13 @@ class CustomersImport implements ToModel, WithBatchInserts, WithChunkReading, Wi
         }
 
         // Validate email
-        $email = trim($row['EMAIL']);
+        $email = trim($row['email']);
         if (! filter_var($email, FILTER_VALIDATE_EMAIL)) {
             throw throw new Exception("Invalid email format at row {$currentRowNumber}: {$email}");
         }
 
         // Validate phone number
-        $phone = trim($row['PHONE']);
+        $phone = trim($row['phone']);
         if (! preg_match('/^\+?[1-9]\d{1,14}$/', $phone)) {
             throw throw new Exception("Invalid phone number format at row {$currentRowNumber}: {$phone}");
         }
@@ -78,12 +80,12 @@ class CustomersImport implements ToModel, WithBatchInserts, WithChunkReading, Wi
 
         return new Customer([
             'business_id' => $this->vendorBusiness?->id,
-            'name' => trim($row['NAME']),
-            'email' => trim($row['EMAIL']),
-            'phone' => trim($row['PHONE']),
+            'name' => trim($row['name']),
+            'email' => trim($row['email']),
+            'phone' => trim($row['phone']),
             'identifier' => $code,
             'active' => true,
-            'reference' => trim($row['REFERENCE']),
+            'reference' => trim($row['reference']),
         ]);
     }
 

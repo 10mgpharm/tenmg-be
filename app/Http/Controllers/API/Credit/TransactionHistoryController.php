@@ -47,7 +47,7 @@ class TransactionHistoryController extends Controller
     public function uploadTransactionHistory(Request $request): JsonResponse
     {
         $request->validate([
-            'file' => 'required|mimes:csv,xlsx,json|max:2048',
+            'file' => 'required|mimes:csv,xlsx,json|max:5048',
             'customerId' => 'required|exists:credit_customers,id',
         ]);
 

@@ -4,6 +4,9 @@ namespace App\Repositories;
 
 use App\Helpers\UtilityHelper;
 use App\Models\LoanApplication;
+use Illuminate\Http\Request;
+use Laravel\Passport\Token;
+use Lcobucci\JWT\Parser;
 
 class LoanApplicationRepository
 {
@@ -129,5 +132,23 @@ class LoanApplicationRepository
         return LoanApplication::where('customer_id', $customerId)
             ->with(['business', 'customer'])
             ->get();
+    }
+
+    public function verifyApplicationLink(Request $request)
+    {
+
+        $token = $request->bearerToken();
+
+        if($token){
+            $tokenId = (new Parser())->parse($token)->getClaim('jti');
+        }
+
+        $validToken = Token::where('id', $token)
+        ->where('revoked', false) // Ensure the token is not revoked
+        ->first();
+
+        return $validToken;
+
+
     }
 }
