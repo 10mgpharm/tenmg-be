@@ -30,9 +30,33 @@ class EcommerceMedicationVariation extends Model
         'ecommerce_medication_type_id',
         'strength_value',
         'strength',
-        'presentation',
-        'package_per_roll',
+        // 'presentation',
+        'ecommerce_presentation_id',
+        // 'package_per_roll',
+        'ecommerce_package_id',
         'description',
         'weight',
+        'status',
+        'active'
+    ];
+
+
+    /**
+     * The model's default values for attributes.
+     *
+     * @var array
+     */
+    protected $attributes = [
+        'active' => false,
+        'status' => 'PENDING',
+    ];
+
+    /**
+     * Get the attributes that should be cast.
+     *
+     * @param array<string, string>
+     */
+    protected $casts = [
+        'active' => 'boolean',
     ];
 }
