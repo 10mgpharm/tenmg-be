@@ -212,7 +212,7 @@ class EcommerceProductService implements IEcommerceProductService
                             'slug' => Str::slug($validated['category_name']),
                             'business_id' => $business?->id,
                             'created_by_id' => $user->id,
-                            'status' => StatusEnum::APPROVED->value,
+                            'status' =>  $user->hasRole('admin') ? StatusEnum::ACTIVE->value : StatusEnum::APPROVED->value,
                             'active' => true,
                         ]
                     );
@@ -228,7 +228,7 @@ class EcommerceProductService implements IEcommerceProductService
                             'slug' => Str::slug($validated['brand_name']),
                             'business_id' => $business?->id,
                             'created_by_id' => $user->id,
-                            'status' => StatusEnum::APPROVED->value,
+                            'status' =>  $user->hasRole('admin') ? StatusEnum::ACTIVE->value : StatusEnum::APPROVED->value,
                             'active' => true,
                         ]
                     );
