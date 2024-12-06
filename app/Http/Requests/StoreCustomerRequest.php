@@ -39,6 +39,7 @@ class StoreCustomerRequest extends FormRequest
             'name' => 'required|string|max:255',
             'email' => 'required|email|max:255|unique:credit_customers,email,NULL,id,business_id,'.$this->vendorId,
             'phone' => 'nullable|string|max:15',
+            'reference' => 'nullable',
             'file' => 'nullable|mimes:csv,xlsx,json|max:2048',
         ];
     }
