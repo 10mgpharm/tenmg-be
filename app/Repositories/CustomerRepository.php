@@ -13,7 +13,7 @@ class CustomerRepository
             'name' => $data['name'],
             'email' => $data['email'],
             'phone' => $data['phone'],
-            'reference' => $data['reference'],
+            'reference' => array_key_exists('reference', $data) ? $data['reference'] : null,
             'active' => true,
         ]);
     }
@@ -75,9 +75,10 @@ class CustomerRepository
         return $query->paginate($perPage);
     }
 
-    function getAllCustomers($vendorId):array
+    public function getAllCustomers($vendorId): array
     {
         $customers = Customer::where('business_id', $vendorId)->get()->toArray();
+
         return $customers;
     }
 }
