@@ -14,17 +14,15 @@ class UserResource extends JsonResource
      */
     public function toArray(Request $request): array
     {
-        $ownerBusinessType = $this->ownerBusinessType;
-
         $business = $this->businesses()->firstWhere('user_id', $this->id);
         $businessStatus = $business?->status ?? 'PENDING_VERIFICATION';
 
-        if ($business->type != 'ADMIN') {
-            if ($ownerBusinessType?->license_verification_status) {
-                $businessStatus = match ($ownerBusinessType?->license_verification_status) {
+        if ($business?->type != 'ADMIN') {
+            if ($business?->license_verification_status) {
+                $businessStatus = match ($business?->license_verification_status) {
                     'PENDING' => 'PENDING_APPROVAL',
                     'REJECTED' => 'REJECTED',
-                    default => now()->greaterThan($ownerBusinessType?->expiry_date)
+                    default => now()->greaterThan($business?->expiry_date)
                         ? 'LICENSE_EXPIRED'
                         : 'VERIFIED'
                 };
@@ -41,21 +39,15 @@ class UserResource extends JsonResource
                 'NOT_SETUP',
             'avatar' => $this->avatar,
             'emailVerifiedAt' => $this->email_verified_at,
-            'owner' => (bool) ($ownerBusinessType),
-            'entityType' => $ownerBusinessType?->type ?? $business?->type,
-            'businessName' => $ownerBusinessType?->name ?? $business?->name,
+            'owner' => (bool) ($this->ownerBusinessType),
+            'entityType' => $business?->type,
+            'businessName' => $business?->name,
             'businessStatus' => $businessStatus,
             'completeProfile' => (bool) (
-                ($ownerBusinessType
-                && $ownerBusinessType?->contact_person
-                && $ownerBusinessType?->contact_phone
-                && $ownerBusinessType?->contact_email
-                ) || (
-                    $business
-                    && $business?->contact_person
-                    && $business?->contact_phone
-                    && $business?->contact_email
-                )
+                $business
+                && $business?->contact_person
+                && $business?->contact_phone
+                && $business?->contact_email
             ),
         ];
     }
