@@ -79,7 +79,7 @@ class LoanApplicationService
         $data['businessId'] = $vendor->id;
         $data['source'] = 'API';
 
-        $application = $this->loanApplicationRepository->create($data);
+        $application = $this->loanApplicationRepository->create($data);//
 
         $token = $user->createToken('Full Access Token', ['full']);
 
