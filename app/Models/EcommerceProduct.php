@@ -25,24 +25,28 @@ class EcommerceProduct extends Model
      */
     protected $fillable = [
         'business_id',
-        'ecommerce_brand_id',
         'thumbnail_file_id',
-        'ecommerce_medication_type_id',
         'ecommerce_category_id',
-        'package_id',
+        'ecommerce_brand_id',
+        'ecommerce_medication_type_id',
+        'ecommerce_measurement_id',
+        'ecommerce_presentation_id',
+        'ecommerce_package_id',
         'ecommerce_variation_id',
         'created_by_id',
         'updated_by_id',
         'quantity',
         'actual_price',
         'discount_price',
-        'min_delivery_duration',
-        'max_delivery_duration',
+        // 'min_delivery_duration',
+        // 'max_delivery_duration',
         'expired_at',
         'commission',
         'status',
         'name',
         'slug',
+        'low_stock_level',
+        'out_stock_level',
     ];
 
     /**
@@ -109,7 +113,23 @@ class EcommerceProduct extends Model
      */
     public function package()
     {
-        return $this->belongsTo(EcommercePackage::class, 'package_id');
+        return $this->belongsTo(EcommercePackage::class, 'ecommerce_package_id');
+    }
+
+    /**
+     * Get the presentation associated with the product.
+     */
+    public function presentation()
+    {
+        return $this->belongsTo(EcommercePresentation::class, 'ecommerce_presentation_id');
+    }
+
+    /**
+     * Get the measurement associated with the product.
+     */
+    public function measurement()
+    {
+        return $this->belongsTo(EcommerceMeasurement::class, 'ecommerce_measurement_id');
     }
 
     /**

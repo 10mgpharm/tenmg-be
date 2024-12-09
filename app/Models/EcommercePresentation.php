@@ -6,17 +6,16 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
-class EcommerceMedicationVariation extends Model
+class EcommercePresentation extends Model
 {
-    use HasFactory;
-    use SoftDeletes;
+    use HasFactory, SoftDeletes;
 
     /**
      * The table associated with the model.
      *
      * @var string
      */
-    protected $table = 'ecommerce_medication_variations';
+    protected $table = 'ecommerce_presentations';
 
     /**
      * The attributes that are mass assignable.
@@ -27,19 +26,10 @@ class EcommerceMedicationVariation extends Model
         'business_id',
         'created_by_id',
         'updated_by_id',
-        'ecommerce_medication_type_id',
-        'strength_value',
-        'strength',
-        // 'presentation',
-        'ecommerce_presentation_id',
-        // 'package_per_roll',
-        'ecommerce_package_id',
-        'description',
-        'weight',
+        'name',
+        'active',
         'status',
-        'active'
     ];
-
 
     /**
      * The model's default values for attributes.
