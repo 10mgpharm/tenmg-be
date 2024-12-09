@@ -3,7 +3,9 @@
 namespace App\Services;
 
 use App\Helpers\UtilityHelper;
+use App\Models\Customer;
 use App\Models\LoanApplication;
+use App\Models\User;
 use App\Notifications\CustomerLoanApplicationNotification;
 use App\Repositories\ApiKeyRepository;
 use App\Repositories\LoanApplicationRepository;
@@ -63,18 +65,23 @@ class LoanApplicationService
     public function sendApplicationLink(array $data)
     {
 
-        $apikey = $this->apiKeyRepository->verifyApiKey(key: $data['vendorId'], secret: $data['vendorSecret']);
+        // $apikey = $this->apiKeyRepository->verifyApiKey(key: $data['vendorId'], secret: $data['vendorSecret']);
 
-        if (! $apikey) {
-            throw new Exception('Invalid API keys', Response::HTTP_UNAUTHORIZED);
-        }
+        // if (! $apikey) {
+        //     throw new Exception('Invalid API keys', Response::HTTP_UNAUTHORIZED);
+        // }
 
-        $data['businessId'] = $apikey->business_id;
+        $customer = Customer::find($data['customerId']);
+
+        $vendor = $this->authService->getBusiness();
+        $user = User::find($vendor->owner_id);
+
+        $data['businessId'] = $vendor->id;
         $data['source'] = 'API';
 
         $application = $this->loanApplicationRepository->create($data);
 
-        $token = $apikey->createToken('Full Access Token', ['full']);
+        $token = $user->createToken('Full Access Token', ['full']);
 
         $link = config('app.frontend_url').'/widgets/applications/'.$application->identifier.'?token='.$token->accessToken;
 
@@ -82,7 +89,7 @@ class LoanApplicationService
 
         // notifation to customer here
         Notification::route('mail', [
-            $customer?->email => $customer?->name,
+            "uhweka@gmail.com" => $customer?->name,
         ])->notify(new CustomerLoanApplicationNotification($link));
 
         return $link;
