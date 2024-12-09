@@ -39,8 +39,8 @@ class SearchAuditLogRequest extends FormRequest
             'crud_type' => ['nullable', 'string', 'in:create,read,update,delete'],
             'event' => ['nullable', 'string'],
             'ip' => ['nullable', 'ip'],
-            'from_date' => ['nullable', 'date', 'before_or_equal:to_date'],
-            'to_date' => ['nullable', 'date', 'after_or_equal:from_date'],
+            'from_date' => ['nullable', 'date', 'before_or_equal:to_date', 'before_or_equal:today'],
+            'to_date' => ['nullable', 'date', 'after_or_equal:from_date', 'before_or_equal:today'],
         ];
     }
 
