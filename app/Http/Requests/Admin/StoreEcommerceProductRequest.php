@@ -39,8 +39,8 @@ class StoreEcommerceProductRequest extends FormRequest
 
             'actual_price' => $this->input('actualPrice'),
             'discount_price' => $this->input('discountPrice'),
-            'min_delivery_duration' => $this->input('minDeliveryDuration'),
-            'max_delivery_duration' => $this->input('maxDeliveryDuration'),
+            'low_stock_level' => $this->input('lowStockLevel'),
+            'out_stock_level' => $this->input('outStockLevel'),
             'expired_at' => $this->input('expiredAt'),
             'thumbnailFile' => $this->file('thumbnailFile'),
             'status' => $this->status ?? StatusEnum::ACTIVE->value,
@@ -73,16 +73,16 @@ class StoreEcommerceProductRequest extends FormRequest
             'measurement_name' => ['required', 'string', 'max:255'],
             'presentation_name' => ['required', 'string', 'max:255'],
             'package_name' => ['required', 'string', 'max:255'],
-            'strength_value' => ['required', 'string', 'max:255'],
-            'weight' => ['required', 'string', 'max:255'],
+            'strength_value' => ['required', 'numeric'],
+            'weight' => ['required', 'numeric',],
 
             // Product Inventory
             'quantity' => ['required', 'integer', 'min:1'],
-            'low_stock_level' => ['nullable', 'sometimes', 'integer', 'min:0'],
-            'out_stock_level' => ['nullable', 'sometimes', 'integer', 'min:0'],
-            'actual_price' => ['required', 'numeric', 'min:0'],
-            'discount_price' => ['nullable', 'numeric', 'min:0'],
-            'expired_at' => ['required', 'date'],
+            'low_stock_level' => ['nullable', 'sometimes', 'integer', 'min:0', 'gte:out_stock_level'],
+            'out_stock_level' => ['nullable', 'sometimes', 'integer', 'min:0', 'lte:low_stock_level'],
+            'actual_price' => ['required', 'numeric', 'min:0', ],
+            'discount_price' => ['nullable', 'numeric', 'min:0', 'lt:actual_price'],
+            'expired_at' => ['required', 'date', 'after:today'],
 
             'status' => ['nullable', new Enum(StatusEnum::class),],
 

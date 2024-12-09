@@ -48,8 +48,8 @@ class UpdateEcommerceProductRequest extends FormRequest
 
             'actual_price' => $this->input('actualPrice'),
             'discount_price' => $this->input('discountPrice'),
-            'min_delivery_duration' => $this->input('minDeliveryDuration'),
-            'max_delivery_duration' => $this->input('maxDeliveryDuration'),
+            'low_stock_level' => $this->input('lowStockLevel'),
+            'out_stock_level' => $this->input('outStockLevel'),
             'expired_at' => $this->input('expiredAt'),
             'thumbnailFile' => $this->file('thumbnailFile'),
             'status' =>  $this->input('status') !== StatusEnum::ACTIVE->value
@@ -90,15 +90,15 @@ class UpdateEcommerceProductRequest extends FormRequest
             'measurement_name' => ['sometimes',  'nullable', 'string', 'max:255'],
             'presentation_name' => ['sometimes',  'nullable', 'string', 'max:255'],
             'package_name' => ['sometimes',  'nullable', 'string', 'max:255'],
-            'strength_value' => ['sometimes',  'nullable', 'string', 'max:255'],
-            'weight' => ['sometimes',  'nullable', 'string', 'max:255'],
+            'strength_value' => ['sometimes',  'nullable', 'numeric',],
+            'weight' => ['sometimes',  'nullable', 'numeric'],
 
             // Product Inventory
             'quantity' => ['sometimes',  'nullable', 'integer', 'min:1'],
-            'low_stock_level' => ['sometimes',  'nullable', 'nullable', 'sometimes', 'integer', 'min:0'],
-            'out_stock_level' => ['sometimes', 'nullable', 'sometimes', 'integer', 'min:0'],
+            'low_stock_level' => ['nullable', 'sometimes', 'integer', 'min:0', 'gte:out_stock_level'],
+            'out_stock_level' => ['nullable', 'sometimes', 'integer', 'min:0', 'lte:low_stock_level'],
             'actual_price' => ['sometimes',  'nullable', 'numeric', 'min:0'],
-            'discount_price' => ['sometimes', 'nullable', 'numeric', 'min:0'],
+            'discount_price' => ['sometimes', 'nullable', 'numeric', 'min:0', 'lt:actual_price'],
             'expired_at' => ['sometimes', 'nullable', 'date'],
 
             'status' => ['sometimes',  'nullable', new Enum(StatusEnum::class),],
