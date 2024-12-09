@@ -89,7 +89,7 @@ class LoanApplicationService
 
         // notifation to customer here
         Notification::route('mail', [
-            "uhweka@gmail.com" => $customer?->name,
+            $customer?->email => $customer?->name,
         ])->notify(new CustomerLoanApplicationNotification($link));
 
         return $link;
