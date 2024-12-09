@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\API\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Admin\SearchAuditLogRequest;
 use App\Http\Resources\Admin\AuditLogResource;
 use App\Models\AuditLog;
 use Carbon\Carbon;
@@ -38,7 +39,7 @@ class AuditLogController extends Controller
      * - `from` and `to` (date): Filter logs from a specific date, to a specific date, or within a range.
      * @return JsonResponse JSON response containing the filtered audit logs.
      */
-    public function search(Request $request): JsonResponse
+    public function search(SearchAuditLogRequest $request): JsonResponse
     {
         $params = $request->only(['crud_type']);
 
@@ -52,19 +53,19 @@ class AuditLogController extends Controller
             $query->where('ip', 'LIKE', '%'.$ip.'%');
         }
 
-        $from = $request->input('from');
-        $to = $request->input('to');
+        $from_ate = $request->input('from_ate');
+        $to_date = $request->input('to_date');
 
-        if ($from || $to) {
-            $from = $from ? Carbon::parse($from) : null;
-            $to = $to ? Carbon::parse($to) : null;
+        if ($from_ate || $to_date) {
+            $from_ate = $from_ate ? Carbon::parse($from_ate) : null;
+            $to_date = $to_date ? Carbon::parse($to_date) : null;
 
-            if ($to && $to->format('H:i:s') === '00:00:00') {
-                $to->endOfDay();
+            if ($to_date && $to_date->format('H:i:s') === '00:00:00') {
+                $to_date->endOfDay();
             }
 
-            $query->when($from, fn ($q) => $q->where('created_at', '>=', $from))
-                ->when($to, fn ($q) => $q->where('created_at', '<=', $to));
+            $query->when($from_ate, fn ($q) => $q->where('created_at', '>=', $from_ate))
+                ->when($to_date, fn ($q) => $q->where('created_at', '<=', $to_date));
         }
 
         $logs = $query->paginate(20);
