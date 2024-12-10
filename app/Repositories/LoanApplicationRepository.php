@@ -3,6 +3,8 @@
 namespace App\Repositories;
 
 use App\Helpers\UtilityHelper;
+use App\Http\Resources\LoadApplicationResource;
+use App\Models\Business;
 use App\Models\LoanApplication;
 use Illuminate\Http\Request;
 use Laravel\Passport\Token;
@@ -134,21 +136,21 @@ class LoanApplicationRepository
             ->get();
     }
 
-    public function verifyApplicationLink(Request $request)
+    public function verifyApplicationLink($reference)
     {
 
-        $token = $request->bearerToken();
+        //get the application
+        $application = LoanApplication::where('identifier', $reference)->first();
+        // $vendor = $application->business;
+        // $customer = $application->customer;
 
-        if($token){
-            $tokenId = (new Parser())->parse($token)->getClaim('jti');
-        }
+        $data = [
+            'application' => new LoadApplicationResource($application),
+            'bvnStatus' => false,
+            'accountMandateStatus' => false
+        ];
 
-        $validToken = Token::where('id', $token)
-        ->where('revoked', false) // Ensure the token is not revoked
-        ->first();
-
-        return $validToken;
-
+        return $data;
 
     }
 }

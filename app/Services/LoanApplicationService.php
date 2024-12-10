@@ -95,9 +95,9 @@ class LoanApplicationService
         return $link;
     }
 
-    public function verifyApplicationLink(Request $request)
+    public function verifyApplicationLink($reference)
     {
-        return $this->loanApplicationRepository->verifyApplicationLink($request);
+        return $this->loanApplicationRepository->verifyApplicationLink($reference);
     }
 
     // Retrieve Customizations
