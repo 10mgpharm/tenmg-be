@@ -154,6 +154,11 @@ class EcommerceProductService implements IEcommerceProductService
                     'description' => $validated['product_description'],
                     'slug' => Str::slug($validated['product_name']),
 
+                    'low_stock_level' => $validated['low_stock_level'] ?? null,
+                    'out_stock_level' => $validated['out_stock_level'] ?? null,
+
+                    'expired_at' => $validated['expired_at'],
+
                     'status' => $user->hasRole('admin') ? StatusEnum::ACTIVE->value : StatusEnum::APPROVED->value,
                     'active' => true,
 

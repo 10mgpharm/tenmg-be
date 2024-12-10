@@ -23,7 +23,8 @@ return new class extends Migration
             }
 
             if (! Schema::hasColumn('ecommerce_medication_variations', 'ecommerce_presentation_id')) {
-                $table->foreignId('ecommerce_presentation_id')->nullable()->after('ecommerce_medication_type_id')->constrained('ecommerce_presentations')->nullOnDelete();
+                $table->foreignId('ecommerce_presentation_id')->nullable()->after('ecommerce_medication_type_id')->constrained('ecommerce_presentations')
+                ->nullOnDelete()->name('medication_variations_presentation_id_fk');;
             }
 
             if (! Schema::hasColumn('ecommerce_medication_variations', 'ecommerce_package_id')) {
