@@ -20,6 +20,7 @@ class LoadApplicationResource extends JsonResource
             'identifier' => $this->identifier,
             'businessId' => $this->business_id,
             'customer' => $this->customer,
+            'business' => new BusinessLimitedRecordResource($this->business),
             'requestedAmount' => $this->requested_amount,
             'interestAmount' => $this->interest_amount,
             'totalAmount' => $this->total_amount,
