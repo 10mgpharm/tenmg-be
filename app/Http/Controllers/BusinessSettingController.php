@@ -50,7 +50,7 @@ class BusinessSettingController extends Controller
         $user->ownerBusinessType->refresh();
 
         return $this->returnJsonResponse(
-            message: 'Business personal information details successfully updated.',
+            message: 'Business information successfully updated.',
             data: (new BusinessResource($user->ownerBusinessType))
         );
     }
@@ -93,7 +93,7 @@ class BusinessSettingController extends Controller
         $licenseFile = $ownerBusiness->cac ?? null;
 
         return $this->returnJsonResponse(
-            message: 'Business license details successfully updated.',
+            message: 'Business license successfully updated.',
             data: [
                 'license_number' => $ownerBusiness?->license_number,
                 'expiry_date' => $ownerBusiness?->expiry_date,

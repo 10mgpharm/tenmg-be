@@ -47,4 +47,5 @@ class FileUpload extends Model
             }
         );
     }
+
 }

@@ -4,6 +4,7 @@ namespace App\Http\Controllers\API\Credit;
 
 use App\Http\Controllers\Controller;
 use App\Http\Resources\LoadApplicationResource;
+use App\Models\LoanApplication;
 use App\Services\LoanApplicationService;
 use App\Services\OfferService;
 use Illuminate\Http\JsonResponse;
@@ -38,27 +39,23 @@ class LoanApplicationController extends Controller
 
         // Call service to generate the application link
         $referenceLink = $this->loanApplicationService->sendApplicationLink([
-            'vendorId' => $request->headers->get('x-vendor-key'),
-            'vendorSecret' => $request->headers->get('x-vendor-secret'),
             'customerId' => $request->customerId,
         ]);
 
         return $this->returnJsonResponse('Application link generated', ['link' => $referenceLink]);
     }
 
-    public function verifyApplicationLink(Request $request)
+    public function verifyApplicationLink($reference)
     {
 
-        $request->validate([
-            'reference' => 'required|exists:credit_applications,identifier',
-        ]);
+        //check if load application exist with this id
+        $application = LoanApplication::where("identifier", $reference)->first();
 
-        $token = $request->bearerToken();
-        if (!$token) {
-            return $this->returnJsonResponse(message:"Token not provided", status:400);
+        if(!$application){
+            return $this->returnJsonResponse(message:"Application not found", status:400);
         }
 
-        $data = $this->loanApplicationService->verifyApplicationLink($request);
+        $data = $this->loanApplicationService->verifyApplicationLink($reference);
 
         return $this->returnJsonResponse(data: $data);
 
