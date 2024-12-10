@@ -38,8 +38,6 @@ class LoanApplicationController extends Controller
 
         // Call service to generate the application link
         $referenceLink = $this->loanApplicationService->sendApplicationLink([
-            'vendorId' => $request->headers->get('x-vendor-key'),
-            'vendorSecret' => $request->headers->get('x-vendor-secret'),
             'customerId' => $request->customerId,
         ]);
 
