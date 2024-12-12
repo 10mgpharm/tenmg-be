@@ -95,27 +95,40 @@ class LoanApplicationRepository
     {
         $query = LoanApplication::query();
 
-        if (isset($criteria['search'])) {
-            $query->whereHas('customer', function ($q) use ($criteria) {
-                $q->where('email', 'like', '%'.$criteria['search'].'%');
+        $query->join('credit_customers', 'credit_customers.id', '=', 'credit_applications.customer_id');
+
+        $query->when(isset($criteria['search']), function ($query) use ($criteria) {
+            $searchTerm = "%{$criteria['search']}%";
+            return $query->where(function ($query) use ($searchTerm) {
+                $query->where('credit_applications.identifier', 'like', $searchTerm)
+                    ->orWhereHas('customer', function ($q) use ($searchTerm) {
+                        $q->where('email', 'like', $searchTerm)->orWhere('name', 'like', $searchTerm);
+                    });
             });
-        }
+        });
 
-        if (isset($criteria['search'])) {
-            $query->where('identifier', 'like', '%'.$criteria['search'].'%');
-        }
+        $query->when(
+            isset($criteria['dateFrom']) && isset($criteria['dateTo']),
+            function ($query) use ($criteria) {
+                // Parse dates with Carbon to ensure proper format
+                $dateFrom = \Carbon\Carbon::parse($criteria['dateFrom'])->startOfDay();
+                $dateTo = \Carbon\Carbon::parse($criteria['dateTo'])->endOfDay();
 
-        if (isset($criteria['dateFrom']) && isset($criteria['dateTo'])) {
-            $query->whereBetween('created_at', [$criteria['dateFrom'], $criteria['dateTo']]);
-        }
-        if (isset($criteria['status'])) {
-            $query->where('status', $criteria['status']);
-        }
-        if (isset($criteria['businessId'])) {
-            $query->where('business_id', $criteria['businessId']);
-        }
+                return $query->whereBetween('credit_applications.created_at', [$dateFrom, $dateTo]);
+            }
+        );
 
-        $query->orderBy('created_at', 'desc');
+        $query->when(isset($criteria['status']), function ($query) use ($criteria) {
+            return $query->where('credit_applications.status', $criteria['status']);
+        });
+
+        // $query->when(isset($criteria['businessId']), function ($query) use ($criteria) {
+        //     return $query->where('credit_applications.business_id', $criteria['businessId']);
+        // });
+
+        $query->orderBy('credit_applications.created_at', 'desc');
+
+        $query->select('credit_applications.*');
 
         return $query->paginate($perPage);
     }
