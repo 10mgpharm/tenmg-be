@@ -40,38 +40,6 @@ class AffordabilitySeeder extends Seeder
                 'active' => true,
                 'is_default' => false,
             ],
-            // [
-            //     'lower_bound' => 50,
-            //     'upper_bound' => 65,
-            //     'base_amount' => 10000,
-            //     'max_amount' => 500000,
-            //     'active' => true,
-            //     'is_default' => false,
-            // ],
-            // [
-            //     'lower_bound' => 66,
-            //     'upper_bound' => 70,
-            //     'base_amount' => 10000,
-            //     'max_amount' => 600000,
-            //     'active' => true,
-            //     'is_default' => false,
-            // ],
-            // [
-            //     'lower_bound' => 71,
-            //     'upper_bound' => 90,
-            //     'base_amount' => 10000,
-            //     'max_amount' => 1000000,
-            //     'active' => true,
-            //     'is_default' => false,
-            // ],
-            // [
-            //     'lower_bound' => 90,
-            //     'upper_bound' => 100,
-            //     'base_amount' => 10000,
-            //     'max_amount' => 5000000,
-            //     'active' => true,
-            //     'is_default' => false,
-            // ],
         ];
 
         Affordability::insert($data);
