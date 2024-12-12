@@ -40,7 +40,7 @@ class BusinessSettingAccountSetupRequest extends FormRequest
                 'max:255',
                 Rule::unique('businesses', 'license_number')->ignore($this->user()->id, 'owner_id'),
             ],
-            'expiry_date' => ['required', 'string', 'date'],
+            'expiry_date' => ['required', 'date'],
             'cacDocument' => [
                 'sometimes',
                 'nullable',
