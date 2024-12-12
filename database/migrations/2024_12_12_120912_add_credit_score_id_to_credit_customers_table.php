@@ -11,8 +11,8 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('credit_affordabilities', function (Blueprint $table) {
-            $table->string('category')->after('upper_bound')->nullable();
+        Schema::table('credit_customers', function (Blueprint $table) {
+            $table->integer('credit_score_id')->after('identifier')->nullable();
         });
     }
 
@@ -21,8 +21,8 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('credit_affordabilities', function (Blueprint $table) {
-            $table->dropColumn('category');
+        Schema::table('credit_customers', function (Blueprint $table) {
+            $table->dropColumn('credit_score_id');
         });
     }
 };
