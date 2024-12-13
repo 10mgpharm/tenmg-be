@@ -54,4 +54,9 @@ class Customer extends Model
             $model->identifier = UtilityHelper::generateSlug('CUS');
         });
     }
+
+    public function creditScore()
+    {
+        return $this->hasOne(CreditScore::class, 'id', 'credit_score_id')->latest();
+    }
 }

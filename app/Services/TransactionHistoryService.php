@@ -192,11 +192,15 @@ class TransactionHistoryService implements ITxnHistoryService
             // 6. Calculate affordability using credit score percent
             $affordability = $this->affordabilityService->calculateAffordability($creditScore['score_percent']);
 
+            // 7. Get affordability category
+            $category = $this->affordabilityService->getAffordabilityCategories($creditScore['score_percent']);
+
             // 7. Store the credit score result in the credit_scores table
-            $this->creditScoreRepository->store([
+            $creditScore = $this->creditScoreRepository->store([
                 'business_id' => $txnHistoryEvaluation->business_id,
                 'customer_id' => $txnHistoryEvaluation->customer_id,
                 'txn_evaluation_id' => $txnHistoryEvaluation->id,
+                'category' => $category,
                 'business_rule_json' => json_encode($activeRules),
                 'credit_score_result' => json_encode($creditScore),
                 'score_percent' => $creditScore['score_percent'],
@@ -206,6 +210,8 @@ class TransactionHistoryService implements ITxnHistoryService
                 'source' => 'API',
                 'affordability' => json_encode($affordability),
             ]);
+
+            $this->creditScoreRepository->updateCreditScore($txnHistoryEvaluation->customer_id, $creditScore->id);
 
             // Logging evaluation success or failure
             $this->activityLogService->logActivity(

@@ -24,6 +24,7 @@ class CreditScore extends Model
         'score_total',
         'created_by_id',
         'source',
+        'category'
     ];
 
     public function creditEvaluation()

@@ -6,6 +6,7 @@ use App\Helpers\UtilityHelper;
 use App\Http\Resources\LoadApplicationResource;
 use App\Models\Business;
 use App\Models\LoanApplication;
+use App\Settings\CreditSettings;
 use Illuminate\Http\Request;
 use Laravel\Passport\Token;
 use Lcobucci\JWT\Parser;
@@ -157,10 +158,16 @@ class LoanApplicationRepository
         // $vendor = $application->business;
         // $customer = $application->customer;
 
+        $creditSettings = new CreditSettings();
+
+
         $data = [
             'application' => new LoadApplicationResource($application),
             'bvnStatus' => false,
-            'accountMandateStatus' => false
+            'accountMandateStatus' => false,
+            'interestConfig' => [
+                'rate' => $creditSettings->interest_config
+            ]
         ];
 
         return $data;
