@@ -14,6 +14,15 @@ class AffordabilitySeeder extends Seeder
     {
         $data = [
             [
+                'lower_bound' => 0,
+                'upper_bound' => 34,
+                'base_amount' => 0,
+                'max_amount' => 0,
+                'category' => 'D',
+                'active' => true,
+                'is_default' => false,
+            ],
+            [
                 'lower_bound' => 35,
                 'upper_bound' => 49,
                 'base_amount' => 10000,

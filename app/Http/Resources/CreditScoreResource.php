@@ -20,7 +20,7 @@ class CreditScoreResource extends JsonResource
             'creditScoreResult'=> json_decode($this->credit_score_result),
             'affordability' => json_decode($this->affordability),
             'evaluation' => json_decode($this->creditEvaluation->evaluation_result),
-            'customer' => $this->customer,
+            'customer' => new CreditCustomerResource($this->customer),
             'vendor' => $this->vendor,
             'created_at' => $this->created_at->format('Y-m-d H:i:s'),
             'updated_at' => $this->updated_at->format('Y-m-d H:i:s'),
