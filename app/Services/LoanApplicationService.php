@@ -74,10 +74,10 @@ class LoanApplicationService
     public function sendApplicationLink(array $data)
     {
 
-        $mandate = DebitMandate::where('customer_id', $data['customerId'])->first();
-        if (! $mandate) {
-            throw new Exception('Customer does not have a debit mandate', Response::HTTP_BAD_REQUEST);
-        }
+        // $mandate = DebitMandate::where('customer_id', $data['customerId'])->first();
+        // if (! $mandate) {
+        //     throw new Exception('Customer does not have a debit mandate', Response::HTTP_BAD_REQUEST);
+        // }
 
         $customer = Customer::find($data['customerId']);
         if ($customer->credit_score_id == null) {
