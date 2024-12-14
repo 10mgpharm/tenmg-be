@@ -90,8 +90,8 @@ class UpdateEcommerceProductRequest extends FormRequest
             'measurement_name' => ['sometimes',  'nullable', 'string', 'max:255'],
             'presentation_name' => ['sometimes',  'nullable', 'string', 'max:255'],
             'package_name' => ['sometimes',  'nullable', 'string', 'max:255'],
-            'strength_value' => ['sometimes',  'nullable', 'numeric',],
-            'weight' => ['sometimes',  'nullable', 'numeric'],
+            'strength_value' => ['sometimes',  'nullable', 'string', 'max:255',],
+            'weight' => ['sometimes',  'nullable', 'numeric', 'min:0'],
 
             // Product Inventory
             'quantity' => ['sometimes',  'nullable', 'integer', 'min:1'],

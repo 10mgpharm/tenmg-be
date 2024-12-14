@@ -73,8 +73,9 @@ class StoreEcommerceProductRequest extends FormRequest
             'measurement_name' => ['required', 'string', 'max:255'],
             'presentation_name' => ['required', 'string', 'max:255'],
             'package_name' => ['required', 'string', 'max:255'],
-            'strength_value' => ['required', 'numeric'],
-            'weight' => ['required', 'numeric',],
+            'strength_value' => ['required',  'string', 'max:255'],
+
+            'weight' => ['required', 'numeric', 'min:0'],
 
             // Product Inventory
             'quantity' => ['required', 'integer', 'min:1'],
