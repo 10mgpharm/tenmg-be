@@ -119,7 +119,7 @@ class EcommerceProductService implements IEcommerceProductService
                 $variation = EcommerceMedicationVariation::firstOrCreate(
                     [
                         'weight' => $validated['weight'],
-                        'strength_value' => $validated['strength_value'],
+                        'strength_value' => (int) preg_replace('/\D/', '', $validated['strength_value']) ?: 0,
                         'strength' => $validated['strength_value'],
                         'ecommerce_presentation_id' => $presentation->id,
                         'ecommerce_package_id' => $package->id,
@@ -305,15 +305,17 @@ class EcommerceProductService implements IEcommerceProductService
 
 
                 // Ensure variation exists or create it
-                if (!empty($validated['weight']) || !empty($validated['strength_value'])) {
+                if (!empty($validated['weight']) && !empty($validated['strength_value'])) {
+
                     $variation = EcommerceMedicationVariation::firstOrCreate(
                         array_filter([ // Include only non-empty keys
-                            'weight' => $validated['weight'] ?? null,
-                            'strength_value' => $validated['strength_value'] ?? null,
+                            'weight' => $validated['weight'],
+                            'strength_value' => (int) preg_replace('/\D/', '', $validated['strength_value']) ?: 0,
+                            'strength' => $validated['strength_value'],
                             'ecommerce_presentation_id' => $presentation->id ?? null,
                             'ecommerce_package_id' => $package->id ?? null,
                             'ecommerce_medication_type_id' => $medicationType->id ?? null,
-                        ]),
+                        ], fn($each) => $each !== null && $each !== false),
                         [
                             'business_id' => $business?->id,
                             'updated_by_id' => $user->id,
