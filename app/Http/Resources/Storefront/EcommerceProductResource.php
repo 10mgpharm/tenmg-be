@@ -17,6 +17,7 @@ class EcommerceProductResource extends JsonResource
         return [
             'id' => $this->id,
             'name' => $this->name,
+            'description' => $this->description,
             'quantity' => $this->quantity,
             'actualPrice' => $this->actual_price,
             'discountPrice' => $this->discount_price,
