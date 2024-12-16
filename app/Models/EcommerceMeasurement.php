@@ -49,4 +49,12 @@ class EcommerceMeasurement extends Model
     protected $casts = [
         'active' => 'boolean',
     ];
+
+    /**
+     * Get the products associated with this measurement
+     */
+    public function products()
+    {
+        return $this->hasMany(EcommerceProduct::class)->latest();
+    }
 }
