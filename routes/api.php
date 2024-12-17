@@ -10,6 +10,10 @@ use App\Http\Controllers\API\Admin\BusinessLicenseController;
 use App\Http\Controllers\API\Admin\CarouselImageController;
 use App\Http\Controllers\API\Admin\EcommerceBrandController as AdminEcommerceBrandController;
 use App\Http\Controllers\API\Admin\EcommerceCategoryController as AdminEcommerceCategoryController;
+use App\Http\Controllers\API\Admin\EcommerceMeasurementController as AdminEcommerceMeasurementController;
+use App\Http\Controllers\API\Admin\EcommerceMedicationVariationController as AdminEcommerceMedicationVariationController;
+use App\Http\Controllers\API\Admin\EcommercePackageController as AdminEcommercePackageController;
+use App\Http\Controllers\API\Admin\EcommercePresentationController as AdminEcommercePresentationController;
 use App\Http\Controllers\API\Admin\EcommerceProductController as AdminEcommerceProductController;
 use App\Http\Controllers\API\Admin\FaqController;
 use App\Http\Controllers\API\Admin\MedicationTypeController as AdminMedicationTypeController;
@@ -332,6 +336,10 @@ Route::prefix('v1')->group(function () {
                 Route::apiResource('medication-types', AdminMedicationTypeController::class);
                 Route::apiResource('notification', NotificationController::class);
                 Route::apiResource('categories', AdminEcommerceCategoryController::class);
+                Route::apiResource('measurements', AdminEcommerceMeasurementController::class);
+                Route::apiResource('presentations', AdminEcommercePresentationController::class);
+                Route::apiResource('packages', AdminEcommercePackageController::class);
+                Route::apiResource('medication-variations', AdminEcommerceMedicationVariationController::class);
 
                 Route::get('products/search', [AdminEcommerceProductController::class, 'search']);
                 Route::apiResource('products', AdminEcommerceProductController::class);

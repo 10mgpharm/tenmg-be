@@ -38,7 +38,7 @@ class EcommerceMedicationVariationService implements IEcommerceMedicationVariati
                         'ecommerce_package_id' => $package->id,
                         'ecommerce_medication_type_id' => $medicationType->id,
                         'business_id' => $business?->id,
-                        'updated_by_id' => $user->id,
+                        'created_by_id' => $user->id,
                         'status' => $user->hasRole('admin') ? StatusEnum::ACTIVE->value : StatusEnum::APPROVED->value,
                         'active' => true,
                     ]
