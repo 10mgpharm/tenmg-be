@@ -54,6 +54,10 @@ class TransactionHistoryRepository
             return $query->where('credit_txn_history_evaluations.customer_id', $filters['customerId']);
         });
 
+        $query->when(isset($filters['dateFrom']) && isset($filters['dateTo']), function ($query) use ($filters) {
+            return $query->whereBetween('credit_txn_history_evaluations.created_at', [$filters['dateFrom'], $filters['dateTo']]);
+        });
+
         $query->orderBy('credit_txn_history_evaluations.created_at', 'desc');
 
         // Prevent column conflicts by selecting specific fields
