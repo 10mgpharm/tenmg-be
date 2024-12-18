@@ -44,8 +44,8 @@ class CarouselImageService implements ICarouselImageService
 
                 // Create the carousel image record
                 $carousel_image = CarouselImage::create([
-                    'title' => $validated['title'],
-                    'description' => $validated['description'],
+                    'title' => $validated['title'] ?? null,
+                    'description' => $validated['description'] ?? null,
                     'created_by_id' => $user->id,
                 ]);
 
