@@ -5,6 +5,7 @@ namespace App\Http\Controllers\API\Admin;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\DeleteEcommerceProductRequest;
 use App\Http\Requests\Admin\ListEcommerceProductRequest;
+use App\Http\Requests\Admin\ShowEcommerceProductRequest;
 use App\Http\Requests\Admin\StoreEcommerceProductRequest;
 use App\Http\Requests\Admin\UpdateEcommerceProductRequest;
 use App\Http\Resources\EcommerceProductResource;
@@ -54,6 +55,24 @@ class EcommerceProductController extends Controller
             message: 'Product successfully created.',
             data: new EcommerceProductResource($product)
         );
+    }
+
+    /**
+     * Show an ecommerce product.
+     *
+     * @param ShowEcommerceProductRequest $request
+     * @return JsonResponse
+     */
+    public function show(ShowEcommerceProductRequest $request, EcommerceProduct $product): JsonResponse
+    {
+        return $product
+            ? $this->returnJsonResponse(
+                message: 'Product successfully fetched.',
+                data: new EcommerceProductResource($product)
+            )
+            : $this->returnJsonResponse(
+                message: 'Oops, can\'t view product at the moment. Please try again later.'
+            );
     }
 
     /**

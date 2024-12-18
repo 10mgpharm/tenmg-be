@@ -5,6 +5,7 @@ namespace App\Http\Controllers\API\Admin;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\DeleteEcommerceBrandRequest;
 use App\Http\Requests\Admin\ListEcommerceBrandRequest;
+use App\Http\Requests\Admin\ShowEcommerceBrandRequest;
 use App\Http\Requests\Admin\StoreEcommerceBrandRequest;
 use App\Http\Requests\Admin\UpdateEcommerceBrandRequest;
 use App\Http\Resources\EcommerceBrandResource;
@@ -91,6 +92,24 @@ class EcommerceBrandController extends Controller
             message: 'Brand successfully updated.',
             data: new EcommerceBrandResource($brand->refresh())
         );
+    }
+
+    /**
+     * Show an ecommerce brand.
+     *
+     * @param ShowEcommerceBrandRequest $request
+     * @return JsonResponse
+     */
+    public function show(ShowEcommerceBrandRequest $request, EcommerceBrandResource $brand): JsonResponse
+    {
+        return $brand
+            ? $this->returnJsonResponse(
+                message: 'Brand successfully fetched.',
+                data: new EcommerceBrandResource($brand)
+            )
+            : $this->returnJsonResponse(
+                message: 'Oops, can\'t view brand at the moment. Please try again later.'
+            );
     }
 
     /**

@@ -5,6 +5,7 @@ namespace App\Http\Controllers\API\Supplier;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Supplier\DeleteEcommerceCategoryRequest;
 use App\Http\Requests\Supplier\ListEcommerceCategoryRequest;
+use App\Http\Requests\Supplier\ShowEcommerceCategoryRequest;
 use App\Http\Requests\Supplier\StoreEcommerceCategoryRequest;
 use App\Http\Requests\Supplier\UpdateEcommerceCategoryRequest;
 use App\Http\Resources\EcommerceCategoryResource;
@@ -64,6 +65,25 @@ class EcommerceCategoryController extends Controller
             data: new EcommerceCategoryResource($category)
         );
     }
+
+    /**
+     * Show an ecommerce category.
+     *
+     * @param ShowEcommerceCategoryRequest $request
+     * @return JsonResponse
+     */
+    public function show(ShowEcommerceCategoryRequest $request, EcommerceCategory $category): JsonResponse
+    {
+        return $category
+            ? $this->returnJsonResponse(
+                message: 'Category successfully fetched.',
+                data: new EcommerceCategoryResource($category)
+            )
+            : $this->returnJsonResponse(
+                message: 'Oops, can\'t view category at the moment. Please try again later.'
+            );
+    }
+
 
     /**
      * Update an existing ecommerce category.
