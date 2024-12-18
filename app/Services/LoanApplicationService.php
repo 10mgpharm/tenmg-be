@@ -22,7 +22,6 @@ class LoanApplicationService
     public function __construct(
         private LoanApplicationRepository $loanApplicationRepository,
         private AuthService $authService,
-        private ApiKeyRepository $apiKeyRepository,
         private NotificationService $notificationService,
     ) {}
 
@@ -73,11 +72,6 @@ class LoanApplicationService
     // Submit Loan Application link
     public function sendApplicationLink(array $data)
     {
-
-        // $mandate = DebitMandate::where('customer_id', $data['customerId'])->first();
-        // if (! $mandate) {
-        //     throw new Exception('Customer does not have a debit mandate', Response::HTTP_BAD_REQUEST);
-        // }
 
         $customer = Customer::find($data['customerId']);
         if ($customer->credit_score_id == null) {
