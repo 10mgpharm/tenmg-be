@@ -22,7 +22,6 @@ class LoanApplicationService
     public function __construct(
         private LoanApplicationRepository $loanApplicationRepository,
         private AuthService $authService,
-        // private ApiKeyRepository $apiKeyRepository,
         private NotificationService $notificationService,
     ) {}
 
