@@ -63,6 +63,9 @@ class BusinessSettingController extends Controller
      */
     public function license(BusinessSettingAccountSetupRequest $request)
     {
+
+        $admins = User::role('admin')->get();
+
         $validated = $request->validated();
         $user = $request->user();
 
@@ -80,17 +83,25 @@ class BusinessSettingController extends Controller
             );
 
             $data['cac_document_id'] = $created->id;
+            $data['expiry_date'] = $request->expiryDate;
         }
 
         $updated = $user->ownerBusinessType()->update($data);
         if ($updated) {
             $user->ownerBusinessType()->update([
-                'license_verification_status' => 'PENDING',
+                'license_verification_status' => 'PENDING'
             ]);
         }
 
         $ownerBusiness = $user->ownerBusinessType()->first();
         $licenseFile = $ownerBusiness->cac ?? null;
+
+        $user->sendLicenseVerificationNotification('Your request has been received and is currently under review. You will receive a response from us shortly.');
+
+        //send mail to all the admins
+        foreach ($admins as $admin) {
+            $admin->sendLicenseVerificationNotification('A license verification request has been submitted and is now awaiting your review.');
+        }
 
         return $this->returnJsonResponse(
             message: 'Business license successfully updated.',

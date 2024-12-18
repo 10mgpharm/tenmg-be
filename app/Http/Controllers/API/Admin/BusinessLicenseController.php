@@ -27,6 +27,7 @@ class BusinessLicenseController extends Controller
      */
     public function index(ListBusinessLicenseRequest $request): JsonResponse
     {
+
         $businesses = $this->licenseService->index($request);
 
         return $this->returnJsonResponse(
