@@ -49,4 +49,13 @@ class EcommercePresentation extends Model
     protected $casts = [
         'active' => 'boolean',
     ];
+
+
+    /**
+     * Get the products associated with this presentation
+     */
+    public function products()
+    {
+        return $this->hasMany(EcommerceProduct::class)->latest();
+    }
 }

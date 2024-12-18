@@ -10,6 +10,10 @@ use App\Http\Controllers\API\Admin\BusinessLicenseController;
 use App\Http\Controllers\API\Admin\CarouselImageController;
 use App\Http\Controllers\API\Admin\EcommerceBrandController as AdminEcommerceBrandController;
 use App\Http\Controllers\API\Admin\EcommerceCategoryController as AdminEcommerceCategoryController;
+use App\Http\Controllers\API\Admin\EcommerceMeasurementController as AdminEcommerceMeasurementController;
+use App\Http\Controllers\API\Admin\EcommerceMedicationVariationController as AdminEcommerceMedicationVariationController;
+use App\Http\Controllers\API\Admin\EcommercePackageController as AdminEcommercePackageController;
+use App\Http\Controllers\API\Admin\EcommercePresentationController as AdminEcommercePresentationController;
 use App\Http\Controllers\API\Admin\EcommerceProductController as AdminEcommerceProductController;
 use App\Http\Controllers\API\Admin\FaqController;
 use App\Http\Controllers\API\Admin\MedicationTypeController as AdminMedicationTypeController;
@@ -31,6 +35,10 @@ use App\Http\Controllers\API\Storefront\ProductController;
 use App\Http\Controllers\API\Storefront\StorefrontController;
 use App\Http\Controllers\API\Supplier\EcommerceBrandController as SupplierEcommerceBrandController;
 use App\Http\Controllers\API\Supplier\EcommerceCategoryController as SupplierEcommerceCategoryController;
+use App\Http\Controllers\API\Supplier\EcommerceMeasurementController as SupplierEcommerceMeasurementController;
+use App\Http\Controllers\API\Supplier\EcommerceMedicationVariationController as SupplierEcommerceMedicationVariationController;
+use App\Http\Controllers\API\Supplier\EcommercePackageController as SupplierEcommercePackageController;
+use App\Http\Controllers\API\Supplier\EcommercePresentationController as SupplierEcommercePresentationController;
 use App\Http\Controllers\API\Supplier\EcommerceProductController as SupplierEcommerceProductController;
 use App\Http\Controllers\API\Supplier\MedicationTypeController as SupplierMedicationTypeController;
 use App\Http\Controllers\API\Webhooks\PaystackWebhookController;
@@ -136,6 +144,10 @@ Route::prefix('v1')->group(function () {
             Route::apiResource('medication-types', SupplierMedicationTypeController::class);
             Route::apiResource('categories', SupplierEcommerceCategoryController::class);
             Route::apiResource('brands', SupplierEcommerceBrandController::class);
+            Route::apiResource('measurements', SupplierEcommerceMeasurementController::class);
+            Route::apiResource('presentations', SupplierEcommercePresentationController::class);
+            Route::apiResource('packages', SupplierEcommercePackageController::class);
+            Route::apiResource('medication-variations', SupplierEcommerceMedicationVariationController::class);
 
         });
 
@@ -324,6 +336,10 @@ Route::prefix('v1')->group(function () {
                 Route::apiResource('medication-types', AdminMedicationTypeController::class);
                 Route::apiResource('notification', NotificationController::class);
                 Route::apiResource('categories', AdminEcommerceCategoryController::class);
+                Route::apiResource('measurements', AdminEcommerceMeasurementController::class);
+                Route::apiResource('presentations', AdminEcommercePresentationController::class);
+                Route::apiResource('packages', AdminEcommercePackageController::class);
+                Route::apiResource('medication-variations', AdminEcommerceMedicationVariationController::class);
 
                 Route::get('products/search', [AdminEcommerceProductController::class, 'search']);
                 Route::apiResource('products', AdminEcommerceProductController::class);

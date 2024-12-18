@@ -59,4 +59,44 @@ class EcommerceMedicationVariation extends Model
     protected $casts = [
         'active' => 'boolean',
     ];
+
+    /**
+     * Get the products associated with this medication variation
+     */
+    public function products()
+    {
+        return $this->hasMany(EcommerceProduct::class, 'ecommerce_variation_id')->latest();
+    }
+
+    /**
+     * Get the presentation associated with the medication variation.
+     */
+    public function presentation()
+    {
+        return $this->belongsTo(EcommercePresentation::class, 'ecommerce_presentation_id');
+    }
+
+    /**
+     * Get the package associated with the medication variation.
+     */
+    public function package()
+    {
+        return $this->belongsTo(EcommercePackage::class, 'ecommerce_package_id');
+    }
+
+    /**
+     * Get the medication type associated with the variation.
+     */
+    public function medicationType()
+    {
+        return $this->belongsTo(EcommerceMedicationType::class, 'ecommerce_medication_type_id');
+    }
+
+    /**
+     * Get the business associated with the variation.
+     */
+    public function business()
+    {
+        return $this->belongsTo(Business::class, 'business_id');
+    }
 }

@@ -49,4 +49,12 @@ class EcommercePackage extends Model
     protected $casts = [
         'active' => 'boolean',
     ];
+
+    /**
+     * Get the products associated with this package
+     */
+    public function products()
+    {
+        return $this->hasMany(EcommerceProduct::class)->latest();
+    }
 }

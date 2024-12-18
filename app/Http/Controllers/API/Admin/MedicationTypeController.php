@@ -5,6 +5,7 @@ namespace App\Http\Controllers\API\Admin;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\DeleteEcommerceMedicationRequest;
 use App\Http\Requests\Admin\ListMedicationTypeRequest;
+use App\Http\Requests\Admin\ShowEcommerceMedicationTypeRequest;
 use App\Http\Requests\Admin\StoreEcommerceMedicationRequest;
 use App\Http\Requests\Admin\UpdateEcommerceMedicationRequest;
 use App\Http\Resources\EcommerceMedicationTypeResource;
@@ -62,6 +63,24 @@ class MedicationTypeController extends Controller
             message: 'Medication type successfully created.',
             data: new EcommerceMedicationTypeResource($medicationType)
         );
+    }
+
+    /**
+     * Show an ecommerce medication type.
+     *
+     * @param ShowEcommerceMedicationTypeRequest $request
+     * @return JsonResponse
+     */
+    public function show(ShowEcommerceMedicationTypeRequest $request, EcommerceMedicationType $medication_type): JsonResponse
+    {
+        return $medication_type
+            ? $this->returnJsonResponse(
+                message: 'Medication type successfully fetched.',
+                data: new EcommerceMedicationTypeResource($medication_type)
+            )
+            : $this->returnJsonResponse(
+                message: 'Oops, can\'t view medication type at the moment. Please try again later.'
+            );
     }
 
     /**

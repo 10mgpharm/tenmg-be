@@ -49,8 +49,8 @@ class AuditLogController extends Controller
             $query->where('event', 'LIKE', '%'.$event.'%');
         }
 
-        if ($ip = $request->input('ip')) {
-            $query->where('ip', 'LIKE', '%'.$ip.'%');
+        if ($ip = $request->input('ip') || $ip = $request->input('ipAddress')) {
+            $query->where('ip_address', 'LIKE', '%'.$ip.'%');
         }
 
         $from_ate = $request->input('from_ate');
