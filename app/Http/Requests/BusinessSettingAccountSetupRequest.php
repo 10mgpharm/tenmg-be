@@ -24,6 +24,7 @@ class BusinessSettingAccountSetupRequest extends FormRequest
             'license_number' => $this->input('licenseNumber'),
             'expiry_date' => $this->input('expiryDate'),
         ]);
+
     }
 
     /**
