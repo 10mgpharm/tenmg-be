@@ -20,12 +20,10 @@ class EcommerceMeasurementController extends Controller
 
     /**
      * List all ecommerce measurements.
-     *
-     * @param ListEcommerceMeasurementRequest $request
-     * @return JsonResponse
      */
     public function index(ListEcommerceMeasurementRequest $request): JsonResponse
     {
+        // TODO: remove pagination
         $measurements = EcommerceMeasurement::latest()->paginate();
 
         return $this->returnJsonResponse(
@@ -36,9 +34,6 @@ class EcommerceMeasurementController extends Controller
 
     /**
      * Store a new ecommerce measurement.
-     *
-     * @param StoreEcommerceMeasurementRequest $request
-     * @return JsonResponse
      */
     public function store(StoreEcommerceMeasurementRequest $request): JsonResponse
     {
@@ -59,9 +54,6 @@ class EcommerceMeasurementController extends Controller
 
     /**
      * Show an ecommerce measurement.
-     *
-     * @param ShowEcommerceMeasurementRequest $request
-     * @return JsonResponse
      */
     public function show(ShowEcommerceMeasurementRequest $request, EcommerceMeasurement $measurement): JsonResponse
     {
@@ -77,10 +69,6 @@ class EcommerceMeasurementController extends Controller
 
     /**
      * Update an existing ecommerce measurement.
-     *
-     * @param UpdateEcommerceMeasurementRequest $request
-     * @param EcommerceMeasurement $measurement
-     * @return JsonResponse
      */
     public function update(UpdateEcommerceMeasurementRequest $request, EcommerceMeasurement $measurement): JsonResponse
     {
@@ -102,10 +90,6 @@ class EcommerceMeasurementController extends Controller
 
     /**
      * Delete an ecommerce measurement.
-     *
-     * @param DeleteEcommerceMeasurementRequest $request
-     * @param EcommerceMeasurement $measurement
-     * @return JsonResponse
      */
     public function destroy(DeleteEcommerceMeasurementRequest $request, EcommerceMeasurement $measurement): JsonResponse
     {
