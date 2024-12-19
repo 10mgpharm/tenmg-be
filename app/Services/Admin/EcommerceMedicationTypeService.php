@@ -3,6 +3,7 @@
 namespace App\Services\Admin;
 
 use App\Enums\StatusEnum;
+use App\Helpers\UtilityHelper;
 use App\Models\EcommerceMeasurement;
 use App\Models\EcommerceMedicationType;
 use App\Models\EcommercePresentation;
@@ -29,28 +30,26 @@ class EcommerceMedicationTypeService implements IEcommerceMedicationTypeService
             // Start a database transaction
             return DB::transaction(function () use ($validated, $user) {
 
+                // Doc: when business is null that means the medication and its dependencies are for global used and created by admin
+                if ($user && $user->hasRole('admin')) {
+                    $validated['business_id'] = null;
+                } else {
+                    $validated['business_id'] = $user->ownerBusinessType?->id ?: $user->businesses()
+                        ->firstWhere('user_id', $user->id)?->id;
+                }
+
                 // create medication type
                 $medication_type = $user->medicationTypes()->create([
                     'name' => $validated['name'],
                     'status' => $validated['status'] ?? StatusEnum::APPROVED->value,
                     'active' => $validated['active'] ?? false,
-                    'slug' => Str::slug($validated['name']),
-                    'business_id' => $user->ownerBusinessType?->id ?: $user->businesses()
-                        ->firstWhere('user_id', $user->id)?->id,
+                    'slug' => UtilityHelper::generateSlug('MDT'),
+                    'business_id' => $validated['business_id'],
                 ]);
 
                 // create variations for that medication type
                 if (isset($validated['variations'])) {
                     foreach ($validated['variations'] as $variation) {
-                        // check if variation already exists
-                        $existing_variation = $medication_type->variations()
-                            ->where('name', $variation['name'])
-                            ->first();
-
-                        if ($existing_variation) {
-                            continue;
-                        }
-
                         $presentation_id = null;
                         $presentationCheck = EcommercePresentation::where('name', $variation['presentation'])->first();
                         if ($presentationCheck) {
@@ -58,9 +57,9 @@ class EcommerceMedicationTypeService implements IEcommerceMedicationTypeService
                         } else {
                             $presentation_id = EcommercePresentation::create([
                                 'name' => $variation['presentation'],
-                                'active' => 'PENDING',
-                                'business_id' => $user->ownerBusinessType?->id ?: $user->businesses()
-                                    ->firstWhere('user_id', $user->id)?->id,
+                                'active' => 1,
+                                'status' => StatusEnum::APPROVED->value,
+                                'business_id' => $validated['business_id'],
                             ])->id;
                         }
 
@@ -71,33 +70,28 @@ class EcommerceMedicationTypeService implements IEcommerceMedicationTypeService
                         } else {
                             $measurement_id = EcommerceMeasurement::create([
                                 'name' => $variation['measurement'],
-                                'active' => 'PENDING',
-                                'business_id' => $user->ownerBusinessType?->id ?: $user->businesses()
-                                    ->firstWhere('user_id', $user->id)?->id,
+                                'active' => 1,
+                                'status' => StatusEnum::APPROVED->value,
+                                'business_id' => $validated['business_id'],
+                                'created_by_id' => $user->id,
                             ])->id;
                         }
 
                         $medication_type->variations()->create([
-                            'name' => $variation['name'],
                             'ecommerce_presentation_id' => $presentation_id,
-                            'measurement_id' => $measurement_id,
-                            'active' => $variation['active'],
-                            'status' => $variation['status'] ?? StatusEnum::APPROVED->value,
-                            'weight' => $variation['weight'],
+                            'ecommerce_measurement_id' => $measurement_id,
+                            'active' => 1,
+                            'status' => StatusEnum::APPROVED->value,
+                            'weight' => array_key_exists('weight', $variation) ? $variation['weight'] : null,
                             'strength_value' => $variation['strength_value'],
                             'package_per_roll' => $variation['package'],
+                            'business_id' => $validated['business_id'],
+                            'created_by_id' => $user->id,
                         ]);
                     }
                 }
 
-                return $user->medicationTypes()->create([
-                    ...$validated,
-                    'status' => $validated['status'] ?? StatusEnum::APPROVED->value,
-                    'active' => $validated['active'] ?? false,
-                    'slug' => Str::slug($validated['name']),
-                    'business_id' => $user->ownerBusinessType?->id ?: $user->businesses()
-                        ->firstWhere('user_id', $user->id)?->id,
-                ]);
+                return $medication_type;
             });
         } catch (Exception $e) {
             throw new Exception('Failed to create a medication type: '.$e->getMessage());

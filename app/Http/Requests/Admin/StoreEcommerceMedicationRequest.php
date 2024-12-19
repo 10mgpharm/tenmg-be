@@ -55,15 +55,15 @@ class StoreEcommerceMedicationRequest extends FormRequest
                     $name = $this->input('name');
                     $id = EcommerceMedicationType::where('name', $name)->value('id');
 
-                    // Check if the variation presentation already exists for the given name
-                    $exists = DB::table('variations')
-                        ->whereExists(function ($query) use ($value, $id) {
+                    // Check if the variation presentation already exists for the medication type $this->input('name');
+                    $exists = DB::table('ecommerce_medication_variations')
+                        ->whereExists(function ($query) use ($value) {
                             $query->select(DB::raw(1))
                                 ->from('ecommerce_presentations')
                                 ->where('ecommerce_presentations.name', $value)
-                                ->whereRaw('ecommerce_presentations.id = variations.ecommerce_presentation_id')
-                                ->whereRaw('variations.ecommerce_medication_type_id', $id);
+                                ->whereRaw('ecommerce_presentations.id = ecommerce_medication_variations.ecommerce_presentation_id');
                         })
+                        ->where('ecommerce_medication_type_id', $id)
                         ->first();
 
                     if ($exists) {
@@ -78,15 +78,15 @@ class StoreEcommerceMedicationRequest extends FormRequest
                     $name = $this->input('name');
                     $id = EcommerceMedicationType::where('name', $name)->value('id');
 
-                    // Check if the variation measurement already exists for the given name
-                    $exists = DB::table('variations')
-                        ->whereExists(function ($query) use ($value, $id) {
+                    // Check if the variation measurement already exists for the medication type $this->input('name');
+                    $exists = DB::table('ecommerce_medication_variations')
+                        ->whereExists(function ($query) use ($value) {
                             $query->select(DB::raw(1))
                                 ->from('ecommerce_measurements')
                                 ->where('ecommerce_measurements.name', $value)
-                                ->whereRaw('ecommerce_measurements.id = variations.ecommerce_measurement_id')
-                                ->whereRaw('variations.ecommerce_medication_type_id', $id);
+                                ->whereRaw('ecommerce_measurements.id = ecommerce_medication_variations.ecommerce_measurement_id');
                         })
+                        ->where('ecommerce_medication_type_id', $id)
                         ->first();
 
                     if ($exists) {

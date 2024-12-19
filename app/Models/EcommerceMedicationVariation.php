@@ -37,9 +37,8 @@ class EcommerceMedicationVariation extends Model
         'description',
         'weight',
         'status',
-        'active'
+        'active',
     ];
-
 
     /**
      * The model's default values for attributes.
@@ -77,11 +76,11 @@ class EcommerceMedicationVariation extends Model
     }
 
     /**
-     * Get the package associated with the medication variation.
+     * Get the presentation associated with the medication variation.
      */
-    public function package()
+    public function measurement()
     {
-        return $this->belongsTo(EcommercePackage::class, 'ecommerce_package_id');
+        return $this->belongsTo(EcommerceMeasurement::class, 'ecommerce_measurement_id');
     }
 
     /**

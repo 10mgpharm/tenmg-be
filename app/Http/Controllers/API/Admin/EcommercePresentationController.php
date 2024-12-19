@@ -23,12 +23,11 @@ class EcommercePresentationController extends Controller
      */
     public function index(ListEcommercePresentationRequest $request): JsonResponse
     {
-
-        $Presentations = EcommercePresentation::latest();
+        $presentations = EcommercePresentation::where('active', 1)->where('status', 'APPROVED')->get();
 
         return $this->returnJsonResponse(
-            message: 'Presentations successfully fetched.',
-            data: EcommercePresentationResource::collection($Presentations)->response()->getData(true)
+            message: 'Presentation successfully fetched.',
+            data: EcommercePresentationResource::collection($presentations)
         );
     }
 
