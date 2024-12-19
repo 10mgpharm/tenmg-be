@@ -20,12 +20,10 @@ class EcommercePresentationController extends Controller
 
     /**
      * List all ecommerce presentations.
-     *
-     * @param ListEcommercePresentationRequest $request
-     * @return JsonResponse
      */
     public function index(ListEcommercePresentationRequest $request): JsonResponse
     {
+        // TODO: remove pagination
         $Presentations = EcommercePresentation::latest()->paginate();
 
         return $this->returnJsonResponse(
@@ -36,9 +34,6 @@ class EcommercePresentationController extends Controller
 
     /**
      * Store a new ecommerce Presentation.
-     *
-     * @param StoreEcommercePresentationRequest $request
-     * @return JsonResponse
      */
     public function store(StoreEcommercePresentationRequest $request): JsonResponse
     {
@@ -59,9 +54,6 @@ class EcommercePresentationController extends Controller
 
     /**
      * Show an ecommerce presentation.
-     *
-     * @param ShowEcommercePresentationRequest $request
-     * @return JsonResponse
      */
     public function show(ShowEcommercePresentationRequest $request, EcommercePresentation $presentation): JsonResponse
     {
@@ -78,9 +70,7 @@ class EcommercePresentationController extends Controller
     /**
      * Update an existing ecommerce presentation.
      *
-     * @param UpdateEcommercePresentationRequest $request
-     * @param EcommercePresentation $presentation
-     * @return JsonResponse
+     * @param  EcommercePresentation  $presentation
      */
     public function update(UpdateEcommercePresentationRequest $request, EcommercePresentation $Presentation): JsonResponse
     {
@@ -103,9 +93,7 @@ class EcommercePresentationController extends Controller
     /**
      * Delete an ecommerce presentation.
      *
-     * @param DeleteEcommercePresentationRequest $request
-     * @param EcommercePresentation $presentation
-     * @return JsonResponse
+     * @param  EcommercePresentation  $presentation
      */
     public function destroy(DeleteEcommercePresentationRequest $request, EcommercePresentation $Presentation): JsonResponse
     {
