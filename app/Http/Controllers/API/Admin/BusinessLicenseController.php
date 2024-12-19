@@ -9,6 +9,7 @@ use App\Http\Resources\Admin\BusinessLicenseResource;
 use App\Models\Business;
 use App\Services\Admin\LicenseService;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Facades\DB;
 
 class BusinessLicenseController extends Controller
 {
@@ -30,9 +31,16 @@ class BusinessLicenseController extends Controller
 
         $businesses = $this->licenseService->index($request);
 
+        $counts = Business::select('type', DB::raw('count(*) as total'))
+    ->groupBy('type')
+    ->get();
+
         return $this->returnJsonResponse(
             message: 'business Licenses successfully fetched.',
-            data: BusinessLicenseResource::collection($businesses)->response()->getData(true)
+            data: [
+                "users" => BusinessLicenseResource::collection($businesses)->response()->getData(true),
+                "stats" => $counts
+                ]
         );
     }
 

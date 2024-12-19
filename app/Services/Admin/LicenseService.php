@@ -37,6 +37,12 @@ class LicenseService implements ILicenseService
             $query->where('license_number', 'LIKE', '%' . $licenseNumber . '%');
         }
 
+        if ($request->input('type') != null) {
+            if($request->input('type') != "all"){
+                $query->where('type', 'LIKE', '%' . $request->type . '%');
+            }
+        }
+
         return $query->latest()->paginate();
     }
 
