@@ -23,8 +23,8 @@ class EcommercePresentationController extends Controller
      */
     public function index(ListEcommercePresentationRequest $request): JsonResponse
     {
-        // TODO: remove pagination
-        $Presentations = EcommercePresentation::latest()->paginate();
+
+        $Presentations = EcommercePresentation::latest();
 
         return $this->returnJsonResponse(
             message: 'Presentations successfully fetched.',

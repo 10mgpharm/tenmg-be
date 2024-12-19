@@ -23,8 +23,7 @@ class EcommerceMeasurementController extends Controller
      */
     public function index(ListEcommerceMeasurementRequest $request): JsonResponse
     {
-        // TODO: remove pagination
-        $measurements = EcommerceMeasurement::latest()->paginate();
+        $measurements = EcommerceMeasurement::latest();
 
         return $this->returnJsonResponse(
             message: 'Measurements successfully fetched.',
