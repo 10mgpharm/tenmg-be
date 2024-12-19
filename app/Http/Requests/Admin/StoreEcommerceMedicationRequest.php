@@ -46,8 +46,8 @@ class StoreEcommerceMedicationRequest extends FormRequest
             ],
             // add array of variations to the payload
             'variations' => 'required|array|min:1',
-            'variations.*.strength_value' => 'required|string|min:1',
-            'variations.*.package' => 'required|string|min:1',
+            'variations.*.strength_value' => 'required|string',
+            'variations.*.package' => 'required|string',
             'variations.*.presentation' => [
                 'required',
                 'string',

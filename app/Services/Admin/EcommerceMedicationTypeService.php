@@ -11,6 +11,7 @@ use App\Models\User;
 use App\Services\Interfaces\IEcommerceMedicationTypeService;
 use Exception;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 
 class EcommerceMedicationTypeService implements IEcommerceMedicationTypeService
@@ -43,7 +44,7 @@ class EcommerceMedicationTypeService implements IEcommerceMedicationTypeService
                     'name' => $validated['name'],
                     'status' => $validated['status'] ?? StatusEnum::APPROVED->value,
                     'active' => $validated['active'] ?? false,
-                    'slug' => UtilityHelper::generateSlug('MDT'),
+                    'slug' => UtilityHelper::generateSlug('MED'),
                     'business_id' => $validated['business_id'],
                 ]);
 
@@ -76,6 +77,18 @@ class EcommerceMedicationTypeService implements IEcommerceMedicationTypeService
                                 'created_by_id' => $user->id,
                             ])->id;
                         }
+
+                        Log::info('presentation_id: ', [
+                            'ecommerce_presentation_id' => $presentation_id,
+                            'ecommerce_measurement_id' => $measurement_id,
+                            'active' => 1,
+                            'status' => StatusEnum::APPROVED->value,
+                            'weight' => array_key_exists('weight', $variation) ? $variation['weight'] : null,
+                            'strength_value' => $variation['strength_value'],
+                            'package_per_roll' => $variation['package'],
+                            'business_id' => $validated['business_id'],
+                            'created_by_id' => $user->id,
+                        ]);
 
                         $medication_type->variations()->create([
                             'ecommerce_presentation_id' => $presentation_id,
