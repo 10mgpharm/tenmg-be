@@ -46,26 +46,51 @@ class StoreEcommerceMedicationRequest extends FormRequest
             ],
             // add array of variations to the payload
             'variations' => 'required|array|min:1',
-            'variations.*' => [
+            'variations.*.strength_value' => 'required|string|min:1',
+            'variations.*.package' => 'required|string|min:1',
+            'variations.*.presentation' => [
                 'required',
                 'string',
-                'min:1',
                 function ($attribute, $value, $fail) {
                     $name = $this->input('name');
+                    $id = EcommerceMedicationType::where('name', $name)->value('id');
 
-                    // Check if the variation already exists for the given name
+                    // Check if the variation presentation already exists for the given name
                     $exists = DB::table('variations')
-                        ->where('name', $value)
-                        ->whereExists(function ($query) {
+                        ->whereExists(function ($query) use ($value, $id) {
                             $query->select(DB::raw(1))
-                                ->from('ecommerce_medication_types')
-                                ->whereRaw('ecommerce_medication_types.id = variations.ecommerce_medication_type_id')
-                                ->where('ecommerce_medication_types.name', $this->input('name'));
+                                ->from('ecommerce_presentations')
+                                ->where('ecommerce_presentations.name', $value)
+                                ->whereRaw('ecommerce_presentations.id = variations.ecommerce_presentation_id')
+                                ->whereRaw('variations.ecommerce_medication_type_id', $id);
                         })
-                        ->exists();
+                        ->first();
 
                     if ($exists) {
-                        $fail("The variation '{$value}' already exists for the name '{$name}'.");
+                        $fail("The presentation '{$value}' already exists for the name '{$name}'.");
+                    }
+                },
+            ],
+            'variations.*.measurement' => [
+                'required',
+                'string',
+                function ($attribute, $value, $fail) {
+                    $name = $this->input('name');
+                    $id = EcommerceMedicationType::where('name', $name)->value('id');
+
+                    // Check if the variation measurement already exists for the given name
+                    $exists = DB::table('variations')
+                        ->whereExists(function ($query) use ($value, $id) {
+                            $query->select(DB::raw(1))
+                                ->from('ecommerce_measurements')
+                                ->where('ecommerce_measurements.name', $value)
+                                ->whereRaw('ecommerce_measurements.id = variations.ecommerce_measurement_id')
+                                ->whereRaw('variations.ecommerce_medication_type_id', $id);
+                        })
+                        ->first();
+
+                    if ($exists) {
+                        $fail("The measurement '{$value}' already exists for the name '{$name}'.");
                     }
                 },
             ],

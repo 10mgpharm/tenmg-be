@@ -52,14 +52,13 @@ class EcommerceMedicationTypeService implements IEcommerceMedicationTypeService
                         }
 
                         $presentation_id = null;
-
-                        $presentationCheck =  EcommercePresentation::where('name', $variation['presentation'])->first();
+                        $presentationCheck = EcommercePresentation::where('name', $variation['presentation'])->first();
                         if ($presentationCheck) {
                             $presentation_id = $presentationCheck->id;
                         } else {
                             $presentation_id = EcommercePresentation::create([
                                 'name' => $variation['presentation'],
-                                'active' => "PENDING",
+                                'active' => 'PENDING',
                                 'business_id' => $user->ownerBusinessType?->id ?: $user->businesses()
                                     ->firstWhere('user_id', $user->id)?->id,
                             ])->id;
@@ -72,7 +71,7 @@ class EcommerceMedicationTypeService implements IEcommerceMedicationTypeService
                         } else {
                             $measurement_id = EcommerceMeasurement::create([
                                 'name' => $variation['measurement'],
-                                'active' => "PENDING",
+                                'active' => 'PENDING',
                                 'business_id' => $user->ownerBusinessType?->id ?: $user->businesses()
                                     ->firstWhere('user_id', $user->id)?->id,
                             ])->id;
@@ -85,8 +84,8 @@ class EcommerceMedicationTypeService implements IEcommerceMedicationTypeService
                             'active' => $variation['active'],
                             'status' => $variation['status'] ?? StatusEnum::APPROVED->value,
                             'weight' => $variation['weight'],
-                            'strength_value' => $variation['strengthValue'],
-                            'package_per_roll' => $variation['packagePerRoll'],
+                            'strength_value' => $variation['strength_value'],
+                            'package_per_roll' => $variation['package'],
                         ]);
                     }
                 }
