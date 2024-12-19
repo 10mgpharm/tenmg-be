@@ -3,7 +3,9 @@
 namespace App\Services\Admin;
 
 use App\Enums\StatusEnum;
+use App\Models\EcommerceMeasurement;
 use App\Models\EcommerceMedicationType;
+use App\Models\EcommercePresentation;
 use App\Models\User;
 use App\Services\Interfaces\IEcommerceMedicationTypeService;
 use Exception;
@@ -49,29 +51,42 @@ class EcommerceMedicationTypeService implements IEcommerceMedicationTypeService
                             continue;
                         }
 
-                        // TODO: Table changes
-                        // delete ecommerce_package_id column on ecommerce_medication_variations table
-                        // delete presentation column on ecommerce_medication_variations table
-                        // change strength to ecommerce_measurement_id as foreign key nullable on ecommerce_medication_variations table
+                        $presentation_id = null;
 
-                        //TODO: check if $variation[presentation] Danjuma exist
-                        // if exist, pick its id from ecommerce_presentations and use for ecommerce_presentation_id when inserting variation
-                        // Table ecommerce_presentations, foreign_key on variations is  ecommerce_presentation_id
+                        $presentationCheck =  EcommercePresentation::where('name', $variation['presentation'])->first();
+                        if ($presentationCheck) {
+                            $presentation_id = $presentationCheck->id;
+                        } else {
+                            $presentation_id = EcommercePresentation::create([
+                                'name' => $variation['presentation'],
+                                'active' => "PENDING",
+                                'business_id' => $user->ownerBusinessType?->id ?: $user->businesses()
+                                    ->firstWhere('user_id', $user->id)?->id,
+                            ])->id;
+                        }
 
-                        //TODO: check if $variation[measurement] Danjuma exist
-                        // if exist, pick its id from ecommerce_measurements and use for ecommerce_measurement_id  when inserting variation
-                        // Table ecommerce_measurements, foreign_key on variations is
+                        $measurement_id = null;
+                        $measurementCheck = EcommerceMeasurement::where('name', $variation['measurement'])->first();
+                        if ($measurementCheck) {
+                            $measurement_id = $measurementCheck->id;
+                        } else {
+                            $measurement_id = EcommerceMeasurement::create([
+                                'name' => $variation['measurement'],
+                                'active' => "PENDING",
+                                'business_id' => $user->ownerBusinessType?->id ?: $user->businesses()
+                                    ->firstWhere('user_id', $user->id)?->id,
+                            ])->id;
+                        }
 
                         $medication_type->variations()->create([
                             'name' => $variation['name'],
-                            // TODO: add necessary columns
-                            // ecommerce_presentation_id
-                            // ecommerce_measurement_id
-                            // -- strength_value
-                            // -- package_per_roll
-                            // -- weight
-                            // -- status
-                            // -- active
+                            'ecommerce_presentation_id' => $presentation_id,
+                            'measurement_id' => $measurement_id,
+                            'active' => $variation['active'],
+                            'status' => $variation['status'] ?? StatusEnum::APPROVED->value,
+                            'weight' => $variation['weight'],
+                            'strength_value' => $variation['strengthValue'],
+                            'package_per_roll' => $variation['packagePerRoll'],
                         ]);
                     }
                 }
