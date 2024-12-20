@@ -31,16 +31,9 @@ class BusinessLicenseController extends Controller
 
         $businesses = $this->licenseService->index($request);
 
-        $counts = Business::where('license_verification_status', 'PENDING')->select('type', DB::raw('count(*) as total'))
-    ->groupBy('type')
-    ->get();
-
         return $this->returnJsonResponse(
             message: 'business Licenses successfully fetched.',
-            data: [
-                "users" => BusinessLicenseResource::collection($businesses)->response()->getData(true),
-                "stats" => $counts
-                ]
+            data: $businesses
         );
     }
 
