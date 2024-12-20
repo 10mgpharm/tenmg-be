@@ -2,14 +2,13 @@
 
 namespace App\Http\Requests\Supplier;
 
-use App\Enums\StatusEnum;
+use App\Models\EcommercePackage;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
-use App\Models\EcommercePackage;
-use Illuminate\Validation\Rules\Enum;
 
 class UpdateEcommercePackageRequest extends FormRequest
-{/**
+{
+    /**
      * Determine if the user is authorized to make this request.
      */
     public function authorize(): bool
@@ -17,7 +16,7 @@ class UpdateEcommercePackageRequest extends FormRequest
         $user = $this->user();
         $package = $this->route('package');
 
-         // Suppliers can only update categories created by their business
+        // Suppliers can only update categories created by their business
         if ($user->hasRole('supplier') && $package->business_id === ($user->ownerBusinessType->id ?: $user->businesses()->first()->id)) {
             return true;
         }
@@ -41,17 +40,11 @@ class UpdateEcommercePackageRequest extends FormRequest
                 'required',
                 'string',
                 'max:255',
-                Rule::unique(EcommercePackage::class)->ignore($package->id)
+                Rule::unique(EcommercePackage::class)->ignore($package->id),
             ],
             'status' => [
                 'sometimes',
                 'string',
-                new Enum(StatusEnum::class),
-                function ($attribute, $value, $fail) {
-                    if ($this->active && !in_array($value, [StatusEnum::APPROVED->value, null])) {
-                        $fail('The status must be "APPROVED" or null when active is true.');
-                    }
-                },
             ],
             'active' => [
                 'sometimes',

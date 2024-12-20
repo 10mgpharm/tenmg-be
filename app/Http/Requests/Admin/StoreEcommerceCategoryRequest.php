@@ -2,11 +2,9 @@
 
 namespace App\Http\Requests\Admin;
 
-use App\Enums\StatusEnum;
+use App\Models\EcommerceCategory;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
-use App\Models\EcommerceCategory;
-use Illuminate\Validation\Rules\Enum;
 
 class StoreEcommerceCategoryRequest extends FormRequest
 {
@@ -32,17 +30,11 @@ class StoreEcommerceCategoryRequest extends FormRequest
             'status' => [
                 'sometimes',
                 'string',
-                new Enum(StatusEnum::class),
-                function ($attribute, $value, $fail) {
-                    if ($this->active && !in_array($value, [StatusEnum::APPROVED->value, null])) {
-                        $fail('The status must be "APPROVED" or null when active is true.');
-                    }
-                },
             ],
             'active' => [
                 'sometimes',
                 'boolean',
-            ]
+            ],
         ];
     }
 

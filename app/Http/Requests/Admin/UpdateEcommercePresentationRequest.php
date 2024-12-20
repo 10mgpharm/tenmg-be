@@ -2,14 +2,13 @@
 
 namespace App\Http\Requests\Admin;
 
-use App\Enums\StatusEnum;
+use App\Models\EcommercePresentation;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
-use App\Models\EcommercePresentation;
-use Illuminate\Validation\Rules\Enum;
 
 class UpdateEcommercePresentationRequest extends FormRequest
-{/**
+{
+    /**
      * Determine if the user is authorized to make this request.
      */
     public function authorize(): bool
@@ -35,17 +34,11 @@ class UpdateEcommercePresentationRequest extends FormRequest
                 'required',
                 'string',
                 'max:255',
-                Rule::unique(EcommercePresentation::class)->ignore($presentation->id)
+                Rule::unique(EcommercePresentation::class)->ignore($presentation->id),
             ],
             'status' => [
                 'sometimes',
                 'string',
-                new Enum(StatusEnum::class),
-                function ($attribute, $value, $fail) {
-                    if ($this->active && !in_array($value, [StatusEnum::APPROVED->value, null])) {
-                        $fail('The status must be "APPROVED" or null when active is true.');
-                    }
-                },
             ],
             'active' => [
                 'sometimes',
