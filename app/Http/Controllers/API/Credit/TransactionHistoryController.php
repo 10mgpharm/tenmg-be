@@ -26,7 +26,7 @@ class TransactionHistoryController extends Controller
 
     public function listAllTransactions(Request $request): JsonResponse
     {
-        $request->merge(['vendorId' => auth()->user()->business->first()->id]);
+        $request->merge(['vendorId' => auth()->user()->businesses()->first()->id]);
 
         $txnHistories = $this->txnHistoryService->listAllTransactions($request->all(), $request->perPage ?? 10);
 
@@ -37,7 +37,7 @@ class TransactionHistoryController extends Controller
 
     public function listAllCreditScore(Request $request): JsonResponse
     {
-        $request->merge(['vendorId' => auth()->user()->business->first()->id]);
+        $request->merge(['vendorId' => auth()->user()->businesses()->first()->id]);
 
         $creditScoresList = $this->txnHistoryService->listAllCreditScore($request->all(), $request->perPage ?? 10);
 
