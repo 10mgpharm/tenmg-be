@@ -12,6 +12,7 @@ use App\Http\Resources\EcommerceMedicationTypeResource;
 use App\Models\EcommerceMedicationType;
 use App\Services\Admin\EcommerceMedicationTypeService;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 
 class MedicationTypeController extends Controller
@@ -147,5 +148,41 @@ class MedicationTypeController extends Controller
             message: 'Medication type successfully deleted.',
             statusCode: Response::HTTP_OK,
         );
+    }
+
+    /**
+     * Show an ecommerce medication type.
+     */
+    public function getVariationsByMedicationType(Request $request, EcommerceMedicationType $medication_type): JsonResponse
+    {
+        $variations = $medication_type->variations()->get()
+            ->map(function ($variation) {
+                $presentation = $variation->presentation?->name;
+                $measurement = $variation->measurement?->name;
+                $strength = $variation->strength_value;
+                $package_per_roll = $variation->package_per_roll;
+                $weight = $variation->weight ? "$variation->weight".'KG' : '';
+
+                return [
+                    'label' => "$presentation $strength$measurement $package_per_roll $weight",
+                    'value' => $variation->id,
+                    'detail' => [
+                        'presentation' => $presentation,
+                        'strength' => $strength,
+                        'measurement' => $measurement,
+                        'package_per_roll' => $package_per_roll,
+                        'weight' => $weight,
+                    ],
+                ];
+            });
+
+        return $medication_type
+            ? $this->returnJsonResponse(
+                message: 'Medication variations successfully fetched.',
+                data: $variations,
+            )
+            : $this->returnJsonResponse(
+                message: 'Oops, can\'t view medication type at the moment. Please try again later.'
+            );
     }
 }

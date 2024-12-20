@@ -41,12 +41,12 @@ class EcommerceCategoryService implements IEcommerceCategoryService
 
         // Filter by "minAmount" if provided
         if ($min_amount = $request->input('minAmount')) {
-            $query->where('amount', '>=', $min_amount);
+            $query->where('actual_price', '>=', $min_amount);
         }
 
         // Filter by "maxAmount" if provided
         if ($max_amount = $request->input('maxAmount')) {
-            $query->where('amount', '<=', $max_amount);
+            $query->where('actual_price', '<=', $max_amount);
         }
 
         // Filter by "from_date" if provided

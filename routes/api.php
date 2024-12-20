@@ -136,6 +136,8 @@ Route::prefix('v1')->group(function () {
                 // Update business account license number, expiry date and cac doc
                 Route::match(['post', 'patch'], 'license', [BusinessSettingController::class, 'license']);
                 Route::get('license', [BusinessSettingController::class, 'getBusinessStatus']);
+
+                Route::get('medication-types/{medication_type:id}/medication-variations', [AdminMedicationTypeController::class, 'getVariationsByMedicationType']);
             });
 
             Route::get('products/search', [SupplierEcommerceProductController::class, 'search']);
@@ -310,7 +312,7 @@ Route::prefix('v1')->group(function () {
                 Route::get('/{customerId}/customer', [LoanOfferController::class, 'getOffersByCustomer'])->name('offers.getByCustomer');
             });
 
-            Route::post('/direct-debit/mandate/generate', [LoanOfferController::class, 'generateMandateForCustomer'])->name('mandate.generate')->withoutMiddleware(['roleCheck:vendor', 'scope:full']);;
+            Route::post('/direct-debit/mandate/generate', [LoanOfferController::class, 'generateMandateForCustomer'])->name('mandate.generate')->withoutMiddleware(['roleCheck:vendor', 'scope:full']);
             Route::post('/direct-debit/mandate/verify', [LoanOfferController::class, 'verifyMandateForCustomer'])->name('mandate.verify');
 
             // Loan
@@ -334,6 +336,8 @@ Route::prefix('v1')->group(function () {
                 Route::apiResource('invite', InviteController::class);
 
                 Route::apiResource('medication-types', AdminMedicationTypeController::class);
+                Route::get('medication-types/{medication_type:id}/medication-variations', [AdminMedicationTypeController::class, 'getVariationsByMedicationType']);
+
                 Route::apiResource('notification', NotificationController::class);
                 Route::apiResource('categories', AdminEcommerceCategoryController::class);
                 Route::apiResource('measurements', AdminEcommerceMeasurementController::class);
@@ -365,7 +369,7 @@ Route::prefix('v1')->group(function () {
         Route::prefix('storefront')->name('storefront.')->group(function () {
             Route::get('/', StorefrontController::class);
             Route::get('/categories/search', [CategoryController::class, 'search']);
-            Route::get('/categories/{category}', [CategoryController::class, 'products']);
+            Route::get('/categories/{category:slug}', [CategoryController::class, 'products']);
 
             Route::get('/products/search', [ProductController::class, 'search']);
             Route::get('/products/{product}', [ProductController::class, 'show']);
