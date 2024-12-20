@@ -58,7 +58,7 @@ class UpdateEcommerceMedicationRequest extends FormRequest
             'variations.*.package' => 'required|string',
             'variations.*.presentation' => 'required|string',
             'variations.*.measurement' => 'required|string',
-            'variations.*.weight' => 'required|string',
+            'variations.*.weight' => 'sometimes|nullable|string',
         ];
     }
 }
