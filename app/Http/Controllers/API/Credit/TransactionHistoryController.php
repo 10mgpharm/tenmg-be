@@ -5,7 +5,6 @@ namespace App\Http\Controllers\API\Credit;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\CreditScoreResource;
 use App\Http\Resources\TxnHistoryResource;
-use App\Models\CreditScore;
 use App\Models\CreditTxnHistoryEvaluation;
 use App\Models\FileUpload;
 use App\Services\Interfaces\ITxnHistoryService;
@@ -13,7 +12,6 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Storage;
-use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
 class TransactionHistoryController extends Controller
 {
@@ -26,8 +24,10 @@ class TransactionHistoryController extends Controller
         return $this->returnJsonResponse(message: 'Transaction histories retrieved successfully.', data: $transactionHistories);
     }
 
-    public function listAllTransactions(Request $request) : JsonResponse
+    public function listAllTransactions(Request $request): JsonResponse
     {
+        $request->merge(['vendorId' => auth()->user()->business->first()->id]);
+
         $txnHistories = $this->txnHistoryService->listAllTransactions($request->all(), $request->perPage ?? 10);
 
         return $this->returnJsonResponse(
@@ -35,8 +35,10 @@ class TransactionHistoryController extends Controller
         );
     }
 
-    public function listAllCreditScore(Request $request):JsonResponse
+    public function listAllCreditScore(Request $request): JsonResponse
     {
+        $request->merge(['vendorId' => auth()->user()->business->first()->id]);
+
         $creditScoresList = $this->txnHistoryService->listAllCreditScore($request->all(), $request->perPage ?? 10);
 
         return $this->returnJsonResponse(
@@ -71,11 +73,11 @@ class TransactionHistoryController extends Controller
 
         $filePath = $fileUpload->path;
 
-        if (!Storage::exists($filePath)){
+        if (! Storage::exists($filePath)) {
             return $this->returnJsonResponse(
                 message: 'File not found',
                 statusCode: Response::HTTP_NOT_FOUND,
-                status:'failed'
+                status: 'failed'
             );
         }
 
@@ -98,11 +100,11 @@ class TransactionHistoryController extends Controller
         //get file upload entry
         $fileUploaded = FileUpload::findOrFail($fileId);
 
-        if (!Storage::exists($fileUploaded->path)){
+        if (! Storage::exists($fileUploaded->path)) {
             return $this->returnJsonResponse(
                 message: 'File not found',
                 statusCode: Response::HTTP_NOT_FOUND,
-                status:'failed'
+                status: 'failed'
             );
         }
 
@@ -125,7 +127,7 @@ class TransactionHistoryController extends Controller
         return $this->returnJsonResponse(message: 'Transaction history evaluated successfully.', data: $evaluation);
     }
 
-    public function creditScoreBreakDown($txnEvaluationId):JsonResponse
+    public function creditScoreBreakDown($txnEvaluationId): JsonResponse
     {
         $creditScore = $this->txnHistoryService->creditScoreBreakDown($txnEvaluationId);
 
