@@ -2,6 +2,7 @@
 
 namespace App\Http\Resources;
 
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
@@ -20,6 +21,7 @@ class EcommerceCategoryResource extends JsonResource
             'slug' => $this->slug,
             'active' => $this->active,
             'status' => $this->status,
+            'created_at' => Carbon::parse($this->created_at)->format('M d, y h:i A'),
             // 'createdBy' => new UserResource($this->createdBy),
             // 'updatedBy' => new UserResource($this->updatedBy),
         ];
