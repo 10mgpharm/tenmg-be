@@ -171,7 +171,7 @@ class MedicationTypeController extends Controller
                         'strength' => $strength,
                         'measurement' => $measurement,
                         'package_per_roll' => $package_per_roll,
-                        'weight' => $weight,
+                        'weight' => $variation->weight,
                     ],
                 ];
             });
