@@ -22,7 +22,7 @@ class EcommerceMedicationTypeResource extends JsonResource
             'slug' => $this->slug,
             'active' => $this->active,
             'status' => $this->status,
-            'variations' => $this->variations,
+            // 'variations' => $this->variations,
             'variations' => $this->variations->filter(function (EcommerceMedicationVariation $variation) {
                 return $variation->active;
             })
