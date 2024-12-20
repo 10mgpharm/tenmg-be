@@ -3,16 +3,16 @@
 namespace App\Http\Requests\Supplier;
 
 use App\Enums\StatusEnum;
+use App\Models\EcommerceMeasurement;
 use App\Models\EcommerceMedicationType;
-use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Validation\Rule;
-use App\Models\EcommerceMedicationVariation;
 use App\Models\EcommercePackage;
 use App\Models\EcommercePresentation;
-use Illuminate\Validation\Rules\Enum;
+use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class UpdateEcommerceMedicationVariationRequest extends FormRequest
-{/**
+{
+    /**
      * Determine if the user is authorized to make this request.
      */
     public function authorize(): bool
@@ -20,7 +20,7 @@ class UpdateEcommerceMedicationVariationRequest extends FormRequest
         $user = $this->user();
         $medication_variation = $this->route('medication_variation');
 
-         // Suppliers can only update categories created by their business
+        // Suppliers can only update categories created by their business
         if ($user->hasRole('supplier') && $medication_variation->business_id === ($user->ownerBusinessType->id ?: $user->businesses()->first()->id)) {
             return true;
         }
@@ -37,9 +37,9 @@ class UpdateEcommerceMedicationVariationRequest extends FormRequest
         $this->merge([
             'medication_type_name' => $this->input('medicationTypeName'),
             'presentation_name' => $this->input('presentationName'),
-            'package_name' => $this->input('packageName'),
+            'measurement_name' => $this->input('measurementName'),
             'strength_value' => $this->input('strengthValue'),
-            'status' =>  $this->input('status') !== StatusEnum::ACTIVE->value
+            'status' => $this->input('status') !== StatusEnum::ACTIVE->value
             ? $this->input('status')
             : StatusEnum::APPROVED->value,
         ]);
@@ -56,19 +56,13 @@ class UpdateEcommerceMedicationVariationRequest extends FormRequest
         return [
             'medication_type_name' => ['sometimes', 'nullable', 'string', 'max:255', Rule::exists(EcommerceMedicationType::class, 'name')],
             'presentation_name' => ['sometimes', 'nullable', 'string', 'max:255', Rule::exists(EcommercePresentation::class, 'name')],
-            'package_name' => ['sometimes', 'nullable', 'string', 'max:255', Rule::exists(EcommercePackage::class, 'name')],
-            'strength_value' => ['sometimes', 'nullable', 'string', 'max:255',],
+            'measurement_name' => ['sometimes', 'nullable', 'string', 'max:255', Rule::exists(EcommerceMeasurement::class, 'name')],
+            'strength_value' => ['sometimes', 'nullable', 'string', 'max:255'],
             'weight' => ['sometimes', 'nullable', 'numeric', 'min:0'],
             'status' => [
                 'sometimes',
                 'nullable',
                 'string',
-                new Enum(StatusEnum::class),
-                function ($attribute, $value, $fail) {
-                    if ($this->active && !in_array($value, [StatusEnum::APPROVED->value, null])) {
-                        $fail('The status must be "APPROVED" or null when active is true.');
-                    }
-                },
             ],
             'active' => [
                 'sometimes',

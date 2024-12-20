@@ -2,11 +2,9 @@
 
 namespace App\Http\Requests\Supplier;
 
-use App\Enums\StatusEnum;
 use App\Models\EcommerceMedicationType;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
-use Illuminate\Validation\Rules\Enum;
 
 class UpdateEcommerceMedicationRequest extends FormRequest
 {
@@ -41,17 +39,11 @@ class UpdateEcommerceMedicationRequest extends FormRequest
                 'required',
                 'string',
                 'max:255',
-                Rule::unique(EcommerceMedicationType::class)->ignore($medication_type->id)
+                Rule::unique(EcommerceMedicationType::class)->ignore($medication_type->id),
             ],
             'status' => [
                 'sometimes',
                 'string',
-                new Enum(StatusEnum::class),
-                function ($attribute, $value, $fail) {
-                    if ($this->active && !in_array($value, [StatusEnum::APPROVED->value, null])) {
-                        $fail('The status must be "APPROVED" or null when active is true.');
-                    }
-                },
             ],
             'active' => [
                 'sometimes',

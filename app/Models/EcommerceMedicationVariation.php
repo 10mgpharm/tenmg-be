@@ -28,18 +28,15 @@ class EcommerceMedicationVariation extends Model
         'created_by_id',
         'updated_by_id',
         'ecommerce_medication_type_id',
-        'strength_value',
-        'strength',
-        // 'presentation',
         'ecommerce_presentation_id',
-        // 'package_per_roll',
-        'ecommerce_package_id',
+        'ecommerce_measurement_id',
+        'strength_value',
+        'package_per_roll',
         'description',
         'weight',
         'status',
-        'active'
+        'active',
     ];
-
 
     /**
      * The model's default values for attributes.
@@ -77,11 +74,11 @@ class EcommerceMedicationVariation extends Model
     }
 
     /**
-     * Get the package associated with the medication variation.
+     * Get the presentation associated with the medication variation.
      */
-    public function package()
+    public function measurement()
     {
-        return $this->belongsTo(EcommercePackage::class, 'ecommerce_package_id');
+        return $this->belongsTo(EcommerceMeasurement::class, 'ecommerce_measurement_id');
     }
 
     /**

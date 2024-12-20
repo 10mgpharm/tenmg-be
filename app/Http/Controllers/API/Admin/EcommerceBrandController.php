@@ -24,16 +24,39 @@ class EcommerceBrandController extends Controller
      * This method retrieves a paginated list of all ecommerce brands sorted by the latest creation date.
      * The list is returned in a JSON response, including the paginated metadata.
      *
-     * @param ListEcommerceBrandRequest $request Validated request instance for listing brands.
+     * @param  ListEcommerceBrandRequest  $request  Validated request instance for listing brands.
      * @return JsonResponse Returns a JSON response with the list of brands and a success message.
      */
     public function index(ListEcommerceBrandRequest $request): JsonResponse
     {
-        $brands = EcommerceBrand::latest()->paginate();
+        $brandsQuery = EcommerceBrand::query()
+            ->when($request->input('search'), function ($query, $search) {
+                $query->where('name', 'like', "%{$search}%");
+            })
+            ->when($request->input('status'), function ($query, $status) {
+                $query->where('active', '=', $status == 'active' ? 1 : 0);
+            });
+
+        if ($request->has('sort') && $request->has('order')) {
+            $sortColumn = $request->input('sort');
+            $sortOrder = $request->input('order');
+
+            $validColumns = ['name'];
+            if (in_array($sortColumn, $validColumns) && in_array(strtolower($sortOrder), ['asc', 'desc'])) {
+                $brandsQuery->orderBy($sortColumn, $sortOrder);
+            }
+        } else {
+            $brandsQuery->orderBy('created_at', 'desc');
+        }
+
+        $brands = $brandsQuery
+            ->paginate($request->has('perPage') ? $request->perPage : 10)
+            ->withQueryString()
+            ->through(fn (EcommerceBrand $item) => EcommerceBrandResource::make($item));
 
         return $this->returnJsonResponse(
             message: 'Brands successfully fetched.',
-            data: EcommerceBrandResource::collection($brands)->response()->getData(true)
+            data: $brands
         );
     }
 
@@ -43,7 +66,7 @@ class EcommerceBrandController extends Controller
      * This method validates the incoming request, creates a new ecommerce brand using the validated data,
      * and returns a JSON response with the details of the newly created brand.
      *
-     * @param StoreEcommerceBrandRequest $request Validated request instance containing data for the new brand.
+     * @param  StoreEcommerceBrandRequest  $request  Validated request instance containing data for the new brand.
      * @return JsonResponse Returns a JSON response with the created brand's details or an error message if the process fails.
      */
     public function store(StoreEcommerceBrandRequest $request): JsonResponse
@@ -68,11 +91,11 @@ class EcommerceBrandController extends Controller
     /**
      * Update an existing ecommerce brand.
      *
-     * This method validates the incoming request, updates the specified brand with the new data, 
+     * This method validates the incoming request, updates the specified brand with the new data,
      * and returns a JSON response with the updated brand's details.
      *
-     * @param UpdateEcommerceBrandRequest $request Validated request instance containing updated data for the brand.
-     * @param EcommerceBrand $brand The brand to be updated.
+     * @param  UpdateEcommerceBrandRequest  $request  Validated request instance containing updated data for the brand.
+     * @param  EcommerceBrand  $brand  The brand to be updated.
      * @return JsonResponse Returns a JSON response with the updated brand's details or an error message if the process fails.
      */
     public function update(UpdateEcommerceBrandRequest $request, EcommerceBrand $brand): JsonResponse
@@ -96,9 +119,6 @@ class EcommerceBrandController extends Controller
 
     /**
      * Show an ecommerce brand.
-     *
-     * @param ShowEcommerceBrandRequest $request
-     * @return JsonResponse
      */
     public function show(ShowEcommerceBrandRequest $request, EcommerceBrandResource $brand): JsonResponse
     {
@@ -115,7 +135,7 @@ class EcommerceBrandController extends Controller
     /**
      * Delete an ecommerce brand.
      *
-     * @param EcommerceBrand $brand The brand to be deleted.
+     * @param  EcommerceBrand  $brand  The brand to be deleted.
      * @return JsonResponse Returns a JSON response indicating success or failure.
      */
     public function destroy(DeleteEcommerceBrandRequest $request, EcommerceBrand $brand): JsonResponse

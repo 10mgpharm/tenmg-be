@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class EcommerceMedicationType extends Model
@@ -75,5 +76,13 @@ class EcommerceMedicationType extends Model
     public function products()
     {
         return $this->hasMany(EcommerceProduct::class)->latest();
+    }
+
+    /**
+     * Get the variations associated with the medication type.
+     */
+    public function variations(): HasMany
+    {
+        return $this->hasMany(EcommerceMedicationVariation::class, 'ecommerce_medication_type_id', 'id');
     }
 }

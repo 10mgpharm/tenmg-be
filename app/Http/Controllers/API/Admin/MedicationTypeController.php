@@ -18,25 +18,45 @@ class MedicationTypeController extends Controller
 {
     /**
      * MedicationTypeController constructor.
-     *
-     * @param \App\Services\Admin\EcommerceMedicationTypeService $medicationTypeService
      */
     public function __construct(private EcommerceMedicationTypeService $medicationTypeService) {}
-
 
     /**
      * Retrieve a paginated list of medication types for the authenticated user's business.
      *
      * @param  \App\Http\Requests\Admin\ListMedicationTypeRequest  $request  Validated request instance.
-     * @return \Illuminate\Http\JsonResponse
      */
     public function index(ListMedicationTypeRequest $request): JsonResponse
     {
-        $medicationTypes = EcommerceMedicationType::latest()->paginate();
+        $medicationTypesQuery = EcommerceMedicationType::query()
+            ->with('variations')
+            ->when($request->input('search'), function ($query, $search) {
+                $query->where('name', 'like', "%{$search}%");
+            })
+            ->when($request->input('status'), function ($query, $status) {
+                $query->where('active', '=', $status == 'active' ? 1 : 0);
+            });
+
+        if ($request->has('sort') && $request->has('order')) {
+            $sortColumn = $request->input('sort');
+            $sortOrder = $request->input('order');
+
+            $validColumns = ['name'];
+            if (in_array($sortColumn, $validColumns) && in_array(strtolower($sortOrder), ['asc', 'desc'])) {
+                $medicationTypesQuery->orderBy($sortColumn, $sortOrder);
+            }
+        } else {
+            $medicationTypesQuery->orderBy('created_at', 'desc');
+        }
+
+        $medicationTypes = $medicationTypesQuery
+            ->paginate($request->has('perPage') ? $request->perPage : 10)
+            ->withQueryString()
+            ->through(fn (EcommerceMedicationType $item) => EcommerceMedicationTypeResource::make($item));
 
         return $this->returnJsonResponse(
             message: 'Medication types successfully fetched.',
-            data: EcommerceMedicationTypeResource::collection($medicationTypes)->response()->getData(true)
+            data: $medicationTypes
         );
     }
 
@@ -44,7 +64,6 @@ class MedicationTypeController extends Controller
      * Store a new medication type for the authenticated user's business.
      *
      * @param  \App\Http\Requests\Admin\StoreEcommerceMedicationRequest  $request  Validated request instance.
-     * @return \Illuminate\Http\JsonResponse
      */
     public function store(StoreEcommerceMedicationRequest $request): JsonResponse
     {
@@ -67,9 +86,6 @@ class MedicationTypeController extends Controller
 
     /**
      * Show an ecommerce medication type.
-     *
-     * @param ShowEcommerceMedicationTypeRequest $request
-     * @return JsonResponse
      */
     public function show(ShowEcommerceMedicationTypeRequest $request, EcommerceMedicationType $medication_type): JsonResponse
     {
@@ -86,11 +102,10 @@ class MedicationTypeController extends Controller
     /**
      * Update an existing medication type for the authenticated user's business.
      *
-     * @param  \App\Http\Requests\Admin\UpdateEcommerceMedicationRequest 
+     * @param  \App\Http\Requests\Admin\UpdateEcommerceMedicationRequest
      * $request - Validated request instance.
-     * @param  \App\Models\EcommerceMedicationType 
+     * @param  \App\Models\EcommerceMedicationType
      * $medication_type - The medication type to be updated.
-     * @return \Illuminate\Http\JsonResponse
      */
     public function update(UpdateEcommerceMedicationRequest $request, EcommerceMedicationType $medication_type): JsonResponse
     {
@@ -114,7 +129,7 @@ class MedicationTypeController extends Controller
     /**
      * Delete an ecommerce medication type.
      *
-     * @param EcommerceMedicationType $medication_type The medication type to be deleted.
+     * @param  EcommerceMedicationType  $medication_type  The medication type to be deleted.
      * @return JsonResponse Returns a JSON response indicating success or failure.
      */
     public function destroy(DeleteEcommerceMedicationRequest $request, EcommerceMedicationType $medication_type): JsonResponse

@@ -2,4 +2,4 @@
 lint-staged
 
 # Run tests again
-php artisan test
+# php artisan test

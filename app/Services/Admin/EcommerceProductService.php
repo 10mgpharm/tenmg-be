@@ -119,11 +119,10 @@ class EcommerceProductService implements IEcommerceProductService
                 $variation = EcommerceMedicationVariation::firstOrCreate(
                     [
                         'weight' => $validated['weight'],
-                        'strength_value' => (int) preg_replace('/\D/', '', $validated['strength_value']) ?: 0,
-                        'strength' => $validated['strength_value'],
+                        'strength_value' => $validated['strength_value'],
                         'ecommerce_presentation_id' => $presentation->id,
-                        'ecommerce_package_id' => $package->id,
                         'ecommerce_medication_type_id' => $medicationType->id,
+                        'ecommerce_measurement_id' => $measurement->id,
                     ],
                     [
                         'business_id' => $business?->id,
@@ -310,11 +309,10 @@ class EcommerceProductService implements IEcommerceProductService
                     $variation = EcommerceMedicationVariation::firstOrCreate(
                         array_filter([ // Include only non-empty keys
                             'weight' => $validated['weight'],
-                            'strength_value' => (int) preg_replace('/\D/', '', $validated['strength_value']) ?: 0,
-                            'strength' => $validated['strength_value'],
+                            'strength_value' => $validated['strength_value'],
                             'ecommerce_presentation_id' => $presentation->id ?? null,
-                            'ecommerce_package_id' => $package->id ?? null,
                             'ecommerce_medication_type_id' => $medicationType->id ?? null,
+                            'ecommerce_measurement_id' => $measurement->id ?? null,
                         ], fn($each) => $each !== null && $each !== false),
                         [
                             'business_id' => $business?->id,

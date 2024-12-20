@@ -24,16 +24,39 @@ class EcommerceCategoryController extends Controller
      * This method retrieves a paginated list of all ecommerce categories sorted by the latest creation date.
      * The list is returned in a JSON response, including the paginated metadata.
      *
-     * @param ListEcommerceCategoryRequest $request Validated request instance for listing categories.
+     * @param  ListEcommerceCategoryRequest  $request  Validated request instance for listing categories.
      * @return JsonResponse Returns a JSON response with the list of categories and a success message.
      */
     public function index(ListEcommerceCategoryRequest $request): JsonResponse
     {
-        $categories = EcommerceCategory::latest()->paginate();
+        $categoriesQuery = EcommerceCategory::query()
+            ->when($request->input('search'), function ($query, $search) {
+                $query->where('name', 'like', "%{$search}%");
+            })
+            ->when($request->input('status'), function ($query, $status) {
+                $query->where('active', '=', $status == 'active' ? 1 : 0);
+            });
+
+        if ($request->has('sort') && $request->has('order')) {
+            $sortColumn = $request->input('sort');
+            $sortOrder = $request->input('order');
+
+            $validColumns = ['name'];
+            if (in_array($sortColumn, $validColumns) && in_array(strtolower($sortOrder), ['asc', 'desc'])) {
+                $categoriesQuery->orderBy($sortColumn, $sortOrder);
+            }
+        } else {
+            $categoriesQuery->orderBy('created_at', 'desc');
+        }
+
+        $categories = $categoriesQuery
+            ->paginate($request->has('perPage') ? $request->perPage : 10)
+            ->withQueryString()
+            ->through(fn (EcommerceCategory $item) => EcommerceCategoryResource::make($item));
 
         return $this->returnJsonResponse(
             message: 'Categories successfully fetched.',
-            data: EcommerceCategoryResource::collection($categories)->response()->getData(true)
+            data: $categories
         );
     }
 
@@ -43,7 +66,7 @@ class EcommerceCategoryController extends Controller
      * This method validates the incoming request, creates a new ecommerce category using the validated data,
      * and returns a JSON response with the details of the newly created category.
      *
-     * @param StoreEcommerceCategoryRequest $request Validated request instance containing data for the new category.
+     * @param  StoreEcommerceCategoryRequest  $request  Validated request instance containing data for the new category.
      * @return JsonResponse Returns a JSON response with the created category's details or an error message if the process fails.
      */
     public function store(StoreEcommerceCategoryRequest $request): JsonResponse
@@ -67,9 +90,6 @@ class EcommerceCategoryController extends Controller
 
     /**
      * Show an ecommerce category.
-     *
-     * @param ShowEcommerceCategoryRequest $request
-     * @return JsonResponse
      */
     public function show(ShowEcommerceCategoryRequest $request, EcommerceCategory $category): JsonResponse
     {
@@ -86,11 +106,11 @@ class EcommerceCategoryController extends Controller
     /**
      * Update an existing ecommerce category.
      *
-     * This method validates the incoming request, updates the specified category with the new data, 
+     * This method validates the incoming request, updates the specified category with the new data,
      * and returns a JSON response with the updated category's details.
      *
-     * @param UpdateEcommerceCategoryRequest $request Validated request instance containing updated data for the category.
-     * @param EcommerceCategory $category The category to be updated.
+     * @param  UpdateEcommerceCategoryRequest  $request  Validated request instance containing updated data for the category.
+     * @param  EcommerceCategory  $category  The category to be updated.
      * @return JsonResponse Returns a JSON response with the updated category's details or an error message if the process fails.
      */
     public function update(UpdateEcommerceCategoryRequest $request, EcommerceCategory $category): JsonResponse
@@ -111,11 +131,11 @@ class EcommerceCategoryController extends Controller
             data: new EcommerceCategoryResource($category->refresh())
         );
     }
-    
+
     /**
      * Delete an ecommerce category.
      *
-     * @param EcommerceCategory $category The category to be deleted.
+     * @param  EcommerceCategory  $category  The category to be deleted.
      * @return JsonResponse Returns a JSON response indicating success or failure.
      */
     public function destroy(DeleteEcommerceCategoryRequest $request, EcommerceCategory $category): JsonResponse

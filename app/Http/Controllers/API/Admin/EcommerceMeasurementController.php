@@ -23,11 +23,11 @@ class EcommerceMeasurementController extends Controller
      */
     public function index(ListEcommerceMeasurementRequest $request): JsonResponse
     {
-        $measurements = EcommerceMeasurement::latest();
+        $measurements = EcommerceMeasurement::where('active', 1)->where('status', 'APPROVED')->get();
 
         return $this->returnJsonResponse(
             message: 'Measurements successfully fetched.',
-            data: EcommerceMeasurementResource::collection($measurements)->response()->getData(true)
+            data: EcommerceMeasurementResource::collection($measurements)
         );
     }
 

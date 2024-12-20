@@ -2,12 +2,10 @@
 
 namespace App\Http\Requests\Admin;
 
-use App\Enums\StatusEnum;
 use App\Models\EcommerceMedicationType;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
-use Illuminate\Validation\Rules\Enum;
 
 class StoreEcommerceMedicationRequest extends FormRequest
 {
@@ -33,12 +31,6 @@ class StoreEcommerceMedicationRequest extends FormRequest
             'status' => [
                 'sometimes',
                 'string',
-                new Enum(StatusEnum::class),
-                function ($attribute, $value, $fail) {
-                    if ($this->active && ! in_array($value, [StatusEnum::APPROVED->value, null])) {
-                        $fail('The status must be "APPROVED" or null when active is true.');
-                    }
-                },
             ],
             'active' => [
                 'sometimes',
@@ -46,26 +38,51 @@ class StoreEcommerceMedicationRequest extends FormRequest
             ],
             // add array of variations to the payload
             'variations' => 'required|array|min:1',
-            'variations.*' => [
+            'variations.*.strength_value' => 'required|string',
+            'variations.*.package' => 'required|string',
+            'variations.*.presentation' => [
                 'required',
                 'string',
-                'min:1',
                 function ($attribute, $value, $fail) {
                     $name = $this->input('name');
+                    $id = EcommerceMedicationType::where('name', $name)->value('id');
 
-                    // Check if the variation already exists for the given name
-                    $exists = DB::table('variations')
-                        ->where('name', $value)
-                        ->whereExists(function ($query) {
+                    // Check if the variation presentation already exists for the medication type $this->input('name');
+                    $exists = DB::table('ecommerce_medication_variations')
+                        ->whereExists(function ($query) use ($value) {
                             $query->select(DB::raw(1))
-                                ->from('ecommerce_medication_types')
-                                ->whereRaw('ecommerce_medication_types.id = variations.ecommerce_medication_type_id')
-                                ->where('ecommerce_medication_types.name', $this->input('name'));
+                                ->from('ecommerce_presentations')
+                                ->where('ecommerce_presentations.name', $value)
+                                ->whereRaw('ecommerce_presentations.id = ecommerce_medication_variations.ecommerce_presentation_id');
                         })
-                        ->exists();
+                        ->where('ecommerce_medication_type_id', $id)
+                        ->first();
 
                     if ($exists) {
-                        $fail("The variation '{$value}' already exists for the name '{$name}'.");
+                        $fail("The presentation '{$value}' already exists for the name '{$name}'.");
+                    }
+                },
+            ],
+            'variations.*.measurement' => [
+                'required',
+                'string',
+                function ($attribute, $value, $fail) {
+                    $name = $this->input('name');
+                    $id = EcommerceMedicationType::where('name', $name)->value('id');
+
+                    // Check if the variation measurement already exists for the medication type $this->input('name');
+                    $exists = DB::table('ecommerce_medication_variations')
+                        ->whereExists(function ($query) use ($value) {
+                            $query->select(DB::raw(1))
+                                ->from('ecommerce_measurements')
+                                ->where('ecommerce_measurements.name', $value)
+                                ->whereRaw('ecommerce_measurements.id = ecommerce_medication_variations.ecommerce_measurement_id');
+                        })
+                        ->where('ecommerce_medication_type_id', $id)
+                        ->first();
+
+                    if ($exists) {
+                        $fail("The measurement '{$value}' already exists for the name '{$name}'.");
                     }
                 },
             ],
