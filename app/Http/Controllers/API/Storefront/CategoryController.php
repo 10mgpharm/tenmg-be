@@ -29,7 +29,14 @@ class CategoryController extends Controller
 
         return $this->returnJsonResponse(
             message: 'Products successfully fetched.',
-            data: EcommerceProductResource::collection($products)->response()->getData(true)
+            data: [
+                'category' => [
+                    'id' => $category->id,
+                    'name' => $category->name,
+                    'slug' => $category->slug,
+                ],
+                ...EcommerceProductResource::collection($products)->response()->getData(true),
+            ]
         );
     }
 

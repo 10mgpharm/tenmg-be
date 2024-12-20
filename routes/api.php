@@ -369,7 +369,7 @@ Route::prefix('v1')->group(function () {
         Route::prefix('storefront')->name('storefront.')->group(function () {
             Route::get('/', StorefrontController::class);
             Route::get('/categories/search', [CategoryController::class, 'search']);
-            Route::get('/categories/{category}', [CategoryController::class, 'products']);
+            Route::get('/categories/{category:slug}', [CategoryController::class, 'products']);
 
             Route::get('/products/search', [ProductController::class, 'search']);
             Route::get('/products/{product}', [ProductController::class, 'show']);
