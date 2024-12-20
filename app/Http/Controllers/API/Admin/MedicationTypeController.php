@@ -166,6 +166,13 @@ class MedicationTypeController extends Controller
                 return [
                     'label' => "$presentation $strength$measurement $package_per_roll $weight",
                     'value' => $variation->id,
+                    'detail' => [
+                        'presentation' => $presentation,
+                        'strength' => $strength,
+                        'measurement' => $measurement,
+                        'package_per_roll' => $package_per_roll,
+                        'weight' => $weight,
+                    ],
                 ];
             });
 
