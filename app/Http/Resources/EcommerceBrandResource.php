@@ -22,8 +22,6 @@ class EcommerceBrandResource extends JsonResource
             'active' => $this->active,
             'status' => $this->status,
             'created_at' => Carbon::parse($this->created_at)->format('M d, y h:i A'),
-            // 'createdBy' => new UserResource($this->createdBy),
-            // 'updatedBy' => new UserResource($this->updatedBy),
         ];
     }
 }
