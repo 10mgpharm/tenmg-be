@@ -3,6 +3,7 @@
 namespace App\Services\Admin;
 
 use App\Enums\StatusEnum;
+use App\Models\EcommerceMeasurement;
 use App\Models\EcommerceMedicationType;
 use App\Models\EcommerceMedicationVariation;
 use App\Models\EcommercePackage;
@@ -27,16 +28,16 @@ class EcommerceMedicationVariationService implements IEcommerceMedicationVariati
                 ?? $user->businesses()->firstWhere('user_id', $user->id);
                 $presentation = EcommercePresentation::where('name', $validated['presentation_name'])->first();
                 $package = EcommercePackage::where('name', $validated['package_name'])->first();
+                $measurement = EcommerceMeasurement::where('name', $validated['measurement_name'] ?? '')->first();
                 $medicationType = EcommerceMedicationType::where('name', $validated['medication_type_name'])->first();
 
                 return EcommerceMedicationVariation::create(
                     [
                         'weight' => $validated['weight'],
-                        'strength_value' => (int) preg_replace('/\D/', '', $validated['strength_value']) ?: 0,
-                        'strength' => $validated['strength_value'],
+                        'strength_value' =>  $validated['strength_value'],
                         'ecommerce_presentation_id' => $presentation->id,
-                        'ecommerce_package_id' => $package->id,
                         'ecommerce_medication_type_id' => $medicationType->id,
+                        'ecommerce_measurement_id' => $measurement->id,
                         'business_id' => $business?->id,
                         'created_by_id' => $user->id,
                         'status' => $user->hasRole('admin') ? StatusEnum::ACTIVE->value : StatusEnum::APPROVED->value,
@@ -61,8 +62,8 @@ class EcommerceMedicationVariationService implements IEcommerceMedicationVariati
                     $presentation = EcommercePresentation::where('name', $validated['presentation_name'])->first();
                 }
 
-                if(isset($validated['package_name'])){
-                    $package = EcommercePackage::where('name', $validated['package_name'])->first();
+                if(isset($validated['measurement_name'])){
+                    $measurement = EcommerceMeasurement::where('name', $validated['measurement_name'])->first();
                 }
 
                 if(isset($validated['medication_type_name'])){
@@ -71,10 +72,9 @@ class EcommerceMedicationVariationService implements IEcommerceMedicationVariati
 
                 $fillable =  array_filter([
                     ...$validated,
-                    'strength_value' => (int) preg_replace('/\D/', '', $validated['strength_value']) ?? null,
-                    'strength' => $validated['strength_value'] ?? null,
+                    'strength_value' => $validated['strength_value'],
                     'ecommerce_presentation_id' => $presentation->id ?? null,
-                    'ecommerce_package_id' => $package->id ?? null,
+                    'ecommerce_measurement_id' => $measurement->id ?? null,
                     'ecommerce_medication_type_id' => $medicationType->id ?? null,
                     'updated_by_id' => $user->id,
                 ], fn($each) => $each !== null && $each !== false);

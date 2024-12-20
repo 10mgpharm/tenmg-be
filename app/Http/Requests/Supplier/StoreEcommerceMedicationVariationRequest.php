@@ -32,7 +32,7 @@ class StoreEcommerceMedicationVariationRequest extends FormRequest
         $this->merge([
             'medication_type_name' => $this->input('medicationTypeName'),
             'presentation_name' => $this->input('presentationName'),
-            'package_name' => $this->input('packageName'),
+            'measurement_name' => $this->input('measurementName'),
             'strength_value' => $this->input('strengthValue'),
             'status' =>  $this->input('status') !== StatusEnum::ACTIVE->value
             ? $this->input('status')
@@ -50,7 +50,7 @@ class StoreEcommerceMedicationVariationRequest extends FormRequest
         return [
             'medication_type_name' => ['required', 'string', 'max:255', Rule::exists(EcommerceMedicationType::class, 'name')],
             'presentation_name' => ['required', 'string', 'max:255', Rule::exists(EcommercePresentation::class, 'name')],
-            'package_name' => ['required', 'string', 'max:255', Rule::exists(EcommercePackage::class, 'name')],
+            'measurement_name' => ['required', 'string', 'max:255', Rule::exists(EcommerceMeasurement::class, 'name')],
             'strength_value' => ['required', 'string', 'max:255',],
             'weight' => ['required', 'numeric', 'min:0'],
             'active' => ['sometimes', 'boolean',]
