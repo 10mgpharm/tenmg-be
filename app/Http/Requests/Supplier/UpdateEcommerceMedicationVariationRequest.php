@@ -3,6 +3,7 @@
 namespace App\Http\Requests\Supplier;
 
 use App\Enums\StatusEnum;
+use App\Models\EcommerceMeasurement;
 use App\Models\EcommerceMedicationType;
 use App\Models\EcommercePackage;
 use App\Models\EcommercePresentation;
@@ -36,7 +37,7 @@ class UpdateEcommerceMedicationVariationRequest extends FormRequest
         $this->merge([
             'medication_type_name' => $this->input('medicationTypeName'),
             'presentation_name' => $this->input('presentationName'),
-            'package_name' => $this->input('packageName'),
+            'measurement_name' => $this->input('measurementName'),
             'strength_value' => $this->input('strengthValue'),
             'status' => $this->input('status') !== StatusEnum::ACTIVE->value
             ? $this->input('status')
@@ -55,7 +56,7 @@ class UpdateEcommerceMedicationVariationRequest extends FormRequest
         return [
             'medication_type_name' => ['sometimes', 'nullable', 'string', 'max:255', Rule::exists(EcommerceMedicationType::class, 'name')],
             'presentation_name' => ['sometimes', 'nullable', 'string', 'max:255', Rule::exists(EcommercePresentation::class, 'name')],
-            'package_name' => ['sometimes', 'nullable', 'string', 'max:255', Rule::exists(EcommercePackage::class, 'name')],
+            'measurement_name' => ['sometimes', 'nullable', 'string', 'max:255', Rule::exists(EcommerceMeasurement::class, 'name')],
             'strength_value' => ['sometimes', 'nullable', 'string', 'max:255'],
             'weight' => ['sometimes', 'nullable', 'numeric', 'min:0'],
             'status' => [
