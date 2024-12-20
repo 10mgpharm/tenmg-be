@@ -58,7 +58,7 @@ class StoreEcommerceProductRequest extends FormRequest
         return [
             // Product Basic
             'product_name' => ['required', 'string', 'max:255', Rule::unique(EcommerceProduct::class, 'name')],
-            'product_description' => ['required', 'string', 'max:255', ],
+            'product_description' => ['required', 'string', 'max:255'],
             'medication_type_name' => ['required', 'string', 'max:255'],
             'category_name' => ['required', 'string', 'max:255'],
             'brand_name' => ['required', 'string', 'max:255'],
@@ -75,17 +75,17 @@ class StoreEcommerceProductRequest extends FormRequest
             'package_name' => ['required', 'string', 'max:255'],
             'strength_value' => ['required',  'string', 'max:255'],
 
-            'weight' => ['required', 'numeric', 'min:0'],
+            'weight' => ['sometimes', 'nullable', 'numeric', 'min:0'],
 
             // Product Inventory
             'quantity' => ['required', 'integer', 'min:1'],
             'low_stock_level' => ['nullable', 'sometimes', 'integer', 'min:0', 'gte:out_stock_level'],
             'out_stock_level' => ['nullable', 'sometimes', 'integer', 'min:0', 'lte:low_stock_level'],
-            'actual_price' => ['required', 'numeric', 'min:0', ],
+            'actual_price' => ['required', 'numeric', 'min:0'],
             'discount_price' => ['nullable', 'numeric', 'min:0', 'lt:actual_price'],
             'expired_at' => ['required', 'date', 'after:today'],
 
-            'status' => ['nullable', new Enum(StatusEnum::class),],
+            'status' => ['nullable', new Enum(StatusEnum::class)],
 
             // 'min_delivery_duration' => ['required', 'integer', 'min:0'],
             // 'max_delivery_duration' => ['required', 'integer', 'min:0'],
