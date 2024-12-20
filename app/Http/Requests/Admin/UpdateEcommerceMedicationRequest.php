@@ -35,14 +35,14 @@ class UpdateEcommerceMedicationRequest extends FormRequest
                 'required',
                 'string',
                 'max:255',
-                Rule::unique(EcommerceMedicationType::class)->ignore($medication_type->id)
+                Rule::unique(EcommerceMedicationType::class)->ignore($medication_type->id),
             ],
             'status' => [
                 'sometimes',
                 'string',
                 new Enum(StatusEnum::class),
                 function ($attribute, $value, $fail) {
-                    if ($this->active && !in_array($value, [StatusEnum::APPROVED->value, null])) {
+                    if ($this->active && ! in_array($value, [StatusEnum::APPROVED->value, null])) {
                         $fail('The status must be "APPROVED" or null when active is true.');
                     }
                 },
@@ -51,6 +51,14 @@ class UpdateEcommerceMedicationRequest extends FormRequest
                 'sometimes',
                 'boolean',
             ],
+            // add array of variations to the payload
+            'variations' => 'required|array|min:1',
+            'variations.*.id' => 'sometimes|nullable|exists:ecommerce_medication_variations,id',
+            'variations.*.strength_value' => 'required|string',
+            'variations.*.package' => 'required|string',
+            'variations.*.presentation' => 'required|string',
+            'variations.*.measurement' => 'required|string',
+            'variations.*.weight' => 'required|string',
         ];
     }
 }

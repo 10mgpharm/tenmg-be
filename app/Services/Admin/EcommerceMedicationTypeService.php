@@ -11,8 +11,6 @@ use App\Models\User;
 use App\Services\Interfaces\IEcommerceMedicationTypeService;
 use Exception;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Str;
 
 class EcommerceMedicationTypeService implements IEcommerceMedicationTypeService
 {
@@ -78,18 +76,6 @@ class EcommerceMedicationTypeService implements IEcommerceMedicationTypeService
                             ])->id;
                         }
 
-                        Log::info('presentation_id: ', [
-                            'ecommerce_presentation_id' => $presentation_id,
-                            'ecommerce_measurement_id' => $measurement_id,
-                            'active' => 1,
-                            'status' => StatusEnum::APPROVED->value,
-                            'weight' => array_key_exists('weight', $variation) ? $variation['weight'] : null,
-                            'strength_value' => $variation['strength_value'],
-                            'package_per_roll' => $variation['package'],
-                            'business_id' => $validated['business_id'],
-                            'created_by_id' => $user->id,
-                        ]);
-
                         $medication_type->variations()->create([
                             'ecommerce_presentation_id' => $presentation_id,
                             'ecommerce_measurement_id' => $measurement_id,
@@ -126,13 +112,85 @@ class EcommerceMedicationTypeService implements IEcommerceMedicationTypeService
         try {
             // Start a database transaction
             return DB::transaction(function () use ($validated, $user, $medication_type) {
-                return $medication_type->update([
+
+                // Doc: when business is null that means the medication and its dependencies are for global used and created by admin
+                if ($user && $user->hasRole('admin')) {
+                    $validated['business_id'] = null;
+                } else {
+                    $validated['business_id'] = $user->ownerBusinessType?->id ?: $user->businesses()
+                        ->firstWhere('user_id', $user->id)?->id;
+                }
+
+                $updated = $medication_type->update([
                     ...$validated,
                     'status' => $validated['status'] ?? StatusEnum::APPROVED->value,
                     'active' => $validated['active'] ?? false,
-                    'slug' => Str::slug($validated['name'] ?? $medication_type->name),
                     'updated_by_id' => $user->id,
+                    'business_id' => $validated['business_id'],
                 ]);
+
+                // create variations if not exist or update for the selected medication type
+                if (isset($validated['variations'])) {
+                    foreach ($validated['variations'] as $variation) {
+                        $presentation_id = null;
+                        $presentationCheck = EcommercePresentation::where('name', $variation['presentation'])->first();
+                        if ($presentationCheck) {
+                            $presentation_id = $presentationCheck->id;
+                        } else {
+                            $presentation_id = EcommercePresentation::create([
+                                'name' => $variation['presentation'],
+                                'active' => 1,
+                                'status' => StatusEnum::APPROVED->value,
+                                'business_id' => $validated['business_id'],
+                            ])->id;
+                        }
+
+                        $measurement_id = null;
+                        $measurementCheck = EcommerceMeasurement::where('name', $variation['measurement'])->first();
+                        if ($measurementCheck) {
+                            $measurement_id = $measurementCheck->id;
+                        } else {
+                            $measurement_id = EcommerceMeasurement::create([
+                                'name' => $variation['measurement'],
+                                'active' => 1,
+                                'status' => StatusEnum::APPROVED->value,
+                                'business_id' => $validated['business_id'],
+                                'created_by_id' => $user->id,
+                            ])->id;
+                        }
+
+                        $variationId = array_key_exists('id', $variation) ? $variation['id'] : null;
+
+                        if ($variationId) {
+                            $variationCheck = $medication_type->variations()->where('id', $variationId)->first();
+                            $variationCheck->update([
+                                'ecommerce_presentation_id' => $presentation_id,
+                                'ecommerce_measurement_id' => $measurement_id,
+                                'active' => 1,
+                                'status' => StatusEnum::APPROVED->value,
+                                'weight' => array_key_exists('weight', $variation) ? $variation['weight'] : null,
+                                'strength_value' => $variation['strength_value'],
+                                'package_per_roll' => $variation['package'],
+                                'business_id' => $validated['business_id'],
+                                'updated_by_id' => $user->id,
+                            ]);
+                        } else {
+                            $medication_type->variations()->create([
+                                'ecommerce_presentation_id' => $presentation_id,
+                                'ecommerce_measurement_id' => $measurement_id,
+                                'active' => 1,
+                                'status' => StatusEnum::APPROVED->value,
+                                'weight' => array_key_exists('weight', $variation) ? $variation['weight'] : null,
+                                'strength_value' => $variation['strength_value'],
+                                'package_per_roll' => $variation['package'],
+                                'business_id' => $validated['business_id'],
+                                'created_by_id' => $user->id,
+                            ]);
+                        }
+                    }
+                }
+
+                return $updated;
             });
         } catch (Exception $e) {
             throw new Exception('Failed to update the medication type: '.$e->getMessage());
