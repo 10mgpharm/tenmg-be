@@ -32,7 +32,7 @@ class BusinessLicenseController extends Controller
         $businesses = $this->licenseService->index($request);
 
         return $this->returnJsonResponse(
-            message: 'business Licenses successfully fetched.',
+            message: 'business Licenses successfully fetched.', //
             data: $businesses
         );
     }
