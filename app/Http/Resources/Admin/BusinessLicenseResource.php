@@ -22,6 +22,7 @@ class BusinessLicenseResource extends JsonResource
             'licenseNumber' => $this->license_number,
             'expiryDate' => $this->expiry_date?->diffForHumans(),
             'cacDocument' => $this->cac,
+            'type' => $this->type,
             'owner' => new UserResource($this->whenLoaded('owner')),
             'verificationStatus' =>  match ($this->license_verification_status) {
                 null => 'PENDING_VERIFICATION',
@@ -31,6 +32,8 @@ class BusinessLicenseResource extends JsonResource
                 ? 'EXPIRED'
                 : 'VERIFIED'
             },
+            'createdAt' => $this->created_at->diffForHumans(),
+            'updatedAt' => $this->updated_at->diffForHumans(),
         ];
     }
 }
