@@ -310,7 +310,7 @@ Route::prefix('v1')->group(function () {
                 Route::get('/{customerId}/customer', [LoanOfferController::class, 'getOffersByCustomer'])->name('offers.getByCustomer');
             });
 
-            Route::post('/direct-debit/mandate/generate', [LoanOfferController::class, 'generateMandateForCustomer'])->name('mandate.generate')->withoutMiddleware(['roleCheck:vendor', 'scope:full']);;
+            Route::post('/direct-debit/mandate/generate', [LoanOfferController::class, 'generateMandateForCustomer'])->name('mandate.generate')->withoutMiddleware(['roleCheck:vendor', 'scope:full']);
             Route::post('/direct-debit/mandate/verify', [LoanOfferController::class, 'verifyMandateForCustomer'])->name('mandate.verify');
 
             // Loan
@@ -334,6 +334,8 @@ Route::prefix('v1')->group(function () {
                 Route::apiResource('invite', InviteController::class);
 
                 Route::apiResource('medication-types', AdminMedicationTypeController::class);
+                Route::get('medication-types/{medication_type:id}/medication-variations', [AdminMedicationTypeController::class, 'getVariationsByMedicationType']);
+
                 Route::apiResource('notification', NotificationController::class);
                 Route::apiResource('categories', AdminEcommerceCategoryController::class);
                 Route::apiResource('measurements', AdminEcommerceMeasurementController::class);
