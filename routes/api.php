@@ -136,6 +136,8 @@ Route::prefix('v1')->group(function () {
                 // Update business account license number, expiry date and cac doc
                 Route::match(['post', 'patch'], 'license', [BusinessSettingController::class, 'license']);
                 Route::get('license', [BusinessSettingController::class, 'getBusinessStatus']);
+
+                Route::get('medication-types/{medication_type:id}/medication-variations', [AdminMedicationTypeController::class, 'getVariationsByMedicationType']);
             });
 
             Route::get('products/search', [SupplierEcommerceProductController::class, 'search']);
