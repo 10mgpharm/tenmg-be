@@ -22,12 +22,12 @@ class BusinessResource extends JsonResource
             'contactPersonPosition' => $this->contact_person_position,
             'businessAddress' => $this->address,
             'licenseNumber' => $this->license_number,
-            'expiryDate' => $this->expiry_date?->diffForHumans(),
+            'expiryDate' => $this->expiry_date,
             'cacDocument' => $this->cac,
             'owner' => new UserResource($this->whenLoaded('owner')),
             'type' => $this->type ?? "N/A",
-            'createdAt' => $this->created_at->diffForHumans(),
-            'updatedAt' => $this->updated_at->diffForHumans(),
+            'createdAt' => $this->created_at,
+            'updatedAt' => $this->updated_at,
         ];
     }
 }
