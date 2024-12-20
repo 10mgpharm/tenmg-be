@@ -25,6 +25,7 @@ class BusinessResource extends JsonResource
             'expiryDate' => $this->expiry_date?->diffForHumans(),
             'cacDocument' => $this->cac,
             'owner' => new UserResource($this->whenLoaded('owner')),
+            'type' => $this->type,
         ];
     }
 }
