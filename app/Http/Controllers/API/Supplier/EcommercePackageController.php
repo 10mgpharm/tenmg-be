@@ -26,7 +26,7 @@ class EcommercePackageController extends Controller
      */
     public function index(ListEcommercePackageRequest $request): JsonResponse
     {
-        $packages = EcommercePackage::latest()->paginate();
+        $packages = EcommercePackage::latest()->businesses()->paginate();
 
         return $this->returnJsonResponse(
             message: 'packages successfully fetched.',

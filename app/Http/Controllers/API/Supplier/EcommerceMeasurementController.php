@@ -26,7 +26,7 @@ class EcommerceMeasurementController extends Controller
      */
     public function index(ListEcommerceMeasurementRequest $request): JsonResponse
     {
-        $measurements = EcommerceMeasurement::latest()->paginate();
+        $measurements = EcommerceMeasurement::latest()->businesses()->paginate();
 
         return $this->returnJsonResponse(
             message: 'Measurements successfully fetched.',

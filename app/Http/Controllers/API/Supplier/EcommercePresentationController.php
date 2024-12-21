@@ -26,7 +26,7 @@ class EcommercePresentationController extends Controller
      */
     public function index(ListEcommercePresentationRequest $request): JsonResponse
     {
-        $Presentations = EcommercePresentation::latest()->paginate();
+        $Presentations = EcommercePresentation::latest()->businesses()->paginate();
 
         return $this->returnJsonResponse(
             message: 'Presentations successfully fetched.',

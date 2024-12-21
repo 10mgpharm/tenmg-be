@@ -30,7 +30,7 @@ class EcommerceBrandController extends Controller
      */
     public function index(ListEcommerceBrandRequest $request): JsonResponse
     {
-        $brands = EcommerceBrand::latest()->paginate();
+        $brands = EcommerceBrand::latest()->businesses()->paginate();
 
         return $this->returnJsonResponse(
             message: 'Brands successfully fetched.',

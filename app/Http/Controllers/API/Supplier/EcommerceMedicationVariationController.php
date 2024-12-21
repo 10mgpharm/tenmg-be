@@ -26,7 +26,7 @@ class EcommerceMedicationVariationController extends Controller
      */
     public function index(ListEcommerceMedicationVariationRequest $request): JsonResponse
     {
-        $medication_variations = EcommerceMedicationVariation::latest()->paginate();
+        $medication_variations = EcommerceMedicationVariation::latest()->businesses()->paginate();
 
         return $this->returnJsonResponse(
             message: 'Medication variations successfully fetched.',

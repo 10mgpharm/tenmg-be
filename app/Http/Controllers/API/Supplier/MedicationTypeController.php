@@ -33,7 +33,7 @@ class MedicationTypeController extends Controller
      */
     public function index(ListMedicationTypeRequest $request): JsonResponse
     {
-        $medicationTypes = EcommerceMedicationType::latest()->paginate();
+        $medicationTypes = EcommerceMedicationType::latest()->businesses()->paginate();
 
         return $this->returnJsonResponse(
             message: 'Medication types successfully fetched.',
