@@ -23,8 +23,8 @@ class StorefrontController extends Controller
     public function __invoke(Request $request): JsonResponse
     {
         $categories = EcommerceCategory::with([
-            'products' => fn ($query) => $query->latest()->limit(15),
-        ])->where('active', 1)->latest()->get();
+            'products' => fn ($query) => $query->where('active', 1)->whereIn('status', ['ACTIVE', 'APPROVED'])->latest()->limit(15),
+        ])->where('active', 1)->whereIn('status', ['ACTIVE', 'APPROVED'])->latest()->get();
 
         return $this->returnJsonResponse(
             message: 'Products fetched successfully.',

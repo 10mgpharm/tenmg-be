@@ -95,6 +95,7 @@ class UpdateEcommerceProductRequest extends FormRequest
                 StatusEnum::REJECTED->value,
                 StatusEnum::INACTIVE->value,
                 StatusEnum::SUSPENDED->value,
+                StatusEnum::FLAGGED->value,
             ]),],
         ];
     }
