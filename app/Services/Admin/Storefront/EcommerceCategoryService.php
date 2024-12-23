@@ -24,7 +24,7 @@ class EcommerceCategoryService implements IEcommerceCategoryService
     public function products(Request $request, EcommerceCategory $category): LengthAwarePaginator
     {
         // Start the query from the products relationship
-        $query = $category->products();
+        $query = $category->products()->where('active', 1)->whereIn('status', ['ACTIVE', 'APPROVED']);
 
         // Filter by product names or slugs if provided
         if ($product_name = $request->input('productName')) {
@@ -88,7 +88,7 @@ class EcommerceCategoryService implements IEcommerceCategoryService
     public function search(Request $request): LengthAwarePaginator
     {
         // Start the query directly from the EcommerceProduct model
-        $query = EcommerceProduct::query();
+        $query = EcommerceProduct::where('active', 1)->whereIn('status', ['ACTIVE', 'APPROVED']);
 
         // Filter by multiple "categories" if provided
         if ($categories = $request->input('categories')) {

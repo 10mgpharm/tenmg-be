@@ -12,4 +12,5 @@ enum StatusEnum: string
     case INACTIVE = 'INACTIVE';      // Manually inactive
     case SUSPENDED = 'SUSPENDED';    // Temporarily disabled due to issues
     case ARCHIVED = 'ARCHIVED';      // Archived, no longer active
+    case FLAGGED = 'FLAGGED'; // Status indicating the item is flagged and no longer active.
 }

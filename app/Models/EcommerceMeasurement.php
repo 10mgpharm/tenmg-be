@@ -57,4 +57,16 @@ class EcommerceMeasurement extends Model
     {
         return $this->hasMany(EcommerceProduct::class)->latest();
     }
+
+    /**
+     * Define a query scope for filtering by business_id
+     */
+    public function scopeBusinesses($query)
+    {
+        $user = request()->user();
+
+        $business = $user->ownerBusinessType ?? $user->businesses()
+            ->firstWhere('user_id', $user->id);
+        return $query->where('business_id', $business?->id);
+    }
 }

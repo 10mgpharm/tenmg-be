@@ -2,6 +2,7 @@
 
 namespace App\Http\Resources\Storefront;
 
+use App\Enums\StatusEnum;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
@@ -26,7 +27,7 @@ class EcommerceProductResource extends JsonResource
             'thumbnailUrl' => $this->thumbnailUrl,
             'expiredAt' => $this->expired_at,
             'productDetails' => $this->productDetails->only('essential', 'starting_stock', 'current_stock'),
-            'status' => in_array($this->status, ['ACTIVE', 'INACTIVE', 'SUSPENDED', 'ARCHIVED'], true)
+            'status' => in_array($this->status, array_column(StatusEnum::cases(), 'value'), true)
             ? $this->status
             : 'DRAFTED',
             'inventory' => match (true) {

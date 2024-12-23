@@ -30,7 +30,7 @@ class EcommerceCategoryController extends Controller
      */
     public function index(ListEcommerceCategoryRequest $request): JsonResponse
     {
-        $categories = EcommerceCategory::latest()->paginate();
+        $categories = EcommerceCategory::latest()->businesses()->paginate();
 
         return $this->returnJsonResponse(
             message: 'Categories successfully fetched.',

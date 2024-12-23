@@ -25,7 +25,7 @@ class EcommerceProductController extends Controller
      */
     public function index(ListEcommerceProductRequest $request): JsonResponse
     {
-        $products = EcommerceProduct::latest()->paginate();
+        $products = EcommerceProduct::latest()->businesses()->paginate();
 
         return $this->returnJsonResponse(
             message: 'Products successfully fetched.',
