@@ -17,8 +17,10 @@ class EcommerceMedicationVariationResource extends JsonResource
         return [
             'id' => $this->id,
             'strength_value' => $this->strength_value,
+            'weight' => $this->weight,
+            'description' => $this->description,
+            'package_per_roll' => $this->package_per_roll,
             'presentation' => new EcommercePresentationResource($this->whenLoaded('presentation')),
-            'package' => new EcommercePackageResource($this->whenLoaded('package')),
             'medicationType' => new EcommerceMedicationTypeResource($this->whenLoaded('medicationType')),
             'status' => $this->status,
             'active' => $this->active,

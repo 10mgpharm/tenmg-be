@@ -68,7 +68,7 @@ class EcommerceMedicationVariationController extends Controller
         return $medication_variation
             ? $this->returnJsonResponse(
                 message: 'Medication variation successfully fetched.',
-                data: new EcommerceMedicationVariationResource($medication_variation->load(['presentation', 'package', 'medicationType']))
+                data: new EcommerceMedicationVariationResource($medication_variation->load(['presentation', 'medicationType']))
             )
             : $this->returnJsonResponse(
                 message: 'Oops, cannot fetch medication variation at the moment. Please try again later.'

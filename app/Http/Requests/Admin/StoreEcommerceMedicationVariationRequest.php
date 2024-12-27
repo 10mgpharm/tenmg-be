@@ -30,6 +30,7 @@ class StoreEcommerceMedicationVariationRequest extends FormRequest
             'presentation_name' => $this->input('presentationName'),
             'measurement_name' => $this->input('measurementName'),
             'strength_value' => $this->input('strengthValue'),
+            'package_per_roll' => $this->input('packagePerRoll'),
         ]);
     }
 
@@ -45,6 +46,7 @@ class StoreEcommerceMedicationVariationRequest extends FormRequest
             'presentation_name' => ['required', 'string', 'max:255', Rule::exists(EcommercePresentation::class, 'name')],
             'measurement_name' => ['required', 'string', 'max:255', Rule::exists(EcommerceMeasurement::class, 'name')],
             'strength_value' => ['required', 'string', 'max:255',],
+            'package_per_roll' => ['sometimes', 'nullable', 'string', 'max:255'],
             'weight' => ['required', 'numeric', 'min:0'],
             'active' => ['sometimes', 'boolean',]
         ];
