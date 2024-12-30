@@ -26,19 +26,22 @@ class EcommerceMedicationVariationService implements IEcommerceMedicationVariati
 
                 $business = $user->ownerBusinessType
                 ?? $user->businesses()->firstWhere('user_id', $user->id);
+
                 $presentation = EcommercePresentation::where('name', $validated['presentation_name'])->first();
-                $package = EcommercePackage::where('name', $validated['package_name'])->first();
                 $measurement = EcommerceMeasurement::where('name', $validated['measurement_name'] ?? '')->first();
                 $medicationType = EcommerceMedicationType::where('name', $validated['medication_type_name'])->first();
 
-                return EcommerceMedicationVariation::create(
+                return EcommerceMedicationVariation::firstOrCreate(
                     [
-                        'weight' => $validated['weight'],
-                        'strength_value' =>  $validated['strength_value'],
                         'ecommerce_presentation_id' => $presentation->id,
                         'ecommerce_medication_type_id' => $medicationType->id,
                         'ecommerce_measurement_id' => $measurement->id,
+                        'strength_value' =>  $validated['strength_value'],
+                        'weight' => $validated['weight'],
+                        'package_per_roll' =>  $validated['package_per_roll'] ?? null,
                         'business_id' => $business?->id,
+                    ],
+                    [
                         'created_by_id' => $user->id,
                         'status' => $user->hasRole('admin') ? StatusEnum::ACTIVE->value : StatusEnum::APPROVED->value,
                         'active' => true,
