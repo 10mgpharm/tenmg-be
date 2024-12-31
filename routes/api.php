@@ -38,7 +38,6 @@ use App\Http\Controllers\API\Supplier\EcommerceCategoryController as SupplierEco
 use App\Http\Controllers\API\Supplier\EcommerceMeasurementController as SupplierEcommerceMeasurementController;
 use App\Http\Controllers\API\Supplier\EcommerceMedicationVariationController as SupplierEcommerceMedicationVariationController;
 use App\Http\Controllers\API\Supplier\EcommercePackageController as SupplierEcommercePackageController;
-use App\Http\Controllers\API\Supplier\EcommercePresentationController as SupplierEcommercePresentationController;
 use App\Http\Controllers\API\Supplier\EcommerceProductController as SupplierEcommerceProductController;
 use App\Http\Controllers\API\Supplier\MedicationTypeController as SupplierMedicationTypeController;
 use App\Http\Controllers\API\Webhooks\PaystackWebhookController;
@@ -147,7 +146,6 @@ Route::prefix('v1')->group(function () {
             Route::apiResource('categories', SupplierEcommerceCategoryController::class);
             Route::apiResource('brands', SupplierEcommerceBrandController::class);
             Route::apiResource('measurements', SupplierEcommerceMeasurementController::class);
-            Route::apiResource('presentations', SupplierEcommercePresentationController::class);
             Route::apiResource('packages', SupplierEcommercePackageController::class);
             Route::apiResource('medication-variations', SupplierEcommerceMedicationVariationController::class);
 
@@ -341,6 +339,7 @@ Route::prefix('v1')->group(function () {
                 Route::apiResource('notification', NotificationController::class);
                 Route::apiResource('categories', AdminEcommerceCategoryController::class);
                 Route::apiResource('measurements', AdminEcommerceMeasurementController::class);
+                Route::get('presentations/search', [AdminEcommercePresentationController::class, 'search']);
                 Route::apiResource('presentations', AdminEcommercePresentationController::class);
                 Route::apiResource('packages', AdminEcommercePackageController::class);
                 Route::apiResource('medication-variations', AdminEcommerceMedicationVariationController::class);
