@@ -20,7 +20,7 @@ class BusinessLicenseResource extends JsonResource
             'contactEmail' => $this->contact_email,
             'businessAddress' => $this->address,
             'licenseNumber' => $this->license_number,
-            'expiryDate' => $this->expiry_date?->diffForHumans(),
+            'expiryDate' => $this->expiry_date,
             'cacDocument' => $this->cac,
             'type' => $this->type,
             'owner' => new UserResource($this->whenLoaded('owner')),
@@ -32,8 +32,8 @@ class BusinessLicenseResource extends JsonResource
                 ? 'EXPIRED'
                 : 'VERIFIED'
             },
-            'createdAt' => $this->created_at->diffForHumans(),
-            'updatedAt' => $this->updated_at->diffForHumans(),
+            'createdAt' => $this->created_at,
+            'updatedAt' => $this->updated_at,
         ];
     }
 }
