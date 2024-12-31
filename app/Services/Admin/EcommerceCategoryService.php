@@ -3,6 +3,7 @@
 namespace App\Services\Admin;
 
 use App\Enums\StatusEnum;
+use App\Helpers\UtilityHelper;
 use App\Models\EcommerceCategory;
 use App\Models\User;
 use App\Services\Interfaces\IEcommerceCategoryService;
@@ -32,8 +33,8 @@ class EcommerceCategoryService implements IEcommerceCategoryService
                 return $user->categories()->create([
                     ...$validated,
                     'status' => $validated['status'] ?? StatusEnum::APPROVED->value,
-                    'active' => $validated['active'] ?? false,
-                    'slug' => Str::slug($validated['name']),
+                    'active' => in_array($validated['status'] ?? StatusEnum::APPROVED->value, [StatusEnum::APPROVED->value, StatusEnum::ACTIVE->value]) ? ($validated['active'] ?? true) : false,
+                    'slug' =>  UtilityHelper::generateSlug('CAT'),
                     'business_id' => $user->ownerBusinessType?->id ?: $user->businesses()
                     ->firstWhere('user_id', $user->id)?->id,
                     'created_by_id' => $user->id,
@@ -66,8 +67,7 @@ class EcommerceCategoryService implements IEcommerceCategoryService
                 return $category->update([
                     ...$validated,
                     'status' => $validated['status'] ?? $category->status,
-                    'active' => $validated['active'] ?? $category->active,
-                    'slug' => Str::slug($validated['name'] ?? $category->name),
+                    'active' => in_array($validated['status'] ?? $category->status, [StatusEnum::APPROVED->value, StatusEnum::ACTIVE->value]) ? ($validated['active'] ?? $category->active) : false,
                     'updated_by_id' => $user->id,
                 ]);
             });
