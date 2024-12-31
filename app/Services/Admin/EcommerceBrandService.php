@@ -33,7 +33,7 @@ class EcommerceBrandService implements IEcommerceBrandService
                 return $user->brands()->create([
                     ...$validated,
                     'status' => $validated['status'] ?? StatusEnum::APPROVED->value,
-                    'active' => in_array($validated['status'] ?? StatusEnum::APPROVED->value, [StatusEnum::APPROVED->value, StatusEnum::ACTIVE->value]),
+                    'active' =>  in_array($validated['status'] ?? StatusEnum::APPROVED->value, [StatusEnum::APPROVED->value, StatusEnum::ACTIVE->value]) ? ($validated['active'] ?? true) : false,
                     'slug' => UtilityHelper::generateSlug('BRD'),
                     'business_id' => $user->ownerBusinessType?->id ?: $user->businesses()
                         ->firstWhere('user_id', $user->id)?->id,
@@ -65,7 +65,7 @@ class EcommerceBrandService implements IEcommerceBrandService
                 return $brand->update([
                     ...$validated,
                     'status' => $validated['status'] ?? $brand->status,
-                    'active' => in_array($validated['status'] ?? $brand->status, [StatusEnum::APPROVED->value, StatusEnum::ACTIVE->value]) ? $validated['active'] : false,
+                    'active' => in_array($validated['status'] ?? $brand->status, [StatusEnum::APPROVED->value, StatusEnum::ACTIVE->value]) ?  ($validated['active'] ?? $brand->active) : false,
                     'updated_by_id' => $user->id,
                 ]);
             });
