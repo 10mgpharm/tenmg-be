@@ -6,11 +6,14 @@ use App\Enums\StatusEnum;
 use App\Helpers\UtilityHelper;
 use App\Models\EcommerceMeasurement;
 use App\Models\EcommerceMedicationType;
+use App\Models\EcommerceMedicationVariation;
 use App\Models\EcommercePresentation;
+use App\Models\EcommerceProduct;
 use App\Models\User;
 use App\Services\Interfaces\IEcommerceMedicationTypeService;
 use Exception;
 use Illuminate\Support\Facades\DB;
+use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 
 class EcommerceMedicationTypeService implements IEcommerceMedicationTypeService
 {
@@ -93,7 +96,7 @@ class EcommerceMedicationTypeService implements IEcommerceMedicationTypeService
                 return $medication_type;
             });
         } catch (Exception $e) {
-            throw new Exception('Failed to create a medication type: '.$e->getMessage());
+            throw new Exception('Failed to create a medication type: ' . $e->getMessage());
         }
     }
 
@@ -131,6 +134,8 @@ class EcommerceMedicationTypeService implements IEcommerceMedicationTypeService
 
                 // create variations if not exist or update for the selected medication type
                 if (isset($validated['variations'])) {
+                    $variationIds = [];
+
                     foreach ($validated['variations'] as $variation) {
                         $presentation_id = null;
                         $presentationCheck = EcommercePresentation::where('name', $variation['presentation'])->first();
@@ -174,26 +179,49 @@ class EcommerceMedicationTypeService implements IEcommerceMedicationTypeService
                                 'business_id' => $validated['business_id'],
                                 'updated_by_id' => $user->id,
                             ]);
+                            array_push($variationIds, $variationId);
                         } else {
-                            $medication_type->variations()->create([
-                                'ecommerce_presentation_id' => $presentation_id,
-                                'ecommerce_measurement_id' => $measurement_id,
-                                'active' => 1,
-                                'status' => StatusEnum::APPROVED->value,
-                                'weight' => array_key_exists('weight', $variation) ? $variation['weight'] : null,
-                                'strength_value' => $variation['strength_value'],
-                                'package_per_roll' => $variation['package'],
-                                'business_id' => $validated['business_id'],
-                                'created_by_id' => $user->id,
-                            ]);
+                            $created = $medication_type->variations()->firstOrCreate(
+                                [
+                                    'ecommerce_presentation_id' => $presentation_id,
+                                    'ecommerce_measurement_id' => $measurement_id,
+                                    'weight' => array_key_exists('weight', $variation) ? $variation['weight'] : null,
+                                    'strength_value' => $variation['strength_value'],
+                                    'package_per_roll' => $variation['package'],
+                                    'business_id' => $validated['business_id'],
+                                ],
+                                [
+                                    'active' => 1,
+                                    'status' => StatusEnum::APPROVED->value,
+                                    'created_by_id' => $user->id,
+                                ]
+                            );
+
+                            array_push($variationIds, $created->id);
                         }
+                    }
+
+
+                    if (
+                        EcommerceProduct::whereIn('ecommerce_variation_id', $variationIds)
+                        ->where(fn($query) => 
+                        $query->orWhere('active', 1)
+                        ->orWhereIn('status', [
+                            StatusEnum::APPROVED->value,
+                            StatusEnum::ACTIVE->value
+                            ]))
+                        ->exists()
+                    ) {
+                        throw new BadRequestHttpException('Cannot delete this variation because it has associated products.');
+                    } else {
+                        $medication_type->variations()->whereNotIn('id', $variationIds)->delete();
                     }
                 }
 
                 return $updated;
             });
         } catch (Exception $e) {
-            throw new Exception('Failed to update the medication type: '.$e->getMessage());
+            throw new Exception('Failed to update the medication type: ' . $e->getMessage());
         }
     }
 
