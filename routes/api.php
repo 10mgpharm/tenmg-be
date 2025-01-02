@@ -34,7 +34,6 @@ use App\Http\Controllers\API\Storefront\ProductController;
 use App\Http\Controllers\API\Storefront\StorefrontController;
 use App\Http\Controllers\API\Supplier\EcommerceBrandController as SupplierEcommerceBrandController;
 use App\Http\Controllers\API\Supplier\EcommerceMedicationVariationController as SupplierEcommerceMedicationVariationController;
-use App\Http\Controllers\API\Supplier\EcommercePresentationController as SupplierEcommercePresentationController;
 use App\Http\Controllers\API\Supplier\EcommerceProductController as SupplierEcommerceProductController;
 use App\Http\Controllers\API\Supplier\MedicationTypeController as SupplierMedicationTypeController;
 use App\Http\Controllers\API\Webhooks\PaystackWebhookController;
@@ -141,7 +140,6 @@ Route::prefix('v1')->group(function () {
 
             Route::apiResource('medication-types', SupplierMedicationTypeController::class);
             Route::apiResource('brands', SupplierEcommerceBrandController::class);
-            Route::apiResource('presentations', SupplierEcommercePresentationController::class);
             Route::apiResource('medication-variations', SupplierEcommerceMedicationVariationController::class);
 
         });
@@ -335,6 +333,7 @@ Route::prefix('v1')->group(function () {
                 Route::apiResource('categories', AdminEcommerceCategoryController::class);
                 Route::get('measurements/search', [AdminEcommerceMeasurementController::class, 'search']);
                 Route::apiResource('measurements', AdminEcommerceMeasurementController::class);
+                Route::get('presentations/search', [AdminEcommercePresentationController::class, 'search']);
                 Route::apiResource('presentations', AdminEcommercePresentationController::class);
                 Route::apiResource('medication-variations', AdminEcommerceMedicationVariationController::class);
 
