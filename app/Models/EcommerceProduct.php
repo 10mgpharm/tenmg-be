@@ -108,13 +108,6 @@ class EcommerceProduct extends Model
         return $this->belongsTo(EcommerceMedicationVariation::class, 'ecommerce_variation_id');
     }
 
-    /**
-     * Get the package associated with the product.
-     */
-    public function package()
-    {
-        return $this->belongsTo(EcommercePackage::class, 'ecommerce_package_id');
-    }
 
     /**
      * Get the presentation associated with the product.

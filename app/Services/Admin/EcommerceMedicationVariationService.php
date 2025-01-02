@@ -6,7 +6,6 @@ use App\Enums\StatusEnum;
 use App\Models\EcommerceMeasurement;
 use App\Models\EcommerceMedicationType;
 use App\Models\EcommerceMedicationVariation;
-use App\Models\EcommercePackage;
 use App\Models\EcommercePresentation;
 use App\Models\User;
 use App\Services\Interfaces\IEcommerceMedicationVariationService;

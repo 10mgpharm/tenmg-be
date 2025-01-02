@@ -3,15 +3,15 @@
 namespace App\Services\Admin;
 
 use App\Enums\StatusEnum;
+use App\Helpers\UtilityHelper;
+use App\Http\Resources\EcommerceProductResource;
 use App\Models\EcommerceBrand;
 use App\Models\EcommerceCategory;
 use App\Models\EcommerceMeasurement;
 use App\Models\EcommerceMedicationType;
 use App\Models\EcommerceMedicationVariation;
-use App\Models\EcommercePackage;
 use App\Models\EcommercePresentation;
 use App\Models\EcommerceProduct;
-use App\Models\EcommerceProductDetail;
 use App\Models\User;
 use App\Services\AttachmentService;
 use App\Services\Interfaces\IEcommerceProductService;
@@ -43,18 +43,23 @@ class EcommerceProductService implements IEcommerceProductService
         try {
             return DB::transaction(function () use ($validated, $user) {
 
-                $business = $user->ownerBusinessType ?? $user->businesses()
-                    ->firstWhere('user_id', $user->id);
+                // Doc: when business is null that means the product and its dependencies are for global used and created by admin
+                if ($user && $user->hasRole('admin')) {
+                    $validated['business_id'] = null;
+                } else {
+                    $validated['business_id'] = $user->ownerBusinessType?->id ?: $user->businesses()
+                        ->firstWhere('user_id', $user->id)?->id;
+                }
 
                 // Ensure category exists or create it
                 $category = EcommerceCategory::firstOrCreate(
                     ['name' => $validated['category_name']],
                     [
-                        'slug' => Str::slug($validated['category_name']),
-                        'business_id' => $business?->id,
+                        'slug' => UtilityHelper::generateSlug('CAT'),
+                        'business_id' => $validated['business_id'],
                         'created_by_id' => $user->id,
-                        'status' => $user->hasRole('admin') ? StatusEnum::ACTIVE->value : StatusEnum::APPROVED->value,
-                        'active' => true,
+                        'status' => $user->hasRole('admin') ? StatusEnum::ACTIVE->value : StatusEnum::PENDING->value,
+                        'active' => $user->hasRole('admin'),
                     ]
                 );
 
@@ -62,11 +67,11 @@ class EcommerceProductService implements IEcommerceProductService
                 $brand = EcommerceBrand::firstOrCreate(
                     ['name' => $validated['brand_name']],
                     [
-                        'slug' => Str::slug($validated['brand_name']),
-                        'business_id' => $business?->id,
+                        'slug' => UtilityHelper::generateSlug('BRD'),
+                        'business_id' => $validated['business_id'],
                         'created_by_id' => $user->id,
-                        'status' => $user->hasRole('admin') ? StatusEnum::ACTIVE->value : StatusEnum::APPROVED->value,
-                        'active' => true,
+                        'status' => $user->hasRole('admin') ? StatusEnum::ACTIVE->value : StatusEnum::PENDING->value,
+                        'active' => $user->hasRole('admin'),
                     ]
                 );
 
@@ -74,11 +79,11 @@ class EcommerceProductService implements IEcommerceProductService
                 $medicationType = EcommerceMedicationType::firstOrCreate(
                     ['name' => $validated['medication_type_name']],
                     [
-                        'slug' => Str::slug($validated['medication_type_name']),
-                        'business_id' => $business?->id,
+                        'slug' => UtilityHelper::generateSlug('MED'),
+                        'business_id' => $validated['business_id'],
                         'created_by_id' => $user->id,
-                        'status' => $user->hasRole('admin') ? StatusEnum::ACTIVE->value : StatusEnum::APPROVED->value,
-                        'active' => true,
+                        'status' => $user->hasRole('admin') ? StatusEnum::ACTIVE->value : StatusEnum::PENDING->value,
+                        'active' => $user->hasRole('admin'),
                     ]
                 );
 
@@ -86,10 +91,10 @@ class EcommerceProductService implements IEcommerceProductService
                 $measurement = EcommerceMeasurement::firstOrCreate(
                     ['name' => $validated['measurement_name']],
                     [
-                        'business_id' => $business?->id,
+                        'business_id' => $validated['business_id'],
                         'created_by_id' => $user->id,
-                        'status' => $user->hasRole('admin') ? StatusEnum::ACTIVE->value : StatusEnum::APPROVED->value,
-                        'active' => true,
+                        'status' => $user->hasRole('admin') ? StatusEnum::ACTIVE->value : StatusEnum::PENDING->value,
+                        'active' => $user->hasRole('admin'),
                     ]
                 );
 
@@ -97,48 +102,37 @@ class EcommerceProductService implements IEcommerceProductService
                 $presentation = EcommercePresentation::firstOrCreate(
                     ['name' => $validated['presentation_name']],
                     [
-                        'business_id' => $business?->id,
+                        'business_id' => $validated['business_id'],
                         'created_by_id' => $user->id,
-                        'status' => $user->hasRole('admin') ? StatusEnum::ACTIVE->value : StatusEnum::APPROVED->value,
-                        'active' => true,
-                    ]
-                );
-
-                // Ensure package exists or create it
-                $package = EcommercePackage::firstOrCreate(
-                    ['name' => $validated['package_name']],
-                    [
-                        'business_id' => $business?->id,
-                        'created_by_id' => $user->id,
-                        'status' => $user->hasRole('admin') ? StatusEnum::ACTIVE->value : StatusEnum::APPROVED->value,
-                        'active' => true,
+                        'status' => $user->hasRole('admin') ? StatusEnum::ACTIVE->value : StatusEnum::PENDING->value,
+                        'active' => $user->hasRole('admin'),
                     ]
                 );
 
                 // Ensure variation exists or create it
                 $variation = EcommerceMedicationVariation::firstOrCreate(
                     [
-                        'weight' => $validated['weight'],
+                        'weight' => $validated['weight'] ?? null,
                         'strength_value' => $validated['strength_value'],
                         'ecommerce_presentation_id' => $presentation->id,
                         'ecommerce_medication_type_id' => $medicationType->id,
                         'ecommerce_measurement_id' => $measurement->id,
+                        'business_id' => $validated['business_id'],
+                        'package_per_roll' => $validated['package_per_roll'] ?? null,
                     ],
                     [
-                        'business_id' => $business?->id,
                         'created_by_id' => $user->id,
                         'status' => $user->hasRole('admin') ? StatusEnum::ACTIVE->value : StatusEnum::APPROVED->value,
-                        'active' => true,
+                        'active' => $user->hasRole('admin'),
                     ]
                 );
 
                 $product = $user->products()->create([
-                    'business_id' => $business?->id,
+                    'business_id' => $validated['business_id'],
 
                     'ecommerce_category_id' => $category->id,
                     'ecommerce_brand_id' => $brand->id,
                     'ecommerce_medication_type_id' => $medicationType->id,
-                    'ecommerce_package_id' => $package->id,
                     'ecommerce_variation_id' => $variation->id,
                     'ecommerce_presentation_id' => $presentation->id,
                     'ecommerce_measurement_id' => $measurement->id,
@@ -151,7 +145,7 @@ class EcommerceProductService implements IEcommerceProductService
 
                     'name' => $validated['product_name'],
                     'description' => $validated['product_description'],
-                    'slug' => Str::slug($validated['product_name']),
+                    'slug' => UtilityHelper::generateSlug('PRD'),
 
                     'low_stock_level' => $validated['low_stock_level'] ?? null,
                     'out_stock_level' => $validated['out_stock_level'] ?? null,
@@ -203,6 +197,14 @@ class EcommerceProductService implements IEcommerceProductService
 
                 // Filter out empty/null values.
                 $validated = array_filter($validated);
+
+                // Doc: when business is null that means the product and its dependencies are for global used and created by admin
+                if ($user && $user->hasRole('admin')) {
+                    $validated['business_id'] = null;
+                } else {
+                    $validated['business_id'] = $user->ownerBusinessType?->id ?: $user->businesses()
+                        ->firstWhere('user_id', $user->id)?->id;
+                }
 
                 // Extract business information
                 $business = $user->ownerBusinessType
@@ -287,22 +289,6 @@ class EcommerceProductService implements IEcommerceProductService
                 }
 
 
-                // Ensure package exists or create it
-                if (!empty($validated['package_name'])) {
-                    $package = EcommercePackage::firstOrCreate(
-                        ['name' => $validated['package_name']],
-                        [
-                            'business_id' => $business?->id,
-                            'created_by_id' => $user->id,
-                            'status' => $user->hasRole('admin') ? StatusEnum::ACTIVE->value : StatusEnum::APPROVED->value,
-                            'active' => true,
-                        ]
-                    );
-
-                    $validated['ecommerce_package_id'] = $package->id;
-                }
-
-
                 // Ensure variation exists or create it
                 if (!empty($validated['weight']) && !empty($validated['strength_value'])) {
 
@@ -364,81 +350,80 @@ class EcommerceProductService implements IEcommerceProductService
      */
     public function search(Request $request): LengthAwarePaginator
     {
-        $query = EcommerceProduct::query();
+        $query = EcommerceProduct::query()
+            // Filter by product name
+            ->when(
+                $request->input('search'),
+                fn($query, $search) =>
+                $query->where('name', 'like', "%{$search}%")
+            )
+            // Filter by product status (e.g., ACTIVE, INACTIVE)
+            ->when(
+                $request->input('status'),
+                fn($query, $status) =>
+                $query->where('status', strtoupper($status))
+            )
+            // Filter by active status (active/inactive mapped to 1/0)
+            ->when(
+                $request->input('active'),
+                fn($query, $active) =>
+                $query->where('active', '=', $active == 'active' ? 1 : 0)
+            )
+            // Filter by inventory status (OUT OF STOCK, LOW STOCK, IN STOCK)
+            ->when($request->input('inventory'), function ($query, $inventory) {
+                $inventories = is_array($inventory) ? $inventory : explode(',', $inventory);
+                $inventories = array_unique(array_map('trim', $inventories));
 
-        // Filter by Inventory Status
-        if ($inventoryStatus = $request->input('inventory')) {
-            // Handle multiple inventory statuses if provided as an array or comma-separated values
-            $inventoryStatuses = is_array($inventoryStatus) ? $inventoryStatus : explode(',', $inventoryStatus);
-            $inventoryStatuses = array_unique(array_map('trim', $inventoryStatuses));  // Remove duplicates and trim values
+                $query->whereHas('productDetails', function ($q) use ($inventories) {
+                    foreach ($inventories as $status) {
+                        $q->when(
+                            $status === 'OUT OF STOCK',
+                            fn ($q) => $q->whereNull('current_stock')->orWhere('current_stock', 0)
+                        )->when(
+                            $status === 'LOW STOCK',
+                            fn ($q) => $q->whereNotNull('starting_stock')->whereColumn('current_stock', '<=', DB::raw('starting_stock / 2'))
+                        )->when(
+                            $status === 'IN STOCK',
+                            fn ($q) => $q->whereNotNull('current_stock')->where('current_stock', '>', DB::raw('starting_stock / 2'))
+                        );
+                    }
+                });
+            })
+            // Filter by category names (case-insensitive partial match)
+            ->when($request->input('category'), function ($query, $category) {
+                $categories = is_array($category) ? $category : explode(',', $category);
+                $categories = array_unique(array_map('trim', $categories));
 
-            $query->where(function ($query) use ($inventoryStatuses) {
-                foreach ($inventoryStatuses as $status) {
-                    $query->when($status === 'OUT OF STOCK', function ($q) {
-                        $q->whereNull('current_stock')
-                            ->orWhere('current_stock', 0);
-                    })->when($status === 'LOW STOCK', function ($q) {
-                        $q->whereNotNull('starting_stock')
-                            ->whereColumn('current_stock', '<=', DB::raw('starting_stock / 2'));
-                    })->when($status === 'IN STOCK', function ($q) {
-                        $q->whereNotNull('current_stock')
-                            ->where('current_stock', '>', DB::raw('starting_stock / 2'));
-                    });
-                }
-            });
-        }
+                $query->whereHas('category', function ($q) use ($categories) {
+                    foreach ($categories as $category) {
+                        $q->orWhere('name', 'like', '%' . $category . '%');
+                    }
+                });
+            })
+            // Filter by brand names (case-insensitive partial match)
+            ->when($request->input('brand'), function ($query, $brand) {
+                $brands = is_array($brand) ? $brand : explode(',', $brand);
+                $brands = array_unique(array_map('trim', $brands));
 
-        // Filter by Related Model Names (handling arrays or comma-separated values)
-        if ($categoryName = $request->input('category')) {
-            $categories = is_array($categoryName) ? $categoryName : explode(',', $categoryName);
-            $categories = array_unique(array_map('trim', $categories));  // Remove duplicates and trim values
-            $query->whereHas('category', function ($q) use ($categories) {
-                foreach ($categories as $category) {
-                    $q->orWhere('name', 'like', '%' . $category . '%');
-                }
-            });
-        }
+                $query->whereHas('brand', function ($q) use ($brands) {
+                    foreach ($brands as $brand) {
+                        $q->orWhere('name', 'like', '%' . $brand . '%');
+                    }
+                });
+            })
+            // Filter by medication types (case-insensitive partial match)
+            ->when($request->input('medicationType'), function ($query, $medicationType) {
+                $medicationTypes = is_array($medicationType) ? $medicationType : explode(',', $medicationType);
+                $medicationTypes = array_unique(array_map('trim', $medicationTypes));
 
-        if ($brandName = $request->input('brand')) {
-            $brands = is_array($brandName) ? $brandName : explode(',', $brandName);
-            $brands = array_unique(array_map('trim', $brands));  // Remove duplicates and trim values
-            $query->whereHas('brand', function ($q) use ($brands) {
-                foreach ($brands as $brand) {
-                    $q->orWhere('name', 'like', '%' . $brand . '%');
-                }
-            });
-        }
+                $query->whereHas('medicationType', function ($q) use ($medicationTypes) {
+                    foreach ($medicationTypes as $medicationType) {
+                        $q->orWhere('name', 'like', '%' . $medicationType . '%');
+                    }
+                });
+        });
 
-        if ($medicationTypeName = $request->input('medicationType')) {
-            $medicationTypes = is_array($medicationTypeName) ? $medicationTypeName : explode(',', $medicationTypeName);
-            $medicationTypes = array_unique(array_map('trim', $medicationTypes));  // Remove duplicates and trim values
-            $query->whereHas('medicationType', function ($q) use ($medicationTypes) {
-                foreach ($medicationTypes as $medicationType) {
-                    $q->orWhere('name', 'like', '%' . $medicationType . '%');
-                }
-            });
-        }
-
-        if ($variationName = $request->input('variation')) {
-            $variations = is_array($variationName) ? $variationName : explode(',', $variationName);
-            $variations = array_unique(array_map('trim', $variations));  // Remove duplicates and trim values
-            $query->whereHas('variation', function ($q) use ($variations) {
-                foreach ($variations as $variation) {
-                    $q->orWhere('name', 'like', '%' . $variation . '%');
-                }
-            });
-        }
-
-        if ($packageName = $request->input('package')) {
-            $packages = is_array($packageName) ? $packageName : explode(',', $packageName);
-            $packages = array_unique(array_map('trim', $packages));  // Remove duplicates and trim values
-            $query->whereHas('package', function ($q) use ($packages) {
-                foreach ($packages as $package) {
-                    $q->orWhere('name', 'like', '%' . $package . '%');
-                }
-            });
-        }
-
+        // Filter by creation date range
         if ($from = $request->input('fromDate')) {
             $query->whereDate('created_at', '>=', $from);
         }
@@ -447,7 +432,23 @@ class EcommerceProductService implements IEcommerceProductService
             $query->whereDate('created_at', '<=', $to);
         }
 
-        // Retrieve paginated results
-        return $query->latest()->paginate();
+        // Sort by specified column and order (default: created_at desc)
+        if ($request->has('sort') && $request->has('order')) {
+            $sortColumn = $request->input('sort');
+            $sortOrder = $request->input('order');
+
+            $validColumns = ['name']; // Define valid sortable columns
+            if (in_array($sortColumn, $validColumns) && in_array(strtolower($sortOrder), ['asc', 'desc'])) {
+                $query->orderBy($sortColumn, $sortOrder);
+            }
+        } else {
+            $query->orderBy('created_at', 'desc');
+        }
+
+        // Return paginated results with applied filters and transformations
+        return $query
+            ->paginate($request->has('perPage') ? $request->perPage : 10)
+            ->withQueryString()
+            ->through(fn(EcommerceProduct $item) => EcommerceProductResource::make($item));
     }
 }

@@ -31,8 +31,8 @@ class EcommerceProductResource extends JsonResource
             ? $this->status
             : 'DRAFTED',
             'inventory' => match (true) {
-                $this->current_stock === null || $this->current_stock === 0 => 'OUT OF STOCK',
-                $this->starting_stock === null || $this->current_stock <= $this->starting_stock / 2 => 'LOW STOCK',
+                $this->productDetails?->current_stock === null || $this->productDetails?->current_stock === 0 => 'OUT OF STOCK',
+                $this->productDetails?->starting_stock === null || $this->productDetails?->current_stock <= $this->productDetails?->starting_stock / 2 => 'LOW STOCK',
                 default => 'IN STOCK',
             },
             'comment' => $this->comment,

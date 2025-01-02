@@ -12,7 +12,6 @@ use App\Http\Controllers\API\Admin\EcommerceBrandController as AdminEcommerceBra
 use App\Http\Controllers\API\Admin\EcommerceCategoryController as AdminEcommerceCategoryController;
 use App\Http\Controllers\API\Admin\EcommerceMeasurementController as AdminEcommerceMeasurementController;
 use App\Http\Controllers\API\Admin\EcommerceMedicationVariationController as AdminEcommerceMedicationVariationController;
-use App\Http\Controllers\API\Admin\EcommercePackageController as AdminEcommercePackageController;
 use App\Http\Controllers\API\Admin\EcommercePresentationController as AdminEcommercePresentationController;
 use App\Http\Controllers\API\Admin\EcommerceProductController as AdminEcommerceProductController;
 use App\Http\Controllers\API\Admin\FaqController;
@@ -36,7 +35,6 @@ use App\Http\Controllers\API\Storefront\StorefrontController;
 use App\Http\Controllers\API\Supplier\EcommerceBrandController as SupplierEcommerceBrandController;
 use App\Http\Controllers\API\Supplier\EcommerceCategoryController as SupplierEcommerceCategoryController;
 use App\Http\Controllers\API\Supplier\EcommerceMedicationVariationController as SupplierEcommerceMedicationVariationController;
-use App\Http\Controllers\API\Supplier\EcommercePackageController as SupplierEcommercePackageController;
 use App\Http\Controllers\API\Supplier\EcommercePresentationController as SupplierEcommercePresentationController;
 use App\Http\Controllers\API\Supplier\EcommerceProductController as SupplierEcommerceProductController;
 use App\Http\Controllers\API\Supplier\MedicationTypeController as SupplierMedicationTypeController;
@@ -146,7 +144,6 @@ Route::prefix('v1')->group(function () {
             Route::apiResource('categories', SupplierEcommerceCategoryController::class);
             Route::apiResource('brands', SupplierEcommerceBrandController::class);
             Route::apiResource('presentations', SupplierEcommercePresentationController::class);
-            Route::apiResource('packages', SupplierEcommercePackageController::class);
             Route::apiResource('medication-variations', SupplierEcommerceMedicationVariationController::class);
 
         });
@@ -341,7 +338,6 @@ Route::prefix('v1')->group(function () {
                 Route::get('measurements/search', [AdminEcommerceMeasurementController::class, 'search']);
                 Route::apiResource('measurements', AdminEcommerceMeasurementController::class);
                 Route::apiResource('presentations', AdminEcommercePresentationController::class);
-                Route::apiResource('packages', AdminEcommercePackageController::class);
                 Route::apiResource('medication-variations', AdminEcommerceMedicationVariationController::class);
 
                 Route::get('products/search', [AdminEcommerceProductController::class, 'search']);

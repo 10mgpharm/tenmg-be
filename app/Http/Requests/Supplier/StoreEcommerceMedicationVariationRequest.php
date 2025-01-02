@@ -8,7 +8,6 @@ use App\Models\EcommerceMedicationType;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 use App\Models\EcommerceMedicationVariation;
-use App\Models\EcommercePackage;
 use App\Models\EcommercePresentation;
 use Illuminate\Validation\Rules\Enum;
 
