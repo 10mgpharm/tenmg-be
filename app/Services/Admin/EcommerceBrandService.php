@@ -3,6 +3,7 @@
 namespace App\Services\Admin;
 
 use App\Enums\StatusEnum;
+use App\Helpers\UtilityHelper;
 use App\Models\EcommerceBrand;
 use App\Models\User;
 use App\Services\Interfaces\IEcommerceBrandService;
@@ -29,13 +30,21 @@ class EcommerceBrandService implements IEcommerceBrandService
     {
         try {
             return DB::transaction(function () use ($validated, $user) {
+
+                 // Doc: when business is null that means the brand and its dependencies are for global used and created by admin
+                if ($user && $user->hasRole('admin')) {
+                    $validated['business_id'] = null;
+                } else {
+                    $validated['business_id'] = $user->ownerBusinessType?->id ?: $user->businesses()
+                        ->firstWhere('user_id', $user->id)?->id;
+                }
+
                 return $user->brands()->create([
                     ...$validated,
                     'status' => $validated['status'] ?? StatusEnum::APPROVED->value,
-                    'active' => $validated['active'] ?? false,
-                    'slug' => Str::slug($validated['name']),
-                    'business_id' => $user->ownerBusinessType?->id ?: $user->businesses()
-                        ->firstWhere('user_id', $user->id)?->id,
+                    'active' =>  in_array($validated['status'] ?? StatusEnum::APPROVED->value, [StatusEnum::APPROVED->value, StatusEnum::ACTIVE->value]) ? ($validated['active'] ?? true) : false,
+                    'slug' => UtilityHelper::generateSlug('BRD'),
+                    'business_id' => $validated['business_id'],
                     'created_by_id' => $user->id,
                 ]);
             });
@@ -64,8 +73,7 @@ class EcommerceBrandService implements IEcommerceBrandService
                 return $brand->update([
                     ...$validated,
                     'status' => $validated['status'] ?? $brand->status,
-                    'active' => $validated['active'] ?? $brand->active,
-                    'slug' => Str::slug($validated['name'] ?? $brand->name),
+                    'active' => in_array($validated['status'] ?? $brand->status, [StatusEnum::APPROVED->value, StatusEnum::ACTIVE->value]) ?  ($validated['active'] ?? $brand->active) : false,
                     'updated_by_id' => $user->id,
                 ]);
             });
