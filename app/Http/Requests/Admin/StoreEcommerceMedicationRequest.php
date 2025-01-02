@@ -86,6 +86,7 @@ class StoreEcommerceMedicationRequest extends FormRequest
                     }
                 },
             ],
+            'variations.*.weight' => [ 'nullable', 'sometimes', 'string',],
         ];
     }
 }

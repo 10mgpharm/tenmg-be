@@ -34,7 +34,6 @@ use App\Http\Controllers\API\Storefront\ProductController;
 use App\Http\Controllers\API\Storefront\StorefrontController;
 use App\Http\Controllers\API\Supplier\EcommerceMedicationVariationController as SupplierEcommerceMedicationVariationController;
 use App\Http\Controllers\API\Supplier\EcommerceProductController as SupplierEcommerceProductController;
-use App\Http\Controllers\API\Supplier\MedicationTypeController as SupplierMedicationTypeController;
 use App\Http\Controllers\API\Webhooks\PaystackWebhookController;
 use App\Http\Controllers\BusinessSettingController;
 use App\Http\Controllers\InviteController;
@@ -136,8 +135,6 @@ Route::prefix('v1')->group(function () {
 
             Route::get('products/search', [SupplierEcommerceProductController::class, 'search']);
             Route::apiResource('products', SupplierEcommerceProductController::class);
-
-            Route::apiResource('medication-types', SupplierMedicationTypeController::class);
             Route::apiResource('medication-variations', SupplierEcommerceMedicationVariationController::class);
 
         });
