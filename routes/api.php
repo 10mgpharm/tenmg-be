@@ -11,7 +11,6 @@ use App\Http\Controllers\API\Admin\CarouselImageController;
 use App\Http\Controllers\API\Admin\EcommerceBrandController as AdminEcommerceBrandController;
 use App\Http\Controllers\API\Admin\EcommerceCategoryController as AdminEcommerceCategoryController;
 use App\Http\Controllers\API\Admin\EcommerceMeasurementController as AdminEcommerceMeasurementController;
-use App\Http\Controllers\API\Admin\EcommerceMedicationVariationController as AdminEcommerceMedicationVariationController;
 use App\Http\Controllers\API\Admin\EcommercePresentationController as AdminEcommercePresentationController;
 use App\Http\Controllers\API\Admin\EcommerceProductController as AdminEcommerceProductController;
 use App\Http\Controllers\API\Admin\FaqController;
@@ -32,7 +31,6 @@ use App\Http\Controllers\API\Storefront\CategoryController;
 use App\Http\Controllers\API\Storefront\FaqController as StorefrontFaqController;
 use App\Http\Controllers\API\Storefront\ProductController;
 use App\Http\Controllers\API\Storefront\StorefrontController;
-use App\Http\Controllers\API\Supplier\EcommerceMedicationVariationController as SupplierEcommerceMedicationVariationController;
 use App\Http\Controllers\API\Supplier\EcommerceProductController as SupplierEcommerceProductController;
 use App\Http\Controllers\API\Webhooks\PaystackWebhookController;
 use App\Http\Controllers\BusinessSettingController;
@@ -135,8 +133,6 @@ Route::prefix('v1')->group(function () {
 
             Route::get('products/search', [SupplierEcommerceProductController::class, 'search']);
             Route::apiResource('products', SupplierEcommerceProductController::class);
-            Route::apiResource('medication-variations', SupplierEcommerceMedicationVariationController::class);
-
         });
 
         // VENDOR specific routes
@@ -330,7 +326,6 @@ Route::prefix('v1')->group(function () {
                 Route::apiResource('measurements', AdminEcommerceMeasurementController::class);
                 Route::get('presentations/search', [AdminEcommercePresentationController::class, 'search']);
                 Route::apiResource('presentations', AdminEcommercePresentationController::class);
-                Route::apiResource('medication-variations', AdminEcommerceMedicationVariationController::class);
 
                 Route::get('products/search', [AdminEcommerceProductController::class, 'search']);
                 Route::apiResource('products', AdminEcommerceProductController::class);
