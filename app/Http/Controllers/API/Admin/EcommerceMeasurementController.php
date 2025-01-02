@@ -104,4 +104,46 @@ class EcommerceMeasurementController extends Controller
                 statusCode: Response::HTTP_BAD_REQUEST
             );
     }
+
+    /**
+     * Search and filter EcommerceMeasurements based on the provided criteria.
+     *
+     * @param ListEcommerceMeasurementRequest $request The incoming request containing search, filter, and pagination parameters.
+     * @return JsonResponse A JSON response with the paginated list of presentations.
+     */
+    public function search(ListEcommerceMeasurementRequest $request): JsonResponse
+    {
+        $query = EcommerceMeasurement::query()
+            ->when($request->input('search'), function ($query, $search) {
+                $query->where('name', 'like', "%{$search}%");
+            })
+            ->when($request->input('status'), function ($query, $status) {
+                $query->where('status', strtoupper($status));
+            })
+            ->when($request->input('active'), function ($query, $active) {
+                $query->where('active', '=', $active == 'active' ? 1 : 0);
+            });
+
+        if ($request->has('sort') && $request->has('order')) {
+            $sortColumn = $request->input('sort');
+            $sortOrder = $request->input('order');
+
+            $validColumns = ['name'];
+            if (in_array($sortColumn, $validColumns) && in_array(strtolower($sortOrder), ['asc', 'desc'])) {
+                $query->orderBy($sortColumn, $sortOrder);
+            }
+        } else {
+            $query->orderBy('created_at', 'desc');
+        }
+
+        $measurement = $query
+            ->paginate($request->has('perPage') ? $request->perPage : 10)
+            ->withQueryString()
+            ->through(fn (EcommerceMeasurement $item) => EcommerceMeasurementResource::make($item));
+
+        return $this->returnJsonResponse(
+            message: 'Measurement successfully fetched.',
+            data: $measurement
+        );
+    }
 }

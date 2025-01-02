@@ -34,7 +34,6 @@ use App\Http\Controllers\API\Storefront\ProductController;
 use App\Http\Controllers\API\Storefront\StorefrontController;
 use App\Http\Controllers\API\Supplier\EcommerceBrandController as SupplierEcommerceBrandController;
 use App\Http\Controllers\API\Supplier\EcommerceCategoryController as SupplierEcommerceCategoryController;
-use App\Http\Controllers\API\Supplier\EcommerceMeasurementController as SupplierEcommerceMeasurementController;
 use App\Http\Controllers\API\Supplier\EcommercePackageController as SupplierEcommercePackageController;
 use App\Http\Controllers\API\Supplier\EcommercePresentationController as SupplierEcommercePresentationController;
 use App\Http\Controllers\API\Supplier\EcommerceProductController as SupplierEcommerceProductController;
@@ -144,7 +143,6 @@ Route::prefix('v1')->group(function () {
             Route::apiResource('medication-types', SupplierMedicationTypeController::class);
             Route::apiResource('categories', SupplierEcommerceCategoryController::class);
             Route::apiResource('brands', SupplierEcommerceBrandController::class);
-            Route::apiResource('measurements', SupplierEcommerceMeasurementController::class);
             Route::apiResource('presentations', SupplierEcommercePresentationController::class);
             Route::apiResource('packages', SupplierEcommercePackageController::class);
 
@@ -337,6 +335,7 @@ Route::prefix('v1')->group(function () {
 
                 Route::apiResource('notification', NotificationController::class);
                 Route::apiResource('categories', AdminEcommerceCategoryController::class);
+                Route::get('measurements/search', [AdminEcommerceMeasurementController::class, 'search']);
                 Route::apiResource('measurements', AdminEcommerceMeasurementController::class);
                 Route::apiResource('presentations', AdminEcommercePresentationController::class);
                 Route::apiResource('packages', AdminEcommercePackageController::class);
