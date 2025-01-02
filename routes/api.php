@@ -32,7 +32,6 @@ use App\Http\Controllers\API\Storefront\CategoryController;
 use App\Http\Controllers\API\Storefront\FaqController as StorefrontFaqController;
 use App\Http\Controllers\API\Storefront\ProductController;
 use App\Http\Controllers\API\Storefront\StorefrontController;
-use App\Http\Controllers\API\Supplier\EcommerceBrandController as SupplierEcommerceBrandController;
 use App\Http\Controllers\API\Supplier\EcommerceMedicationVariationController as SupplierEcommerceMedicationVariationController;
 use App\Http\Controllers\API\Supplier\EcommerceProductController as SupplierEcommerceProductController;
 use App\Http\Controllers\API\Supplier\MedicationTypeController as SupplierMedicationTypeController;
@@ -139,7 +138,6 @@ Route::prefix('v1')->group(function () {
             Route::apiResource('products', SupplierEcommerceProductController::class);
 
             Route::apiResource('medication-types', SupplierMedicationTypeController::class);
-            Route::apiResource('brands', SupplierEcommerceBrandController::class);
             Route::apiResource('medication-variations', SupplierEcommerceMedicationVariationController::class);
 
         });
