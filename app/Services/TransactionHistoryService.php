@@ -199,6 +199,7 @@ class TransactionHistoryService implements ITxnHistoryService
             $creditScore = $this->creditScoreRepository->store([
                 'business_id' => $txnHistoryEvaluation->business_id,
                 'customer_id' => $txnHistoryEvaluation->customer_id,
+                'identifier' => UtilityHelper::generateSlug("CSC"),
                 'txn_evaluation_id' => $txnHistoryEvaluation->id,
                 'category' => $category,
                 'business_rule_json' => json_encode($activeRules),

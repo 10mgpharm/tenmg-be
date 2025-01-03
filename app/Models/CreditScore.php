@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Helpers\UtilityHelper;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Str;
@@ -24,7 +25,7 @@ class CreditScore extends Model
         'score_total',
         'created_by_id',
         'source',
-        'category'
+        'category',
     ];
 
     public function creditEvaluation()
@@ -46,7 +47,7 @@ class CreditScore extends Model
     {
         parent::boot();
         self::creating(function ($model) {
-            $model->identifier = 'CSCORES-10MG'.time().'-'.Str::random(5);
+            $model->identifier = UtilityHelper::generateSlug('CSC');
         });
     }
 }
