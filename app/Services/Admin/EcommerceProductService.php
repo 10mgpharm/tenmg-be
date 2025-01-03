@@ -206,17 +206,13 @@ class EcommerceProductService implements IEcommerceProductService
                         ->firstWhere('user_id', $user->id)?->id;
                 }
 
-                // Extract business information
-                $business = $user->ownerBusinessType
-                    ?? $user->businesses()->firstWhere('user_id', $user->id);
-
                 // Ensure category exists or create it
                 if (!empty($validated['category_name'])) {
                     $category = EcommerceCategory::firstOrCreate(
                         ['name' => $validated['category_name']],
                         [
                             'slug' => Str::slug($validated['category_name']),
-                            'business_id' => $business?->id,
+                            'business_id' => $validated['business_id'],
                             'created_by_id' => $user->id,
                             'status' =>  $user->hasRole('admin') ? StatusEnum::ACTIVE->value : StatusEnum::APPROVED->value,
                             'active' => true,
@@ -232,7 +228,7 @@ class EcommerceProductService implements IEcommerceProductService
                         ['name' => $validated['brand_name']],
                         [
                             'slug' => Str::slug($validated['brand_name']),
-                            'business_id' => $business?->id,
+                            'business_id' => $validated['business_id'],
                             'created_by_id' => $user->id,
                             'status' =>  $user->hasRole('admin') ? StatusEnum::ACTIVE->value : StatusEnum::APPROVED->value,
                             'active' => true,
@@ -248,7 +244,7 @@ class EcommerceProductService implements IEcommerceProductService
                         ['name' => $validated['medication_type_name']],
                         [
                             'slug' => Str::slug($validated['medication_type_name']),
-                            'business_id' => $business?->id,
+                            'business_id' => $validated['business_id'],
                             'created_by_id' => $user->id,
                             'status' => $user->hasRole('admin') ? StatusEnum::ACTIVE->value : StatusEnum::APPROVED->value,
                             'active' => true,
@@ -263,7 +259,7 @@ class EcommerceProductService implements IEcommerceProductService
                     $measurement = EcommerceMeasurement::firstOrCreate(
                         ['name' => $validated['measurement_name']],
                         [
-                            'business_id' => $business?->id,
+                            'business_id' => $validated['business_id'],
                             'created_by_id' => $user->id,
                             'status' => $user->hasRole('admin') ? StatusEnum::ACTIVE->value : StatusEnum::APPROVED->value,
                             'active' => true,
@@ -278,7 +274,7 @@ class EcommerceProductService implements IEcommerceProductService
                     $presentation = EcommercePresentation::firstOrCreate(
                         ['name' => $validated['presentation_name']],
                         [
-                            'business_id' => $business?->id,
+                            'business_id' => $validated['business_id'],
                             'created_by_id' => $user->id,
                             'status' => $user->hasRole('admin') ? StatusEnum::ACTIVE->value : StatusEnum::APPROVED->value,
                             'active' => true,
@@ -301,7 +297,7 @@ class EcommerceProductService implements IEcommerceProductService
                             'ecommerce_measurement_id' => $measurement->id ?? null,
                         ], fn($each) => $each !== null && $each !== false),
                         [
-                            'business_id' => $business?->id,
+                            'business_id' => $validated['business_id'],
                             'updated_by_id' => $user->id,
                             'status' => $user->hasRole('admin') ? StatusEnum::ACTIVE->value : StatusEnum::APPROVED->value,
                             'active' => true,
