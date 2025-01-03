@@ -25,7 +25,6 @@ class EcommerceProductResource extends JsonResource
             'medicationType' => new EcommerceMedicationTypeResource($this->medicationType),
             'presentation' => new EcommercePresentationResource($this->presentation),
             'measurement' => new EcommerceMeasurementResource($this->measurement),
-            'package' => new EcommercePackageResource($this->package),
             'thumbnailFile' => $this->thumbnailFile?->url,
             'quantity' => $this->quantity,
             'actualPrice' => $this->actual_price,
@@ -34,13 +33,13 @@ class EcommerceProductResource extends JsonResource
             'outStockLevel' => $this->out_stock_level,
             'expiredAt' => $this->expired_at,
             'commission' => $this->commission,
-            'productDetails' => $this->productDetails,
+            'productDetails' => $this->productDetails->only('essential', 'starting_stock', 'current_stock', 'id', 'ecommerce_product_id'),
             'status' => in_array($this->status, array_column(StatusEnum::cases(), 'value'), true)
             ? $this->status
             : 'PENDING',
             'inventory' => match (true) {
-                $this->current_stock === null || $this->current_stock === 0 => 'OUT OF STOCK',
-                $this->starting_stock === null || $this->current_stock <= $this->starting_stock / 2 => 'LOW STOCK',
+                $this->productDetails?->current_stock === null || $this->productDetails?->current_stock === 0 => 'OUT OF STOCK',
+                $this->productDetails?->starting_stock === null || $this->productDetails?->current_stock <= $this->productDetails?->starting_stock / 2 => 'LOW STOCK',
                 default => 'IN STOCK',
             },
             'comment' => $this->comment,

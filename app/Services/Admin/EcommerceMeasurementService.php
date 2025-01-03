@@ -19,11 +19,19 @@ class EcommerceMeasurementService implements IEcommerceMeasurementService
     {
         try {
             return DB::transaction(function () use ($validated, $user) {
+
+                // Doc: when business is null that means the measurement and its dependencies are for global used and created by admin
+                if ($user && $user->hasRole('admin')) {
+                    $validated['business_id'] = null;
+                } else {
+                    $validated['business_id'] = $user->ownerBusinessType?->id ?: $user->businesses()
+                        ->firstWhere('user_id', $user->id)?->id;
+                }
+
                 return EcommerceMeasurement::create(
                     [
                         'name' => $validated['name'],
-                        'business_id' => $user->ownerBusinessType?->id ?: $user->businesses()
-                            ->firstWhere('user_id', $user->id)?->id,
+                        'business_id' => $validated['business_id'],
                         'created_by_id' => $user->id,
                         'status' => $user->hasRole('admin') ? StatusEnum::ACTIVE->value : StatusEnum::APPROVED->value,
                         'active' => true,
@@ -46,7 +54,6 @@ class EcommerceMeasurementService implements IEcommerceMeasurementService
                     ...$validated,
                     'status' => $validated['status'] ?? $measurement->status,
                     'active' => $validated['active'] ?? $measurement->active,
-                    'slug' => Str::slug($validated['name'] ?? $measurement->name),
                     'updated_by_id' => $user->id,
                 ]);
             });

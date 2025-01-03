@@ -37,13 +37,13 @@ class UpdateEcommerceProductRequest extends FormRequest
         $this->merge([
             'product_name' => $this->input('productName'),
             'product_description' => $this->input('productDescription'),
-            'medication_type_name' => $this->input('medicationTypeName'),
             'category_name' => $this->input('categoryName'),
             'brand_name' => $this->input('brandName'),
-
+            
+            'medication_type_name' => $this->input('medicationTypeName'),
             'measurement_name' => $this->input('measurementName'),
             'presentation_name' => $this->input('presentationName'),
-            'package_name' => $this->input('packageName'),
+            'package_per_roll' => $this->input('packagePerRoll'),
             'strength_value' => $this->input('strengthValue'),
 
             'actual_price' => $this->input('actualPrice'),
@@ -56,6 +56,11 @@ class UpdateEcommerceProductRequest extends FormRequest
             ? $this->input('status')
             : $product->status,
             'status_comment' => $this->input('comment'),
+
+            // ProductDetail model attributes
+            'essential' => $this->input('productEssential'),
+            'starting_stock' => $this->input('startingStock'),
+            'current_stock' => $this->input('currentStock'),
 
         ]);
     }
@@ -75,7 +80,6 @@ class UpdateEcommerceProductRequest extends FormRequest
             // Product Basic
             'product_name' => ['sometimes', 'nullable', 'string', 'max:255', Rule::unique(EcommerceProduct::class, 'name')->ignore($product->id)],
             'product_description' => ['sometimes',  'nullable', 'string', 'max:255',],
-            'medication_type_name' => ['sometimes', 'nullable', 'string', 'max:255'],
             'category_name' => ['sometimes',  'nullable', 'string', 'max:255'],
             'brand_name' => ['sometimes',  'nullable', 'string', 'max:255'],
             'thumbnailFile' => [
@@ -85,27 +89,35 @@ class UpdateEcommerceProductRequest extends FormRequest
                 'mimes:jpg,jpeg,png,gif',
                 'max:10240',
             ],
-
+            
             // Product Essentials
+            'medication_type_name' => ['sometimes', 'nullable', 'string', 'max:255'],
             'measurement_name' => ['sometimes',  'nullable', 'string', 'max:255'],
             'presentation_name' => ['sometimes',  'nullable', 'string', 'max:255'],
-            'package_name' => ['sometimes',  'nullable', 'string', 'max:255'],
+            'package_per_roll' => ['sometimes',  'nullable', 'string', 'max:255'],
             'strength_value' => ['sometimes',  'nullable', 'string', 'max:255',],
             'weight' => ['sometimes',  'nullable', 'numeric', 'min:0'],
+            'actual_price' => ['sometimes',  'nullable', 'numeric', 'min:0'],
+            'discount_price' => ['sometimes', 'nullable', 'numeric', 'min:0', 'lt:actual_price'],
 
             // Product Inventory
             'quantity' => ['sometimes',  'nullable', 'integer', 'min:1'],
             'low_stock_level' => ['nullable', 'sometimes', 'integer', 'min:0', 'gte:out_stock_level'],
             'out_stock_level' => ['nullable', 'sometimes', 'integer', 'min:0', 'lte:low_stock_level'],
-            'actual_price' => ['sometimes',  'nullable', 'numeric', 'min:0'],
-            'discount_price' => ['sometimes', 'nullable', 'numeric', 'min:0', 'lt:actual_price'],
             'expired_at' => ['sometimes', 'nullable', 'date'],
 
             'status' => ['sometimes',  'nullable', new Enum(StatusEnum::class),],
             'statusComment' => ['required_if:status,' . implode(',', [
+                StatusEnum::REJECTED->value,
                 StatusEnum::INACTIVE->value,
                 StatusEnum::SUSPENDED->value,
+                StatusEnum::FLAGGED->value,
             ]),],
+
+            // ProductDetail model attributes
+            'essential' => $this->input('productEssential'),
+            'starting_stock' => $this->input('startingStock'),
+            'current_stock' => $this->input('currentStock'),
         ];
     }
 
