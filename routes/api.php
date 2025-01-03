@@ -36,6 +36,11 @@ use App\Http\Controllers\API\Webhooks\PaystackWebhookController;
 use App\Http\Controllers\BusinessSettingController;
 use App\Http\Controllers\InviteController;
 use App\Http\Controllers\Supplier\DashboardController as SupplierDashboardController;
+use App\Http\Controllers\Supplier\EcommerceBrandController as SupplierEcommerceBrandController;
+use App\Http\Controllers\Supplier\EcommerceCategoryController as SupplierEcommerceCategoryController;
+use App\Http\Controllers\Supplier\EcommerceMeasurementController as SupplierEcommerceMeasurementController;
+use App\Http\Controllers\Supplier\EcommerceMedicationTypeController as SupplierEcommerceMedicationTypeController;
+use App\Http\Controllers\Supplier\EcommercePresentationController as SupplierEcommercePresentationController;
 use Illuminate\Support\Facades\Route;
 
 Route::prefix('v1')->group(function () {
@@ -133,6 +138,12 @@ Route::prefix('v1')->group(function () {
 
             Route::get('products/search', [SupplierEcommerceProductController::class, 'search']);
             Route::apiResource('products', SupplierEcommerceProductController::class);
+
+            Route::get('brands', SupplierEcommerceBrandController::class);
+            Route::get('categories', SupplierEcommerceCategoryController::class);
+            Route::get('medication-types', SupplierEcommerceMedicationTypeController::class);
+            Route::get('measurements', SupplierEcommercePresentationController::class);
+            Route::get('presentations', SupplierEcommercePresentationController::class);
         });
 
         // VENDOR specific routes
