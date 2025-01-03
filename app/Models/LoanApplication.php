@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Helpers\UtilityHelper;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
@@ -39,8 +40,7 @@ class LoanApplication extends Model
     {
         parent::boot();
         self::creating(function ($model) {
-            $businessCode = DB::table('businesses')->where('id', $model->business_id)->value('code');
-            $model->identifier = "APP-{$businessCode}-".time().'-'.Str::random(5);
+            $model->identifier = UtilityHelper::generateSlug('APP');
         });
     }
 }

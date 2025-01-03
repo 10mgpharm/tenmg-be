@@ -25,7 +25,7 @@ class BusinessResource extends JsonResource
             'expiryDate' => $this->expiry_date,
             'cacDocument' => $this->cac,
             'owner' => new UserResource($this->whenLoaded('owner')),
-            'type' => $this->type ?? "N/A",
+            'type' => $this->type == "VENDOR" ? "ADMIN": $this->type ?? "N/A",
             'createdAt' => $this->created_at,
             'updatedAt' => $this->updated_at,
         ];
