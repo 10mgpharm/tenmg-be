@@ -326,6 +326,7 @@ class EcommerceProductService implements IEcommerceProductService
 
                 $updateProduct = $product->update([
                     ...array_filter($validated),
+                    'name' => $validated['product_name'] ?? $product->name,
                     'updated_by_id' => $user->id,
                     'slug' => Str::slug($validated['product_name'] ?? $product->name),
                 ]);
