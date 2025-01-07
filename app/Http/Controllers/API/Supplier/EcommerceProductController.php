@@ -112,7 +112,7 @@ class EcommerceProductController extends Controller
 
         return $this->returnJsonResponse(
             message: 'Products successfully fetched.',
-            data: EcommerceProductResource::collection($products)->response()->getData(true)
+            data: $products
         );
     }
 

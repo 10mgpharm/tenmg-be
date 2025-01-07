@@ -143,7 +143,7 @@ Route::prefix('v1')->group(function () {
             Route::get('brands', SupplierEcommerceBrandController::class);
             Route::get('categories', SupplierEcommerceCategoryController::class);
             Route::get('medication-types', SupplierEcommerceMedicationTypeController::class);
-            Route::get('measurements', SupplierEcommercePresentationController::class);
+            Route::get('measurements', SupplierEcommerceMeasurementController::class);
             Route::get('presentations', SupplierEcommercePresentationController::class);
         });
 

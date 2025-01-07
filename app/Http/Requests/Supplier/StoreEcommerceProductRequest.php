@@ -43,7 +43,7 @@ class StoreEcommerceProductRequest extends FormRequest
             'out_stock_level' => $this->input('outStockLevel'),
             'expired_at' => $this->input('expiredAt'),
             'thumbnailFile' => $this->file('thumbnailFile'),
-            'status' =>  $this->input('status') !== StatusEnum::ACTIVE->value
+            'status' =>  in_array($this->input('status'), [StatusEnum::ACTIVE->value, StatusEnum::FLAGGED, StatusEnum::SUSPENDED, StatusEnum::REJECTED])
             ? $this->input('status')
             : StatusEnum::APPROVED->value,
             // 'ecommerce_variation' => $this->input('ecommerceVariation'),
@@ -53,6 +53,7 @@ class StoreEcommerceProductRequest extends FormRequest
             'starting_stock' => $this->input('startingStock'),
             'current_stock' => $this->input('currentStock'),
         ]);
+
     }
 
     /**
@@ -94,10 +95,13 @@ class StoreEcommerceProductRequest extends FormRequest
             'status' => ['nullable', new Enum(StatusEnum::class),],
 
             // ProductDetail model attributes
-            'essential' => $this->input('productEssential'),
-            'starting_stock' => $this->input('startingStock'),
-            'current_stock' => $this->input('currentStock'),
+            'essential' => ['nullable', 'sometimes', 'string', 'min:3'],
+            'starting_stock' => ['nullable', 'sometimes', 'numeric', 'min:0'],
+            'current_stock' => ['nullable', 'sometimes', 'numeric', 'min:0'],
         ];
+
+        dd($this->all());
+
     }
 
     /**

@@ -115,9 +115,9 @@ class UpdateEcommerceProductRequest extends FormRequest
             ]),],
 
             // ProductDetail model attributes
-            'essential' => $this->input('productEssential'),
-            'starting_stock' => $this->input('startingStock'),
-            'current_stock' => $this->input('currentStock'),
+            'essential' => ['nullable', 'sometimes', 'string', 'min:3'],
+            'starting_stock' => ['nullable', 'sometimes', 'numeric', 'min:0'],
+            'current_stock' => ['nullable', 'sometimes', 'numeric', 'min:0'],
         ];
     }
 
