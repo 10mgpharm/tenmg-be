@@ -27,6 +27,7 @@ use App\Http\Controllers\API\Credit\LoanOfferController;
 use App\Http\Controllers\API\Credit\TransactionHistoryController;
 use App\Http\Controllers\API\ProfileController;
 use App\Http\Controllers\API\ResendOtpController;
+use App\Http\Controllers\API\Storefront\CartController;
 use App\Http\Controllers\API\Storefront\CategoryController;
 use App\Http\Controllers\API\Storefront\FaqController as StorefrontFaqController;
 use App\Http\Controllers\API\Storefront\ProductController;
@@ -370,6 +371,8 @@ Route::prefix('v1')->group(function () {
 
             Route::get('shipping-addresses/search', [StorefrontShippingAddressController::class, 'search']);
             Route::apiResource('shipping-addresses', StorefrontShippingAddressController::class);
+
+            Route::post('/add-to-cart', [CartController::class, 'addItemToCart']);
         });
 
     });
