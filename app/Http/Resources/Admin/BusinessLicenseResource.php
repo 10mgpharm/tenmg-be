@@ -20,6 +20,7 @@ class BusinessLicenseResource extends JsonResource
             'contactEmail' => $this->contact_email,
             'contactPerson' => $this->contact_person,
             'contactPersonPosition' => $this->contact_person_position,
+            'contactPhone' => $this->contact_phone,
             'address' => $this->address,
             'businessAddress' => $this->address,
             'licenseNumber' => $this->license_number,
