@@ -139,7 +139,13 @@ Route::prefix('v1')->group(function () {
             });
 
             Route::get('products/search', [SupplierEcommerceProductController::class, 'search']);
-            Route::apiResource('products', SupplierEcommerceProductController::class);
+
+            Route::get('products', [SupplierEcommerceProductController::class, 'index']);
+            Route::get('products/{product}', [SupplierEcommerceProductController::class, 'show']);
+            Route::post('products', [SupplierEcommerceProductController::class, 'store']);
+            Route::match(['PUT', 'PATCH', 'POST'], 'products/{product}', [SupplierEcommerceProductController::class, 'update']);
+            Route::delete('products/{product}', [SupplierEcommerceProductController::class, 'destroy']);
+
 
             Route::get('brands', SupplierEcommerceBrandController::class);
             Route::get('categories', SupplierEcommerceCategoryController::class);
@@ -341,7 +347,12 @@ Route::prefix('v1')->group(function () {
                 Route::apiResource('presentations', AdminEcommercePresentationController::class);
 
                 Route::get('products/search', [AdminEcommerceProductController::class, 'search']);
-                Route::apiResource('products', AdminEcommerceProductController::class);
+        
+                Route::get('products', [AdminEcommerceProductController::class, 'index']);
+                Route::get('products/{product}', [AdminEcommerceProductController::class, 'show']);
+                Route::post('products', [AdminEcommerceProductController::class, 'store']);
+                Route::match(['PUT', 'PATCH', 'POST'], 'products/{product}', [AdminEcommerceProductController::class, 'update']);
+                Route::delete('products/{product}', [AdminEcommerceProductController::class, 'destroy']);
 
                 Route::apiResource('brands', AdminEcommerceBrandController::class);
                 Route::apiResource('faqs', FaqController::class);

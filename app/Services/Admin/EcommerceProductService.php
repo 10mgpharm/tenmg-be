@@ -323,6 +323,7 @@ class EcommerceProductService implements IEcommerceProductService
                 $updateProduct = $product->update([
                     ...array_filter($validated),
                     'name' => $validated['product_name'] ?? $product->name,
+                    'description' => $validated['product_description'] ?? $product->description,
                     'updated_by_id' => $user->id,
                     'slug' => Str::slug($validated['product_name'] ?? $product->name),
                 ]);
@@ -375,13 +376,13 @@ class EcommerceProductService implements IEcommerceProductService
                     foreach ($inventories as $status) {
                         $q->when(
                             $status === 'OUT OF STOCK',
-                            fn ($q) => $q->whereNull('current_stock')->orWhere('current_stock', 0)
+                            fn($q) => $q->whereNull('current_stock')->orWhere('current_stock', 0)
                         )->when(
                             $status === 'LOW STOCK',
-                            fn ($q) => $q->whereNotNull('starting_stock')->whereColumn('current_stock', '<=', DB::raw('starting_stock / 2'))
+                            fn($q) => $q->whereNotNull('starting_stock')->whereColumn('current_stock', '<=', DB::raw('starting_stock / 2'))
                         )->when(
                             $status === 'IN STOCK',
-                            fn ($q) => $q->whereNotNull('current_stock')->where('current_stock', '>', DB::raw('starting_stock / 2'))
+                            fn($q) => $q->whereNotNull('current_stock')->where('current_stock', '>', DB::raw('starting_stock / 2'))
                         );
                     }
                 });
@@ -391,34 +392,46 @@ class EcommerceProductService implements IEcommerceProductService
                 $categories = is_array($category) ? $category : explode(',', $category);
                 $categories = array_unique(array_map('trim', $categories));
 
-                $query->whereHas('category', function ($q) use ($categories) {
-                    foreach ($categories as $category) {
-                        $q->orWhere('name', 'like', '%' . $category . '%');
-                    }
-                });
+                $query->whereHas(
+                    'category',
+                    fn($q) =>
+                    $q->where(function ($query) use ($categories) {
+                        foreach ($categories as $category) {
+                            $query->orWhere('name', 'like', '%' . $category . '%');
+                        }
+                    })
+                );
             })
             // Filter by brand names (case-insensitive partial match)
             ->when($request->input('brand'), function ($query, $brand) {
                 $brands = is_array($brand) ? $brand : explode(',', $brand);
                 $brands = array_unique(array_map('trim', $brands));
 
-                $query->whereHas('brand', function ($q) use ($brands) {
-                    foreach ($brands as $brand) {
-                        $q->orWhere('name', 'like', '%' . $brand . '%');
-                    }
-                });
+                $query->whereHas(
+                    'brand',
+                    fn($q) =>
+                    $q->where(function ($query) use ($brands) {
+                        foreach ($brands as $brand) {
+                            $query->orWhere('name', 'like', '%' . $brand . '%');
+                        }
+                    })
+                );
             })
             // Filter by medication types (case-insensitive partial match)
             ->when($request->input('medicationType'), function ($query, $medicationType) {
                 $medicationTypes = is_array($medicationType) ? $medicationType : explode(',', $medicationType);
                 $medicationTypes = array_unique(array_map('trim', $medicationTypes));
 
-                $query->whereHas('medicationType', function ($q) use ($medicationTypes) {
-                    foreach ($medicationTypes as $medicationType) {
-                        $q->orWhere('name', 'like', '%' . $medicationType . '%');
-                    }
-                });
-        });
+                $query->whereHas(
+                    'medicationType',
+                    fn($q) =>
+                    $q->where(function ($query) use ($medicationTypes) {
+                        foreach ($medicationTypes as $medicationType) {
+                            $query->orWhere('name', 'like', '%' . $medicationType . '%');
+                        }
+                    })
+                );
+            });
 
         // Filter by creation date range
         if ($from = $request->input('fromDate')) {

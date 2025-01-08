@@ -100,8 +100,6 @@ class StoreEcommerceProductRequest extends FormRequest
             'current_stock' => ['nullable', 'sometimes', 'numeric', 'min:0'],
         ];
 
-        dd($this->all());
-
     }
 
     /**
