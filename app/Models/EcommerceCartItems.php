@@ -8,4 +8,9 @@ class EcommerceCartItems extends Model
 {
     //
     protected $guarded = [];
+
+    function product()
+    {
+        return $this->belongsTo(EcommerceProduct::class, 'product_id', 'id');
+    }
 }

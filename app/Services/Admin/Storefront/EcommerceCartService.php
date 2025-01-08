@@ -16,7 +16,7 @@ class EcommerceCartService
 
     }
 
-    function addItemToCart(Request $request)
+    function addRemoveItemToCart(Request $request)
     {
 
         try {
@@ -31,16 +31,25 @@ class EcommerceCartService
                 $item = $cart->items()->where('product_id', $request->productId)->first();
 
                 if ($item) {
-                    //check if quantity to minus is greater than what is is cart
-                    if ($request->action == "minus" && $item->qty <= $request->qty) {
-                        throw new \Exception("Quantity to minus is greater than what is in cart");
+
+                    //check if the action is remove
+                    if($request->action == "remove"){
+                        $item->delete();
+                        DB::commit();
+                    }else{
+                        //check if quantity to minus is greater than what is is cart
+                        if ($request->action == "minus" && $item->qty <= $request->qty) {
+                            throw new \Exception("Quantity to minus is greater than what is in cart");
+                        }
+                        $qty = $request->action == "add" ? (int)$item->qty + (int)$request->qty : abs((int)$item->qty - (int)$request->qty);
+                        //update item quantity
+                        $item->qty = $qty;
+                        $item->total_price = (float)$product->discount_price * $qty;
+                        $item->unit_price = $product->discount_price;
+                        $item->save();
                     }
-                    $qty = $request->action == "add" ? (int)$item->qty + (int)$request->qty : abs((int)$item->qty - (int)$request->qty);
-                    //update item quantity
-                    $item->qty = $qty;
-                    $item->total_price = (float)$product->discount_price * $qty;
-                    $item->unit_price = $product->discount_price;
-                    $item->save();
+
+
                 } else {
 
                     $product = EcommerceProduct::find($request->productId);
@@ -85,6 +94,16 @@ class EcommerceCartService
             throw $th;
         }
 
+    }
+
+    function getUserCart()
+    {
+        try {
+            $cart = EcommerceCart::where('customer_id', Auth::id())->where('status', 'active')->get();
+            return $cart;
+        } catch (\Throwable $th) {
+            throw $th;
+        }
     }
 
 
