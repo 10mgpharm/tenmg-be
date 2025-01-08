@@ -372,7 +372,8 @@ Route::prefix('v1')->group(function () {
             Route::get('shipping-addresses/search', [StorefrontShippingAddressController::class, 'search']);
             Route::apiResource('shipping-addresses', StorefrontShippingAddressController::class);
 
-            Route::post('/add-to-cart', [CartController::class, 'addItemToCart']);
+            Route::post('/add-remove-cart-items', [CartController::class, 'addRemoveItemToCart']);
+            Route::get('/get-user-cart', [CartController::class, 'getUserCart']);
         });
 
     });
