@@ -33,7 +33,7 @@ class EcommerceProductResource extends JsonResource
             'outStockLevel' => $this->out_stock_level,
             'expiredAt' => $this->expired_at,
             'commission' => $this->commission,
-            'productDetails' => $this->productDetails->only('essential', 'starting_stock', 'current_stock', 'id', 'ecommerce_product_id'),
+            'productDetails' => $this->productDetails == null ? null : $this->productDetails->only('essential', 'starting_stock', 'current_stock', 'id', 'ecommerce_product_id'),
             'status' => in_array($this->status, array_column(StatusEnum::cases(), 'value'), true)
             ? $this->status
             : 'PENDING',
