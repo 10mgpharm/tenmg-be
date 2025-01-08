@@ -47,6 +47,7 @@ class EcommerceProduct extends Model
         'slug',
         'low_stock_level',
         'out_stock_level',
+        'description',
     ];
 
     /**
