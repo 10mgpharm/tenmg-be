@@ -24,11 +24,14 @@ class StorefrontController extends Controller
     {
         $categories = EcommerceCategory::with([
             'products' => fn ($query) => $query->where('active', 1)->whereIn('status', ['ACTIVE', 'APPROVED'])->latest()->limit(15),
-        ])->where('active', 1)->whereIn('status', ['ACTIVE', 'APPROVED'])->latest()->get();
+        ])->where('active', 1)->whereIn('status', ['ACTIVE', 'APPROVED'])
+        ->paginate($request->has('perPage') ? $request->perPage : 10)
+        ->withQueryString()
+        ->through(fn(EcommerceCategory $item) => StorefrontResource::make($item));
 
         return $this->returnJsonResponse(
             message: 'Products fetched successfully.',
-            data: StorefrontResource::collection($categories)
+            data: $categories
         );
     }
 }
