@@ -17,9 +17,15 @@ class EcommerceCartResource extends JsonResource
         return [
             'id' => $this->id,
             'customerId' => $this->customer_id,
-            'totalPrice' => $this->total_price,
+            'qtyTotal' => $this->qty_total,
+            'orderTotal' => $this->order_total,
+            'grandTotal' => $this->grand_total,
+            'logisticTotal' => $this->logistic_total,
+            'totalWeight' => $this->total_weight,
+            'deliveryAddress' => $this->delivery_address,
+            'deliveryType' => $this->delivery_type,
             'status' => $this->status,
-            'items' => EcommerceCartItemResource::collection($this->items),
+            'items' => EcommerceCartItemResource::collection($this->orderDetails),
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at
         ];

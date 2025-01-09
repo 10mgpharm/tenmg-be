@@ -7,6 +7,7 @@ use App\Models\Business;
 use App\Services\Interfaces\ILicenseService;
 use Exception;
 use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 
 class LicenseService implements ILicenseService
@@ -71,9 +72,9 @@ class LicenseService implements ILicenseService
             if ($validated['license_verification_status'] == 'APPROVED') {
                 //send notification mail to user
 
-                $user->sendLicenseVerificationNotification('Your license verification has been successfully approved. You now have full access.');
+                $user->sendLicenseVerificationNotification('Your license verification has been successfully approved. You now have full access.', Auth::user());
             }else{
-                $user->sendLicenseVerificationNotification('Your license verification request has been denied for the following reason:'.'\n'. $validated['license_verification_comment']);
+                $user->sendLicenseVerificationNotification('Your license verification request has been denied for the following reason:'.'\n'. $validated['license_verification_comment'], Auth::user());
             }
 
             return $trans;

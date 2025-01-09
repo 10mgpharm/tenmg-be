@@ -14,7 +14,7 @@ class LicenseVerificationNotification extends Notification implements ShouldQueu
     /**
      * Create a new notification instance.
      */
-    public function __construct(public string $message)
+    public function __construct(public string $message, public $user = null)
     {
         //
     }
@@ -35,7 +35,7 @@ class LicenseVerificationNotification extends Notification implements ShouldQueu
     public function toMail(object $notifiable): MailMessage
     {
         return (new MailMessage)
-            ->greeting('Hello!')
+            ->greeting('Hello!'.$this->user->name ?? "")
             ->line($this->message)
             // ->action('Click to Contnue', $this->link)
             ->line('Thank you for using 10MG!');

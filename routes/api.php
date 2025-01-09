@@ -347,7 +347,7 @@ Route::prefix('v1')->group(function () {
                 Route::apiResource('presentations', AdminEcommercePresentationController::class);
 
                 Route::get('products/search', [AdminEcommerceProductController::class, 'search']);
-        
+
                 Route::get('products', [AdminEcommerceProductController::class, 'index']);
                 Route::get('products/{product}', [AdminEcommerceProductController::class, 'show']);
                 Route::post('products', [AdminEcommerceProductController::class, 'store']);
@@ -385,6 +385,7 @@ Route::prefix('v1')->group(function () {
 
             Route::post('/add-remove-cart-items', [CartController::class, 'addRemoveItemToCart']);
             Route::get('/get-user-cart', [CartController::class, 'getUserCart']);
+            Route::post('/buy-now', [CartController::class, 'buyNow']);
         });
 
     });

@@ -11,6 +11,7 @@ use App\Models\User;
 use App\Services\AttachmentService;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
+use Illuminate\Support\Facades\Auth;
 
 class BusinessSettingController extends Controller
 {
@@ -96,11 +97,11 @@ class BusinessSettingController extends Controller
         $ownerBusiness = $user->ownerBusinessType()->first();
         $licenseFile = $ownerBusiness->cac ?? null;
 
-        $user->sendLicenseVerificationNotification('Your request has been received and is currently under review. You will receive a response from us shortly.');
+        $user->sendLicenseVerificationNotification('Your request has been received and is currently under review. You will receive a response from us shortly.', Auth::user());
 
         //send mail to all the admins
         foreach ($admins as $admin) {
-            $admin->sendLicenseVerificationNotification('A license verification request has been submitted and is now awaiting your review.');
+            $admin->sendLicenseVerificationNotification('A license verification request has been submitted and is now awaiting your review.', $admins);
         }
 
         return $this->returnJsonResponse(
