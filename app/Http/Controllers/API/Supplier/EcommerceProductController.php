@@ -25,11 +25,14 @@ class EcommerceProductController extends Controller
      */
     public function index(ListEcommerceProductRequest $request): JsonResponse
     {
-        $products = EcommerceProduct::latest()->businesses()->paginate();
+        $products = EcommerceProduct::latest()
+        ->paginate($request->has('perPage') ? $request->perPage : 10)
+        ->withQueryString()
+        ->through(fn(EcommerceProduct $item) => EcommerceProductResource::make($item));
 
         return $this->returnJsonResponse(
             message: 'Products successfully fetched.',
-            data: EcommerceProductResource::collection($products)->response()->getData(true)
+            data: $products
         );
     }
 
