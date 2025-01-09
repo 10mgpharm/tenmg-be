@@ -3,7 +3,10 @@
 namespace App\Services\Admin\Storefront;
 
 use App\Models\EcommerceCart;
+use App\Models\EcommerceOrder;
+use App\Models\EcommerceOrderDetail;
 use App\Models\EcommerceProduct;
+use App\Settings\CreditSettings;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -23,12 +26,15 @@ class EcommerceCartService
 
             DB::beginTransaction();
 
+            $creditSettings = new CreditSettings();
+            $tenmgPercent = $creditSettings->tenmg_ecommerce_commission_percent;
+
             //check if user has an active cart
-            $cart = EcommerceCart::where('customer_id', Auth::id())->where('status', 'active')->first();
+            $cart = EcommerceOrder::where('customer_id', Auth::id())->where('status', 'CART')->first();
             if ($cart) {
                 $product = EcommerceProduct::find($request->productId);
                 //check if item already exists in cart
-                $item = $cart->items()->where('product_id', $request->productId)->first();
+                $item = $cart->orderDetails()->where('ecommerce_product_id', $request->productId)->first();
 
                 if ($item) {
 
@@ -41,11 +47,17 @@ class EcommerceCartService
                         if ($request->action == "minus" && $item->qty <= $request->qty) {
                             throw new \Exception("Quantity to minus is greater than what is in cart");
                         }
+                        $orderPrice = $product->actual_price - $product->discount_price;
+                        $totalWeight = $request->qty * $product->weight;
+                        $tenmgPercentCommission = ($tenmgPercent/100) * $orderPrice;
+
                         $qty = $request->action == "add" ? (int)$item->qty + (int)$request->qty : abs((int)$item->qty - (int)$request->qty);
                         //update item quantity
-                        $item->qty = $qty;
-                        $item->total_price = (float)$product->discount_price * $qty;
-                        $item->unit_price = $product->discount_price;
+                        $item->quantity = $qty;
+                        $item->actual_price = $product->actual_price * $request->qty;
+                        $item->discount_price = $orderPrice;
+                        $item->tenmg_commission = $tenmgPercentCommission;
+                        $item->tenmg_commission_percent = $tenmgPercent;
                         $item->save();
                     }
 
@@ -53,34 +65,57 @@ class EcommerceCartService
                 } else {
 
                     $product = EcommerceProduct::find($request->productId);
+                    $orderPrice = $product->actual_price - $request->discount_price;
+                    $totalWeight = $request->qty * $product->weight;
+                    $tenmgPercentCommission = ($tenmgPercent/100) * $orderPrice;
+
                     //add item to cart
-                    $cart->items()->create([
-                        'product_id' => $request->productId,
-                        'qty' => $request->qty,
-                        'unit_price' => $product->discount_price,
-                        'total_price' => $product->discount_price * $request->qty,
-                    ]);
+                    $cart->orderDetails()->create([
+                        'ecommerce_product_id' => $request->productId,
+                        'supplier_id' => $product->business_id,
+                        'actual_price' => $product->actual_price * $request->qty,
+                        'discount_price' => $orderPrice * $request->qty,
+                        'tenmg_commission' => $tenmgPercentCommission,
+                        'tenmg_commission_percent' => $tenmgPercent,
+                        'quantity' => $request->qty
+                        ]);
                 }
 
                 //update cart total
-                $cart->total_price = $cart->items()->sum('total_price');
+                $cart->order_total = $cart->orderDetails()->sum('discount_price');
+                $cart->grand_total = $cart->orderDetails()->sum('discount_price')+$cart->orderDetails()->sum('tenmg_commission');
+                $cart->qty_total = $cart->orderDetails()->sum('quantity');
                 $cart->save();
 
             } else {
+                if($request->action != "add"){
+                    throw new \Exception("Cart does not exist");
+                }
                 $product = EcommerceProduct::find($request->productId);
+                $orderPrice = (float)$product->actual_price - (float)$product->discount_price;
+                $totalWeight = $request->qty * $product->weight;
+                $tenmgPercentCommission = ($tenmgPercent/100) * $orderPrice;
                 //create new cart
-                $cart = EcommerceCart::create([
+                $cart = EcommerceOrder::create([
                     'customer_id' => Auth::id(),
-                    'status' => 'active',
-                    'total_price' => $product->discount_price * $request->qty
+                    'qty_total' => $request->qty,
+                    'order_total' => $orderPrice * $request->qty,
+                    'grand_total' => $orderPrice * $request->qty+$tenmgPercentCommission,
+                    'delivery_address' => "address",
+                    'status' => 'CART',
+                    'logistic_total' => 0,
+                    'total_weight' => $totalWeight
                 ]);
 
                 //add item to cart
-                $cart->items()->create([
-                    'product_id' => $request->productId,
-                    'qty' => $request->qty,
-                    'unit_price' => $product->discount_price,
-                    'total_price' => $product->discount_price * $request->qty,
+                $cart->orderDetails()->create([
+                    'ecommerce_product_id' => $request->productId,
+                    'supplier_id' => $product->business_id,
+                    'actual_price' => $product->actual_price * $request->qty,
+                    'discount_price' => $orderPrice * $request->qty,
+                    'tenmg_commission' => $tenmgPercentCommission,
+                    'tenmg_commission_percent' => $tenmgPercent,
+                    'quantity' => $request->qty
                 ]);
             }
 
@@ -99,8 +134,48 @@ class EcommerceCartService
     function getUserCart()
     {
         try {
-            $cart = EcommerceCart::where('customer_id', Auth::id())->where('status', 'active')->get();
+            $cart = EcommerceOrder::where('customer_id', Auth::id())->where('status', 'CART')->get();
             return $cart;
+        } catch (\Throwable $th) {
+            throw $th;
+        }
+    }
+
+    function buyNow(Request $request)
+    {
+        try {
+
+                $creditSettings = new CreditSettings();
+                $tenmgPercent = $creditSettings->tenmg_ecommerce_commission_percent;
+
+                $product = EcommerceProduct::find($request->productId);
+                $orderPrice = (float)$product->actual_price - (float)$product->discount_price;
+                $totalWeight = $request->qty * $product->weight;
+                $tenmgPercentCommission = ($tenmgPercent/100) * $orderPrice;
+
+            $createOrder = EcommerceOrder::create([
+                'customer_id' => Auth::id(),
+                'qty_total' => $request->qty,
+                'order_total' => $orderPrice * $request->qty,
+                'grand_total' => $orderPrice * $request->qty+$tenmgPercentCommission,
+                'delivery_address' => "address",
+                'status' => 'PENDING',
+                'logistic_total' => 0,
+                'total_weight' => $totalWeight
+            ]);
+
+            $createOrder->orderDetails()->create([
+                'ecommerce_product_id' => $request->productId,
+                'supplier_id' => $product->business_id,
+                'actual_price' => $product->actual_price * $request->qty,
+                'discount_price' => $orderPrice * $request->qty,
+                'tenmg_commission' => $tenmgPercentCommission,
+                'tenmg_commission_percent' => $tenmgPercent,
+                'quantity' => $request->qty
+            ]);
+
+            return $createOrder;
+
         } catch (\Throwable $th) {
             throw $th;
         }
