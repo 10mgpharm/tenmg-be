@@ -109,7 +109,7 @@ class EcommerceProductController extends Controller
      *
      * @param  \App\Http\Requests\Admin\ListEcommerceProductRequest  $request  Validated request instance.
      */
-    public function search(Request $request): JsonResponse
+    public function search(ListEcommerceProductRequest $request): JsonResponse
     {
         $products = $this->productService->search($request);
 
