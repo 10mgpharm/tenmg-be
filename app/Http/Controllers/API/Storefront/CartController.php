@@ -4,7 +4,7 @@ namespace App\Http\Controllers\API\Storefront;
 
 use App\Http\Controllers\Controller;
 use App\Http\Resources\EcommerceCartResource;
-use App\Services\Admin\Storefront\EcommerceCartService;
+use App\Services\Storefront\EcommerceCartService;
 use Illuminate\Http\Request;
 
 class CartController extends Controller
