@@ -53,7 +53,7 @@ class EcommerceMeasurementService implements IEcommerceMeasurementService
                 return $measurement->update([
                     ...$validated,
                     'status' => $validated['status'] ?? $measurement->status,
-                    'active' => $validated['active'] ?? $measurement->active,
+                    'active' => in_array($validated['status'] ?? $measurement->status, [StatusEnum::APPROVED->value, StatusEnum::ACTIVE->value]) ? ($validated['active'] ?? $measurement->active) : false,
                     'updated_by_id' => $user->id,
                 ]);
             });

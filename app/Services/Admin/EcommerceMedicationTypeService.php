@@ -126,8 +126,8 @@ class EcommerceMedicationTypeService implements IEcommerceMedicationTypeService
 
                 $updated = $medication_type->update([
                     ...$validated,
-                    'status' => $validated['status'] ?? StatusEnum::APPROVED->value,
-                    'active' => $validated['active'] ?? false,
+                    'status' => $validated['status'] ?? $medication_type->status,
+                    'active' => in_array($validated['status'] ?? $medication_type->status, [StatusEnum::APPROVED->value, StatusEnum::ACTIVE->value]) ? ($validated['active'] ?? $medication_type->active) : false,
                     'updated_by_id' => $user->id,
                     'business_id' => $validated['business_id'],
                 ]);
@@ -166,7 +166,7 @@ class EcommerceMedicationTypeService implements IEcommerceMedicationTypeService
 
                         $variationId = array_key_exists('id', $variation) ? $variation['id'] : null;
 
-                        if ($variationId) {
+                        if ($variationId && $medication_type->variations()->where('id', $variationId)->exists()) {
                             $variationCheck = $medication_type->variations()->where('id', $variationId)->first();
                             $variationCheck->update([
                                 'ecommerce_presentation_id' => $presentation_id,

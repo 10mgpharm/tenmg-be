@@ -2,10 +2,12 @@
 
 namespace App\Http\Requests\Admin;
 
+use App\Enums\StatusEnum;
 use App\Models\EcommerceMedicationType;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
+use Illuminate\Validation\Rules\Enum;
 
 class StoreEcommerceMedicationRequest extends FormRequest
 {
@@ -31,6 +33,12 @@ class StoreEcommerceMedicationRequest extends FormRequest
             'status' => [
                 'sometimes',
                 'string',
+                new Enum(StatusEnum::class),
+                function ($attribute, $value, $fail) {
+                    if ($this->active && ! in_array($value, [StatusEnum::APPROVED->value, StatusEnum::ACTIVE->value])) {
+                        $fail('The status must be "APPROVED" or "ACTIVE" when active is true.');
+                    }
+                },
             ],
             'active' => [
                 'sometimes',

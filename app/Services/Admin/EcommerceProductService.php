@@ -358,7 +358,7 @@ class EcommerceProductService implements IEcommerceProductService
             // Filter by product status (e.g., ACTIVE, INACTIVE)
             ->when(
                 $request->input('status'),
-                fn($query, $status) => is_array($status) ? $query->whereIn('status', array_map('strtoupper', $status)) : $query->where('status', strtoupper($status))
+                fn($query, $status) => is_array($status) ? $query->whereIn('status', array_unique(array_map('trim', array_map('strtoupper', $status)))) : $query->whereIn('status', array_unique(array_map('trim', array_map('strtoupper', explode(",", $status)))))
             )
             // Filter by active status (active/inactive mapped to 1/0)
             ->when(
@@ -370,22 +370,32 @@ class EcommerceProductService implements IEcommerceProductService
             ->when($request->input('inventory'), function ($query, $inventory) {
                 $inventories = is_array($inventory) ? $inventory : explode(',', $inventory);
                 $inventories = array_unique(array_map('trim', $inventories));
-
+            
                 $query->whereHas('productDetails', function ($q) use ($inventories) {
-                    foreach ($inventories as $status) {
-                        $q->when(
-                            $status === 'OUT OF STOCK',
-                            fn($q) => $q->whereNull('current_stock')->orWhere('current_stock', 0)
-                        )->when(
-                            $status === 'LOW STOCK',
-                            fn($q) => $q->whereNotNull('starting_stock')->whereColumn('current_stock', '<=', DB::raw('starting_stock / 2'))
-                        )->when(
-                            $status === 'IN STOCK',
-                            fn($q) => $q->whereNotNull('current_stock')->where('current_stock', '>', DB::raw('starting_stock / 2'))
-                        );
-                    }
+                    $q->where(function ($q) use ($inventories) {
+                        foreach ($inventories as $status) {
+                            if ($status === 'OUT OF STOCK') {
+                                $q->orWhere(function ($q) {
+                                    $q->whereNull('current_stock')
+                                        ->orWhere('current_stock', 0);
+                                });
+                            } elseif ($status === 'LOW STOCK') {
+                                $q->orWhere(function ($q) {
+                                    $q->whereNotNull('starting_stock')
+                                        ->whereColumn('current_stock', '<=', DB::raw('starting_stock / 2'))
+                                        ->where('current_stock', '>', 0); // Ensure not OUT OF STOCK
+                                });
+                            } elseif ($status === 'IN STOCK') {
+                                $q->orWhere(function ($q) {
+                                    $q->whereNotNull('current_stock')
+                                        ->where('current_stock', '>', DB::raw('starting_stock / 2')); // Ensure IN STOCK only
+                                });
+                            }
+                        }
+                    });
                 });
             })
+            
             // Filter by category names (case-insensitive partial match)
             ->when($request->input('category'), function ($query, $category) {
                 $categories = is_array($category) ? $category : explode(',', $category);
@@ -454,6 +464,9 @@ class EcommerceProductService implements IEcommerceProductService
             $query->orderBy('created_at', 'desc');
         }
 
+        if(!$request->user()->hasRole('admin')){
+            $query->businesses();
+        }
         // Return paginated results with applied filters and transformations
         return $query
             ->paginate($request->has('perPage') ? $request->perPage : 10)

@@ -48,6 +48,7 @@ class EcommerceProduct extends Model
         'low_stock_level',
         'out_stock_level',
         'description',
+        'active',
     ];
 
     /**

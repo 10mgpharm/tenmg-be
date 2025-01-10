@@ -45,8 +45,7 @@ class EcommercePresentationService implements IEcommercePresentationService
                 return $presentation->update([
                     ...$validated,
                     'status' => $validated['status'] ?? $presentation->status,
-                    'active' => $validated['active'] ?? $presentation->active,
-                    'slug' => Str::slug($validated['name'] ?? $presentation->name),
+                    'active' => in_array($validated['status'] ?? $presentation->status, [StatusEnum::APPROVED->value, StatusEnum::ACTIVE->value]) ?  ($validated['active'] ?? $presentation->active) : false,
                     'updated_by_id' => $user->id,
                 ]);
             });

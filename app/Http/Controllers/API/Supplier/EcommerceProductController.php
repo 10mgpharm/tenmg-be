@@ -25,7 +25,7 @@ class EcommerceProductController extends Controller
      */
     public function index(ListEcommerceProductRequest $request): JsonResponse
     {
-        $products = EcommerceProduct::latest()
+        $products = EcommerceProduct::businesses()->latest()
         ->paginate($request->has('perPage') ? $request->perPage : 10)
         ->withQueryString()
         ->through(fn(EcommerceProduct $item) => EcommerceProductResource::make($item));
@@ -109,7 +109,7 @@ class EcommerceProductController extends Controller
      *
      * @param  \App\Http\Requests\Admin\ListEcommerceProductRequest  $request  Validated request instance.
      */
-    public function search(ListEcommerceProductRequest $request): JsonResponse
+    public function search(Request $request): JsonResponse
     {
         $products = $this->productService->search($request);
 
