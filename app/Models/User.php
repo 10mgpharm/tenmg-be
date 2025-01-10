@@ -198,9 +198,9 @@ class User extends Authenticatable implements MustVerifyEmail
         $this->notify(new ResetPasswordNotification($code));
     }
 
-    public function sendLicenseVerificationNotification($message)
+    public function sendLicenseVerificationNotification($message, $user = null)
     {
-        $this->notify(new LicenseVerificationNotification($message));
+        $this->notify(new LicenseVerificationNotification($message, $user));
     }
 
     protected function getDefaultGuardName(): string

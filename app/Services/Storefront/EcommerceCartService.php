@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Services\Admin\Storefront;
+namespace App\Services\Storefront;
 
 use App\Models\EcommerceCart;
 use App\Models\EcommerceOrder;

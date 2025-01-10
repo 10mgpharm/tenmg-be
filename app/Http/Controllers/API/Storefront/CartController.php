@@ -4,7 +4,7 @@ namespace App\Http\Controllers\API\Storefront;
 
 use App\Http\Controllers\Controller;
 use App\Http\Resources\EcommerceCartResource;
-use App\Services\Admin\Storefront\EcommerceCartService;
+use App\Services\Storefront\EcommerceCartService;
 use Illuminate\Http\Request;
 
 class CartController extends Controller
@@ -33,6 +33,22 @@ class CartController extends Controller
     {
         $cart = $this->ecommerceCartService->getUserCart();
         return $this->returnJsonResponse(message: 'User cart', data: EcommerceCartResource::collection($cart));
+    }
+
+    function buyNow(Request $request)
+    {
+
+        $request->validate([
+            'productId' => 'required|exists:ecommerce_products,id',
+            'ecommercePaymentMethodId' => 'required|exists:ecommerce_payment_methods,id',
+            'qty' => 'required|integer|min:1',
+            'deliveryType' => 'required|in:STANDARD, EXPRESS',
+            'deliveryAddress' => 'required|string'
+        ]);
+
+        $order = $this->ecommerceCartService->buyNow($request);
+
+        return $this->returnJsonResponse(message: 'Success', data: $order);
     }
 
 
