@@ -358,8 +358,7 @@ class EcommerceProductService implements IEcommerceProductService
             // Filter by product status (e.g., ACTIVE, INACTIVE)
             ->when(
                 $request->input('status'),
-                fn($query, $status) =>
-                $query->where('status', strtoupper($status))
+                fn($query, $status) => is_array($status) ? $query->whereIn('status', array_map('strtoupper', $status)) : $query->where('status', strtoupper($status))
             )
             // Filter by active status (active/inactive mapped to 1/0)
             ->when(

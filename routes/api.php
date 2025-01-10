@@ -28,10 +28,10 @@ use App\Http\Controllers\API\Credit\TransactionHistoryController;
 use App\Http\Controllers\API\ProfileController;
 use App\Http\Controllers\API\ResendOtpController;
 use App\Http\Controllers\API\Storefront\CartController;
-use App\Http\Controllers\API\Storefront\CategoryController;
+use App\Http\Controllers\API\Storefront\CategoryController as StorefrontCategoryController;
 use App\Http\Controllers\API\Storefront\FaqController as StorefrontFaqController;
 use App\Http\Controllers\API\Storefront\OrdersController;
-use App\Http\Controllers\API\Storefront\ProductController;
+use App\Http\Controllers\API\Storefront\ProductController as StorefrontProductController;
 use App\Http\Controllers\API\Storefront\ShippingAddressController as StorefrontShippingAddressController;
 use App\Http\Controllers\API\Storefront\StorefrontController;
 use App\Http\Controllers\API\Supplier\EcommerceProductController as SupplierEcommerceProductController;
@@ -375,11 +375,11 @@ Route::prefix('v1')->group(function () {
         // STOREFRONTS specific routes
         Route::prefix('storefront')->name('storefront.')->group(function () {
             Route::get('/', StorefrontController::class);
-            Route::get('/categories/search', [CategoryController::class, 'search']);
-            Route::get('/categories/{category:slug}', [CategoryController::class, 'products']);
+            Route::get('/categories/search', [StorefrontCategoryController::class, 'search']);
+            Route::get('/categories/{category:slug}', [StorefrontCategoryController::class, 'products']);
 
-            Route::get('/products/search', [ProductController::class, 'search']);
-            Route::get('/products/{product}', [ProductController::class, 'show']);
+            Route::get('/products/search', [StorefrontProductController::class, 'search']);
+            Route::get('/products/{product}', [StorefrontProductController::class, 'show']);
 
             Route::get('shipping-addresses/search', [StorefrontShippingAddressController::class, 'search']);
             Route::apiResource('shipping-addresses', StorefrontShippingAddressController::class);

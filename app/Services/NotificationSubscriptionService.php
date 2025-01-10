@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Http\Resources\NotificationResource;
 use App\Models\Notification;
 use App\Models\NotificationSetting;
 use App\Models\User;
@@ -33,7 +34,9 @@ class NotificationSubscriptionService implements INotificationSubscriptionServic
             $query->where('user_id', $user->id);
         }])
         ->latest()
-        ->paginate();
+        ->paginate(request()->has('perPage') ? request()->input('perPage') : 10)
+            ->withQueryString()
+            ->through(fn(Notification $item) => NotificationResource::make($item));
 
         return ($notifications);
     }

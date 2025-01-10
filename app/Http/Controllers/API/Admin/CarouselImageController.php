@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\API\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Admin\DeleteCarouselImageRequest;
 use App\Http\Requests\Admin\StoreCarouselImageRequest;
 use App\Http\Resources\Admin\CarouselImageResource;
 use App\Models\CarouselImage;
@@ -74,6 +75,15 @@ class CarouselImageController extends Controller
             message: 'Carousel image updated successfully.',
             data: new CarouselImageResource($carousel_image->refresh()),
             statusCode: Response::HTTP_OK,
+        );
+    }
+
+    public function destroy(DeleteCarouselImageRequest $request, CarouselImage $carousel_image)
+    {
+        $carousel_image->delete();
+
+        return $this->returnJsonResponse(
+            message: 'Product successfully deleted.',
         );
     }
 
