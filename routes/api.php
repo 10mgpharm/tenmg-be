@@ -30,6 +30,7 @@ use App\Http\Controllers\API\ResendOtpController;
 use App\Http\Controllers\API\Storefront\CartController;
 use App\Http\Controllers\API\Storefront\CategoryController as StorefrontCategoryController;
 use App\Http\Controllers\API\Storefront\FaqController as StorefrontFaqController;
+use App\Http\Controllers\API\Storefront\OrdersController;
 use App\Http\Controllers\API\Storefront\ProductController as StorefrontProductController;
 use App\Http\Controllers\API\Storefront\ShippingAddressController as StorefrontShippingAddressController;
 use App\Http\Controllers\API\Storefront\StorefrontController;
@@ -386,6 +387,7 @@ Route::prefix('v1')->group(function () {
             Route::post('/add-remove-cart-items', [CartController::class, 'addRemoveItemToCart']);
             Route::get('/get-user-cart', [CartController::class, 'getUserCart']);
             Route::post('/buy-now', [CartController::class, 'buyNow']);
+            Route::post('/checkout', [OrdersController::class, 'checkout']);
         });
 
     });
