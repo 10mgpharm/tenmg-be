@@ -32,7 +32,11 @@ class UsersController extends Controller
         }
 
         if ($email = $request->input('email')) {
-            $query->where('email', $email);
+            $query->where('email', 'like', '%' . $email . '%');
+        }
+
+        if ($user = $request->input('user')) {
+            $query->where('name', 'like', '%' . $user . '%');
         }
 
         if (!is_null($request->input('active'))) {
