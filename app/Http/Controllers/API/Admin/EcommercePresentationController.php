@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\API\Admin;
 
+use App\Enums\StatusEnum;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\DeleteEcommercePresentationRequest;
 use App\Http\Requests\Admin\ListEcommercePresentationRequest;
@@ -23,7 +24,7 @@ class EcommercePresentationController extends Controller
      */
     public function index(ListEcommercePresentationRequest $request): JsonResponse
     {
-        $presentations = EcommercePresentation::where('active', 1)->where('status', 'APPROVED')->get();
+        $presentations = EcommercePresentation::where('active', 1)->whereIn('status', [StatusEnum::ACTIVE->value, StatusEnum::APPROVED->value])->get();
 
         return $this->returnJsonResponse(
             message: 'Presentation successfully fetched.',

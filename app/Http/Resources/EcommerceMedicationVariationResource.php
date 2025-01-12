@@ -24,6 +24,7 @@ class EcommerceMedicationVariationResource extends JsonResource
             'medicationType' => new EcommerceMedicationTypeResource($this->whenLoaded('medicationType')),
             'status' => $this->status,
             'active' => $this->active,
+            'createdAt' => $this->created_at->format('M d, y h:i A')
             // 'createdBy' => new UserResource($this->createdBy),
             // 'updatedBy' => new UserResource($this->updatedBy),
         ];

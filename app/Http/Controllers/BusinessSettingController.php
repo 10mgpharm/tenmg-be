@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\BusinessSettingAccountSetupRequest;
+use App\Http\Requests\BusinessSettingLicenseWithdrawalRequest;
 use App\Http\Requests\BusinessSettingPersonalInformationRequest;
 use App\Http\Requests\ShowBusinessSettingRequest;
 use App\Http\Resources\BusinessResource;
@@ -143,6 +144,37 @@ class BusinessSettingController extends Controller
                 'license_file' => $licenseFile,
                 'license_verification_status' => $ownerBusiness?->license_verification_status,
             ]
+        );
+    }
+
+    /**
+     * Withdraw a license uploaded by the business.
+     *
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function withdraw(BusinessSettingLicenseWithdrawalRequest $request)
+    {
+        $user = $request->user();
+        $ownerBusiness = $user->ownerBusinessType;
+
+        $licenseFile = $ownerBusiness?->cac_document ?? null;
+
+        if ($licenseFile) {
+            $isDeleted = $this->attachmentService->deleteFile($licenseFile);
+
+            return $this->returnJsonResponse(
+                message: 'Business license upload successfully withdrawn.',
+                data: [
+                    'license_number' => $ownerBusiness?->license_number,
+                    'expiry_date' => $ownerBusiness?->expiry_date,
+                    'license_file' => null,
+                    'license_verification_status' => $ownerBusiness?->license_verification_status,
+                ]
+            );
+        }
+
+        return $this->returnJsonResponse(
+            message: 'Oops, can\'t update license at the moment. Please try again later.'
         );
     }
 }

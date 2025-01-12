@@ -27,12 +27,16 @@ class UsersController extends Controller
 
         if ($type = $request->input('type')) {
             $query->whereHas('roles', function ($query) use ($type) {
-                $query->where('name', $type);
+                $query->where('name', $type == 'pharmacy' ? 'customer' : $type);
             });
         }
 
         if ($email = $request->input('email')) {
-            $query->where('email', $email);
+            $query->where('email', 'like', '%' . $email . '%');
+        }
+
+        if ($user = $request->input('user')) {
+            $query->where('name', 'like', '%' . $user . '%');
         }
 
         if (!is_null($request->input('active'))) {
