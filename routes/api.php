@@ -37,6 +37,7 @@ use App\Http\Controllers\API\Storefront\StorefrontController;
 use App\Http\Controllers\API\Supplier\EcommerceProductController as SupplierEcommerceProductController;
 use App\Http\Controllers\API\Webhooks\PaystackWebhookController;
 use App\Http\Controllers\BusinessSettingController;
+use App\Http\Controllers\API\Admin\EcommerceOrderController;
 use App\Http\Controllers\InviteController;
 use App\Http\Controllers\Supplier\DashboardController as SupplierDashboardController;
 use App\Http\Controllers\Supplier\EcommerceBrandController as SupplierEcommerceBrandController;
@@ -368,7 +369,11 @@ Route::prefix('v1')->group(function () {
 
             Route::prefix('system-setup')->name('system-setup.')->group(function () {
                 Route::get('storefront-images/search', [CarouselImageController::class, 'search']);
-                Route::apiResource('storefront-images', CarouselImageController::class);
+            });
+
+            Route::prefix('orders')->name('orders.')->group(function () {
+                Route::get('get-orders', [EcommerceOrderController::class, 'getOrderByStatus']);
+                Route::post('change-order-status', [EcommerceOrderController::class, 'changeOrderStatus']);
             });
         });
 
