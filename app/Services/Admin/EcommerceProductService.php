@@ -44,6 +44,9 @@ class EcommerceProductService implements IEcommerceProductService
             return DB::transaction(function () use ($validated, $user) {
 
                 // Doc: when business is null that means the product and its dependencies are for global used and created by admin
+                $productBusinessId = $user->ownerBusinessType?->id ?: $user->businesses()
+                        ->firstWhere('user_id', $user->id)?->id;
+
                 if ($user && $user->hasRole('admin')) {
                     $validated['business_id'] = null;
                 } else {
@@ -128,7 +131,7 @@ class EcommerceProductService implements IEcommerceProductService
                 );
 
                 $product = $user->products()->create([
-                    'business_id' => $validated['business_id'],
+                    'business_id' => $productBusinessId,
 
                     'ecommerce_category_id' => $category->id,
                     'ecommerce_brand_id' => $brand->id,
