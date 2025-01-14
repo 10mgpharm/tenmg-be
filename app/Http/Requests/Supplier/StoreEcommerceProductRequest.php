@@ -45,13 +45,13 @@ class StoreEcommerceProductRequest extends FormRequest
             'thumbnailFile' => $this->file('thumbnailFile'),
             'status' =>  in_array($this->input('status'), [StatusEnum::ACTIVE->value, StatusEnum::FLAGGED, StatusEnum::SUSPENDED, StatusEnum::REJECTED])
             ? $this->input('status')
-            : StatusEnum::APPROVED->value,
+            : StatusEnum::INACTIVE->value,
             // 'ecommerce_variation' => $this->input('ecommerceVariation'),
 
             // ProductDetail model attributes
             'essential' => $this->input('productEssential'),
             'starting_stock' => $this->input('startingStock'),
-            'current_stock' => $this->input('currentStock'),
+            'current_stock' => $this->input('currentStock') ?? $this->input('quantity'),
         ]);
 
     }
