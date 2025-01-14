@@ -58,7 +58,7 @@ class EcommerceProductService implements IEcommerceProductService
                 $category = EcommerceCategory::firstOrCreate(
                     ['name' => $validated['category_name']],
                     [
-                        'slug' => UtilityHelper::generateSlug('CAT'),
+                        'slug' => Str::slug($validated['category_name']),
                         'business_id' => $validated['business_id'],
                         'created_by_id' => $user->id,
                         'status' => $user->hasRole('admin') ? StatusEnum::ACTIVE->value : StatusEnum::PENDING->value,
@@ -155,8 +155,8 @@ class EcommerceProductService implements IEcommerceProductService
 
                     'expired_at' => $validated['expired_at'],
 
-                    'status' => $user->hasRole('admin') ? StatusEnum::ACTIVE->value : StatusEnum::APPROVED->value,
-                    'active' => true,
+                    'status' => $validated['status'] ?? StatusEnum::INACTIVE->value,
+                    'active' => false,
 
                 ]);
 

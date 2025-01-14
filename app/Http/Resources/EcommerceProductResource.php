@@ -35,15 +35,18 @@ class EcommerceProductResource extends JsonResource
             'expiredAt' => $this->expired_at,
             'commission' => $this->commission,
             'productDetails' => $this->productDetails == null ? null : $this->productDetails->only('essential', 'starting_stock', 'current_stock', 'id', 'ecommerce_product_id'),
-            'status' => in_array($this->status, array_column(StatusEnum::cases(), 'value'), true)
-            ? $this->status
-            : 'PENDING',
+            'status' => match (true) {
+                in_array($this->status, [StatusEnum::ACTIVE->value, StatusEnum::APPROVED->value]) => StatusEnum::ACTIVE->value,
+                in_array($this->status, array_column(StatusEnum::cases(), 'value'), true) => $this->status,
+                default => 'PENDING',
+            },
             'inventory' => match (true) {
-                $this->productDetails?->current_stock === null || $this->productDetails?->current_stock === 0 => 'OUT OF STOCK',
-                $this->productDetails?->starting_stock === null || $this->productDetails?->current_stock <= $this->productDetails?->starting_stock / 2 => 'LOW STOCK',
+                $this->quantity === null || $this->quantity === 0 || $this->quantity == $this->out_stock_level => 'OUT OF STOCK',
+                $this->quantity == $this->low_stock_level => 'LOW STOCK',
                 default => 'IN STOCK',
             },
             'comment' => $this->comment,
+            'company' => (request()->user() && request()->user()->hasRole('admin')) ? $this->business?->name : null
         ];
     }
 }

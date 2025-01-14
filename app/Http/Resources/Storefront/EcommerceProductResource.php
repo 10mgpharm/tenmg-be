@@ -27,12 +27,15 @@ class EcommerceProductResource extends JsonResource
             'thumbnailUrl' => $this->thumbnailUrl,
             'expiredAt' => $this->expired_at,
             'productDetails' => $this->productDetails->only('essential', 'starting_stock', 'current_stock'),
-            'status' => in_array($this->status, array_column(StatusEnum::cases(), 'value'), true)
-            ? $this->status
-            : 'DRAFTED',
+            'status' => match (true) {
+                in_array($this->status, [StatusEnum::ACTIVE->value, StatusEnum::APPROVED->value]) => StatusEnum::ACTIVE->value,
+                in_array($this->status, array_column(StatusEnum::cases(), 'value'), true) => $this->status,
+                default => 'PENDING',
+            },
             'inventory' => match (true) {
-                $this->productDetails?->current_stock === null || $this->productDetails?->current_stock === 0 => 'OUT OF STOCK',
-                $this->productDetails?->starting_stock === null || $this->productDetails?->current_stock <= $this->productDetails?->starting_stock / 2 => 'LOW STOCK',
+                $this->quantity === null || $this->quantity === 0 => 'OUT OF STOCK',
+                $this->productDetails?->starting_stock !== null && 
+                $this->quantity <= $this->productDetails?->starting_stock / 2 => 'LOW STOCK',
                 default => 'IN STOCK',
             },
             'comment' => $this->comment,

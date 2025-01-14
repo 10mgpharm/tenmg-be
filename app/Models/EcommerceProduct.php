@@ -128,6 +128,14 @@ class EcommerceProduct extends Model
     }
 
     /**
+     * Get the measurement associated with the product.
+     */
+    public function business()
+    {
+        return $this->belongsTo(Business::class, 'business_id');
+    }
+
+    /**
      * Get the product details associated with the product.
      */
     public function productDetails()

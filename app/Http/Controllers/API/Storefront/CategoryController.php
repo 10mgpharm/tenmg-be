@@ -34,8 +34,8 @@ class CategoryController extends Controller
                     'id' => $category->id,
                     'name' => $category->name,
                     'slug' => $category->slug,
+                    'products' => $products
                 ],
-                ...$products,
             ]
         );
     }
