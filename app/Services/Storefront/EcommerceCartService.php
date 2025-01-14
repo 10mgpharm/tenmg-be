@@ -51,7 +51,7 @@ class EcommerceCartService
                         $totalWeight = $request->qty * $product->weight;
                         $tenmgPercentCommission = ($tenmgPercent/100) * $orderPrice;
 
-                        $qty = $request->action == "add" ? (int)$item->qty + (int)$request->qty : abs((int)$item->qty - (int)$request->qty);
+                        $qty = $request->action == "add" ? (int)$item->quantity + (int)$request->qty : abs((int)$item->quantity - (int)$request->qty);
                         //update item quantity
                         $item->quantity = $qty;
                         $item->actual_price = $product->actual_price * $request->qty;
