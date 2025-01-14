@@ -100,7 +100,7 @@ Route::prefix('v1')->group(function () {
         Route::post('/resend-otp', ResendOtpController::class)
             ->name('resend.otp.auth')->middleware('throttle:5,1');
 
-        // Account/Profile managment
+        // Account/Profile management
         Route::prefix('account')->group(function () {
             Route::patch('password', PasswordUpdateController::class);
             Route::match(['post', 'patch'], 'profile', [AccountController::class, 'profile']);
@@ -379,6 +379,19 @@ Route::prefix('v1')->group(function () {
 
         // STOREFRONTS specific routes
         Route::prefix('storefront')->name('storefront.')->group(function () {
+
+            Route::prefix('settings')->name('settings.')->group(function () {
+                Route::get('/', [BusinessSettingController::class, 'show']);
+
+                // Update business information
+                Route::match(['post', 'patch'], 'business-information', [BusinessSettingController::class, 'businessInformation']);
+
+                // Update business account license number, expiry date and cac doc
+                Route::patch('license/withdraw', [BusinessSettingController::class, 'withdraw']);
+                Route::match(['post', 'patch'], 'license', [BusinessSettingController::class, 'license']);
+                Route::get('license', [BusinessSettingController::class, 'getBusinessStatus']);
+            });
+
             Route::get('/', StorefrontController::class);
             Route::get('/categories/search', [StorefrontCategoryController::class, 'search']);
             Route::get('/categories/{category:slug}', [StorefrontCategoryController::class, 'products']);

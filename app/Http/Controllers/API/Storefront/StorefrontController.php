@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\API\Storefront;
 
+use App\Enums\StatusEnum;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\Storefront\StorefrontResource;
 use App\Models\EcommerceCategory;
@@ -23,11 +24,15 @@ class StorefrontController extends Controller
     public function __invoke(Request $request): JsonResponse
     {
         $categories = EcommerceCategory::with([
-            'products' => fn ($query) => $query->where('active', 1)->whereIn('status', ['ACTIVE', 'APPROVED'])->latest()->limit(15),
-        ])->where('active', 1)->whereIn('status', ['ACTIVE', 'APPROVED'])
-        ->paginate($request->has('perPage') ? $request->perPage : 10)
-        ->withQueryString()
-        ->through(fn(EcommerceCategory $item) => StorefrontResource::make($item));
+            'products' => fn($query) => $query->where('active', 1)
+                ->whereIn('status', [StatusEnum::ACTIVE->value, StatusEnum::APPROVED->value])
+                ->latest()
+                ->limit(15)
+        ])->where('active', 1)
+            ->whereIn('status', [StatusEnum::ACTIVE->value, StatusEnum::APPROVED->value])
+            ->paginate($request->has('perPage') ? $request->perPage : 10)
+            ->withQueryString()
+            ->through(fn(EcommerceCategory $item) => StorefrontResource::make($item));
 
         return $this->returnJsonResponse(
             message: 'Products fetched successfully.',

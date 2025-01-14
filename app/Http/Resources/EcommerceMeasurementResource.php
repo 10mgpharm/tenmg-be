@@ -19,6 +19,7 @@ class EcommerceMeasurementResource extends JsonResource
             'name' => $this->name,
             'active' => $this->active,
             'status' => $this->status,
+            'createdAt' => $this->created_at->format('M d, y h:i A'),
             // 'createdBy' => new UserResource($this->createdBy),
             // 'updatedBy' => new UserResource($this->updatedBy),
         ];

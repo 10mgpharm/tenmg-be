@@ -42,8 +42,8 @@ class UpdateEcommerceMedicationRequest extends FormRequest
                 'string',
                 new Enum(StatusEnum::class),
                 function ($attribute, $value, $fail) {
-                    if ($this->active && ! in_array($value, [StatusEnum::APPROVED->value, null])) {
-                        $fail('The status must be "APPROVED" or null when active is true.');
+                    if ($this->active && ! in_array($value, [StatusEnum::APPROVED->value, StatusEnum::ACTIVE->value])) {
+                        $fail('The status must be "APPROVED" or "ACTIVE" when active is true.');
                     }
                 },
             ],
