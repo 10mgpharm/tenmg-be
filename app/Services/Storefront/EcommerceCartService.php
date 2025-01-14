@@ -117,7 +117,7 @@ class EcommerceCartService
                     'tenmg_commission_percent' => $tenmgPercent,
                     'quantity' => $request->qty
                 ]);
-            }
+            } //
 
             DB::commit();
 
