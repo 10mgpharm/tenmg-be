@@ -134,7 +134,7 @@ class EcommerceCartService
     function getUserCart()
     {
         try {
-            $cart = EcommerceOrder::where('customer_id', Auth::id())->where('status', 'CART')->get();
+            $cart = EcommerceOrder::where('customer_id', Auth::id())->where('status', 'CART')->first();
             return $cart;
         } catch (\Throwable $th) {
             throw $th;
