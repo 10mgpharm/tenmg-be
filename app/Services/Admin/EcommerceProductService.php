@@ -131,6 +131,8 @@ class EcommerceProductService implements IEcommerceProductService
                 );
 
                 $product = $user->products()->create([
+                    ...array_filter($validated),
+
                     'business_id' => $productBusinessId,
 
                     'ecommerce_category_id' => $category->id,
@@ -142,18 +144,11 @@ class EcommerceProductService implements IEcommerceProductService
 
                     'created_by_id' => $user->id,
 
-                    'quantity' => $validated['quantity'],
-                    'actual_price' => $validated['actual_price'],
-                    'discount_price' => $validated['discount_price'],
 
                     'name' => $validated['product_name'],
                     'description' => $validated['product_description'],
                     'slug' => UtilityHelper::generateSlug('PRD'),
 
-                    'low_stock_level' => $validated['low_stock_level'] ?? null,
-                    'out_stock_level' => $validated['out_stock_level'] ?? null,
-
-                    'expired_at' => $validated['expired_at'],
 
                     'status' => $validated['status'] ?? StatusEnum::INACTIVE->value,
                     'active' => false,

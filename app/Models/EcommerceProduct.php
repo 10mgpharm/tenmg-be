@@ -49,6 +49,7 @@ class EcommerceProduct extends Model
         'out_stock_level',
         'description',
         'active',
+        'weight',
     ];
 
     /**

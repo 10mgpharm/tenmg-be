@@ -19,6 +19,7 @@ class EcommerceProductResource extends JsonResource
             'id' => $this->id,
             'name' => $this->name,
             'active' => $this->active,
+            'weight' => $this->weight,
             'description' => $this->description,
             'slug' => $this->slug,
             'category' => new EcommerceCategoryResource($this->category),
