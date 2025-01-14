@@ -40,7 +40,7 @@ class CartController extends Controller
 
         $request->validate([
             'productId' => 'required|exists:ecommerce_products,id',
-            'ecommercePaymentMethodId' => 'required|exists:ecommerce_payment_methods,id',
+            // 'ecommercePaymentMethodId' => 'required|exists:ecommerce_payment_methods,id',
             'qty' => 'required|integer|min:1',
             'deliveryType' => 'required|in:STANDARD, EXPRESS',
             'deliveryAddress' => 'required|string'

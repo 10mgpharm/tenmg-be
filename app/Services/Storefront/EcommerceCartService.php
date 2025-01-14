@@ -44,7 +44,7 @@ class EcommerceCartService
                         DB::commit();
                     }else{
                         //check if quantity to minus is greater than what is is cart
-                        if ($request->action == "minus" && $item->qty <= $request->qty) {
+                        if ($request->action == "minus" && $item->quantity <= $request->qty) {
                             throw new \Exception("Quantity to minus is greater than what is in cart");
                         }
                         $orderPrice = $product->actual_price - $product->discount_price;
