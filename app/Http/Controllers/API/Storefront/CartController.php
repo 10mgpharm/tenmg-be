@@ -32,7 +32,7 @@ class CartController extends Controller
     function getUserCart()
     {
         $cart = $this->ecommerceCartService->getUserCart();
-        return $this->returnJsonResponse(message: 'User cart', data: EcommerceCartResource::collection($cart));
+        return $this->returnJsonResponse(message: 'User cart', data: new EcommerceCartResource($cart));
     }
 
     function buyNow(Request $request)
