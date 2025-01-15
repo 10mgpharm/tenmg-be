@@ -72,9 +72,9 @@ class LicenseService implements ILicenseService
             if ($validated['license_verification_status'] == 'APPROVED') {
                 //send notification mail to user
 
-                $user->sendLicenseVerificationNotification('Your license verification has been successfully approved. You now have full access.', Auth::user());
+                $user->sendLicenseVerificationNotification('Your license verification has been successfully approved. You now have full access.', $user);
             }else{
-                $user->sendLicenseVerificationNotification('Your license verification request has been denied for the following reason:'.'\n'. $validated['license_verification_comment'], Auth::user());
+                $user->sendLicenseVerificationNotification("Your license verification request has been denied for the following reason:\n". $validated['license_verification_comment'], $user);
             }
 
             return $trans;
