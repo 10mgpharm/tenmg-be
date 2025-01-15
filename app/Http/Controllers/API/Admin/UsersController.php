@@ -5,6 +5,7 @@ namespace App\Http\Controllers\API\Admin;
 use App\Enums\StatusEnum;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\CreateUserRequest;
+use App\Http\Requests\Admin\DeleteUserRequest;
 use App\Http\Requests\Admin\ListUserRequest;
 use App\Http\Requests\Admin\UpdateUserStatusRequest;
 use App\Http\Resources\Admin\UserResource;
@@ -115,6 +116,15 @@ class UsersController extends Controller
         return $this->returnJsonResponse(
             message: "User status has been successfully updated to {$status}.",
             data: new UserResource($user->refresh())
+        );
+    }
+
+    public function destroy(DeleteUserRequest $request, User $user)
+    {
+        $user->delete();
+
+        return $this->returnJsonResponse(
+            message: 'User successfully deleted.',
         );
     }
 
