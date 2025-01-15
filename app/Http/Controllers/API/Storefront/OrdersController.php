@@ -20,7 +20,7 @@ class OrdersController extends Controller
     {
         $request->validate([
             'orderId' => 'required|exists:ecommerce_orders,id',
-            'paymentMethodId' => 'required|exists:ecommerce_payment_methods,id',
+            // 'paymentMethodId' => 'required|exists:ecommerce_payment_methods,id',
             'deliveryAddress' => 'required|string',
             'deliveryType' => 'required|:STANDARD,EXPRESS'
         ]);

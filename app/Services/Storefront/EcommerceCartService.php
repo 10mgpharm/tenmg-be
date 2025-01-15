@@ -44,14 +44,14 @@ class EcommerceCartService
                         DB::commit();
                     }else{
                         //check if quantity to minus is greater than what is is cart
-                        if ($request->action == "minus" && $item->qty <= $request->qty) {
+                        if ($request->action == "minus" && $item->quantity <= $request->qty) {
                             throw new \Exception("Quantity to minus is greater than what is in cart");
                         }
                         $orderPrice = $product->actual_price - $product->discount_price;
                         $totalWeight = $request->qty * $product->weight;
                         $tenmgPercentCommission = ($tenmgPercent/100) * $orderPrice;
 
-                        $qty = $request->action == "add" ? (int)$item->qty + (int)$request->qty : abs((int)$item->qty - (int)$request->qty);
+                        $qty = $request->action == "add" ? (int)$item->quantity + (int)$request->qty : abs((int)$item->quantity - (int)$request->qty);
                         //update item quantity
                         $item->quantity = $qty;
                         $item->actual_price = $product->actual_price * $request->qty;
@@ -117,7 +117,7 @@ class EcommerceCartService
                     'tenmg_commission_percent' => $tenmgPercent,
                     'quantity' => $request->qty
                 ]);
-            }
+            } //
 
             DB::commit();
 
