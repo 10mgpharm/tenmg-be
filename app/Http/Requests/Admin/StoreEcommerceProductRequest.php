@@ -43,7 +43,7 @@ class StoreEcommerceProductRequest extends FormRequest
             'out_stock_level' => $this->input('outStockLevel'),
             'expired_at' => $this->input('expiredAt'),
             'thumbnailFile' => $this->file('thumbnailFile'),
-            'status' => $this->status ?? StatusEnum::ACTIVE->value,
+            'status' => $this->status ?? StatusEnum::INACTIVE->value,
             // 'ecommerce_variation' => $this->input('ecommerceVariation'),
 
             // ProductDetail model attributes

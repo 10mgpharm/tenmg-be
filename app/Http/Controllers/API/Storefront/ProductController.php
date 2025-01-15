@@ -23,6 +23,7 @@ class ProductController extends Controller
      */
     public function show(Request $request, EcommerceProduct $product): JsonResponse
     {
+        $product->related_products = true;
         $product = $this->productService->show($request, $product);
 
         return $this->returnJsonResponse(
