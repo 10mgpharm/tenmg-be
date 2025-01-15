@@ -364,6 +364,7 @@ Route::prefix('v1')->group(function () {
                 Route::get('audit-logs/search', [AuditLogController::class, 'search']);
             });
 
+            Route::patch('users/{user}/status', [UsersController::class, 'status']);
             Route::apiResource('users', UsersController::class);
 
             Route::get('business/licenses', [BusinessLicenseController::class, 'index']);
