@@ -44,4 +44,12 @@ class EcommerceOrderController extends Controller
         return $this->returnJsonResponse(message: 'Order status updated');
 
     }
+
+    function getOrderDetails($id)
+    {
+        $orderDetails = $this->ecommerceCartService->getOrderDetails($id);
+        return $this->returnJsonResponse(
+            data: new EcommerceCartResource($orderDetails)
+        );
+    }
 }

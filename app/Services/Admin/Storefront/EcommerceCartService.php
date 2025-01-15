@@ -67,5 +67,17 @@ class EcommerceCartService
 
     }
 
+    function getOrderDetails($id)
+    {
+        try {
+
+            $orderDetails = EcommerceOrder::find($id);
+            return $orderDetails;
+
+        } catch (\Throwable $th) {
+            throw $th;
+        }
+    }
+
 
 }
