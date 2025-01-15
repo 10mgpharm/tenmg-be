@@ -45,9 +45,9 @@ class BusinessSettingController extends Controller
 
         $data = array_filter(array_intersect_key(
             $validated,
-            array_flip(['name', 'contact_person', 'contact_phone', 'contact_email', 'address'])
+            array_flip(['name', 'contact_person', 'contact_phone', 'contact_email', 'address', 'contact_person_position'])
         ));  // since fillable isn't used.
-
+        
         $user->ownerBusinessType()->update($data);
         $user->ownerBusinessType->refresh();
 

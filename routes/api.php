@@ -134,6 +134,7 @@ Route::prefix('v1')->group(function () {
                 Route::match(['post', 'patch'], 'business-information', [BusinessSettingController::class, 'businessInformation']);
 
                 // Update business account license number, expiry date and cac doc
+                Route::patch('license/withdraw', [BusinessSettingController::class, 'withdraw']);
                 Route::match(['post', 'patch'], 'license', [BusinessSettingController::class, 'license']);
                 Route::get('license', [BusinessSettingController::class, 'getBusinessStatus']);
 
@@ -168,6 +169,7 @@ Route::prefix('v1')->group(function () {
                 Route::match(['post', 'patch'], 'business-information', [BusinessSettingController::class, 'businessInformation']);
 
                 // Update business account license number, expiry date and cac doc
+                Route::patch('license/withdraw', [BusinessSettingController::class, 'withdraw']);
                 Route::match(['post', 'patch'], 'license', [BusinessSettingController::class, 'license']);
                 Route::get('license', [BusinessSettingController::class, 'getBusinessStatus']);
 

@@ -61,7 +61,7 @@ class BusinessSettingPersonalInformationRequest extends FormRequest
                 'email',
                 new BusinessEmail,
             ],
-            // 'contact_person_position' => ['required', 'string', 'min:3', 'max:255',],
+            'contact_person_position' => ['required', 'string', 'min:3', 'max:255',],
             'address' => [
                 'required',
                 'string',
