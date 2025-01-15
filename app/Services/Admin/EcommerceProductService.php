@@ -369,28 +369,22 @@ class EcommerceProductService implements IEcommerceProductService
                 $inventories = is_array($inventory) ? $inventory : explode(',', $inventory);
                 $inventories = array_unique(array_map('trim', $inventories));
             
-                $query->whereHas('productDetails', function ($q) use ($inventories) {
-                    $q->where(function ($q) use ($inventories) {
-                        foreach ($inventories as $status) {
-                            if ($status === 'OUT OF STOCK') {
-                                $q->orWhere(function ($q) {
-                                    $q->whereNull('current_stock')
-                                        ->orWhere('current_stock', 0);
-                                });
-                            } elseif ($status === 'LOW STOCK') {
-                                $q->orWhere(function ($q) {
-                                    $q->whereNotNull('starting_stock')
-                                        ->whereColumn('current_stock', '<=', DB::raw('starting_stock / 2'))
-                                        ->where('current_stock', '>', 0); // Ensure not OUT OF STOCK
-                                });
-                            } elseif ($status === 'IN STOCK') {
-                                $q->orWhere(function ($q) {
-                                    $q->whereNotNull('current_stock')
-                                        ->where('current_stock', '>', DB::raw('starting_stock / 2')); // Ensure IN STOCK only
-                                });
-                            }
-                        }
-                    });
+                $query->where(function ($query) use ($inventories) {
+                    foreach ($inventories as $status) {
+                        $query->when(
+                            $status === 'OUT OF STOCK',
+                            fn($q) => $q->orWhereNull('quantity')
+                                        ->orWhere('quantity', 0)
+                                        ->orWhereColumn('quantity', '=', 'out_stock_level')
+                        )->when(
+                            $status === 'LOW STOCK',
+                            fn($q) => $q->orWhereColumn('quantity', '=', 'low_stock_level')
+                        )->when(
+                            $status === 'IN STOCK',
+                            fn($q) => $q->orWhereColumn('quantity', '>', 'low_stock_level')
+                                        ->whereColumn('quantity', '!=', 'out_stock_level')
+                        );
+                    }
                 });
             })
             

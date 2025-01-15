@@ -49,22 +49,24 @@ class EcommerceProductService implements IEcommerceProductService
                 $inventories = is_array($inventory) ? $inventory : explode(',', $inventory);
                 $inventories = array_unique(array_map('trim', $inventories));
 
-                $query->whereHas('productDetails', fn ($q) => 
-                    $q->where(function ($query) use($inventories) {
-                        foreach ($inventories as $status) {
-                            $query->when(
-                                $status === 'OUT OF STOCK',
-                                fn($q) => $q->orWhereNull('current_stock')->orWhere('current_stock', 0)
-                            )->when(
-                                $status === 'LOW STOCK',
-                                fn($q) => $q->orWhereNotNull('starting_stock')->orWhereColumn('current_stock', '<=', DB::raw('starting_stock / 2'))
-                            )->when(
-                                $status === 'IN STOCK',
-                                fn($q) => $q->orWhereNotNull('current_stock')->orWhere('current_stock', '>', DB::raw('starting_stock / 2'))
-                            );
-                        }
-                    })
-                );
+                $query->where(function ($query) use ($inventories) {
+                    foreach ($inventories as $status) {
+                        $query->when(
+                            $status === 'OUT OF STOCK',
+                            fn($q) => $q->orWhereNull('quantity')
+                                        ->orWhere('quantity', 0)
+                                        ->orWhereColumn('quantity', '=', 'out_stock_level')
+                        )->when(
+                            $status === 'LOW STOCK',
+                            fn($q) => $q->orWhereColumn('quantity', '=', 'low_stock_level')
+                        )->when(
+                            $status === 'IN STOCK',
+                            fn($q) => $q->orWhereColumn('quantity', '>', 'low_stock_level')
+                                        ->whereColumn('quantity', '!=', 'out_stock_level')
+                        );
+                    }
+                });
+                
             })
             // Filter by category names (case-insensitive partial match)
             ->when($request->input('categories'), function ($query, $categories) {
