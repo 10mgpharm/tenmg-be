@@ -47,7 +47,7 @@ class BusinessSettingController extends Controller
             $validated,
             array_flip(['name', 'contact_person', 'contact_phone', 'contact_email', 'address', 'contact_person_position'])
         ));  // since fillable isn't used.
-        
+
         $user->ownerBusinessType()->update($data);
         $user->ownerBusinessType->refresh();
 
@@ -121,7 +121,7 @@ class BusinessSettingController extends Controller
      *
      * @return \Illuminate\Http\JsonResponse
      */
-    public function getBusinessStatus(Request $request)
+    public function getBusinessStatus(Request $request)//admin@10mg.com
     {
         $user = $request->user();
         $ownerBusiness = $user->ownerBusinessType;
