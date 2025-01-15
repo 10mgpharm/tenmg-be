@@ -3,6 +3,8 @@
 namespace App\Http\Resources\Storefront;
 
 use App\Enums\StatusEnum;
+use App\Http\Resources\EcommerceCategoryResource;
+use App\Models\EcommerceProduct;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
@@ -18,6 +20,7 @@ class EcommerceProductResource extends JsonResource
         return [
             'id' => $this->id,
             'name' => $this->name,
+            'slug' => $this->slug,
             'description' => $this->description,
             'quantity' => $this->quantity,
             'actualPrice' => $this->actual_price,
@@ -33,12 +36,31 @@ class EcommerceProductResource extends JsonResource
                 default => 'PENDING',
             },
             'inventory' => match (true) {
-                $this->quantity === null || $this->quantity === 0 => 'OUT OF STOCK',
-                $this->productDetails?->starting_stock !== null && 
-                $this->quantity <= $this->productDetails?->starting_stock / 2 => 'LOW STOCK',
+                $this->quantity === null || $this->quantity === 0 || $this->quantity == $this->out_stock_level => 'OUT OF STOCK',
+                $this->quantity == $this->low_stock_level => 'LOW STOCK',
                 default => 'IN STOCK',
             },
             'comment' => $this->comment,
+            'category' => new EcommerceCategoryResource($this->category),
+            'related_products' => $this->when(
+                $this->related_products,
+                EcommerceProductResource::collection(
+                    EcommerceProduct::where('id', '!=', $this->id)
+                        ->where(function ($query) {
+                            $query->where('ecommerce_category_id', $this->ecommerce_category_id)
+                                ->orWhere('ecommerce_brand_id', $this->ecommerce_brand_id)
+                                ->orWhere('ecommerce_medication_type_id', $this->ecommerce_medication_type_id)
+                                ->orWhere('ecommerce_presentation_id', $this->ecommerce_presentation_id);
+                        })
+                        ->limit(10)
+                        ->latest()
+                        ->get()
+                ),
+            )
         ];
+
+
+
+        return $data;
     }
 }
