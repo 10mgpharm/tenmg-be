@@ -44,6 +44,8 @@ class User extends Authenticatable implements MustVerifyEmail
         'email_verified_at',
         'google_picture_url',
         'force_password_change',
+        'status',
+        'status_comment',
     ];
 
     /**

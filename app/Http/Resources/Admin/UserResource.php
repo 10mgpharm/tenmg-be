@@ -19,6 +19,7 @@ class UserResource extends JsonResource
             'email' => $this->email,
             'name' => $this->name,
             'status' => $this->active,
+            'account_status' => $this->getRawOriginal('status'),
             'dateJoined' => $this->created_at,
             'businessName' => $this->ownerBusinessType?->name ?? $this->businesses()->firstWhere('user_id', $this->id)?->name,
         ];
