@@ -3,10 +3,19 @@
 namespace App\Services\Storefront;
 
 use App\Models\EcommerceOrder;
+use App\Repositories\OrderRepository;
 use Illuminate\Http\Request;
 
 class EcommerceOrderService
 {
+
+    protected $orderRepository;
+
+    function __construct(OrderRepository $orderRepository)
+    {
+        $this->orderRepository = $orderRepository;
+    }
+
     function checkout(Request $request)
     {
         try {
@@ -22,5 +31,10 @@ class EcommerceOrderService
         } catch (\Throwable $th) {
             throw $th;
         }
+    }
+
+    function getOrderByStatusSuppliers(Request $request)
+    {
+        return $this->orderRepository->getOrderByStatusSuppliers($request);
     }
 }

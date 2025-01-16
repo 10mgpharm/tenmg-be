@@ -44,8 +44,10 @@ use App\Http\Controllers\Supplier\EcommerceBrandController as SupplierEcommerceB
 use App\Http\Controllers\Supplier\EcommerceCategoryController as SupplierEcommerceCategoryController;
 use App\Http\Controllers\Supplier\EcommerceMeasurementController as SupplierEcommerceMeasurementController;
 use App\Http\Controllers\Supplier\EcommerceMedicationTypeController as SupplierEcommerceMedicationTypeController;
+use App\Http\Controllers\Supplier\EcommerceOrderController as SupplierEcommerceOrderController;
 use App\Http\Controllers\Supplier\EcommercePresentationController as SupplierEcommercePresentationController;
 use Illuminate\Support\Facades\Route;
+
 
 Route::prefix('v1')->group(function () {
 
@@ -155,6 +157,10 @@ Route::prefix('v1')->group(function () {
             Route::get('medication-types', SupplierEcommerceMedicationTypeController::class);
             Route::get('measurements', SupplierEcommerceMeasurementController::class);
             Route::get('presentations', SupplierEcommercePresentationController::class);
+
+            Route::prefix('orders')->name('orders.')->group(function () {
+                Route::get('/', [SupplierEcommerceOrderController::class, 'getOrderByStatusSuppliers']);
+            });
         });
 
         // VENDOR specific routes
