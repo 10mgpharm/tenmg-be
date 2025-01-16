@@ -29,7 +29,6 @@ class RoleCheckMiddleware
 
         $business = $user->ownerBusinessType ?: $user->businesses->first();
 
-        Log::alert($user->ownerBusinessType);
 
         if (strtolower($business->type) !== strtolower($role)) {
             return response()->json([
