@@ -19,14 +19,18 @@ class EcommercePresentationService implements IEcommercePresentationService
     {
         try {
             return DB::transaction(function () use ($validated, $user) {
+
+                $validated['status'] = $validated['status'] ?? (isset($validated['active']) && $validated['active'] === false 
+                ? StatusEnum::INACTIVE->value 
+                : StatusEnum::ACTIVE->value);
+
                 return EcommercePresentation::create(
                     [
-                        'name' => $validated['name'],
-                        'business_id' => $user->ownerBusinessType?->id ?: $user->businesses()
-                            ->firstWhere('user_id', $user->id)?->id,
+                        ...$validated,
+                        'active' => in_array($validated['status'], StatusEnum::actives()) 
+                            ? ($validated['active'] ?? true) 
+                            : false,
                         'created_by_id' => $user->id,
-                        'status' => $user->hasRole('admin') ? StatusEnum::ACTIVE->value : StatusEnum::APPROVED->value,
-                        'active' => true,
                     ]
                 );
             });
@@ -42,10 +46,20 @@ class EcommercePresentationService implements IEcommercePresentationService
     {
         try {
             return DB::transaction(function () use ($validated, $user, $presentation) {
+
+                $validated['status'] = isset($validated['active']) && $validated['active'] === true 
+                ? (isset($validated['status']) && in_array($validated['status'], StatusEnum::actives()) 
+                    ? $validated['status'] 
+                    : $validated['status'] ?? StatusEnum::ACTIVE->value) 
+                : ($validated['status'] ?? ($presentation->status ?? StatusEnum::INACTIVE->value));
+
+            
+            $validated['active'] = (in_array($validated['status'], StatusEnum::actives()))
+                ? ($validated['active'] ?? true )
+                : (false);
+
                 return $presentation->update([
                     ...$validated,
-                    'status' => $validated['status'] ?? $presentation->status,
-                    'active' => in_array($validated['status'] ?? $presentation->status, [StatusEnum::APPROVED->value, StatusEnum::ACTIVE->value]) ?  ($validated['active'] ?? $presentation->active) : false,
                     'updated_by_id' => $user->id,
                 ]);
             });
@@ -63,7 +77,10 @@ class EcommercePresentationService implements IEcommercePresentationService
         if ($presentation->products()->exists()) {
             return false; // Prevent deletion
         }
+        if ($presentation->variations()->exists()) {
+            return false; // Prevent deletion
+        }
 
-        return $presentation->delete();
+        return $presentation->forceDelete();
     }
 }

@@ -30,6 +30,7 @@ class EcommerceMedicationVariation extends Model
         'ecommerce_medication_type_id',
         'ecommerce_presentation_id',
         'ecommerce_measurement_id',
+        'ecommerce_product_id',
         'strength_value',
         'package_per_roll',
         'description',

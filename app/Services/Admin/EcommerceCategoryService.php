@@ -38,10 +38,16 @@ class EcommerceCategoryService implements IEcommerceCategoryService
                     $validated['business_id'] = $user->ownerBusinessType?->id ?: $user->businesses()
                         ->firstWhere('user_id', $user->id)?->id;
                 }
+
+                $validated['status'] = $validated['status'] ?? (isset($validated['active']) && $validated['active'] === false 
+                ? StatusEnum::INACTIVE->value 
+                : StatusEnum::ACTIVE->value);
+
                 return $user->categories()->create([
                     ...$validated,
-                    'status' => $validated['status'] ?? StatusEnum::APPROVED->value,
-                    'active' => in_array($validated['status'] ?? StatusEnum::APPROVED->value, [StatusEnum::APPROVED->value, StatusEnum::ACTIVE->value]) ? ($validated['active'] ?? true) : false,
+                    'active' => in_array($validated['status'], StatusEnum::actives()) 
+                    ? ($validated['active'] ?? true) 
+                    : false,
                     'slug' =>  UtilityHelper::generateSlug('CAT'),
                     'business_id' => $validated['business_id'],
                     'created_by_id' => $user->id,
@@ -71,10 +77,20 @@ class EcommerceCategoryService implements IEcommerceCategoryService
     {
         try {
             return DB::transaction(function () use ($validated, $user, $category) {
+
+                $validated['status'] = isset($validated['active']) && $validated['active'] === true 
+                ? (isset($validated['status']) && in_array($validated['status'], StatusEnum::actives()) 
+                    ? $validated['status'] 
+                    : $validated['status'] ?? StatusEnum::ACTIVE->value) 
+                : ($validated['status'] ?? ($category->status ?? StatusEnum::INACTIVE->value));
+
+            
+            $validated['active'] = (in_array($validated['status'], StatusEnum::actives()))
+                ? ($validated['active'] ?? true )
+                : (false);
+
                 return $category->update([
                     ...$validated,
-                    'status' => $validated['status'] ?? $category->status,
-                    'active' => in_array($validated['status'] ?? $category->status, [StatusEnum::APPROVED->value, StatusEnum::ACTIVE->value]) ? ($validated['active'] ?? $category->active) : false,
                     'updated_by_id' => $user->id,
                 ]);
             });
@@ -99,6 +115,6 @@ class EcommerceCategoryService implements IEcommerceCategoryService
         }
 
         // Proceed with deletion
-        return $category->delete();
+        return $category->forceDelete();
     }
 }

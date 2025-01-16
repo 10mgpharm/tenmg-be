@@ -40,11 +40,16 @@ class EcommerceMedicationTypeService implements IEcommerceMedicationTypeService
                         ->firstWhere('user_id', $user->id)?->id;
                 }
 
+                $validated['status'] = $validated['status'] ?? (isset($validated['active']) && $validated['active'] === false 
+                ? StatusEnum::INACTIVE->value 
+                : StatusEnum::ACTIVE->value);
+
                 // create medication type
                 $medication_type = $user->medicationTypes()->create([
-                    'name' => $validated['name'],
-                    'status' => $validated['status'] ?? StatusEnum::APPROVED->value,
-                    'active' => $validated['active'] ?? false,
+                    ...$validated,
+                    'active' => in_array($validated['status'], StatusEnum::actives()) 
+                    ? ($validated['active'] ?? true) 
+                    : false,
                     'slug' => UtilityHelper::generateSlug('MED'),
                     'business_id' => $validated['business_id'],
                 ]);
@@ -124,10 +129,20 @@ class EcommerceMedicationTypeService implements IEcommerceMedicationTypeService
                         ->firstWhere('user_id', $user->id)?->id;
                 }
 
+                $validated['status'] = isset($validated['active']) && $validated['active'] === true 
+                ? (isset($validated['status']) && in_array($validated['status'], StatusEnum::actives()) 
+                    ? $validated['status'] 
+                    : $validated['status'] ?? StatusEnum::ACTIVE->value) 
+                : ($validated['status'] ?? ($medication_type->status ?? StatusEnum::INACTIVE->value));
+
+
+            
+                $validated['active'] = (in_array($validated['status'], StatusEnum::actives()))
+                ? ($validated['active'] ?? true )
+                : (false);
+
                 $updated = $medication_type->update([
                     ...$validated,
-                    'status' => $validated['status'] ?? $medication_type->status,
-                    'active' => in_array($validated['status'] ?? $medication_type->status, [StatusEnum::APPROVED->value, StatusEnum::ACTIVE->value]) ? ($validated['active'] ?? $medication_type->active) : false,
                     'updated_by_id' => $user->id,
                     'business_id' => $validated['business_id'],
                 ]);
@@ -206,10 +221,7 @@ class EcommerceMedicationTypeService implements IEcommerceMedicationTypeService
                         EcommerceProduct::whereIn('ecommerce_variation_id', $variationIds)
                         ->where(fn($query) => 
                         $query->orWhere('active', 1)
-                        ->orWhereIn('status', [
-                            StatusEnum::APPROVED->value,
-                            StatusEnum::ACTIVE->value
-                            ]))
+                        ->orWhereIn('status', StatusEnum::actives()))
                         ->exists()
                     ) {
                         throw new BadRequestHttpException('Cannot delete this variation because it has associated products.');
@@ -241,6 +253,7 @@ class EcommerceMedicationTypeService implements IEcommerceMedicationTypeService
         }
 
         // Proceed with deletion
-        return $medicationType->delete();
+        $medicationType->variations()->forceDelete();
+        return $medicationType->forceDelete();
     }
 }

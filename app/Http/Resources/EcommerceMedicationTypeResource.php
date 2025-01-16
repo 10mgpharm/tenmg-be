@@ -39,7 +39,7 @@ class EcommerceMedicationTypeResource extends JsonResource
                         'status' => $variation->status,
                         'statusComment' => $variation->status_comment,
                     ];
-                }),
+                })->toArray(),
             'created_at' => Carbon::parse($this->created_at)->format('M d, y h:i A'),
         ];
     }

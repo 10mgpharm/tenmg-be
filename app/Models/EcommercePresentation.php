@@ -70,4 +70,12 @@ class EcommercePresentation extends Model
             ->firstWhere('user_id', $user->id);
         return $query->where('business_id', $business?->id);
     }
+
+    /**
+     * Get the variations associated with the presentation.
+     */
+    public function variations()
+    {
+        return $this->hasMany(EcommerceMedicationVariation::class, 'ecommerce_presentation_id', 'id');
+    }
 }
