@@ -2,12 +2,16 @@
 
 namespace App\Http\Controllers\API\Admin;
 
+use App\Enums\StatusEnum;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\CreateUserRequest;
+use App\Http\Requests\Admin\DeleteUserRequest;
 use App\Http\Requests\Admin\ListUserRequest;
+use App\Http\Requests\Admin\UpdateUserStatusRequest;
 use App\Http\Resources\Admin\UserResource;
 use App\Models\User;
 use App\Services\Admin\UserService;
+use Illuminate\Http\Request;
 
 class UsersController extends Controller
 {
@@ -81,4 +85,47 @@ class UsersController extends Controller
             data: new UserResource($user)
         );
     }
+
+    /**
+     * Update the status of a user.
+     *
+     * This method allows an admin to update the status of a user.
+     * It validates the request, updates the user record, and returns a response.
+     *
+     * @param UpdateUserStatusRequest $request The validated request containing the new status.
+     * @param User $user The user whose status is being updated.
+     * @return JsonResponse The response indicating the result of the operation.
+     */
+    public function status(UpdateUserStatusRequest $request, User $user)
+    {
+        $validated = $request->validated();
+
+        $isUpdated = $user->update([
+            ...$validated,
+            'active' => $validated['status'] === StatusEnum::ACTIVE->value,
+        ]);
+
+        if (!$isUpdated) {
+            return $this->returnJsonResponse(
+                message: 'Unable to update the user status at this time. Please try again later.'
+            );
+        }
+
+        $status = strtolower($validated['status']);
+        
+        return $this->returnJsonResponse(
+            message: "User status has been successfully updated to {$status}.",
+            data: new UserResource($user->refresh())
+        );
+    }
+
+    public function destroy(DeleteUserRequest $request, User $user)
+    {
+        $user->delete();
+
+        return $this->returnJsonResponse(
+            message: 'User successfully deleted.',
+        );
+    }
+
 }

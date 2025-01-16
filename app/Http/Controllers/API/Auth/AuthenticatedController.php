@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\API\Auth;
 
+use App\Enums\StatusEnum;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Auth\AuthenticatedRequest;
 use App\Http\Requests\AuthProviderRequest;
@@ -9,6 +10,7 @@ use App\Services\Interfaces\IAuthService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
+use Illuminate\Validation\ValidationException;
 
 class AuthenticatedController extends Controller
 {
@@ -34,6 +36,30 @@ class AuthenticatedController extends Controller
             }
 
             $user = $request->user();
+
+            if ($user->getRawOriginal('status') === StatusEnum::INACTIVE->value) {
+                
+                return response()->json([
+                    'message' => 'Your account is inactive. Please contact support.',
+                    'status' => 'error',
+                ], Response::HTTP_UNPROCESSABLE_ENTITY);
+            }
+            
+            if ($user->getRawOriginal('status') === StatusEnum::SUSPENDED->value) {
+                
+                return response()->json([
+                    'message' => 'Your account is suspended. Please contact support.',
+                    'status' => 'error',
+                ], Response::HTTP_UNPROCESSABLE_ENTITY);
+            }
+            
+            if ($user->getRawOriginal('status') !== StatusEnum::ACTIVE->value) {
+                return response()->json([
+                    'message' => 'Your account is banned. Please contact support.',
+                    'status' => 'error',
+                ], Response::HTTP_UNPROCESSABLE_ENTITY);
+            }
+
             $tokenResult = $user->createToken('Full Access Token', ['full']);
 
             return $this->authService->returnAuthResponse(
