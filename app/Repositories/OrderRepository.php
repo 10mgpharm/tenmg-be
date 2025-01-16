@@ -4,6 +4,7 @@ namespace App\Repositories;
 
 use App\Models\EcommerceOrder;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class OrderRepository
 {
@@ -89,6 +90,24 @@ class OrderRepository
         try {
 
             $orderDetails = EcommerceOrder::find($id);
+            return $orderDetails;
+
+        } catch (\Throwable $th) {
+            throw $th;
+        }
+    }
+
+    function getOrderDetailsSuppliers($id)
+    {
+        try {
+            $user = Auth::user();
+            $businessId = $user->ownerBusinessType?->id ?: $user->businesses()->firstWhere('user_id', $user->id)?->id;
+
+            $orderDetails = EcommerceOrder::with(['orderDetails' => function($query) use ($businessId) {
+                $query->where('supplier_id', $businessId);
+            }])
+            ->findOrFail($id);
+
             return $orderDetails;
 
         } catch (\Throwable $th) {

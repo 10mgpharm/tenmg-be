@@ -28,6 +28,15 @@ class EcommerceOrderController extends Controller
         );
     }
 
+    function getOrderDetailsSuppliers($id)
+    {
+        $orderDetails = $this->ecommerceOrderService->getOrderDetailsSuppliers($id);
+
+        return $this->returnJsonResponse(
+            data: new EcommerceCartResource($orderDetails)
+        );
+    }
+
 
 
 }

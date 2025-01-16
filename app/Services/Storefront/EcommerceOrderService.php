@@ -37,4 +37,9 @@ class EcommerceOrderService
     {
         return $this->orderRepository->getOrderByStatusSuppliers($request);
     }
+
+    function getOrderDetailsSuppliers($id)
+    {
+        return $this->orderRepository->getOrderDetailsSuppliers($id);
+    }
 }
