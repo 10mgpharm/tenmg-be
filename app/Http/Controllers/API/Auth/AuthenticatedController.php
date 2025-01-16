@@ -38,21 +38,21 @@ class AuthenticatedController extends Controller
             $user = $request->user();
 
             if ($user->getRawOriginal('status') === StatusEnum::INACTIVE->value) {
-                
+
                 return response()->json([
                     'message' => 'Your account is inactive. Please contact support.',
                     'status' => 'error',
                 ], Response::HTTP_UNPROCESSABLE_ENTITY);
             }
-            
+
             if ($user->getRawOriginal('status') === StatusEnum::SUSPENDED->value) {
-                
+
                 return response()->json([
                     'message' => 'Your account is suspended. Please contact support.',
                     'status' => 'error',
                 ], Response::HTTP_UNPROCESSABLE_ENTITY);
             }
-            
+
             if ($user->getRawOriginal('status') !== StatusEnum::ACTIVE->value) {
                 return response()->json([
                     'message' => 'Your account is banned. Please contact support.',
