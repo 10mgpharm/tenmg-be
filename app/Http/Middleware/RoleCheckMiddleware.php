@@ -6,6 +6,7 @@ use App\Models\User;
 use Closure;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 use Symfony\Component\HttpFoundation\Response;
 
 class RoleCheckMiddleware
@@ -18,6 +19,7 @@ class RoleCheckMiddleware
     public function handle(Request $request, Closure $next, string $role): Response
     {
         $user = Auth::user();
+
         if (!$user instanceof User) {
             return response()->json([
                 'success' => false,
@@ -26,6 +28,8 @@ class RoleCheckMiddleware
         }
 
         $business = $user->ownerBusinessType ?: $user->businesses->first();
+
+        Log::alert($user->ownerBusinessType);
 
         if (strtolower($business->type) !== strtolower($role)) {
             return response()->json([
