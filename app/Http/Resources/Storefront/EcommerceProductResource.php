@@ -5,7 +5,9 @@ namespace App\Http\Resources\Storefront;
 use App\Enums\StatusEnum;
 use App\Http\Resources\EcommerceBrandResource;
 use App\Http\Resources\EcommerceCategoryResource;
+use App\Http\Resources\EcommerceMeasurementResource;
 use App\Http\Resources\EcommerceMedicationVariationResource;
+use App\Http\Resources\EcommercePresentationResource;
 use App\Models\EcommerceProduct;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
@@ -49,6 +51,8 @@ class EcommerceProductResource extends JsonResource
             'category' => new EcommerceCategoryResource($this->category),
             'brand' => new EcommerceBrandResource($this->brand),
             'variation' => new EcommerceMedicationVariationResource($this->variation),
+            'presentation' => new EcommercePresentationResource($this->presentation),
+            'measurement' => new EcommerceMeasurementResource($this->measurement),
             'productDetails' => $this->productDetails == null ? null : $this->productDetails->only('essential', 'starting_stock', 'current_stock', 'id', 'ecommerce_product_id'),
             'related_products' => $this->when(
                 $this->related_products,
