@@ -418,7 +418,8 @@ Route::prefix('v1')->group(function () {
             Route::post('/buy-now', [CartController::class, 'buyNow']);
             Route::post('/checkout', [OrdersController::class, 'checkout']);
             Route::prefix('orders')->name('orders.')->group(function () {
-                Route::get('/get-orders', [OrdersController::class, 'getOrders']);
+                Route::get('/', [OrdersController::class, 'getOrders']);
+                Route::get('/{id}', [OrdersController::class, 'getOrders']);
             });
         });
 
