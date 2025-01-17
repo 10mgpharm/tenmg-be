@@ -25,13 +25,19 @@ enum StatusEnum: string
     public static function inactives(): array
     {
         return [
-            self::REJECTED->value,
             self::INACTIVE->value,
-            self::SUSPENDED->value,
             self::ARCHIVED->value,
-            self::FLAGGED->value,
             self::DRAFT->value,
             self::PENDING->value,
+        ];
+    }
+
+    public static function flagged(): array
+    {
+        return [
+            self::REJECTED->value,
+            self::SUSPENDED->value,
+            self::FLAGGED->value
         ];
     }
 }
