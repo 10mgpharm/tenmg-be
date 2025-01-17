@@ -90,6 +90,9 @@ class OrderRepository
         try {
 
             $orderDetails = EcommerceOrder::find($id);
+            if (!$orderDetails) {
+                throw new \Exception("Order not found", 404);
+            }
             return $orderDetails;
 
         } catch (\Throwable $th) {

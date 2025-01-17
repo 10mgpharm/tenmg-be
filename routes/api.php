@@ -419,7 +419,7 @@ Route::prefix('v1')->group(function () {
             Route::post('/checkout', [OrdersController::class, 'checkout']);
             Route::prefix('orders')->name('orders.')->group(function () {
                 Route::get('/', [OrdersController::class, 'getOrders']);
-                Route::get('/{id}', [OrdersController::class, 'getOrders']);
+                Route::get('/{id}', [OrdersController::class, 'getOrderDetails']);
             });
         });
 
