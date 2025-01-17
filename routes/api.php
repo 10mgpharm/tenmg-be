@@ -11,6 +11,7 @@ use App\Http\Controllers\API\Admin\CarouselImageController;
 use App\Http\Controllers\API\Admin\EcommerceBrandController as AdminEcommerceBrandController;
 use App\Http\Controllers\API\Admin\EcommerceCategoryController as AdminEcommerceCategoryController;
 use App\Http\Controllers\API\Admin\EcommerceMeasurementController as AdminEcommerceMeasurementController;
+use App\Http\Controllers\API\Admin\EcommerceOrderController;
 use App\Http\Controllers\API\Admin\EcommercePresentationController as AdminEcommercePresentationController;
 use App\Http\Controllers\API\Admin\EcommerceProductController as AdminEcommerceProductController;
 use App\Http\Controllers\API\Admin\FaqController;
@@ -37,7 +38,6 @@ use App\Http\Controllers\API\Storefront\StorefrontController;
 use App\Http\Controllers\API\Supplier\EcommerceProductController as SupplierEcommerceProductController;
 use App\Http\Controllers\API\Webhooks\PaystackWebhookController;
 use App\Http\Controllers\BusinessSettingController;
-use App\Http\Controllers\API\Admin\EcommerceOrderController;
 use App\Http\Controllers\InviteController;
 use App\Http\Controllers\Supplier\DashboardController as SupplierDashboardController;
 use App\Http\Controllers\Supplier\EcommerceBrandController as SupplierEcommerceBrandController;
@@ -47,7 +47,6 @@ use App\Http\Controllers\Supplier\EcommerceMedicationTypeController as SupplierE
 use App\Http\Controllers\Supplier\EcommerceOrderController as SupplierEcommerceOrderController;
 use App\Http\Controllers\Supplier\EcommercePresentationController as SupplierEcommercePresentationController;
 use Illuminate\Support\Facades\Route;
-
 
 Route::prefix('v1')->group(function () {
 
@@ -150,7 +149,6 @@ Route::prefix('v1')->group(function () {
             Route::post('products', [SupplierEcommerceProductController::class, 'store']);
             Route::match(['PUT', 'PATCH', 'POST'], 'products/{product}', [SupplierEcommerceProductController::class, 'update']);
             Route::delete('products/{product}', [SupplierEcommerceProductController::class, 'destroy']);
-
 
             Route::get('brands', SupplierEcommerceBrandController::class);
             Route::get('categories', SupplierEcommerceCategoryController::class);
@@ -352,6 +350,10 @@ Route::prefix('v1')->group(function () {
 
                 Route::apiResource('notification', NotificationController::class);
                 Route::apiResource('categories', AdminEcommerceCategoryController::class);
+
+                Route::get('measurements/dropdown', [AdminEcommerceMeasurementController::class, 'getDropdown']);
+                Route::get('presentations/dropdown', [AdminEcommercePresentationController::class, 'getDropdown']);
+
                 Route::get('measurements/search', [AdminEcommerceMeasurementController::class, 'search']);
                 Route::apiResource('measurements', AdminEcommerceMeasurementController::class);
                 Route::get('presentations/search', [AdminEcommercePresentationController::class, 'search']);

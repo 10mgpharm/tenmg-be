@@ -136,11 +136,10 @@ class EcommercePresentationController extends Controller
             );
     }
 
-
     /**
      * Search and filter EcommercePresentations based on the provided criteria.
      *
-     * @param ListEcommercePresentationRequest $request The incoming request containing search, filter, and pagination parameters.
+     * @param  ListEcommercePresentationRequest  $request  The incoming request containing search, filter, and pagination parameters.
      * @return JsonResponse A JSON response with the paginated list of presentations.
      */
     public function search(ListEcommercePresentationRequest $request): JsonResponse
@@ -179,4 +178,15 @@ class EcommercePresentationController extends Controller
         );
     }
 
+    public function getDropdown()
+    {
+        $presentations = EcommercePresentation::where('active', 1)
+            ->where('status', StatusEnum::APPROVED->value)
+            ->get();
+
+        return $this->returnJsonResponse(
+            message: 'Presentations successfully fetched.',
+            data: $presentations,
+        );
+    }
 }
