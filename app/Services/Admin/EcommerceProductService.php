@@ -295,8 +295,10 @@ class EcommerceProductService implements IEcommerceProductService
                 // Ensure variation first or update it
                 if (!empty($validated['weight']) && !empty($validated['strength_value'])) {
 
-                    $variation = EcommerceMedicationVariation::firstOrUpdate(
-                        array_filter([ // Include only non-empty keys
+                    $variation = EcommerceMedicationVariation::find($product->ecommerce_variation_id);
+
+                    if($variation){
+                        $updated = array_filter([ // Include only non-empty keys
                             'weight' => $validated['weight'],
                             'strength_value' => $validated['strength_value'],
                             'ecommerce_presentation_id' => $presentation->id ?? null,
@@ -305,15 +307,16 @@ class EcommerceProductService implements IEcommerceProductService
                             'package_per_roll' => $validated['package_per_roll'] ?? null,
                             'ecommerce_product_id' => $product->id,
                             'business_id' => $validated['business_id'],
-                        ], fn($each) => $each !== null && $each !== false),
-                        [
+                        ], fn($each) => $each !== null && $each !== false);
+                    
+                        // Update the variation attributes
+                        $variation->update([
+                            ...$updated,
                             'updated_by_id' => $user->id,
                             'status' => $user->hasRole('admin') ? StatusEnum::ACTIVE->value : StatusEnum::APPROVED->value,
                             'active' => true,
-                        ]
-                    );
-
-                    $validated['ecommerce_variation_id'] = $variation->id;
+                        ]);
+                    }
                 }
 
 
