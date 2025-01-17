@@ -90,6 +90,9 @@ class OrderRepository
         try {
 
             $orderDetails = EcommerceOrder::find($id);
+            if (!$orderDetails) {
+                throw new \Exception("Order not found", 404);
+            }
             return $orderDetails;
 
         } catch (\Throwable $th) {
@@ -109,6 +112,29 @@ class OrderRepository
             ->findOrFail($id);
 
             return $orderDetails;
+
+        } catch (\Throwable $th) {
+            throw $th;
+        }
+    }
+
+    function getOrders(Request $request)
+    {
+        try {
+
+            $query = EcommerceOrder::query();
+
+            $status = $request->input('status');
+
+            if (strtolower($request->input('status')) != "all") {
+                $query->when(isset($status), function ($query) use ($status) {
+                    $query->where("status",'like', "%{$status}%");
+                });
+            }
+
+            $query->where("status", '!=', 'CART')->where("customer_id", Auth::id())->orderBy("created_at", "desc");
+
+            return $query->paginate(20);
 
         } catch (\Throwable $th) {
             throw $th;

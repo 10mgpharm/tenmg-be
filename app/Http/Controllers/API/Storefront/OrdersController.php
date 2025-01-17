@@ -4,6 +4,7 @@ namespace App\Http\Controllers\API\Storefront;
 
 use App\Http\Controllers\Controller;
 use App\Http\Resources\EcommerceCartResource;
+use App\Models\EcommerceOrder;
 use App\Services\Storefront\EcommerceOrderService;
 use Illuminate\Http\Request;
 
@@ -26,6 +27,18 @@ class OrdersController extends Controller
         ]);
         $order = $this->ecommerceOrderService->checkout($request);
 
+        return $this->returnJsonResponse(message: 'Success', data: new EcommerceCartResource($order));
+    }
+
+    function getOrders(Request $request)
+    {
+        $order = $this->ecommerceOrderService->getOrders($request);
+        return $this->returnJsonResponse(message: 'Success', data: EcommerceCartResource::collection($order));
+    }
+
+    function getOrderDetails($id)
+    {
+        $order = $this->ecommerceOrderService->getOrderDetails($id);
         return $this->returnJsonResponse(message: 'Success', data: new EcommerceCartResource($order));
     }
 }

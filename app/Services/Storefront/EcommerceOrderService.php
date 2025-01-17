@@ -42,4 +42,14 @@ class EcommerceOrderService
     {
         return $this->orderRepository->getOrderDetailsSuppliers($id);
     }
+
+    function getOrders(Request $request)
+    {
+        return $this->orderRepository->getOrders($request);
+    }
+
+    function getOrderDetails($id)
+    {
+        return $this->orderRepository->getOrderDetails($id);
+    }
 }
