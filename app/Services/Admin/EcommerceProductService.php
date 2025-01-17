@@ -406,7 +406,6 @@ class EcommerceProductService implements IEcommerceProductService
                         )->when(
                             $status === 'IN STOCK',
                             fn($q) => $q->orWhereColumn('quantity', '>', 'low_stock_level')
-                                        ->whereColumn('quantity', '!=', 'out_stock_level')
                         );
                     }
                 });
