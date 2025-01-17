@@ -33,7 +33,7 @@ class NotificationSubscriptionService implements INotificationSubscriptionServic
         ->with(['subscribers' => function ($query) use ($user) {
             $query->where('user_id', $user->id);
         }])
-        ->latest()
+        ->latest('id')
         ->paginate(request()->has('perPage') ? request()->input('perPage') : 10)
             ->withQueryString()
             ->through(fn(Notification $item) => NotificationResource::make($item));

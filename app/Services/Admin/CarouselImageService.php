@@ -27,7 +27,7 @@ class CarouselImageService implements ICarouselImageService
                 ->orWhere('description', 'LIKE', '%'.$name.'%');
         }
 
-        return $query->latest()->paginate();
+        return $query->latest('id')->paginate();
     }
 
     /**
@@ -112,6 +112,6 @@ class CarouselImageService implements ICarouselImageService
                 ->orWhere('description', 'LIKE', '%'.$name.'%');
         }
 
-        return $query->latest()->paginate();
+        return $query->latest('id')->paginate();
     }
 }

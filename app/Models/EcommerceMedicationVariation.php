@@ -63,7 +63,7 @@ class EcommerceMedicationVariation extends Model
      */
     public function products()
     {
-        return $this->hasMany(EcommerceProduct::class, 'ecommerce_variation_id')->latest();
+        return $this->hasMany(EcommerceProduct::class, 'ecommerce_variation_id')->latest('id');
     }
 
     /**

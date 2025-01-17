@@ -52,7 +52,7 @@ class UsersController extends Controller
             $query->whereIn('status', $status);
         }
     
-        $users = $query->whereHas('ownerBusinessType')->latest()->paginate();
+        $users = $query->whereHas('ownerBusinessType')->latest('id')->paginate();
 
         return $this->returnJsonResponse(
             message: 'Users successfully fetched.',

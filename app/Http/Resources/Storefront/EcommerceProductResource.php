@@ -61,7 +61,7 @@ class EcommerceProductResource extends JsonResource
                                 ->orWhere('ecommerce_presentation_id', $this->ecommerce_presentation_id);
                         })
                         ->limit(10)
-                        ->latest()
+                        ->latest('id')
                         ->get()
                 ),
             )

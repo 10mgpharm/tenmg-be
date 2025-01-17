@@ -62,7 +62,7 @@ class Business extends Model
      */
     public function businessUsers()
     {
-        return $this->hasMany(BusinessUser::class);
+        return $this->hasMany(BusinessUser::class)->latest('id');
     }
 
     /**
@@ -70,7 +70,7 @@ class Business extends Model
      */
     public function invites()
     {
-        return $this->hasMany(Invite::class);
+        return $this->hasMany(Invite::class)->latest('id');
     }
 
     public function logo()
