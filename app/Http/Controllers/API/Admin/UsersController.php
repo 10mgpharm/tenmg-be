@@ -40,7 +40,8 @@ class UsersController extends Controller
         }
 
         if ($user = $request->input('user')) {
-            $query->where('name', 'like', '%' . $user . '%');
+            $query->where(fn($q) => $q->orWhere('name', 'like', '%' . $user . '%')
+                ->orWhere('email', 'like', '%' . $user . '%'));
         }
 
         if (!is_null($request->input('active'))) {
