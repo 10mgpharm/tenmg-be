@@ -96,12 +96,7 @@ class UpdateEcommerceProductRequest extends FormRequest
             'expired_at' => ['sometimes', 'nullable', 'date'],
 
             'status' => ['sometimes',  'nullable', new Enum(StatusEnum::class),],
-            'statusComment' => ['required_if:status,' . implode(',', [
-                StatusEnum::REJECTED->value,
-                StatusEnum::INACTIVE->value,
-                StatusEnum::SUSPENDED->value,
-                StatusEnum::FLAGGED->value,
-            ]),],
+            'statusComment' => ['sometimes', 'nullable', 'string',],
             'active' => [
                 'sometimes',
                 'boolean',
