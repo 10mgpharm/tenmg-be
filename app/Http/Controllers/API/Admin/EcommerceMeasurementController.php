@@ -132,7 +132,7 @@ class EcommerceMeasurementController extends Controller
     /**
      * Search and filter EcommerceMeasurements based on the provided criteria.
      *
-     * @param ListEcommerceMeasurementRequest $request The incoming request containing search, filter, and pagination parameters.
+     * @param  ListEcommerceMeasurementRequest  $request  The incoming request containing search, filter, and pagination parameters.
      * @return JsonResponse A JSON response with the paginated list of presentations.
      */
     public function search(ListEcommerceMeasurementRequest $request): JsonResponse
@@ -168,6 +168,18 @@ class EcommerceMeasurementController extends Controller
         return $this->returnJsonResponse(
             message: 'Measurement successfully fetched.',
             data: $measurement
+        );
+    }
+
+    public function getDropdown()
+    {
+        $measurement = EcommerceMeasurement::where('active', 1)
+            ->where('status', StatusEnum::APPROVED->value)
+            ->get();
+
+        return $this->returnJsonResponse(
+            message: 'Measurements successfully fetched.',
+            data: $measurement,
         );
     }
 }
