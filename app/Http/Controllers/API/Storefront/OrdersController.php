@@ -28,4 +28,10 @@ class OrdersController extends Controller
 
         return $this->returnJsonResponse(message: 'Success', data: new EcommerceCartResource($order));
     }
+
+    function getOrders(Request $request)
+    {
+        $order = $this->ecommerceOrderService->getOrders($request);
+        return $this->returnJsonResponse(message: 'Success', data: EcommerceCartResource::collection($order));
+    }
 }
