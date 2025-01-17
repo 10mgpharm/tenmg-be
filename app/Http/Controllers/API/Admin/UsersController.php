@@ -46,7 +46,12 @@ class UsersController extends Controller
         if (!is_null($request->input('active'))) {
             $query->where('active', $request->input('active'));
         }
-
+        
+        if($status = $request->input('status')){
+            $status = is_array($status) ? array_unique(array_map('trim', array_map('strtoupper', $status))) : array_unique(array_map('trim', array_map('strtoupper', explode(",", $status))));
+            $query->whereIn('status', $status);
+        }
+    
         $users = $query->whereHas('ownerBusinessType')->latest()->paginate();
 
         return $this->returnJsonResponse(
