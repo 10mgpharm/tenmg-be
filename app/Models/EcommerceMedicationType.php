@@ -75,7 +75,7 @@ class EcommerceMedicationType extends Model
      */
     public function products()
     {
-        return $this->hasMany(EcommerceProduct::class)->latest();
+        return $this->hasMany(EcommerceProduct::class)->latest('id');
     }
 
     /**
@@ -83,7 +83,7 @@ class EcommerceMedicationType extends Model
      */
     public function variations(): HasMany
     {
-        return $this->hasMany(EcommerceMedicationVariation::class, 'ecommerce_medication_type_id', 'id');
+        return $this->hasMany(EcommerceMedicationVariation::class, 'ecommerce_medication_type_id', 'id')->latest('id');
     }
 
     /**

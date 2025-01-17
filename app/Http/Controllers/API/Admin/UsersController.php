@@ -40,14 +40,20 @@ class UsersController extends Controller
         }
 
         if ($user = $request->input('user')) {
-            $query->where('name', 'like', '%' . $user . '%');
+            $query->where(fn($q) => $q->orWhere('name', 'like', '%' . $user . '%')
+                ->orWhere('email', 'like', '%' . $user . '%'));
         }
 
         if (!is_null($request->input('active'))) {
             $query->where('active', $request->input('active'));
         }
-
-        $users = $query->whereHas('ownerBusinessType')->latest()->paginate();
+        
+        if($status = $request->input('status')){
+            $status = is_array($status) ? array_unique(array_map('trim', array_map('strtoupper', $status))) : array_unique(array_map('trim', array_map('strtoupper', explode(",", $status))));
+            $query->whereIn('status', $status);
+        }
+    
+        $users = $query->whereHas('ownerBusinessType')->latest('id')->paginate();
 
         return $this->returnJsonResponse(
             message: 'Users successfully fetched.',

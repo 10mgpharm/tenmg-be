@@ -26,7 +26,7 @@ class StorefrontController extends Controller
         $categories = EcommerceCategory::with([
             'products' => fn($query) => $query->where('active', 1)
                 ->whereIn('status', StatusEnum::actives())
-                ->latest()
+                ->latest('id')
                 ->limit(15)
         ])->where('active', 1)
             ->whereIn('status', StatusEnum::actives())

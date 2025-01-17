@@ -44,7 +44,7 @@ class Customer extends Model
 
     public function lastEvaluationHistory()
     {
-        return $this->hasOne(CreditTxnHistoryEvaluation::class)->latest();
+        return $this->hasOne(CreditTxnHistoryEvaluation::class)->latest('id');
     }
 
     public static function boot()
@@ -57,6 +57,6 @@ class Customer extends Model
 
     public function creditScore()
     {
-        return $this->hasOne(CreditScore::class, 'id', 'credit_score_id')->latest();
+        return $this->hasOne(CreditScore::class, 'id', 'credit_score_id')->latest('id');
     }
 }

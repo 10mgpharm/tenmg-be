@@ -56,7 +56,7 @@ class EcommercePresentation extends Model
      */
     public function products()
     {
-        return $this->hasMany(EcommerceProduct::class)->latest();
+        return $this->hasMany(EcommerceProduct::class)->latest('id');
     }
 
     /**
@@ -76,6 +76,6 @@ class EcommercePresentation extends Model
      */
     public function variations()
     {
-        return $this->hasMany(EcommerceMedicationVariation::class, 'ecommerce_presentation_id', 'id');
+        return $this->hasMany(EcommerceMedicationVariation::class, 'ecommerce_presentation_id', 'id')->latest('id');
     }
 }

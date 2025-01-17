@@ -28,7 +28,7 @@ class FaqService implements IFaqService
             $query->where('name', 'LIKE', '%'.$answer.'%');
         }
 
-        return $query->latest()->paginate();
+        return $query->latest('id')->paginate();
     }
 
     /**
@@ -78,6 +78,6 @@ class FaqService implements IFaqService
             $query->where('name', 'LIKE', '%'.$answer.'%');
         }
 
-        return $query->latest()->paginate();
+        return $query->latest('id')->paginate();
     }
 }
