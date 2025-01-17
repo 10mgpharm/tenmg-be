@@ -28,13 +28,17 @@ class EcommerceMeasurementService implements IEcommerceMeasurementService
                         ->firstWhere('user_id', $user->id)?->id;
                 }
 
+                $validated['status'] = $validated['status'] ?? (isset($validated['active']) && $validated['active'] === false 
+                ? StatusEnum::INACTIVE->value 
+                : StatusEnum::ACTIVE->value);
+
                 return EcommerceMeasurement::create(
                     [
-                        'name' => $validated['name'],
-                        'business_id' => $validated['business_id'],
+                        ...$validated,
+                        'active' => in_array($validated['status'], StatusEnum::actives()) 
+                            ? ($validated['active'] ?? true) 
+                            : false,
                         'created_by_id' => $user->id,
-                        'status' => $user->hasRole('admin') ? StatusEnum::ACTIVE->value : StatusEnum::APPROVED->value,
-                        'active' => true,
                     ]
                 );
             });
@@ -50,10 +54,20 @@ class EcommerceMeasurementService implements IEcommerceMeasurementService
     {
         try {
             return DB::transaction(function () use ($validated, $user, $measurement) {
+
+                $validated['status'] = isset($validated['active']) && $validated['active'] === true 
+                ? (isset($validated['status']) && in_array($validated['status'], StatusEnum::actives()) 
+                    ? $validated['status'] 
+                    : $validated['status'] ?? StatusEnum::ACTIVE->value) 
+                : ($validated['status'] ?? ($measurement->status ?? StatusEnum::INACTIVE->value));
+
+            
+            $validated['active'] = (in_array($validated['status'], StatusEnum::actives()) )
+                ? ($validated['active'] ?? true )
+                : (false);
+
                 return $measurement->update([
                     ...$validated,
-                    'status' => $validated['status'] ?? $measurement->status,
-                    'active' => in_array($validated['status'] ?? $measurement->status, [StatusEnum::APPROVED->value, StatusEnum::ACTIVE->value]) ? ($validated['active'] ?? $measurement->active) : false,
                     'updated_by_id' => $user->id,
                 ]);
             });
@@ -71,7 +85,10 @@ class EcommerceMeasurementService implements IEcommerceMeasurementService
         if ($measurement->products()->exists()) {
             return false; // Prevent deletion
         }
+        if ($measurement->variations()->exists()) {
+            return false; // Prevent deletion
+        }
 
-        return $measurement->delete();
+        return $measurement->forceDelete();
     }
 }

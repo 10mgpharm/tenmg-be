@@ -3,7 +3,9 @@
 namespace App\Http\Resources\Storefront;
 
 use App\Enums\StatusEnum;
+use App\Http\Resources\EcommerceBrandResource;
 use App\Http\Resources\EcommerceCategoryResource;
+use App\Http\Resources\EcommerceMedicationVariationResource;
 use App\Models\EcommerceProduct;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
@@ -22,16 +24,9 @@ class EcommerceProductResource extends JsonResource
             'name' => $this->name,
             'slug' => $this->slug,
             'description' => $this->description,
-            'quantity' => $this->quantity,
-            'actualPrice' => $this->actual_price,
-            'discountPrice' => $this->discount_price,
-            'minDeliveryDuration' => $this->min_delivery_duration,
-            'maxDeliveryDuration' => $this->max_delivery_duration,
-            'thumbnailUrl' => $this->thumbnailUrl,
-            'expiredAt' => $this->expired_at,
-            'productDetails' => $this->productDetails->only('essential', 'starting_stock', 'current_stock'),
+            'active' => $this->active,
             'status' => match (true) {
-                in_array($this->status, [StatusEnum::ACTIVE->value, StatusEnum::APPROVED->value]) => StatusEnum::ACTIVE->value,
+                in_array($this->status, StatusEnum::actives()) => StatusEnum::ACTIVE->value,
                 in_array($this->status, array_column(StatusEnum::cases(), 'value'), true) => $this->status,
                 default => 'PENDING',
             },
@@ -40,8 +35,21 @@ class EcommerceProductResource extends JsonResource
                 $this->quantity == $this->low_stock_level => 'LOW STOCK',
                 default => 'IN STOCK',
             },
+            'weight' => $this->weight,
+            'thumbnailFile' => $this->thumbnailFile?->url,
+            'quantity' => $this->quantity,
+            'actualPrice' => $this->actual_price,
+            'discountPrice' => $this->discount_price,
+            'lowStockLevel' => $this->low_stock_level,
+            'outStockLevel' => $this->out_stock_level,
+            'expiredAt' => $this->expired_at,
+            'commission' => $this->commission,
             'comment' => $this->comment,
+            'company' => (request()->user() && request()->user()->hasRole('admin')) ? $this->business?->name ?? '10MG FAMILY PHARMACY' : null,
             'category' => new EcommerceCategoryResource($this->category),
+            'brand' => new EcommerceBrandResource($this->brand),
+            'variation' => new EcommerceMedicationVariationResource($this->variation),
+            'productDetails' => $this->productDetails == null ? null : $this->productDetails->only('essential', 'starting_stock', 'current_stock', 'id', 'ecommerce_product_id'),
             'related_products' => $this->when(
                 $this->related_products,
                 EcommerceProductResource::collection(

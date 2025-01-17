@@ -30,7 +30,7 @@ class EcommerceMeasurementController extends Controller
 
         // Build query for fetching ecommerce measurements
         $query = EcommerceMeasurement::where('business_id', $business?->id)
-            ->orWhere(fn($query) => $query->whereNull('business_id')->where('active', 1)->whereIn('status', [StatusEnum::ACTIVE->value, StatusEnum::APPROVED->value]) )
+            ->orWhere(fn($query) => $query->whereNull('business_id')->where('active', 1)->whereIn('status',  StatusEnum::actives()) )
             ->when(
                 $request->input('search'),
                 fn($query, $search) => $query->where('name', 'like', "%{$search}%")

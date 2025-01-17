@@ -90,6 +90,10 @@ class StoreEcommerceProductRequest extends FormRequest
             'expired_at' => ['required', 'date', 'after:today'],
 
             'status' => ['nullable', 'sometimes', new Enum(StatusEnum::class)],
+            'active' => [
+                'sometimes',
+                'boolean',
+            ],
 
             // 'min_delivery_duration' => ['required', 'integer', 'min:0'],
             // 'max_delivery_duration' => ['required', 'integer', 'min:0'],

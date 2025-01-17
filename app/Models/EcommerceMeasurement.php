@@ -69,4 +69,12 @@ class EcommerceMeasurement extends Model
             ->firstWhere('user_id', $user->id);
         return $query->where('business_id', $business?->id);
     }
+
+    /**
+     * Get the varaitions associated with the measurement
+     */
+    public function variations()
+    {
+        return $this->hasMany(EcommerceMedicationVariation::class, 'ecommerce_medication_type_id', 'id');
+    }
 }

@@ -93,6 +93,11 @@ class StoreEcommerceProductRequest extends FormRequest
             'expired_at' => ['required', 'date', 'after:today'],
 
             'status' => ['nullable', new Enum(StatusEnum::class),],
+            'active' => [
+                'sometimes',
+                'boolean',
+            ],
+
 
             // ProductDetail model attributes
             'essential' => ['nullable', 'sometimes', 'string', 'min:3'],

@@ -56,9 +56,9 @@ class EcommerceProductService implements IEcommerceProductService
 
                 // Ensure category exists or create it
                 $category = EcommerceCategory::firstOrCreate(
-                    ['name' => $validated['category_name']],
+                    [ 'slug' => Str::slug($validated['category_name'])],
                     [
-                        'slug' => Str::slug($validated['category_name']),
+                        'name' => $validated['category_name'],
                         'business_id' => $validated['business_id'],
                         'created_by_id' => $user->id,
                         'status' => $user->hasRole('admin') ? StatusEnum::ACTIVE->value : StatusEnum::PENDING->value,
@@ -112,23 +112,16 @@ class EcommerceProductService implements IEcommerceProductService
                     ]
                 );
 
-                // Ensure variation exists or create it
-                $variation = EcommerceMedicationVariation::firstOrCreate(
-                    [
-                        'weight' => $validated['weight'] ?? null,
-                        'strength_value' => $validated['strength_value'],
-                        'ecommerce_presentation_id' => $presentation->id,
-                        'ecommerce_medication_type_id' => $medicationType->id,
-                        'ecommerce_measurement_id' => $measurement->id,
-                        'business_id' => $validated['business_id'],
-                        'package_per_roll' => $validated['package_per_roll'] ?? null,
-                    ],
-                    [
-                        'created_by_id' => $user->id,
-                        'status' => $user->hasRole('admin') ? StatusEnum::ACTIVE->value : StatusEnum::APPROVED->value,
-                        'active' => $user->hasRole('admin'),
-                    ]
-                );
+                $validated['status'] = isset($validated['active']) && $validated['active'] === true 
+                ? (isset($validated['status']) && in_array($validated['status'], StatusEnum::actives()) 
+                    ? $validated['status'] 
+                    : $validated['status'] ?? StatusEnum::ACTIVE->value) 
+                : ($validated['status'] ?? ($category->status ?? StatusEnum::INACTIVE->value));
+
+                $validated['active'] = (in_array($validated['status'], StatusEnum::actives()))
+                ? ($validated['active'] ?? true )
+                : (false);
+
 
                 $product = $user->products()->create([
                     ...array_filter($validated),
@@ -138,7 +131,7 @@ class EcommerceProductService implements IEcommerceProductService
                     'ecommerce_category_id' => $category->id,
                     'ecommerce_brand_id' => $brand->id,
                     'ecommerce_medication_type_id' => $medicationType->id,
-                    'ecommerce_variation_id' => $variation->id,
+                    // 'ecommerce_variation_id' => $variation?->id,
                     'ecommerce_presentation_id' => $presentation->id,
                     'ecommerce_measurement_id' => $measurement->id,
 
@@ -150,11 +143,27 @@ class EcommerceProductService implements IEcommerceProductService
                     'slug' => UtilityHelper::generateSlug('PRD'),
 
 
-                    'status' => $validated['status'] ?? StatusEnum::INACTIVE->value,
-                    'active' => false,
-
                 ]);
 
+                 // make a copy of the variation
+                $variation = EcommerceMedicationVariation::create(
+                    [
+                        'weight' => $validated['weight'] ?? null,
+                        'strength_value' => $validated['strength_value'],
+                        'ecommerce_presentation_id' => $presentation->id,
+                        'ecommerce_medication_type_id' => $medicationType->id,
+                        'ecommerce_measurement_id' => $measurement->id,
+                        'package_per_roll' => $validated['package_per_roll'] ?? null,
+                        'ecommerce_product_id' => $product->id,
+                        'business_id' => $validated['business_id'],
+
+                        'created_by_id' => $user->id,
+                        'status' => $user->hasRole('admin') ? StatusEnum::ACTIVE->value : StatusEnum::APPROVED->value,
+                        'active' => $user->hasRole('admin'),
+                    ]
+                );
+
+                $product->update(['ecommerce_variation_id' => $variation->id]);
                 $product->productDetails()->create($validated);
 
                 // Save uploaded file
@@ -283,19 +292,21 @@ class EcommerceProductService implements IEcommerceProductService
                 }
 
 
-                // Ensure variation exists or create it
+                // Ensure variation first or update it
                 if (!empty($validated['weight']) && !empty($validated['strength_value'])) {
 
-                    $variation = EcommerceMedicationVariation::firstOrCreate(
+                    $variation = EcommerceMedicationVariation::firstOrUpdate(
                         array_filter([ // Include only non-empty keys
                             'weight' => $validated['weight'],
                             'strength_value' => $validated['strength_value'],
                             'ecommerce_presentation_id' => $presentation->id ?? null,
                             'ecommerce_medication_type_id' => $medicationType->id ?? null,
                             'ecommerce_measurement_id' => $measurement->id ?? null,
+                            'package_per_roll' => $validated['package_per_roll'] ?? null,
+                            'ecommerce_product_id' => $product->id,
+                            'business_id' => $validated['business_id'],
                         ], fn($each) => $each !== null && $each !== false),
                         [
-                            'business_id' => $validated['business_id'],
                             'updated_by_id' => $user->id,
                             'status' => $user->hasRole('admin') ? StatusEnum::ACTIVE->value : StatusEnum::APPROVED->value,
                             'active' => true,
@@ -318,8 +329,18 @@ class EcommerceProductService implements IEcommerceProductService
                     $validated['thumbnail_file_id'] = $created->id;
                 }
 
+                $validated['status'] = isset($validated['active']) && $validated['active'] === true 
+                ? (isset($validated['status']) && in_array($validated['status'], StatusEnum::actives()) 
+                    ? $validated['status'] 
+                    : $validated['status'] ?? StatusEnum::ACTIVE->value) 
+                : ($validated['status'] ?? ($category->status ?? StatusEnum::INACTIVE->value));
+
+                $validated['active'] = (in_array($validated['status'], StatusEnum::actives()))
+                ? ($validated['active'] ?? true )
+                : (false);
+
                 $updateProduct = $product->update([
-                    ...array_filter($validated),
+                    ...array_filter($validated, fn($each) => $each !== null),
                     'name' => $validated['product_name'] ?? $product->name,
                     'description' => $validated['product_description'] ?? $product->description,
                     'updated_by_id' => $user->id,
