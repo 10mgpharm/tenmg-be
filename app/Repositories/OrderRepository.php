@@ -115,4 +115,27 @@ class OrderRepository
         }
     }
 
+    function getOrders(Request $request)
+    {
+        try {
+
+            $query = EcommerceOrder::query();
+
+            $status = $request->input('status');
+
+            if (strtolower($request->input('status')) != "all") {
+                $query->when(isset($status), function ($query) use ($status) {
+                    $query->where("status",'like', "%{$status}%");
+                });
+            }
+
+            $query->where("status", '!=', 'CART')->where("customer_id", Auth::id())->orderBy("created_at", "desc");
+
+            return $query->paginate(20);
+
+        } catch (\Throwable $th) {
+            throw $th;
+        }
+    }
+
 }
