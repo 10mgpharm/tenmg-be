@@ -129,7 +129,7 @@ class BusinessUserSeeder extends Seeder
                     'password' => bcrypt('password'),
                 ]
             );
-            $supplierOwner->assignRole($vendorRole);
+            $vendorOwner->assignRole($vendorRole);
 
             $vendorBusiness = Business::firstOrCreate(
                 ['code' => "VENDOR00$i"],
