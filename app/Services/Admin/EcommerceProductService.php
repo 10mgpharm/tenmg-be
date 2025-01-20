@@ -62,7 +62,7 @@ class EcommerceProductService implements IEcommerceProductService
                         'business_id' => $validated['business_id'],
                         'created_by_id' => $user->id,
                         'status' => $user->hasRole('admin') ? StatusEnum::ACTIVE->value : StatusEnum::PENDING->value,
-                        'active' => $user->hasRole('admin'),
+                        'active' => true,
                     ]
                 );
 
@@ -74,7 +74,7 @@ class EcommerceProductService implements IEcommerceProductService
                         'business_id' => $validated['business_id'],
                         'created_by_id' => $user->id,
                         'status' => $user->hasRole('admin') ? StatusEnum::ACTIVE->value : StatusEnum::PENDING->value,
-                        'active' => $user->hasRole('admin'),
+                        'active' => true,
                     ]
                 );
 
@@ -86,7 +86,7 @@ class EcommerceProductService implements IEcommerceProductService
                         'business_id' => $validated['business_id'],
                         'created_by_id' => $user->id,
                         'status' => $user->hasRole('admin') ? StatusEnum::ACTIVE->value : StatusEnum::PENDING->value,
-                        'active' => $user->hasRole('admin'),
+                        'active' => true,
                     ]
                 );
 
@@ -97,7 +97,7 @@ class EcommerceProductService implements IEcommerceProductService
                         'business_id' => $validated['business_id'],
                         'created_by_id' => $user->id,
                         'status' => $user->hasRole('admin') ? StatusEnum::ACTIVE->value : StatusEnum::PENDING->value,
-                        'active' => $user->hasRole('admin'),
+                        'active' => true,
                     ]
                 );
 
@@ -108,7 +108,7 @@ class EcommerceProductService implements IEcommerceProductService
                         'business_id' => $validated['business_id'],
                         'created_by_id' => $user->id,
                         'status' => $user->hasRole('admin') ? StatusEnum::ACTIVE->value : StatusEnum::PENDING->value,
-                        'active' => $user->hasRole('admin'),
+                        'active' => true,
                     ]
                 );
 
@@ -159,7 +159,7 @@ class EcommerceProductService implements IEcommerceProductService
 
                         'created_by_id' => $user->id,
                         'status' => $user->hasRole('admin') ? StatusEnum::ACTIVE->value : StatusEnum::APPROVED->value,
-                        'active' => $user->hasRole('admin'),
+                        'active' => true,
                     ]
                 );
 
@@ -380,8 +380,14 @@ class EcommerceProductService implements IEcommerceProductService
             // Filter by product status (e.g., ACTIVE, INACTIVE)
             ->when(
                 $request->input('status'),
-                fn($query, $status) => is_array($status) ? $query->whereIn('status', array_unique(array_map('trim', array_map('strtoupper', $status)))) : $query->whereIn('status', array_unique(array_map('trim', array_map('strtoupper', explode(",", $status)))))
+                fn($query, $status) => $query->whereIn(
+                    'status', 
+                    is_array($status)
+                        ? array_unique(array_merge(...array_map(fn($s) => StatusEnum::mapper(trim($s)), $status)))
+                        : array_unique(array_merge(...array_map(fn($s) => StatusEnum::mapper(trim($s)), explode(",", $status))))
+                )
             )
+            
             // Filter by active status (active/inactive mapped to 1/0)
             ->when(
                 $request->input('active'),
