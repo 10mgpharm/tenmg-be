@@ -127,7 +127,7 @@ class EcommerceProductController extends Controller
      */
     public function destroy(DeleteEcommerceProductRequest $request, EcommerceProduct $product)
     {
-        $product->delete();
+        $product->forceDelete();
 
         return $this->returnJsonResponse(
             message: 'Product successfully deleted.',

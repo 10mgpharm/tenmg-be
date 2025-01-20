@@ -102,6 +102,10 @@ class UpdateEcommerceProductRequest extends FormRequest
                 StatusEnum::SUSPENDED->value,
                 StatusEnum::FLAGGED->value,
             ]),],
+            'active' => [
+                'sometimes',
+                'boolean',
+            ],
 
             // ProductDetail model attributes
             'essential' => ['nullable', 'sometimes', 'string', 'min:3'],

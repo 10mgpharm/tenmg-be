@@ -13,4 +13,31 @@ enum StatusEnum: string
     case SUSPENDED = 'SUSPENDED';    // Temporarily disabled due to issues
     case ARCHIVED = 'ARCHIVED';      // Archived, no longer active
     case FLAGGED = 'FLAGGED'; // Status indicating the item is flagged and no longer active.
+
+    public static function actives(): array
+    {
+        return [
+            self::ACTIVE->value,
+            self::APPROVED->value,
+        ];
+    }
+
+    public static function inactives(): array
+    {
+        return [
+            self::INACTIVE->value,
+            self::ARCHIVED->value,
+            self::DRAFT->value,
+            self::PENDING->value,
+        ];
+    }
+
+    public static function flagged(): array
+    {
+        return [
+            self::REJECTED->value,
+            self::SUSPENDED->value,
+            self::FLAGGED->value
+        ];
+    }
 }

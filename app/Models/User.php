@@ -113,7 +113,7 @@ class User extends Authenticatable implements MustVerifyEmail
             get: function () use ($_this) {
                 return '-';
 
-                $lastActivity = $_this->activities()->latest()->first();
+                $lastActivity = $_this->activities()->latest('id')->first();
 
                 if (! $lastActivity) {
                     return '-';
@@ -215,7 +215,7 @@ class User extends Authenticatable implements MustVerifyEmail
      */
     public function otps(): HasMany
     {
-        return $this->hasMany(Otp::class)->latest();
+        return $this->hasMany(Otp::class)->latest('id');
     }
 
     public function ownerBusinessType(): HasOne
@@ -233,7 +233,7 @@ class User extends Authenticatable implements MustVerifyEmail
      */
     public function invites()
     {
-        return $this->hasMany(Invite::class, 'creator_id');
+        return $this->hasMany(Invite::class, 'creator_id')->latest('id');
     }
 
     /**
@@ -241,7 +241,7 @@ class User extends Authenticatable implements MustVerifyEmail
      */
     public function medicationTypes()
     {
-        return $this->hasMany(EcommerceMedicationType::class, 'created_by_id');
+        return $this->hasMany(EcommerceMedicationType::class, 'created_by_id')->latest('id');
     }
 
     /**
@@ -249,7 +249,7 @@ class User extends Authenticatable implements MustVerifyEmail
      */
     public function brands()
     {
-        return $this->hasMany(EcommerceBrand::class, 'created_by_id');
+        return $this->hasMany(EcommerceBrand::class, 'created_by_id')->latest('id');
     }
 
     /**
@@ -257,7 +257,7 @@ class User extends Authenticatable implements MustVerifyEmail
      */
     public function products()
     {
-        return $this->hasMany(EcommerceProduct::class, 'created_by_id');
+        return $this->hasMany(EcommerceProduct::class, 'created_by_id')->latest('id');
     }
 
     /**
@@ -265,6 +265,6 @@ class User extends Authenticatable implements MustVerifyEmail
      */
     public function categories()
     {
-        return $this->hasMany(EcommerceCategory::class, 'created_by_id');
+        return $this->hasMany(EcommerceCategory::class, 'created_by_id')->latest('id');
     }
 }

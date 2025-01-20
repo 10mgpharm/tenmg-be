@@ -2,6 +2,7 @@
 
 namespace App\Services\Admin\Storefront;
 
+use App\Enums\StatusEnum;
 use App\Models\EcommerceCategory;
 use App\Models\EcommerceProduct;
 use App\Services\Interfaces\Storefront\IEcommerceCategoryService;
@@ -27,7 +28,7 @@ class EcommerceCategoryService implements IEcommerceCategoryService
     public function products(Request $request, EcommerceCategory $category): LengthAwarePaginator
     {
         // Start the query from the products relationship
-        $query = $category->products()->where('active', 1)->whereIn('status', ['ACTIVE', 'APPROVED'])
+        $query = $category->products()->where('active', 1)->whereIn('status', StatusEnum::actives())
           // Filter by product name
         ->when(
             $request->input('search'),
@@ -129,7 +130,7 @@ class EcommerceCategoryService implements IEcommerceCategoryService
     public function search(Request $request): LengthAwarePaginator
     {
         // Start the query directly from the EcommerceProduct model
-        $query = EcommerceProduct::where('active', 1)->whereIn('status', ['ACTIVE', 'APPROVED'])
+        $query = EcommerceProduct::where('active', 1)->whereIn('status', StatusEnum::actives())
             // Filter by product name
             ->when(
                 $request->input('search'),

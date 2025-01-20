@@ -30,6 +30,7 @@ class EcommerceMedicationVariation extends Model
         'ecommerce_medication_type_id',
         'ecommerce_presentation_id',
         'ecommerce_measurement_id',
+        'ecommerce_product_id',
         'strength_value',
         'package_per_roll',
         'description',
@@ -62,7 +63,7 @@ class EcommerceMedicationVariation extends Model
      */
     public function products()
     {
-        return $this->hasMany(EcommerceProduct::class, 'ecommerce_variation_id')->latest();
+        return $this->hasMany(EcommerceProduct::class, 'ecommerce_variation_id')->latest('id');
     }
 
     /**

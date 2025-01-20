@@ -38,11 +38,16 @@ class EcommerceBrandService implements IEcommerceBrandService
                     $validated['business_id'] = $user->ownerBusinessType?->id ?: $user->businesses()
                         ->firstWhere('user_id', $user->id)?->id;
                 }
-
+                
+                $validated['status'] = $validated['status'] ?? (isset($validated['active']) && $validated['active'] === false 
+                ? StatusEnum::INACTIVE->value 
+                : StatusEnum::ACTIVE->value);
+            
                 return $user->brands()->create([
                     ...$validated,
-                    'status' => $validated['status'] ?? StatusEnum::APPROVED->value,
-                    'active' =>  in_array($validated['status'] ?? StatusEnum::APPROVED->value, [StatusEnum::APPROVED->value, StatusEnum::ACTIVE->value]) ? ($validated['active'] ?? true) : false,
+                    'active' => in_array($validated['status'], StatusEnum::actives()) 
+                    ? ($validated['active'] ?? true) 
+                    : false,
                     'slug' => UtilityHelper::generateSlug('BRD'),
                     'business_id' => $validated['business_id'],
                     'created_by_id' => $user->id,
@@ -70,10 +75,21 @@ class EcommerceBrandService implements IEcommerceBrandService
     {
         try {
             return DB::transaction(function () use ($validated, $user, $brand) {
+
+                $validated['status'] = isset($validated['active']) && $validated['active'] === true 
+                ? (isset($validated['status']) && in_array($validated['status'], StatusEnum::actives()) 
+                    ? $validated['status'] 
+                    : $validated['status'] ?? StatusEnum::ACTIVE->value) 
+                : ($validated['status'] ?? ($brand->status ?? StatusEnum::INACTIVE->value));
+
+            
+            $validated['active'] = (in_array($validated['status'], StatusEnum::actives()))
+                ? ($validated['active'] ?? true )
+                : (false);
+            
+
                 return $brand->update([
                     ...$validated,
-                    'status' => $validated['status'] ?? $brand->status,
-                    'active' => in_array($validated['status'] ?? $brand->status, [StatusEnum::APPROVED->value, StatusEnum::ACTIVE->value]) ?  ($validated['active'] ?? $brand->active) : false,
                     'updated_by_id' => $user->id,
                 ]);
             });
@@ -98,6 +114,6 @@ class EcommerceBrandService implements IEcommerceBrandService
         }
 
         // Proceed with deletion
-        return $brand->delete();
+        return $brand->forceDelete();
     }
 }

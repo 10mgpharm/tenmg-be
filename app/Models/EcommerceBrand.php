@@ -75,7 +75,7 @@ class EcommerceBrand extends Model
      */
     public function products()
     {
-        return $this->hasMany(EcommerceProduct::class)->latest();
+        return $this->hasMany(EcommerceProduct::class)->latest('id');
     }
 
     /**

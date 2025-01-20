@@ -25,11 +25,11 @@ class StorefrontController extends Controller
     {
         $categories = EcommerceCategory::with([
             'products' => fn($query) => $query->where('active', 1)
-                ->whereIn('status', [StatusEnum::ACTIVE->value, StatusEnum::APPROVED->value])
-                ->latest()
+                ->whereIn('status', StatusEnum::actives())
+                ->latest('id')
                 ->limit(15)
         ])->where('active', 1)
-            ->whereIn('status', [StatusEnum::ACTIVE->value, StatusEnum::APPROVED->value])
+            ->whereIn('status', StatusEnum::actives())
             ->paginate($request->has('perPage') ? $request->perPage : 10)
             ->withQueryString()
             ->through(fn(EcommerceCategory $item) => StorefrontResource::make($item));

@@ -46,7 +46,7 @@ class LicenseService implements ILicenseService
 
         $query->where('license_verification_status', 'PENDING');
 
-        return $query->latest()->paginate();
+        return $query->latest('id')->paginate();
     }
 
     /**

@@ -162,6 +162,12 @@ class BusinessSettingController extends Controller
         if ($licenseFile) {
             $isDeleted = $this->attachmentService->deleteFile($licenseFile);
 
+            $ownerBusiness?->update([
+                'license_verification_status' => NULL,
+            ]);
+
+            $ownerBusiness?->refresh();
+
             return $this->returnJsonResponse(
                 message: 'Business license upload successfully withdrawn.',
                 data: [

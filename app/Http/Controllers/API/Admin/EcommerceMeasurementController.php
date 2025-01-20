@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\API\Admin;
 
+use App\Enums\StatusEnum;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\DeleteEcommerceMeasurementRequest;
 use App\Http\Requests\Admin\ListEcommerceMeasurementRequest;
@@ -23,7 +24,30 @@ class EcommerceMeasurementController extends Controller
      */
     public function index(ListEcommerceMeasurementRequest $request): JsonResponse
     {
-        $measurements = EcommerceMeasurement::where('active', 1)->where('status', 'APPROVED')->get();
+        $query = EcommerceMeasurement::query()
+            ->when($request->input('search'), function ($query, $search) {
+                $query->where('name', 'like', "%{$search}%");
+            })
+            ->when($request->input('status'), function ($query, $status) {
+                $query->where('active', '=', $status == 'active' ? 1 : 0);
+            });
+
+        if ($request->has('sort') && $request->has('order')) {
+            $sortColumn = $request->input('sort');
+            $sortOrder = $request->input('order');
+
+            $validColumns = ['name'];
+            if (in_array($sortColumn, $validColumns) && in_array(strtolower($sortOrder), ['asc', 'desc'])) {
+                $query->orderBy($sortColumn, $sortOrder);
+            }
+        } else {
+            $query->orderBy('created_at', 'desc');
+        }
+
+        $measurements = $query
+            ->paginate($request->has('perPage') ? $request->perPage : 10)
+            ->withQueryString()
+            ->through(fn (EcommerceMeasurement $item) => EcommerceMeasurementResource::make($item));
 
         return $this->returnJsonResponse(
             message: 'Measurements successfully fetched.',
@@ -100,7 +124,7 @@ class EcommerceMeasurementController extends Controller
                 statusCode: Response::HTTP_OK
             )
             : $this->returnJsonResponse(
-                message: 'Cannot delete this measurement because it has associated products.',
+                message: 'Cannot delete this measurement because it has associated products, and or variations.',
                 statusCode: Response::HTTP_BAD_REQUEST
             );
     }
@@ -108,7 +132,7 @@ class EcommerceMeasurementController extends Controller
     /**
      * Search and filter EcommerceMeasurements based on the provided criteria.
      *
-     * @param ListEcommerceMeasurementRequest $request The incoming request containing search, filter, and pagination parameters.
+     * @param  ListEcommerceMeasurementRequest  $request  The incoming request containing search, filter, and pagination parameters.
      * @return JsonResponse A JSON response with the paginated list of presentations.
      */
     public function search(ListEcommerceMeasurementRequest $request): JsonResponse
@@ -144,6 +168,18 @@ class EcommerceMeasurementController extends Controller
         return $this->returnJsonResponse(
             message: 'Measurement successfully fetched.',
             data: $measurement
+        );
+    }
+
+    public function getDropdown()
+    {
+        $measurement = EcommerceMeasurement::where('active', 1)
+            ->where('status', StatusEnum::APPROVED->value)
+            ->get();
+
+        return $this->returnJsonResponse(
+            message: 'Measurements successfully fetched.',
+            data: $measurement,
         );
     }
 }

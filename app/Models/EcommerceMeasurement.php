@@ -55,7 +55,7 @@ class EcommerceMeasurement extends Model
      */
     public function products()
     {
-        return $this->hasMany(EcommerceProduct::class)->latest();
+        return $this->hasMany(EcommerceProduct::class)->latest('id');
     }
 
     /**
@@ -68,5 +68,13 @@ class EcommerceMeasurement extends Model
         $business = $user->ownerBusinessType ?? $user->businesses()
             ->firstWhere('user_id', $user->id);
         return $query->where('business_id', $business?->id);
+    }
+
+    /**
+     * Get the varaitions associated with the measurement
+     */
+    public function variations()
+    {
+        return $this->hasMany(EcommerceMedicationVariation::class, 'ecommerce_medication_type_id', 'id')->latest('id');
     }
 }

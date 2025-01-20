@@ -26,7 +26,7 @@ class BusinessLicenseResource extends JsonResource
             'licenseNumber' => $this->license_number,
             'expiryDate' => $this->expiry_date,
             'cacDocument' => $this->cac,
-            'cacFileSize' => $this->cac_document->size,
+            'cacFileSize' => $this->cac_document?->size,
             'type' => $this->type,
             'owner' => new UserResource($this->whenLoaded('owner')),
             'verificationStatus' =>  match ($this->license_verification_status) {
