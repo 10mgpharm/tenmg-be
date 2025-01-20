@@ -52,4 +52,16 @@ class PasswordUpdateRequest extends FormRequest
             ],
         ];
     }
+
+    /**
+     * Custom error messages for validation failures.
+     *
+     * @return array
+     */
+    public function messages()
+    {
+        return [
+            'current_password.current_password' => 'The old password is incorrect.',
+        ];
+    }
 }

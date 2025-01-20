@@ -336,7 +336,7 @@ class EcommerceProductService implements IEcommerceProductService
                 ? (isset($validated['status']) && in_array($validated['status'], StatusEnum::actives()) 
                     ? $validated['status'] 
                     : $validated['status'] ?? StatusEnum::ACTIVE->value) 
-                : ($validated['status'] ?? ($category->status ?? StatusEnum::INACTIVE->value));
+                : ($validated['status'] ?? ($product->status ?? StatusEnum::INACTIVE->value));
 
                 $validated['active'] = (in_array($validated['status'], StatusEnum::actives()))
                 ? ($validated['active'] ?? true )
