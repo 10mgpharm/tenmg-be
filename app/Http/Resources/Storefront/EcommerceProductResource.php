@@ -60,9 +60,7 @@ class EcommerceProductResource extends JsonResource
                     EcommerceProduct::where('id', '!=', $this->id)
                         ->where(function ($query) {
                             $query->where('ecommerce_category_id', $this->ecommerce_category_id)
-                                ->orWhere('ecommerce_brand_id', $this->ecommerce_brand_id)
-                                ->orWhere('ecommerce_medication_type_id', $this->ecommerce_medication_type_id)
-                                ->orWhere('ecommerce_presentation_id', $this->ecommerce_presentation_id);
+                                ->orWhere('ecommerce_medication_type_id', $this->ecommerce_medication_type_id);
                         })
                         ->limit(10)
                         ->latest('id')
