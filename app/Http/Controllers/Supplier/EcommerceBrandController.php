@@ -34,9 +34,22 @@ class EcommerceBrandController extends Controller
                 $request->input('search'),
                 fn($query, $search) => $query->where('name', 'like', "%{$search}%")
             )
+             // Filter by product status (e.g., ACTIVE, INACTIVE)
             ->when(
                 $request->input('status'),
-                fn($query, $status) => $query->where('active', $status === 'active' ? 1 : 0)
+                fn($query, $status) => $query->whereIn(
+                    'status', 
+                    is_array($status)
+                        ? array_unique(array_merge(...array_map(fn($s) => StatusEnum::mapper(trim($s)), $status)))
+                        : array_unique(array_merge(...array_map(fn($s) => StatusEnum::mapper(trim($s)), explode(",", $status))))
+                )
+            )
+            
+            // Filter by active status (active/inactive mapped to 1/0)
+            ->when(
+                $request->input('active'),
+                fn($query, $active) =>
+                $query->where('active', '=', $active == 'active' ? 1 : 0)
             );
 
         // Apply sorting if specified

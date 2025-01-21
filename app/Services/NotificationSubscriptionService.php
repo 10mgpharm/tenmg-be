@@ -19,15 +19,30 @@ class NotificationSubscriptionService implements INotificationSubscriptionServic
      */
     public function index(User $user): LengthAwarePaginator
     {
+        
         $notifications = Notification::where(function ($query) use ($user) {
+            $hasRole = false;
+
             if ($user->hasRole('admin')) {
                 $query->where('is_admin', true);
+                $hasRole = true;
+                
             } elseif ($user->hasRole('supplier')) {
                 $query->where('is_supplier', true);
+                $hasRole = true;
+
             } elseif ($user->hasRole('pharmacy')) {
                 $query->where('is_pharmacy', true);
+                $hasRole = true;
+
             } elseif ($user->hasRole('vendor')) {
                 $query->where('is_vendor', true);
+                $hasRole = true;
+
+            }
+
+            if (!$hasRole) {
+                $query->whereRaw('1 = 0'); // Ensures the query returns no results.
             }
         })
         ->with(['subscribers' => function ($query) use ($user) {

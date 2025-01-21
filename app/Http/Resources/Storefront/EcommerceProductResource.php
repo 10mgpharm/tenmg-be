@@ -6,6 +6,7 @@ use App\Enums\StatusEnum;
 use App\Http\Resources\EcommerceBrandResource;
 use App\Http\Resources\EcommerceCategoryResource;
 use App\Http\Resources\EcommerceMeasurementResource;
+use App\Http\Resources\EcommerceMedicationTypeResource;
 use App\Http\Resources\EcommerceMedicationVariationResource;
 use App\Http\Resources\EcommercePresentationResource;
 use App\Models\EcommerceProduct;
@@ -53,6 +54,7 @@ class EcommerceProductResource extends JsonResource
             'variation' => new EcommerceMedicationVariationResource($this->variation),
             'presentation' => new EcommercePresentationResource($this->presentation),
             'measurement' => new EcommerceMeasurementResource($this->measurement),
+            'medicationType' => new EcommerceMedicationTypeResource($this->medicationType),
             'productDetails' => $this->productDetails == null ? null : $this->productDetails->only('essential', 'starting_stock', 'current_stock', 'id', 'ecommerce_product_id'),
             'related_products' => $this->when(
                 $this->related_products,
@@ -60,9 +62,7 @@ class EcommerceProductResource extends JsonResource
                     EcommerceProduct::where('id', '!=', $this->id)
                         ->where(function ($query) {
                             $query->where('ecommerce_category_id', $this->ecommerce_category_id)
-                                ->orWhere('ecommerce_brand_id', $this->ecommerce_brand_id)
-                                ->orWhere('ecommerce_medication_type_id', $this->ecommerce_medication_type_id)
-                                ->orWhere('ecommerce_presentation_id', $this->ecommerce_presentation_id);
+                                ->orWhere('ecommerce_medication_type_id', $this->ecommerce_medication_type_id);
                         })
                         ->limit(10)
                         ->latest('id')
