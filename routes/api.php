@@ -38,6 +38,7 @@ use App\Http\Controllers\API\Storefront\StorefrontController;
 use App\Http\Controllers\API\Supplier\EcommerceProductController as SupplierEcommerceProductController;
 use App\Http\Controllers\API\Webhooks\PaystackWebhookController;
 use App\Http\Controllers\BusinessSettingController;
+use App\Http\Controllers\API\Storefront\WishListController;
 use App\Http\Controllers\InviteController;
 use App\Http\Controllers\Supplier\DashboardController as SupplierDashboardController;
 use App\Http\Controllers\Supplier\EcommerceBrandController as SupplierEcommerceBrandController;
@@ -422,6 +423,11 @@ Route::prefix('v1')->group(function () {
             Route::prefix('orders')->name('orders.')->group(function () {
                 Route::get('/', [OrdersController::class, 'getOrders']);
                 Route::get('/{id}', [OrdersController::class, 'getOrderDetails']);
+            });
+            Route::prefix('wishlist')->name('wishlist.')->group(function () {
+                Route::get('/', [WishListController::class, 'getWhishList']);
+                Route::post('add-wishlist', [WishListController::class, 'addWishList']);
+                Route::delete('remove-product/{id}', [WishListController::class, 'removeProductFromWishList']);
             });
         });
 
