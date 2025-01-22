@@ -10,6 +10,7 @@ use App\Http\Requests\Admin\ListUserRequest;
 use App\Http\Requests\Admin\ShowUserRequest;
 use App\Http\Requests\Admin\UpdateUserStatusRequest;
 use App\Http\Resources\Admin\UserResource;
+use App\Http\Resources\Admin\UserWithBusinessResource;
 use App\Models\User;
 use App\Services\Admin\UserService;
 use Illuminate\Http\Request;
@@ -101,7 +102,7 @@ class UsersController extends Controller
         return $user
             ? $this->returnJsonResponse(
                 message: 'User successfully fetched.',
-                data: new UserResource($user)
+                data: new UserWithBusinessResource($user->load('businesses'))
             )
             : $this->returnJsonResponse(
                 message: 'Oops, cannot fetch user at the moment. Please try again later.'
