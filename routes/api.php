@@ -26,6 +26,7 @@ use App\Http\Controllers\API\Credit\LoanApplicationController;
 use App\Http\Controllers\API\Credit\LoanController;
 use App\Http\Controllers\API\Credit\LoanOfferController;
 use App\Http\Controllers\API\Credit\TransactionHistoryController;
+use App\Http\Controllers\API\EcommerceDiscountController;
 use App\Http\Controllers\API\ProfileController;
 use App\Http\Controllers\API\ResendOtpController;
 use App\Http\Controllers\API\Storefront\CartController;
@@ -374,6 +375,8 @@ Route::prefix('v1')->group(function () {
                 Route::get('audit-logs/search', [AuditLogController::class, 'search']);
             });
 
+            Route::get('discounts/search', [EcommerceDiscountController::class, 'search']);
+            Route::apiResource('discounts', EcommerceDiscountController::class);
             Route::patch('users/{user}/status', [UsersController::class, 'status']);
             Route::apiResource('users', UsersController::class);
 
