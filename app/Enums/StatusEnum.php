@@ -28,6 +28,12 @@ enum StatusEnum: string
             self::INACTIVE->value,
             self::ARCHIVED->value,
             self::DRAFT->value,
+        ];
+    }
+
+    public static function pending(): array
+    {
+        return [
             self::PENDING->value,
         ];
     }
@@ -39,5 +45,24 @@ enum StatusEnum: string
             self::SUSPENDED->value,
             self::FLAGGED->value
         ];
+    }
+
+    /**
+     * Maps a status string to its corresponding group or a default value.
+     *
+     * @param string $status The status string to map.
+     * @return string|array The mapped value(s).
+     */
+    public static function mapper(string $status): string|array
+    {
+        $status = strtoupper($status);
+
+        return match ($status) {
+            'ACTIVE', 'APPROVED' => static::actives(),
+            'PENDING' => static::pending(),
+            'REJECTED', 'SUSPENDED', 'FLAGGED' => static::flagged(),
+            'INACTIVE', 'ARCHIVED', 'DRAFT' => static::inactives(),
+            default => [self::DRAFT->value],
+        };
     }
 }

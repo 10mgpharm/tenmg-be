@@ -52,9 +52,7 @@ class UpdateEcommerceProductRequest extends FormRequest
             'out_stock_level' => $this->input('outStockLevel'),
             'expired_at' => $this->input('expiredAt'),
             'thumbnailFile' => $this->file('thumbnailFile'),
-            'status' =>  $this->input('status') !== StatusEnum::ACTIVE->value
-            ? $this->input('status')
-            : $product->status,
+            'status' =>  $this->input('status'),
             'status_comment' => $this->input('comment'),
 
             // ProductDetail model attributes
@@ -107,12 +105,7 @@ class UpdateEcommerceProductRequest extends FormRequest
             'expired_at' => ['sometimes', 'nullable', 'date'],
 
             'status' => ['sometimes',  'nullable', new Enum(StatusEnum::class),],
-            'statusComment' => ['required_if:status,' . implode(',', [
-                StatusEnum::REJECTED->value,
-                StatusEnum::INACTIVE->value,
-                StatusEnum::SUSPENDED->value,
-                StatusEnum::FLAGGED->value,
-            ]),],
+            'statusComment' => ['sometimes', 'nullable', 'string',],
             'active' => [
                 'sometimes',
                 'boolean',

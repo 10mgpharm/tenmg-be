@@ -7,6 +7,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\CreateUserRequest;
 use App\Http\Requests\Admin\DeleteUserRequest;
 use App\Http\Requests\Admin\ListUserRequest;
+use App\Http\Requests\Admin\ShowUserRequest;
 use App\Http\Requests\Admin\UpdateUserStatusRequest;
 use App\Http\Resources\Admin\UserResource;
 use App\Models\User;
@@ -90,6 +91,21 @@ class UsersController extends Controller
             message: 'User created successfully.',
             data: new UserResource($user)
         );
+    }
+
+    /**
+     * Show a user.
+     */
+    public function show(ShowUserRequest $request, User $user)
+    {
+        return $user
+            ? $this->returnJsonResponse(
+                message: 'User successfully fetched.',
+                data: new UserResource($user)
+            )
+            : $this->returnJsonResponse(
+                message: 'Oops, cannot fetch user at the moment. Please try again later.'
+            );
     }
 
     /**

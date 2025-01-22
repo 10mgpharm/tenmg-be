@@ -66,12 +66,12 @@ class StoreEcommerceProductRequest extends FormRequest
             'product_description' => ['required', 'string', 'max:255'],
             'category_name' => ['required', 'string', 'max:255'],
             'brand_name' => ['required', 'string', 'max:255'],
-            // 'thumbnailFile' => [
-            //     'required',
-            //     'image',
-            //     'mimes:jpg,jpeg,png,gif',
-            //     'max:10240',
-            // ],
+            'thumbnailFile' => [
+                'required',
+                'image',
+                'mimes:jpg,jpeg,png,gif',
+                'max:10240',
+            ],
             
             // Product Essentials
             'medication_type_name' => ['required', 'string', 'max:255'],
