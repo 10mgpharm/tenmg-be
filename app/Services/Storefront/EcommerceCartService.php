@@ -131,6 +131,49 @@ class EcommerceCartService
 
     }
 
+    function syncCartItems(Request $request)
+    {
+        try {
+
+            $cart = EcommerceOrder::where('id', $request->cartId)->where('status', 'CART')->first();
+            //get cart items
+            // $cartItems = $cart->orderDetails()->get();
+            $creditSettings = new CreditSettings();
+            $tenmgPercent = $creditSettings->tenmg_ecommerce_commission_percent;
+
+
+            for ($i=0; $i < count($request->items); $i++) {
+
+                $orderItem = EcommerceOrderDetail::find($request->items[$i]['itemId']);
+                //get product for the items
+                $product = EcommerceProduct::find($orderItem->ecommerce_product_id);
+                $orderPrice = $product->actual_price - $product->discount_price;
+                $quantity = $request->items[$i]['quantity'];
+                $tenmgPercentCommission = ($tenmgPercent/100) * $orderPrice;
+
+                $orderItem->quantity = $quantity;
+                $orderItem->actual_price = $product->actual_price * $quantity;
+                $orderItem->discount_price = $orderPrice * $quantity;
+                $orderItem->tenmg_commission = $tenmgPercentCommission;
+                $orderItem->tenmg_commission_percent = $tenmgPercent;
+                $orderItem->save();
+
+
+            }
+
+            $cart->order_total = $cart->orderDetails()->sum('discount_price');
+            $cart->grand_total = $cart->orderDetails()->sum('discount_price')+$cart->orderDetails()->sum('tenmg_commission');
+            $cart->qty_total = $cart->orderDetails()->sum('quantity');
+            $cart->save();
+
+            return $cart;
+
+
+        } catch (\Throwable $th) {
+            throw $th;
+        }
+    }
+
     function getUserCart()
     {
         try {

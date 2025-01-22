@@ -418,6 +418,7 @@ Route::prefix('v1')->group(function () {
             Route::apiResource('shipping-addresses', StorefrontShippingAddressController::class);
 
             Route::post('/add-remove-cart-items', [CartController::class, 'addRemoveItemToCart']);
+            Route::post('/sync-cart', [CartController::class, 'syncCartItems']);
             Route::get('/get-user-cart', [CartController::class, 'getUserCart']);
             Route::post('/buy-now', [CartController::class, 'buyNow']);
             Route::post('/checkout', [OrdersController::class, 'checkout']);
