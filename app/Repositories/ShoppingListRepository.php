@@ -25,7 +25,7 @@ class ShoppingListRepository
         $shoppingList->brand_name = $request->brandName;
         $shoppingList->purchase_date = $request->purchaseDate;
         $shoppingList->user_id = Auth::id();
-        $shoppingList->exist_in_10mg_store = $request->existIn10mgStore;
+        $shoppingList->product_id = $request->productId;
         $shoppingList->save();
 
         // Save uploaded file

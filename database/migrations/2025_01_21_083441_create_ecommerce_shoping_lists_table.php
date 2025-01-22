@@ -18,7 +18,7 @@ return new class extends Migration
             $table->date('purchase_date')->nullable();
             $table->integer('user_id')->constrained('users')->cascadeOnDelete();
             $table->foreignId('shopping_list_image_id')->nullable()->constrained('file_uploads')->nullOnDelete();
-            $table->enum('exist_in_10mg_store', ['EXIST', 'NON-EXIST'])->default('NON-EXIST');
+            $table->foreignId('product_id')->nullable()->constrained('ecommerce_products')->cascadeOnDelete();
             $table->timestamps();
         });
     }

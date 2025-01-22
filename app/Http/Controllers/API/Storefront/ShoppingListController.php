@@ -21,7 +21,8 @@ class ShoppingListController extends Controller
             'productName' => 'required',
             'brandName' => 'required',
             'purchaseDate' => 'nullable|date|after_or_equal:today',
-            'description' => 'required'
+            'description' => 'required',
+            'productId' => 'nullable|exists:ecommerce_products,id',
         ]);
         $shoppingList = $this->shoppingListService->addShoppingList($request);
         return $this->returnJsonResponse(
