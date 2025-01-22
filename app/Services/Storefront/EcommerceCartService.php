@@ -55,7 +55,7 @@ class EcommerceCartService
                         //update item quantity
                         $item->quantity = $qty;
                         $item->actual_price = $product->actual_price * $request->qty;
-                        $item->discount_price = $orderPrice;
+                        $item->discount_price = $orderPrice * $request->qty;
                         $item->tenmg_commission = $tenmgPercentCommission;
                         $item->tenmg_commission_percent = $tenmgPercent;
                         $item->save();
