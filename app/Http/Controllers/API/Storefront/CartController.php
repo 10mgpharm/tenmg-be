@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Resources\EcommerceCartResource;
 use App\Services\Storefront\EcommerceCartService;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 
 class CartController extends Controller
 {
@@ -27,6 +28,30 @@ class CartController extends Controller
 
         $cart = $this->ecommerceCartService->addRemoveItemToCart($request);
         return $this->returnJsonResponse(message: 'Success', data: $cart);
+    }
+
+    function syncCartItems(Request $request)
+    {
+        $validatedData = $request->validate([
+            'cartId'           => 'required|exists:ecommerce_orders,id',
+            'items'            => 'required|array',
+
+            // Each item has an itemId that must exist in order_details
+            // with a matching cart_id value
+            'items.*.itemId'   => [
+                'required',
+                'integer',
+                Rule::exists('ecommerce_order_details', 'id')
+                    ->where('ecommerce_order_id', $request->input('cartId')),
+            ],
+
+            // Validate quantity as a positive integer
+            'items.*.quantity' => 'required|integer|min:1',
+        ]);
+
+        $cart = $this->ecommerceCartService->syncCartItems($request);
+        return $this->returnJsonResponse(message: 'Success', data: $cart);
+
     }
 
     function getUserCart()

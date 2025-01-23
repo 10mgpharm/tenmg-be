@@ -35,6 +35,7 @@ use App\Http\Controllers\API\Storefront\FaqController as StorefrontFaqController
 use App\Http\Controllers\API\Storefront\OrdersController;
 use App\Http\Controllers\API\Storefront\ProductController as StorefrontProductController;
 use App\Http\Controllers\API\Storefront\ShippingAddressController as StorefrontShippingAddressController;
+use App\Http\Controllers\API\Storefront\ShoppingListController;
 use App\Http\Controllers\API\Storefront\StorefrontController;
 use App\Http\Controllers\API\Supplier\EcommerceProductController as SupplierEcommerceProductController;
 use App\Http\Controllers\API\Webhooks\PaystackWebhookController;
@@ -420,6 +421,7 @@ Route::prefix('v1')->group(function () {
             Route::apiResource('shipping-addresses', StorefrontShippingAddressController::class);
 
             Route::post('/add-remove-cart-items', [CartController::class, 'addRemoveItemToCart']);
+            Route::post('/sync-cart', [CartController::class, 'syncCartItems']);
             Route::get('/get-user-cart', [CartController::class, 'getUserCart']);
             Route::post('/buy-now', [CartController::class, 'buyNow']);
             Route::post('/checkout', [OrdersController::class, 'checkout']);
@@ -431,6 +433,11 @@ Route::prefix('v1')->group(function () {
                 Route::get('/', [WishListController::class, 'getWhishList']);
                 Route::post('add-wishlist', [WishListController::class, 'addWishList']);
                 Route::delete('remove-product/{id}', [WishListController::class, 'removeProductFromWishList']);
+            });
+            Route::prefix('shopping-list')->name('shopping-list.')->group(function () {
+                Route::get('/', [ShoppingListController::class, 'getShoppingList']);
+                Route::post('add-shopping-list', [ShoppingListController::class, 'addShoppingList']);
+                Route::delete('remove-item/{id}', [ShoppingListController::class, 'removeItemFromSHoppingList']);
             });
         });
 
