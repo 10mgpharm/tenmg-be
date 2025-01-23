@@ -7,7 +7,7 @@ Use the link below to accept the invitation:
 {{ $invitationUrl }}
 
 
-This invitation will expire in 24 hours.
+This invitation will expire in {{ $invite->expires_at->diffInDays() }} days from now.
 
 If you did not expect this invitation, no further action is required.
 
