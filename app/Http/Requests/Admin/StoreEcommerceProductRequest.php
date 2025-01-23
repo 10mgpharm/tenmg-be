@@ -77,7 +77,7 @@ class StoreEcommerceProductRequest extends FormRequest
             'medication_type_name' => ['required', 'string', 'max:255'],
             'measurement_name' => ['required', 'string', 'max:255'],
             'presentation_name' => ['required', 'string', 'max:255'],
-            'package_per_roll' => ['required', 'string', 'max:255'],
+            'package_per_roll' => ['sometimes', 'nullable', 'string', 'max:255'],
             'strength_value' => ['required',  'string', 'max:255'],
             'weight' => ['sometimes', 'nullable', 'numeric', 'min:0'],
             'actual_price' => ['required', 'numeric', 'min:0'],
