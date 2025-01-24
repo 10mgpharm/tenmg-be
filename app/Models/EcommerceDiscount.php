@@ -27,7 +27,7 @@ class EcommerceDiscount extends Model
         'type',
         'amount',
         'applicable_products',
-        'customer_limits',
+        'customer_limit',
         'start_date',
         'end_date',
         'business_id',
