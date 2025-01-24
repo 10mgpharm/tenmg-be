@@ -105,6 +105,26 @@ class CreateInviteRequest extends FormRequest
      */
     public function failedAuthorization()
     {
+        $user = $this->user();
+
+        if (!$user) {
+            abort(response()->json([
+                'message' => 'Unauthenticated.',
+            ], 403));
+        }
+    
+        if (!$user->ownerBusinessType && !$user->businesses()->firstWhere('user_id', $this->id)) {
+            abort(response()->json([
+                'message' => 'You must own or belong to a business to create this resource.',
+            ], 403));
+        }
+    
+        if (!$user->hasRole('vendor') && !$user->hasRole('admin')) {
+            abort(response()->json([
+                'message' => 'You do not have the required role to create this resource.',
+            ], 403));
+        }
+    
         abort(response()->json([
             'message' => 'You are not authorized to create this resource.',
         ], 403));
