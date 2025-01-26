@@ -16,7 +16,7 @@ class BusinessUserResource extends JsonResource
     {
         return [
             'id' => $this->id,
-            'role' => $this->role->name,
+            'role' => strtoupper($this->role?->name ?? ''),
             'active' => $this->active,
             'email' => $this->user->email,
             'name' => $this->user->name,
