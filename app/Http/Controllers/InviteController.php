@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\CreateInviteRequest;
+use App\Http\Requests\DeleteInviteRequest;
 use App\Http\Requests\GuestAcceptInviteRequest;
 use App\Http\Requests\GuestRejectInviteRequest;
 use App\Http\Requests\ListInvitesRequest;
@@ -153,6 +154,29 @@ class InviteController extends Controller
 
         return $this->returnJsonResponse(
             message: 'Invitation has been rejected successfully.'
+        );
+    }
+
+    /**
+     * Delete an invitation.
+     *
+     * @param  DeleteInviteRequest  $request  Validated request instance.
+     * @return \Illuminate\Http\JsonResponse A JSON response indicating the rejection status.
+     */
+    public function destroy(DeleteInviteRequest $request, Invite $invite)
+    {
+
+        // Call the service method to delete the invite
+        $isDeleted = $this->inviteService->delete($invite);
+
+        if (!$isDeleted) {
+            return $this->returnJsonResponse(
+                message: 'Unable to delete the invitation at this time. Please try again later.'
+            );
+        }
+
+        return $this->returnJsonResponse(
+            message: 'Invitation has been deleted successfully.'
         );
     }
 }
