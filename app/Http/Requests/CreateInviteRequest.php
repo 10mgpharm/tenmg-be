@@ -127,7 +127,6 @@ class CreateInviteRequest extends FormRequest
                 'message' => 'You must own or belong to a business to create this resource.',
             ], 403));
         }
-
         abort(response()->json([
             'message' => 'You are not authorized to create this resource.',
         ], 403));
