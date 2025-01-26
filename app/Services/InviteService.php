@@ -67,15 +67,14 @@ class InviteService implements IInviteService
      */
     protected function sendInviteLink(Invite $invite)
     {
-        // Send invite email with embedded token
-        $signedUrl = URL::temporarySignedRoute(
-            'auth.invite.accept', // 'auth.invite.view', define a named route for accepting the invitation
-            $invite->expires_at,
-            ['inviteId' => $invite->id, 'inviteToken' => $invite->invite_token] // Route parameters
-        );
-
+       // Construct invite URL without signing
         $frontendBaseUrl = config('app.frontend_url') . '/auth/invite';
-        $queryParams = parse_url($signedUrl, PHP_URL_QUERY);
+
+        // Add query parameters to the URL
+        $queryParams = urldecode(http_build_query([
+            'inviteId' => $invite->id,
+            'inviteToken' => $invite->invite_token,
+        ]));
 
         $invitationUrl = $frontendBaseUrl . '?' . $queryParams;
 
@@ -103,19 +102,14 @@ class InviteService implements IInviteService
 
         // Prepare the invitation details including signed URLs for acceptance and rejection
         $data = [
-            'role' => $invite->role->name,
+            'role' => strtoupper($invite->role->name),
             'fullName' => $invite->full_name,
             'email' => $invite->email,
-            'acceptUrl' => URL::temporarySignedRoute(
-                'auth.invite.accept',
-                $invite->expires_at,
-                ['inviteId' => $invite->id, 'inviteToken' => $invite->invite_token]
-            ),
-            'rejectUrl' => URL::temporarySignedRoute(
-                'auth.invite.reject',
-                $invite->expires_at,
-                ['inviteId' => $invite->id, 'inviteToken' => $invite->invite_token]
-            ),
+            'businessName' => $invite->business->name,
+            'acceptUrl' => route('auth.invite.accept', [
+                'inviteId' => $invite->id,
+                'inviteToken' => $invite->invite_token,
+            ]),
         ];
 
         return $data;
