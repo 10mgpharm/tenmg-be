@@ -20,7 +20,7 @@ class CreateInviteRequest extends FormRequest
         }
     
         // Check if the user owns a business or belongs to a business as specified
-        $ownsBusinessOrBelongsToBusiness = $user->ownerBusinessType || $user->businesses()->firstWhere('user_id', $this->id);
+        $ownsBusinessOrBelongsToBusiness = $user->ownerBusinessType || $user->businesses()->firstWhere('user_id', $user->id);
     
         // Check if the user has the required roles
         $hasRequiredRole = $user->hasRole('vendor') || $user->hasRole('admin');
@@ -105,6 +105,26 @@ class CreateInviteRequest extends FormRequest
      */
     public function failedAuthorization()
     {
+        $user = $this->user();
+
+        if (!$user) {
+            abort(response()->json([
+                'message' => 'Unauthenticated.',
+            ], 403));
+        }
+    
+        if (!$user->hasRole('vendor') || !$user->hasRole('admin')) {
+            abort(response()->json([
+                'message' => 'You do not have the required role to create this resource.',
+            ], 403));
+        }
+    
+        if (!$user->ownerBusinessType && !$user->businesses()->firstWhere('user_id', $user->id)) {
+            abort(response()->json([
+                'message' => 'You must own or belong to a business to create this resource.',
+            ], 403));
+        }
+    
         abort(response()->json([
             'message' => 'You are not authorized to create this resource.',
         ], 403));
