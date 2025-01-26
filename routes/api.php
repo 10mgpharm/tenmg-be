@@ -89,8 +89,7 @@ Route::prefix('v1')->group(function () {
             ->name('resend.otp')->middleware('throttle:5,1');
 
         Route::get('invite/view', [InviteController::class, 'view'])->name('invite.view');
-        Route::post('invite/accept', [InviteController::class, 'accept'])->name('invite.accept')->middleware('signed');
-        Route::post('invite/reject', [InviteController::class, 'reject'])->name('invite.reject')->middleware('signed');
+        Route::post('invite/accept', [InviteController::class, 'accept'])->name('invite.accept');
     });
 
     Route::prefix('storefront')->name('storefront.')->group(function () {

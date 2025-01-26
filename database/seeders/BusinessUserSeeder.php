@@ -78,6 +78,8 @@ class BusinessUserSeeder extends Seeder
             $role = ($i <= 2) ? $supportRole :
                     (($i <= 4) ? $operationRole : $adminRole);
 
+            $user->assignRole($role);
+
             BusinessUser::firstOrCreate(
                 ['user_id' => $user->id, 'business_id' => $adminBusiness->id],
                 ['role_id' => $role->id]

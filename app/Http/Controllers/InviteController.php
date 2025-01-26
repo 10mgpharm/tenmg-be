@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\CreateInviteRequest;
+use App\Http\Requests\DeleteInviteRequest;
 use App\Http\Requests\GuestAcceptInviteRequest;
 use App\Http\Requests\GuestRejectInviteRequest;
 use App\Http\Requests\ListInvitesRequest;
@@ -28,8 +29,9 @@ class InviteController extends Controller
     public function index(ListInvitesRequest $request)
     {
         $user = $request->user();
+        $business =  $user->ownerBusinessType ?? $user->businesses()->firstWhere('user_id', $user->id);
 
-        $invites = $user->ownerBusinessType?->invites ?? collect();
+        $invites = $business?->invites ?? collect();
 
         return $this->returnJsonResponse(
             message: 'Invites successfully fetched.',
@@ -47,7 +49,10 @@ class InviteController extends Controller
     {
         $user = $request->user();
 
-        $businessUsers = $user->ownerBusinessType?->businessUsers ?? collect();
+        $user = $request->user();
+        $business =  $user->ownerBusinessType ?? $user->businesses()->firstWhere('user_id', $user->id);
+
+        $businessUsers = $business?->businessUsers ?? collect();
 
         return $this->returnJsonResponse(
             message: 'Team members successfully fetched.',
@@ -149,6 +154,29 @@ class InviteController extends Controller
 
         return $this->returnJsonResponse(
             message: 'Invitation has been rejected successfully.'
+        );
+    }
+
+    /**
+     * Delete an invitation.
+     *
+     * @param  DeleteInviteRequest  $request  Validated request instance.
+     * @return \Illuminate\Http\JsonResponse A JSON response indicating the rejection status.
+     */
+    public function destroy(DeleteInviteRequest $request, Invite $invite)
+    {
+
+        // Call the service method to delete the invite
+        $isDeleted = $this->inviteService->delete($invite);
+
+        if (!$isDeleted) {
+            return $this->returnJsonResponse(
+                message: 'Unable to delete the invitation at this time. Please try again later.'
+            );
+        }
+
+        return $this->returnJsonResponse(
+            message: 'Invitation has been deleted successfully.'
         );
     }
 }
