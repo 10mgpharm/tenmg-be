@@ -4,7 +4,7 @@ You have been invited to join {{ $invite->business->name }} on {{ config('app.na
 
 Use the link below to accept the invitation:
 
-{{ $invitationUrl }}
+{!! $invitationUrl !!}
 
 
 This invitation will expire in {{ $invite->expires_at->diffForHumans() }}.
