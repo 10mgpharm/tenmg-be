@@ -157,7 +157,7 @@ class InviteService implements IInviteService
                 $user->save();
 
                 // Delete the invite after successful user creation
-                $invite->delete();
+                $invite->update(['status' => 'ACCEPTED']);
 
                 return $user->refresh(); // Return the updated user instance
             });
@@ -192,6 +192,20 @@ class InviteService implements IInviteService
             });
         } catch (Exception $e) {
             throw new Exception('Failed to reject invite: '.$e->getMessage());
+        }
+    }
+
+    /*
+    * Delete an invite from the database.
+    */
+    public function delete(Invite $invite): bool
+    {
+        try {
+            return DB::transaction(function () use ($invite) {
+                return $invite->delete();
+            });
+        } catch (Exception $e) {
+            throw new Exception('Failed to delete invite: '.$e->getMessage());
         }
     }
 }
