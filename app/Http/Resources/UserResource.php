@@ -41,6 +41,7 @@ class UserResource extends JsonResource
             'emailVerifiedAt' => $this->email_verified_at,
             'owner' => (bool) ($this->ownerBusinessType),
             'entityType' => $business?->type,
+            'role' => strtoupper($this->type ?? $this->getRoleNames()->first()),
             'businessName' => $business?->name,
             'businessStatus' => $businessStatus,
             'completeProfile' => (bool) (
