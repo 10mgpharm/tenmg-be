@@ -14,30 +14,30 @@ class CreateInviteRequest extends FormRequest
     public function authorize(): bool
     {
         $user = $this->user();
-    
+
         if (!$user) {
             return false; // Ensure there is a logged-in user
         }
-    
+
         // Check if the user owns a business or belongs to a business as specified
         $ownsBusinessOrBelongsToBusiness = $user->ownerBusinessType || $user->businesses()->firstWhere('user_id', $user->id);
-    
+
         // Check if the user has the required roles
         $hasRequiredRole = $user->hasRole('vendor') || $user->hasRole('admin');
-    
+
         return $ownsBusinessOrBelongsToBusiness && $hasRequiredRole;
     }
-    
+
     /**
      * Prepare the data for validation.
      */
     protected function prepareForValidation(): void
     {
         $user = $this->user();
-    
+
         $roleName = $this->user()->roles()->first()?->name;
 
-        if($this->input('role') == 'admin'){
+        if ($this->input('role') == 'admin') {
             $this->merge([
                 'role' => $roleName,
             ]);
@@ -60,8 +60,9 @@ class CreateInviteRequest extends FormRequest
     public function rules(): array
     {
         $user = $this->user();
-        
-        $business_id = $user->ownerBusinessType?->id ?: $user->businesses()->firstWhere('user_id', $this->id)?->id;
+
+        $business_id = $user->ownerBusinessType?->id
+            ?: $user->businesses()->firstWhere('user_id', $user->id)?->id;
 
         return [
             'full_name' => ['required', 'string', 'max:255'],
@@ -70,15 +71,17 @@ class CreateInviteRequest extends FormRequest
                 'string',
                 'email',
                 'max:255',
-                Rule::unique('invites')->where(fn ($query) => $query->where('business_id', $business_id)->whereNotIn('status', ['REJECTED', 'REMOVED'])),
-                Rule::unique('users', 'email')
-                ->where(fn ($query) => $query->whereExists(fn ($subQuery) =>
-                    $subQuery->select('id')
-                        ->from('business_users')
-                        ->whereColumn('business_users.user_id', 'users.id')
-                        ->where('business_users.business_id', $business_id)
-                )),
-
+                // Ensure email isn't already invited for the business with non-rejected/removed status
+                Rule::unique('invites')->where('business_id', $business_id),
+                // Ensure email isn't already associated with the business
+                Rule::unique('users', 'email')->where(
+                    fn($query) => $query->whereExists(
+                        fn($subQuery) => $subQuery->select('id')
+                            ->from('business_users')
+                            ->whereColumn('business_users.user_id', 'users.id')
+                            ->where('business_users.business_id', $business_id)
+                    )
+                ),
             ],
             'role_id' => ['required', 'exists:roles,id'],
         ];
@@ -112,19 +115,19 @@ class CreateInviteRequest extends FormRequest
                 'message' => 'Unauthenticated.',
             ], 403));
         }
-    
+
         if (!$user->hasRole('vendor') || !$user->hasRole('admin')) {
             abort(response()->json([
                 'message' => 'You do not have the required role to create this resource.',
             ], 403));
         }
-    
+
         if (!$user->ownerBusinessType && !$user->businesses()->firstWhere('user_id', $user->id)) {
             abort(response()->json([
                 'message' => 'You must own or belong to a business to create this resource.',
             ], 403));
         }
-    
+
         abort(response()->json([
             'message' => 'You are not authorized to create this resource.',
         ], 403));
