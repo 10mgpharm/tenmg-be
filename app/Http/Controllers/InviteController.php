@@ -28,8 +28,9 @@ class InviteController extends Controller
     public function index(ListInvitesRequest $request)
     {
         $user = $request->user();
+        $business =  $user->ownerBusinessType ?? $user->businesses()->firstWhere('user_id', $user->id);
 
-        $invites = $user->ownerBusinessType?->invites ?? collect();
+        $invites = $business?->invites ?? collect();
 
         return $this->returnJsonResponse(
             message: 'Invites successfully fetched.',
@@ -47,7 +48,10 @@ class InviteController extends Controller
     {
         $user = $request->user();
 
-        $businessUsers = $user->ownerBusinessType?->businessUsers ?? collect();
+        $user = $request->user();
+        $business =  $user->ownerBusinessType ?? $user->businesses()->firstWhere('user_id', $user->id);
+
+        $businessUsers = $business?->businessUsers ?? collect();
 
         return $this->returnJsonResponse(
             message: 'Team members successfully fetched.',
