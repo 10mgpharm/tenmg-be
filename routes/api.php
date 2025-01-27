@@ -420,6 +420,7 @@ Route::prefix('v1')->group(function () {
             Route::post('/add-remove-cart-items', [CartController::class, 'addRemoveItemToCart']);
             Route::post('/sync-cart', [CartController::class, 'syncCartItems']);
             Route::get('/get-user-cart', [CartController::class, 'getUserCart']);
+            Route::post('/clear-cart', [CartController::class, 'clearUserCart']);
             Route::post('/buy-now', [CartController::class, 'buyNow']);
             Route::post('/checkout', [OrdersController::class, 'checkout']);
             Route::prefix('orders')->name('orders.')->group(function () {
@@ -436,7 +437,8 @@ Route::prefix('v1')->group(function () {
                 Route::post('add-shopping-list', [ShoppingListController::class, 'addShoppingList']);
                 Route::delete('remove-item/{id}', [ShoppingListController::class, 'removeItemFromSHoppingList']);
             });
-        });
+
+        });//OrderPaymentController
 
     });
 
