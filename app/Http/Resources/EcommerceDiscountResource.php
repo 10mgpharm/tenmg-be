@@ -21,6 +21,9 @@ class EcommerceDiscountResource extends JsonResource
             'couponCode' => $this->coupon_code,
             'type' => $this->type,
             'amount' => $this->amount,
+            'customerLimit' => $this->customer_limit,
+            'startDate' => $this->start_date?->format('M d, y h:i A'),
+            'endDate' => $this->end_date?->format('M d, y h:i A'),
             'applicableProducts' =>  EcommerceProductResource::collection($this->whenLoaded('applicableProducts')),
         ];
     }

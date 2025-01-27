@@ -46,6 +46,8 @@ class EcommerceDiscount extends Model
     protected $casts = [
         'active' => 'boolean',
         'applicable_products' => 'array',
+        'start_date' => 'datetime',
+        'end_date' => 'datetime',
     ];
 
     /**
