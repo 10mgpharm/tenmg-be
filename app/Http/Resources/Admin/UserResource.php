@@ -20,6 +20,7 @@ class UserResource extends JsonResource
             'name' => $this->name,
             'phone' => $this->phone,
             'status' => $this->active,
+            'role' => strtoupper($this->type ?? $this->getRoleNames()->first()),
             'account_status' => $this->getRawOriginal('status'),
             'dateJoined' => $this->created_at,
             'businessName' => $this->ownerBusinessType?->name ?? $this->businesses()->firstWhere('user_id', $this->id)?->name,
