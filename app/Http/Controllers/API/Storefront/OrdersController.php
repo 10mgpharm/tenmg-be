@@ -25,7 +25,7 @@ class OrdersController extends Controller
             'deliveryAddress' => 'required|string',
             'deliveryType' => 'required|:STANDARD,EXPRESS'
         ]);
-        $order = $this->ecommerceOrderService->checkout($request);
+        return $order = $this->ecommerceOrderService->checkout($request);
 
         return $this->returnJsonResponse(message: 'Success', data: new EcommerceCartResource($order));
     }

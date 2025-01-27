@@ -224,5 +224,22 @@ class EcommerceCartService
         }
     }
 
+    function clearUserCart()
+    {
+        try {
+            $cart = EcommerceOrder::where('customer_id', Auth::id())->where('status', 'CART')->first();
+            if (!$cart) {
+                throw new \Exception("Cart does not exist");
+            }
+            $cart->orderDetails()->delete();
+            $cart->delete();
+
+            return $cart;
+        } catch (\Throwable $th) {
+            throw $th;
+        }
+
+    }
+
 
 }

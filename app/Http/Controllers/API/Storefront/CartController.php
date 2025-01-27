@@ -57,7 +57,7 @@ class CartController extends Controller
     function getUserCart()
     {
         $cart = $this->ecommerceCartService->getUserCart();
-        return $this->returnJsonResponse(message: 'User cart', data: new EcommerceCartResource($cart));
+        return $this->returnJsonResponse(message: 'User cart', data: $cart ? new EcommerceCartResource($cart) : null);
     }
 
     function buyNow(Request $request)
@@ -74,6 +74,12 @@ class CartController extends Controller
         $order = $this->ecommerceCartService->buyNow($request);
 
         return $this->returnJsonResponse(message: 'Success', data: $order);
+    }
+
+    function clearUserCart()
+    {
+        $cart = $this->ecommerceCartService->clearUserCart();
+        return $this->returnJsonResponse(message: 'Cart cleared');
     }
 
 

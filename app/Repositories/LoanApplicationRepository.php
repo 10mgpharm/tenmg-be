@@ -123,9 +123,9 @@ class LoanApplicationRepository
             return $query->where('credit_applications.status', $criteria['status']);
         });
 
-        // $query->when(isset($criteria['businessId']), function ($query) use ($criteria) {
-        //     return $query->where('credit_applications.business_id', $criteria['businessId']);
-        // });
+        $query->when(isset($criteria['businessId']), function ($query) use ($criteria) {
+            return $query->where('credit_applications.business_id', $criteria['businessId']);
+        });
 
         $query->orderBy('credit_applications.created_at', 'desc');
 
