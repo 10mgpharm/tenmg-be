@@ -2,10 +2,11 @@
 
 namespace App\Http\Resources\Admin;
 
+use App\Http\Resources\BusinessResource;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
-class UserResource extends JsonResource
+class UserWithBusinessResource extends JsonResource
 {
     /**
      * Transform the resource into an array.
@@ -18,12 +19,13 @@ class UserResource extends JsonResource
             'id' => $this->id,
             'email' => $this->email,
             'name' => $this->name,
+            'role' => strtoupper($this->type ?? $this->getRoleNames()->first()),
             'phone' => $this->phone,
             'status' => $this->active,
-            'role' => strtoupper($this->type ?? $this->getRoleNames()->first()),
             'account_status' => $this->getRawOriginal('status'),
             'dateJoined' => $this->created_at,
-            'businessName' => $this->ownerBusinessType?->name ?? $this->businesses()->firstWhere('user_id', $this->id)?->name,
+            'business' => $this->whenLoaded('businesses', fn() => $this->businesses->first() ? new BusinessResource($this->businesses->first()) : null),
+
         ];
     }
 }

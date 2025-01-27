@@ -26,6 +26,7 @@ use App\Http\Controllers\API\Credit\LoanApplicationController;
 use App\Http\Controllers\API\Credit\LoanController;
 use App\Http\Controllers\API\Credit\LoanOfferController;
 use App\Http\Controllers\API\Credit\TransactionHistoryController;
+use App\Http\Controllers\API\EcommerceDiscountController;
 use App\Http\Controllers\API\ProfileController;
 use App\Http\Controllers\API\ResendOtpController;
 use App\Http\Controllers\API\Storefront\CartController;
@@ -88,8 +89,7 @@ Route::prefix('v1')->group(function () {
             ->name('resend.otp')->middleware('throttle:5,1');
 
         Route::get('invite/view', [InviteController::class, 'view'])->name('invite.view');
-        Route::post('invite/accept', [InviteController::class, 'accept'])->name('invite.accept')->middleware('signed');
-        Route::post('invite/reject', [InviteController::class, 'reject'])->name('invite.reject')->middleware('signed');
+        Route::post('invite/accept', [InviteController::class, 'accept'])->name('invite.accept');
     });
 
     Route::prefix('storefront')->name('storefront.')->group(function () {
@@ -375,6 +375,8 @@ Route::prefix('v1')->group(function () {
                 Route::get('audit-logs/search', [AuditLogController::class, 'search']);
             });
 
+            Route::get('discounts/search', [EcommerceDiscountController::class, 'search']);
+            Route::apiResource('discounts', EcommerceDiscountController::class);
             Route::patch('users/{user}/status', [UsersController::class, 'status']);
             Route::apiResource('users', UsersController::class);
 
