@@ -33,7 +33,7 @@ class UsersController extends Controller
 
         if ($type = $request->input('type')) {
             $query->whereHas('roles', function ($query) use ($type) {
-                $query->where('name', $type == 'pharmacy' ? 'customer' : $type);
+                $query->where('name', $type == 'pharmacy' ? 'customer' : strtolower($type));
             });
         }
 

@@ -19,7 +19,7 @@ class UserWithBusinessResource extends JsonResource
             'id' => $this->id,
             'email' => $this->email,
             'name' => $this->name,
-            'type' => strtoupper($this->type ?? $this->getRoleNames()->first()),
+            'role' => strtoupper($this->type ?? $this->getRoleNames()->first()),
             'phone' => $this->phone,
             'status' => $this->active,
             'account_status' => $this->getRawOriginal('status'),
