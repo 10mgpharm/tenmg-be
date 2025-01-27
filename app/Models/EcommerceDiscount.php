@@ -35,6 +35,7 @@ class EcommerceDiscount extends Model
         'updated_by_id',
         'minimum_order_amount',
         'maximum_discount_amount',
+        'status',
 
     ];
 
@@ -48,6 +49,16 @@ class EcommerceDiscount extends Model
         'applicable_products' => 'array',
         'start_date' => 'datetime',
         'end_date' => 'datetime',
+    ];
+
+
+    /**
+     * The model's default values for attributes.
+     *
+     * @var array<string, bool>
+     */
+    protected $attributes = [
+        'status' => 'ACTIVE',
     ];
 
     /**

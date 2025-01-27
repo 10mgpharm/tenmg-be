@@ -87,6 +87,7 @@ class StoreEcommerceDiscountRequest extends FormRequest
             'customer_limit' => ['required', new Enum(DiscountCustomerLimitEnum::class),],
             'start_date' => ['sometimes', 'nullable', 'date', 'after_or_equal:today'],
             'end_date' => ['sometimes', 'nullable', 'date', 'after_or_equal:start_date',],
+            'status' => ['sometimes', 'nullable', 'in:ACTIVE,INACTIVE'],
         ];
     }
 
