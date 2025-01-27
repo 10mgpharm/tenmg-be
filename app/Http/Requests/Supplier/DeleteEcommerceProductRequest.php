@@ -15,7 +15,7 @@ class DeleteEcommerceProductRequest extends FormRequest
         $product = $this->route('product');
 
         // Suppliers can only update products created by their business
-        if ($user->hasRole('supplier') && $product->business_id === ($user->ownerBusinessType->id ?: $user->businesses()->first()->id)) {
+        if ($user->hasRole('supplier') && $product->business_id === ($user->ownerBusinessType->id ?? $user->businesses()->first()?->id)) {
             return true;
         }
 

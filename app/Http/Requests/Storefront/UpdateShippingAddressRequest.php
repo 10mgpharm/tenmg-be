@@ -18,7 +18,7 @@ class UpdateShippingAddressRequest extends FormRequest
         $user = $this->user();
         $shipping_address = $this->route('shipping_address');
 
-        if ($user->hasRole('customer') && $shipping_address->business_id === ($user->ownerBusinessType->id ?: $user->businesses()->first()->id)) {
+        if ($user->hasRole('customer') && $shipping_address->business_id === ($user->ownerBusinessType->id ?? $user->businesses()->first()?->id)) {
             return true;
         }
 

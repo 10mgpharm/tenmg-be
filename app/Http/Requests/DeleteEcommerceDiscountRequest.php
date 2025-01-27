@@ -16,7 +16,7 @@ class DeleteEcommerceDiscountRequest extends FormRequest
         $discount = $this->route('discount');
 
         // Can only delete discount created by their business
-        if ($user && $discount->business_id === ($user->ownerBusinessType->id ?: $user->businesses()->first()->id)) {
+        if ($user && $discount->business_id === ($user->ownerBusinessType->id ?? $user->businesses()->first()?->id)) {
             return true;
         }
 

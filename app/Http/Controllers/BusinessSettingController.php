@@ -80,7 +80,7 @@ class BusinessSettingController extends Controller
         if ($request->hasFile('cacDocument')) {
             $created = $this->attachmentService->saveNewUpload(
                 $request->file('cacDocument'),
-                $user->ownerBusinessType->id,
+                $user->ownerBusinessType?->id,
                 Business::class,
             );
 
