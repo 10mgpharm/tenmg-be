@@ -20,7 +20,7 @@ class EcommerceOrderController extends Controller
 
     function getOrderByStatus(Request $request)
     {
-        $validStatuses = ['PENDING','CONFIRMED','SHIPPED','DELIVERED','CANCELED','CART','COMPLETED'];
+        $validStatuses = ['PENDING','PROCESSING','SHIPPED','DELIVERED','CANCELED','CART','COMPLETED'];
 
         $orders = $this->ecommerceCartService->getOrderByStatus($request);
 
@@ -33,7 +33,7 @@ class EcommerceOrderController extends Controller
     {
         $request->validate([
             'orderId' => 'required|exists:ecommerce_orders,id',
-            'status' => 'required|in:PENDING,CONFIRMED,SHIPPED,DELIVERED,CANCELED,COMPLETED',
+            'status' => 'required|in:PENDING,PROCESSING,SHIPPED,DELIVERED,CANCELED,COMPLETED',
             'reason' => 'required_if:status,CANCELED|string',
             'requiresRefund' => 'required_if:status,CANCELED|boolean',
             'refundStatus' => 'required_if:status,CANCELED||in:REFUNDED,AWAITING REFUND'
