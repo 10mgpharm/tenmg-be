@@ -32,6 +32,7 @@ class ShippingAddress extends Model
         'city',
         'zip_code',
         'phone_number',
+        'is_default'
     ];
 
     /**

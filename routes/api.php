@@ -417,6 +417,7 @@ Route::prefix('v1')->group(function () {
             Route::get('/products/{product}', [StorefrontProductController::class, 'show']);
 
             Route::get('shipping-addresses/search', [StorefrontShippingAddressController::class, 'search']);
+            Route::post('shipping-addresses/set-default', [StorefrontShippingAddressController::class, 'setDefaultAddress']);
             Route::apiResource('shipping-addresses', StorefrontShippingAddressController::class);
 
             Route::post('/add-remove-cart-items', [CartController::class, 'addRemoveItemToCart']);

@@ -12,6 +12,7 @@ use App\Http\Resources\Storefront\ShippingAddressResource;
 use App\Models\ShippingAddress;
 use App\Services\Storefront\ShippingAddressService;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 
 class ShippingAddressController extends Controller
 {
@@ -128,6 +129,19 @@ class ShippingAddressController extends Controller
 
         return $this->returnJsonResponse(
             message: 'Shipping address successfully deleted.'
+        );
+    }
+
+    function setDefaultAddress(Request $request)
+    {
+        $request->validate([
+            'addressId' => 'required|exists:shipping_addresses,id'
+        ]);
+        $shippingAddress = $this->shippingAddress->setDefaultAddress($request);
+
+        return $this->returnJsonResponse(
+            message: 'Default address successfully set.',
+            data: new ShippingAddressResource($shippingAddress)
         );
     }
 }

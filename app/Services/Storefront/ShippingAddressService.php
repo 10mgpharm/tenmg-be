@@ -81,4 +81,33 @@ class ShippingAddressService implements IShippingAddressServiceService
         return $query->paginate($request->input('perPage', 10))->withQueryString()
             ->through(fn(ShippingAddress $item) => new ShippingAddressResource($item));
     }
+
+    function setDefaultAddress(Request $request)
+    {
+        try {
+
+            $user = $request->user();
+            $business_id = $user->ownerBusinessType?->id
+                ?: $user->businesses()->firstWhere('user_id', $user->id)?->id;
+
+            $shipping_address = ShippingAddress::where('business_id', $business_id)
+                ->where('id', $request->input('addressId'))
+                ->first();
+
+            if(!$shipping_address){
+                throw new Exception('Shipping address not found');
+            }
+
+            //update all addresses to false
+            ShippingAddress::where('business_id', $business_id)
+                ->update(['is_default' => false]);
+            $shipping_address->update(['is_default' => true]);
+
+            return $shipping_address;
+
+
+        } catch (\Throwable $th) {
+            throw $th;
+        }
+    }
 }
