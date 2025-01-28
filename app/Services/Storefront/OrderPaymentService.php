@@ -2,24 +2,24 @@
 
 namespace App\Services\Storefront;
 
-use App\Repositories\OrderPaymentRepository;
+use App\Repositories\FincraPaymentRepository;
 use Illuminate\Http\Request;
 
 class OrderPaymentService
 {
 
-    protected $orderPaymentRepository;
+    protected $fincraPaymentRepository;
 
-    function __construct(OrderPaymentRepository $orderPaymentRepository)
+    function __construct(FincraPaymentRepository $fincraPaymentRepository)
     {
-        $this->orderPaymentRepository = $orderPaymentRepository;
+        $this->fincraPaymentRepository = $fincraPaymentRepository;
     }
 
     function initializePayment(Request $request)
     {
         try {
 
-            return $this->orderPaymentRepository->initializePayment($request);
+            return $this->fincraPaymentRepository->initializePayment($request);
 
         } catch (\Throwable $th) {
             throw $th;

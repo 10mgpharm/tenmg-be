@@ -102,7 +102,7 @@ class BusinessSettingController extends Controller
 
         //send mail to all the admins
         foreach ($admins as $admin) {
-            $admin->sendLicenseVerificationNotification('A license verification request has been submitted and is now awaiting your review.', $admins);
+            $admin->sendLicenseVerificationNotification('A license verification request has been submitted and is now awaiting your review.', $admin);
         }
 
         return $this->returnJsonResponse(

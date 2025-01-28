@@ -439,6 +439,10 @@ Route::prefix('v1')->group(function () {
                 Route::post('add-shopping-list', [ShoppingListController::class, 'addShoppingList']);
                 Route::delete('remove-item/{id}', [ShoppingListController::class, 'removeItemFromSHoppingList']);
             });
+            Route::prefix('payment')->name('payment.')->group(function () {
+                Route::get('/verify/{ref}', [OrdersController::class, 'verifyFincraPayment']);
+                Route::get('/cancel/{ref}', [OrdersController::class, 'cancelPayment']);
+            });
 
         });//OrderPaymentController
 

@@ -41,4 +41,16 @@ class OrdersController extends Controller
         $order = $this->ecommerceOrderService->getOrderDetails($id);
         return $this->returnJsonResponse(message: 'Success', data: new EcommerceCartResource($order));
     }
+
+    function verifyFincraPayment($ref)
+    {
+        $orderPayment = $this->ecommerceOrderService->verifyFincraPayment($ref);
+        return $this->returnJsonResponse(message: 'Success', data: $orderPayment);
+    }
+
+    function cancelPayment($ref)
+    {
+        $this->ecommerceOrderService->cancelPayment($ref);
+        return $this->returnJsonResponse(message: 'Success');
+    }
 }

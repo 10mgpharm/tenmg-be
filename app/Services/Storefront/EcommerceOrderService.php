@@ -3,7 +3,7 @@
 namespace App\Services\Storefront;
 
 use App\Models\EcommerceOrder;
-use App\Repositories\OrderPaymentRepository;
+use App\Repositories\FincraPaymentRepository;
 use App\Repositories\OrderRepository;
 use Illuminate\Http\Request;
 
@@ -11,26 +11,19 @@ class EcommerceOrderService
 {
 
     protected $orderRepository;
-    protected $orderPaymentRepository;
+    protected $fincraPaymentRepository;
 
-    function __construct(OrderRepository $orderRepository, OrderPaymentRepository $orderPaymentRepository)
+    function __construct(OrderRepository $orderRepository, FincraPaymentRepository $fincraPaymentRepository)
     {
         $this->orderRepository = $orderRepository;
-        $this->orderPaymentRepository = $orderPaymentRepository;
+        $this->fincraPaymentRepository = $fincraPaymentRepository;
     }
 
     function checkout(Request $request)
     {
         try {
 
-            // $order = EcommerceOrder::find($request->orderId);
-            // $order->status = 'PENDING';
-            // $order->delivery_type = $request->deliveryType;
-            // $order->delivery_address = $request->deliveryAddress;
-            // $order->save();
-
-            // return $order;
-            return $this->orderPaymentRepository->initializePayment($request);
+            return $this->fincraPaymentRepository->initializePayment($request);
 
         } catch (\Throwable $th) {
             throw $th;
@@ -55,5 +48,15 @@ class EcommerceOrderService
     function getOrderDetails($id)
     {
         return $this->orderRepository->getOrderDetails($id);
+    }
+
+    function verifyFincraPayment($ref)
+    {
+        return $this->fincraPaymentRepository->verifyFincraPayment($ref);
+    }
+
+    function cancelPayment($ref)
+    {
+        return $this->fincraPaymentRepository->cancelPayment($ref);
     }
 }
