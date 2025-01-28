@@ -23,6 +23,7 @@ class ShippingAddressResource extends JsonResource
             'city' => $this->city,
             'zipCode' => $this->zip_code,
             'phoneNumber' => $this->phone_number,
+            'isDefault' => $this->is_default == 0 ? false : true
         ];
     }
 }

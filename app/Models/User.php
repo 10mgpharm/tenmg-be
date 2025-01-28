@@ -6,6 +6,7 @@ use App\Notifications\AdminVerificationNotification;
 use App\Notifications\Auth\ResetPasswordNotification;
 use App\Notifications\Auth\VerifyEmailNotification;
 use App\Notifications\LicenseVerificationNotification;
+use App\Notifications\Order\OrderConfirmationNotification;
 use Carbon\Carbon;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Casts\Attribute;
@@ -203,6 +204,11 @@ class User extends Authenticatable implements MustVerifyEmail
     public function sendLicenseVerificationNotification($message, $user = null)
     {
         $this->notify(new LicenseVerificationNotification($message, $user));
+    }
+
+    public function sendOrderConfirmationNotification($message, $user = null)
+    {
+        $this->notify(new OrderConfirmationNotification($message, $user));
     }
 
     protected function getDefaultGuardName(): string

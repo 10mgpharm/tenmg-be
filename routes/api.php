@@ -417,6 +417,7 @@ Route::prefix('v1')->group(function () {
             Route::get('/products/{product}', [StorefrontProductController::class, 'show']);
 
             Route::get('shipping-addresses/search', [StorefrontShippingAddressController::class, 'search']);
+            Route::post('shipping-addresses/set-default', [StorefrontShippingAddressController::class, 'setDefaultAddress']);
             Route::apiResource('shipping-addresses', StorefrontShippingAddressController::class);
 
             Route::post('/add-remove-cart-items', [CartController::class, 'addRemoveItemToCart']);
@@ -438,6 +439,10 @@ Route::prefix('v1')->group(function () {
                 Route::get('/', [ShoppingListController::class, 'getShoppingList']);
                 Route::post('add-shopping-list', [ShoppingListController::class, 'addShoppingList']);
                 Route::delete('remove-item/{id}', [ShoppingListController::class, 'removeItemFromSHoppingList']);
+            });
+            Route::prefix('payment')->name('payment.')->group(function () {
+                Route::get('/verify/{ref}', [OrdersController::class, 'verifyFincraPayment']);
+                Route::get('/cancel/{ref}', [OrdersController::class, 'cancelPayment']);
             });
 
         });//OrderPaymentController
