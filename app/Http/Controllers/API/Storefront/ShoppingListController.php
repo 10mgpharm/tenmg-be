@@ -20,7 +20,7 @@ class ShoppingListController extends Controller
         $request->validate([
             'productName' => 'required',
             'brandName' => 'required',
-            'purchaseDate' => 'nullable|date|after_or_equal:today',
+            'purchaseDate' => 'nullable|date|after_or_equal:'. now()->addDay()->toDateString(),
             'description' => 'required',
             'productId' => 'nullable|exists:ecommerce_products,id',
         ]);
