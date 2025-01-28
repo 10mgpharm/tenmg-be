@@ -52,6 +52,15 @@ class EcommerceDiscountService implements IEcommerceDiscountService
                 )
             )
             ->when(
+                $request->input('status'),
+                fn($query, $status) => $query->whereIn(
+                    'status',
+                    is_array($status)
+                        ? array_unique(array_map(fn($s) => strtoupper(trim($s)), $status))
+                        : array_unique(array_map(fn($s) => strtoupper(trim($s)), explode(",", $status)))
+                )
+            )
+            ->when(
                 $request->input('startDate'),
                 fn($query, $startDate) => $query->whereDate('start_date', '>=', $startDate)
             )

@@ -19,7 +19,7 @@ class UpdateEcommerceProductRequest extends FormRequest
         $product = $this->route('product');
 
         // Suppliers can only update products created by their business
-        if ($user->hasRole('supplier') && $product->business_id === $user->ownerBusinessType->id) {
+        if ($user->hasRole('supplier') && $product->business_id === $user->ownerBusinessType?->id) {
             return true;
         }
 

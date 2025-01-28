@@ -16,7 +16,7 @@ class DeleteInviteRequest extends FormRequest
 
         // Ensure the invite is created by the user's business and has not been accepted
         if ($user && 
-            $invite->business_id === ($user->ownerBusinessType->id ?? $user->businesses()->first()->id) && 
+            $invite->business_id === ($user->ownerBusinessType->id ?? $user->businesses()->first()?->id) && 
             $invite->status !== 'ACCEPTED') {
             return true;
         }
