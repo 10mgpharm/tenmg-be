@@ -73,13 +73,12 @@ class CreateInviteRequest extends FormRequest
                 'max:255',
                 // Ensure email isn't already invited for the business with non-rejected/removed status
                 Rule::unique('invites')->where('business_id', $business_id),
-                // Ensure email isn't already associated with the business
+                // Ensure email isn't already associated with a business
                 Rule::unique('users', 'email')->where(
                     fn($query) => $query->whereExists(
                         fn($subQuery) => $subQuery->select('id')
                             ->from('business_users')
                             ->whereColumn('business_users.user_id', 'users.id')
-                            ->where('business_users.business_id', $business_id)
                     )
                 ),
             ],
@@ -95,7 +94,7 @@ class CreateInviteRequest extends FormRequest
     public function messages()
     {
         return [
-            'email.unique' => 'This email has already been invited to this business.',
+            'email.unique' => 'This email has already exists or has been invited to this business.',
             'role_id.required' => $this->input('role') ? 'The selected role does not exist.' : 'The role field is required.',
             'role_id.exists' => 'The selected role does not exist.',
         ];
