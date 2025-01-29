@@ -144,7 +144,7 @@ class UsersController extends Controller
 
     public function destroy(DeleteUserRequest $request, User $user)
     {
-        $user->delete();
+        $user->forceDelete();
 
         return $this->returnJsonResponse(
             message: 'User successfully deleted.',
