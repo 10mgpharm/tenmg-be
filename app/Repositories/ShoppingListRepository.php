@@ -24,6 +24,7 @@ class ShoppingListRepository
         $shoppingList->product_name = $request->productName;
         $shoppingList->brand_name = $request->brandName;
         $shoppingList->purchase_date = $request->purchaseDate;
+        $shoppingList->description = $request->description;
         $shoppingList->user_id = Auth::id();
         $shoppingList->product_id = $request->productId;
         $shoppingList->save();

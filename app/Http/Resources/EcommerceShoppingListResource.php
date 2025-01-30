@@ -20,6 +20,7 @@ class EcommerceShoppingListResource extends JsonResource
             'brandName' => $this->brand_name,
             'purchaseDate' => $this->purchase_date,
             'productId' => $this->product_id,
+            'description' => $this->description,
             'image' =>$this->attachment?->url ?? "N/A",
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
