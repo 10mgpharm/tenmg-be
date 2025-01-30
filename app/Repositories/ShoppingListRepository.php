@@ -65,7 +65,7 @@ class ShoppingListRepository
             throw new \Exception('You are not allowed to delete this item');
         }
         $item->delete();
-        return $item;
+        return $item; //
     }
 
 }
