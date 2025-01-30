@@ -18,8 +18,8 @@ class BusinessUserResource extends JsonResource
             'id' => $this->id,
             'role' => strtoupper($this->role?->name ?? ''),
             'active' => $this->active,
-            'email' => $this->user->email,
-            'name' => $this->user->name,
+            'email' => $this->user?->email,
+            'name' => $this->user?->name,
         ];
 
         return parent::toArray($request);
