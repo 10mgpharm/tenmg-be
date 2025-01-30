@@ -21,6 +21,7 @@ class InviteResource extends JsonResource
             'status' => $this->status,
             'role' => $this->role->name,
             'createdAt' => $this->created_at->format('Y-m-d H:i:s'),
+            'userId' => $this->user_id,
         ];
     }
 }
