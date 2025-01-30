@@ -130,6 +130,11 @@ class AuthService implements IAuthService
                 ['role_id' => $userRole->id]
             );
 
+            //check if the user is a supplier
+            if ($businessType == BusinessType::SUPPLIER) {
+                $this->createEcommerceWallet($adminBusiness);
+            }
+
             (new OtpService)->forUser($user)
                 ->generate(OtpType::SIGNUP_EMAIL_VERIFICATION)
                 ->sendMail(OtpType::SIGNUP_EMAIL_VERIFICATION);
@@ -154,6 +159,9 @@ class AuthService implements IAuthService
 
             case BusinessType::VENDOR:
                 return Role::where('name', 'vendor')->first();
+
+            case BusinessType::LENDER:
+                return Role::where('name', 'lender')->first();
 
             default:
                 // BusinessType::CUSTOMER_PHARMACY
@@ -295,6 +303,11 @@ class AuthService implements IAuthService
                 ['role_id' => $userRole->id]
             );
 
+            //check if the user is a supplier
+            if ($businessType == BusinessType::SUPPLIER) {
+                $this->createEcommerceWallet($adminBusiness);
+            }
+
             DB::commit();
         } catch (\Throwable $th) {
             DB::rollBack();
@@ -319,5 +332,15 @@ class AuthService implements IAuthService
         $user = $request->user();
         $business = Business::firstWhere('owner_id', $user->id);
         $business->update($data);
+    }
+
+    public function createEcommerceWallet($business)
+    {
+        $business->wallet()->create([
+            'business_id' => $business->id,
+            'previous_balance' => 0,
+            'current_balance' => 0,
+        ]);
+
     }
 }

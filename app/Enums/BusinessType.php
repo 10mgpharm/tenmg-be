@@ -8,6 +8,7 @@ enum BusinessType: string
     case SUPPLIER = 'SUPPLIER';
     case VENDOR = 'VENDOR';
     case CUSTOMER_PHARMACY = 'CUSTOMER_PHARMACY';
+    case LENDER = 'LENDER';
 
     public static function allowedForRegistration(): array
     {
@@ -15,6 +16,7 @@ enum BusinessType: string
             self::SUPPLIER,
             self::VENDOR,
             self::CUSTOMER_PHARMACY,
+            self::LENDER
         ];
     }
 

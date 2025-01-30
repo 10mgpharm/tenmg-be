@@ -77,4 +77,9 @@ class Business extends Model
     {
         return $this->morphOne(related: FileUpload::class, name: 'model');
     }
+
+    public function wallet()
+    {
+        return $this->hasOne(EcommerceWallet::class, 'business_id');
+    }
 }
