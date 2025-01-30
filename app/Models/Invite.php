@@ -21,6 +21,7 @@ class Invite extends Model
         'creator_id',
         'expires_at',
         'invite_token',
+        'user_id',
     ];
 
     /**

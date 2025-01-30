@@ -157,7 +157,7 @@ class InviteService implements IInviteService
                 $user->save();
 
                 // Delete the invite after successful user creation
-                $invite->update(['status' => 'ACCEPTED']);
+                $invite->update(['status' => 'ACCEPTED', 'user_id' => $user->id]);
 
                 return $user->refresh(); // Return the updated user instance
             });
