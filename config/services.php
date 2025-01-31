@@ -39,6 +39,11 @@ return [
         'secret' => env('PAYSTACK_SECRET_KEY'),
         'url' => env('PAYSTACK_BASE_URL', 'https://api.paystack.co'),
     ],
+    'fincra' => [
+        'public' => env('FINCRA_PUBKEY'),
+        'secret' => env('FINCRA_SECKEY'),
+        'url' => env('FINCRA_BASE_URL', 'https://api.paystack.co'),
+    ],
 
     'google' => [
         'oauth_url' => env('GOOGLE_OAUTH2_URL'),

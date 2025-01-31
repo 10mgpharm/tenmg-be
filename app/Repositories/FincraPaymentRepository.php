@@ -11,15 +11,14 @@ use Illuminate\Support\Facades\Auth;
 
 class FincraPaymentRepository
 {
-
-    function initializePayment(Request $request)
+    public function initializePayment(Request $request)
     {
         //get the order by id
         $order = EcommerceOrder::find($request->orderId);
 
         //ensure order is in cart
-        if ($order->status != "CART") {
-            throw new \Exception("Order is not in cart");
+        if ($order->status != 'CART') {
+            throw new \Exception('Order is not in cart');
         }
 
         $amount = $order->grand_total;
@@ -34,40 +33,40 @@ class FincraPaymentRepository
         $orderPayment = EcommercePayment::where('order_id', $order->id)->first();
 
         //create or update ecommerce payment
-        $orderPayment = $orderPayment ?? new EcommercePayment();
+        $orderPayment = $orderPayment ?? new EcommercePayment;
         $orderPayment->order_id = $order->id;
-        $orderPayment->status = "initiated";
+        $orderPayment->status = 'initiated';
         $orderPayment->reference = $reference;
         $orderPayment->customer_id = Auth::id();
         $orderPayment->amount = $amount;
         $orderPayment->fee = $transactionFee;
         $orderPayment->total_amount = $amount + $transactionFee;
-        $orderPayment->channel = "fincra";
-        $orderPayment->currency = "NGN";
+        $orderPayment->channel = 'fincra';
+        $orderPayment->currency = 'NGN';
         $orderPayment->save();
 
         return $orderPayment;
     }
 
-    function calculateTransactionFee($amount, $currency)
+    public function calculateTransactionFee($amount, $currency)
     {
 
-        $apiUrl = "https://api.fincra.com/checkout/data/fees"; // Example endpoint
+        $apiUrl = 'https://api.fincra.com/checkout/data/fees'; // Example endpoint
 
         // You’d typically retrieve your secret key from a secure location (env variable, config, etc.)
         $secretKey = env('YOUR_FINCRA_SECKEY');
 
         // Prepare the data you need to send. This will vary based on Fincra's documentation.
-        $postData = array(
-            'amount'   => $amount,
+        $postData = [
+            'amount' => $amount,
             'currency' => $currency,
-            'type' => 'card'
-        );
+            'type' => 'card',
+        ];
 
-        $headers = array(
-            "Content-Type: application/json",
+        $headers = [
+            'Content-Type: application/json',
             "Authorization: Bearer $secretKey",
-        );
+        ];
 
         // Initialize cURL
         $ch = curl_init($apiUrl);
@@ -80,7 +79,7 @@ class FincraPaymentRepository
 
         // Execute request
         $response = curl_exec($ch);
-        $err      = curl_error($ch);
+        $err = curl_error($ch);
 
         // Close connection
         curl_close($ch);
@@ -89,6 +88,7 @@ class FincraPaymentRepository
         if ($err) {
             // Handle the error (log it, throw exception, etc.)
             return $err;
+
             return null;
         } else {
             // Decode JSON response
@@ -105,22 +105,22 @@ class FincraPaymentRepository
         }
     }
 
-    function verifyFincraPayment($ref)
+    public function verifyFincraPayment($ref)
     {
 
         $curl = curl_init();
         curl_setopt_array($curl, [
-        CURLOPT_URL => env('FINCRA_BASE_URL')."/collections/merchant-reference/".$ref,
-        CURLOPT_RETURNTRANSFER => true,
-        CURLOPT_ENCODING => "",
-        CURLOPT_MAXREDIRS => 10,
-        CURLOPT_TIMEOUT => 30,
-        CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
-        CURLOPT_CUSTOMREQUEST => "GET",
-        CURLOPT_HTTPHEADER => [
-            "accept: application/json",
-            "api-key: ".env('FINCRA_SECKEY')
-        ],
+            CURLOPT_URL => config('services.fincra.url').'/collections/merchant-reference/'.$ref,
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_ENCODING => '',
+            CURLOPT_MAXREDIRS => 10,
+            CURLOPT_TIMEOUT => 30,
+            CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+            CURLOPT_CUSTOMREQUEST => 'GET',
+            CURLOPT_HTTPHEADER => [
+                'accept: application/json',
+                'api-key: '.config('services.fincra.secret'),
+            ],
         ]);
 
         $response = curl_exec($curl);
@@ -129,35 +129,35 @@ class FincraPaymentRepository
         curl_close($curl);
 
         if ($err) {
-            echo "cURL Error #:" . $err;
+            echo 'cURL Error #:'.$err;
         } else {
-           return $this->completeOrder(json_decode($response));
+            return $this->completeOrder(json_decode($response));
         }
 
     }
 
-    function completeOrder($data)
+    public function completeOrder($data)
     {
         $body = $data->data;
         $merchantReference = $body->merchantReference;
         $status = $body->status;
 
-        if($status != "successful"){
-            throw new \Exception("Payment not successful");
+        if ($status != 'successful') {
+            throw new \Exception('Payment not successful');
         }
 
         // //get the order payment instance
         $orderPayment = EcommercePayment::where('reference', $merchantReference)->first();
         // //update external reference
         $orderPayment->external_reference = $body->reference;
-        $orderPayment->status = "success";
+        $orderPayment->status = 'success';
         $orderPayment->paid_at = now();
         $orderPayment->meta = json_encode($body);
         $orderPayment->save();
 
         //update order status
         $order = EcommerceOrder::find($orderPayment->order_id);
-        $order->status = "PENDING";
+        $order->status = 'PENDING';
         $order->save();
 
         //send email to customer.
@@ -167,7 +167,7 @@ class FincraPaymentRepository
         //send email to supplier
         $orderItems = $order->orderDetails;
 
-        for ($i=0; $i < count($orderItems); $i++) {
+        for ($i = 0; $i < count($orderItems); $i++) {
             $product = $orderItems[$i]->product;
             $supplier = $orderItems[$i]->supplier;
             $owner = $supplier->owner;
@@ -183,16 +183,16 @@ class FincraPaymentRepository
 
     }
 
-    function cancelPayment($ref)
+    public function cancelPayment($ref)
     {
         $orderPayment = EcommercePayment::where('reference', $ref)->first();
-        if(!$orderPayment){
-            throw new \Exception("Order payment not found");
+        if (! $orderPayment) {
+            throw new \Exception('Order payment not found');
         }
-         if($orderPayment->status != "initiated"){
-            throw new \Exception("Order payment not initiated");
+        if ($orderPayment->status != 'initiated') {
+            throw new \Exception('Order payment not initiated');
         }
-        $orderPayment->status = "abandoned";
+        $orderPayment->status = 'abandoned';
         $orderPayment->save();
     }
 }
