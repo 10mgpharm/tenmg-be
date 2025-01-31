@@ -28,6 +28,7 @@ class BusinessUserSeeder extends Seeder
         $supplierRole = Role::where('name', 'supplier')->first();
         $vendorRole = Role::where('name', 'vendor')->first();
         $customerRole = Role::where('name', 'customer')->first(); // Pharmacy / Hospital
+        $lenderRole = Role::where('name', 'lender')->first();
 
         // 1. Setup Admin Business and Users
         $adminUser = User::firstOrCreate(
@@ -245,6 +246,40 @@ class BusinessUserSeeder extends Seeder
             BusinessUser::firstOrCreate(
                 ['user_id' => $customerHost->id, 'business_id' => $customerHostBusiness->id],
                 ['role_id' => $customerRole->id]
+            );
+        }
+
+        // 6. Create 5 users with different businesses and type 'LENDER'
+        for ($i = 1; $i <= 5; $i++) {
+            $lenderHost = User::firstOrCreate(
+                ['email' => "lender_LEN$i@example.com"],
+                [
+                    'name' => $faker->name(),
+                    'phone' => $faker->phoneNumber(),
+                    'email_verified_at' => now(),
+                    'password' => bcrypt('password'),
+                ]
+            );
+            $lenderHost->assignRole($lenderRole);
+
+            $lenderHostBusiness = Business::firstOrCreate(
+                ['code' => "LENDER_LEND00$i"],
+                [
+                    'name' => "Lender Business $i",
+                    'short_name' => "lender$i",
+                    'owner_id' => $lenderHost->id,
+                    'type' => 'LENDER',
+                    'address' => $faker->address,
+                    'contact_person' => $faker->name(),
+                    'contact_phone' => $faker->phoneNumber,
+                    'contact_email' => $faker->email,
+                    'status' => 'PENDING_VERIFICATION',
+                ]
+            );
+
+            BusinessUser::firstOrCreate(
+                ['user_id' => $lenderHost->id, 'business_id' => $lenderHostBusiness->id],
+                ['role_id' => $lenderRole->id]
             );
         }
 

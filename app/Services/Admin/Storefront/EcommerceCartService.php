@@ -26,6 +26,11 @@ class EcommerceCartService
         return $this->orderRepository->getOrderByStatus($request);
     }
 
+    function getOrderByStatusCount()
+    {
+        return $this->orderRepository->getOrderByStatusCount();
+    }
+
     function changeOrderStatus(Request $request)
     {
         try {

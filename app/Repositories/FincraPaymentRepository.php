@@ -54,7 +54,7 @@ class FincraPaymentRepository
         $apiUrl = 'https://api.fincra.com/checkout/data/fees'; // Example endpoint
 
         // You’d typically retrieve your secret key from a secure location (env variable, config, etc.)
-        $secretKey = env('YOUR_FINCRA_SECRET_KEY');
+        $secretKey = env('YOUR_FINCRA_SECKEY');
 
         // Prepare the data you need to send. This will vary based on Fincra's documentation.
         $postData = [

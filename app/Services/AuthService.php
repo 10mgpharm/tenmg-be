@@ -12,6 +12,7 @@ use App\Http\Requests\AuthProviderRequest;
 use App\Http\Resources\UserResource;
 use App\Models\Business;
 use App\Models\BusinessUser;
+use App\Models\CreditLendersWallet;
 use App\Models\Role;
 use App\Models\User;
 use App\Services\Interfaces\IAuthService;
@@ -130,6 +131,13 @@ class AuthService implements IAuthService
                 ['role_id' => $userRole->id]
             );
 
+            //check if the user is a supplier
+            if ($businessType == BusinessType::SUPPLIER) {
+                $this->createEcommerceWallet($adminBusiness);
+            }elseif($businessType == BusinessType::LENDER){
+                $this->createLendersWallet($adminBusiness);
+            }
+
             (new OtpService)->forUser($user)
                 ->generate(OtpType::SIGNUP_EMAIL_VERIFICATION)
                 ->sendMail(OtpType::SIGNUP_EMAIL_VERIFICATION);
@@ -154,6 +162,9 @@ class AuthService implements IAuthService
 
             case BusinessType::VENDOR:
                 return Role::where('name', 'vendor')->first();
+
+            case BusinessType::LENDER:
+                return Role::where('name', 'lender')->first();
 
             default:
                 // BusinessType::CUSTOMER_PHARMACY
@@ -295,6 +306,13 @@ class AuthService implements IAuthService
                 ['role_id' => $userRole->id]
             );
 
+            //check if the user is a supplier
+            if ($businessType == BusinessType::SUPPLIER) {
+                $this->createEcommerceWallet($adminBusiness);
+            }elseif($businessType == BusinessType::LENDER){
+                $this->createLendersWallet($adminBusiness);
+            }
+
             DB::commit();
         } catch (\Throwable $th) {
             DB::rollBack();
@@ -319,5 +337,29 @@ class AuthService implements IAuthService
         $user = $request->user();
         $business = Business::firstWhere('owner_id', $user->id);
         $business->update($data);
+    }
+
+    public function createEcommerceWallet($business)
+    {
+        $business->wallet()->create([
+            'business_id' => $business->id,
+            'previous_balance' => 0,
+            'current_balance' => 0,
+        ]);
+
+    }
+
+    public function createLendersWallet($business)
+    {
+        $walletTypes = ["investment", "deposit"];
+        foreach ($walletTypes as $type) {
+            CreditLendersWallet::create([
+                'lender_id' => $business->id,
+                'type' => $type,
+                'previous_balance' => 0,
+                'current_balance' => 0,
+            ]);
+        }
+
     }
 }

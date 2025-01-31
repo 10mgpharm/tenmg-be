@@ -5,6 +5,7 @@ namespace App\Repositories;
 use App\Models\EcommerceOrder;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 class OrderRepository
 {
@@ -33,6 +34,25 @@ class OrderRepository
             $query->where("status", '!=', 'CART')->orderBy("created_at", "desc");
 
             return $query->paginate(20);
+
+        } catch (\Throwable $th) {
+            throw $th;
+        }
+    }
+
+    function getOrderByStatusCount()
+    {
+        try {
+
+            $statuses = ['PENDING','PROCESSING','SHIPPED','DELIVERED','CANCELED','COMPLETED'];
+
+            // Query orders, group by status, and count each one:
+            $counts = EcommerceOrder::select('status', DB::raw('COUNT(*) as total'))
+                ->whereIn('status', $statuses) // optional filter only those statuses
+                ->groupBy('status')
+                ->get();
+
+                return $counts;
 
         } catch (\Throwable $th) {
             throw $th;

@@ -15,4 +15,6 @@ class RoleConstant
     public const OPERATION = 'operation';
 
     public const SUPPORT = 'support';
+
+    public const LENDER = 'lender';
 }

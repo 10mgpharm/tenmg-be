@@ -56,4 +56,12 @@ class Invite extends Model
     {
         return $this->belongsTo(Role::class);
     }
+
+    /**
+     * Get the user associated with the invitee.
+     */
+    public function user()
+    {
+        return $this->belongsTo(User::class);
+    }
 }
