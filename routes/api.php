@@ -389,6 +389,7 @@ Route::prefix('v1')->group(function () {
 
             Route::prefix('orders')->name('orders.')->group(function () {
                 Route::get('get-orders', [EcommerceOrderController::class, 'getOrderByStatus']);
+                Route::get('get-orders-status-count', [EcommerceOrderController::class, 'getOrderByStatusCount']);
                 Route::post('change-order-status', [EcommerceOrderController::class, 'changeOrderStatus']);
                 Route::get('get-order-details/{id}', [EcommerceOrderController::class, 'getOrderDetails']);
             });

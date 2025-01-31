@@ -29,6 +29,15 @@ class EcommerceOrderController extends Controller
         );
     }
 
+    function getOrderByStatusCount()
+    {
+        $count = $this->ecommerceCartService->getOrderByStatusCount();
+        return $this->returnJsonResponse(
+            data: $count
+        );
+
+    }
+
     function changeOrderStatus(Request $request)
     {
         $request->validate([
