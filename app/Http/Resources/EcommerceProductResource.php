@@ -22,7 +22,7 @@ class EcommerceProductResource extends JsonResource
             'description' => $this->description,
             'active' => $this->active,
             'status' => match (true) {
-                in_array($this->status, StatusEnum::actives()) => StatusEnum::ACTIVE->value,
+                in_array($this->status, StatusEnum::actives()) => StatusEnum::APPROVED->value,
                 in_array($this->status, array_column(StatusEnum::cases(), 'value'), true) => $this->status,
                 default => 'PENDING',
             },

@@ -2,6 +2,7 @@
 
 namespace App\Http\Resources;
 
+use App\Enums\StatusEnum;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
@@ -19,7 +20,11 @@ class EcommerceCategoryResource extends JsonResource
             'name' => $this->name,
             'slug' => $this->slug,
             'active' => $this->active,
-            'status' => $this->status,
+            'status' => match (true) {
+                in_array($this->status, StatusEnum::actives()) => StatusEnum::APPROVED->value,
+                in_array($this->status, array_column(StatusEnum::cases(), 'value'), true) => $this->status,
+                default => 'PENDING',
+            },
             'createdAt' => $this->created_at->format('M d, y h:i A'),
             // 'createdBy' => new UserResource($this->createdBy),
             // 'updatedBy' => new UserResource($this->updatedBy),
