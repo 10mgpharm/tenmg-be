@@ -25,7 +25,9 @@ class EcommerceCartResource extends JsonResource
             'deliveryAddress' => $this->delivery_address,
             'deliveryType' => $this->delivery_type,
             'status' => $this->status,
+            'refundStatus' => $this->refund_status,
             'items' => EcommerceCartItemResource::collection($this->orderDetails),
+            'totalTenmgComission' => $this->orderDetails->sum('tenmg_commission'),
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at
         ];
