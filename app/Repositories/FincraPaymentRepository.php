@@ -108,6 +108,16 @@ class FincraPaymentRepository
     public function verifyFincraPayment($ref)
     {
 
+        //check if we have a payment with this ref
+        $payment = EcommercePayment::where('reference', $ref)->first();
+        if (!$payment) {
+            throw new \Exception('Payment not found');
+        }
+
+        if($payment->status != "initiated"){
+            throw new \Exception('Payment already processed');
+        }
+
         $curl = curl_init();
         curl_setopt_array($curl, [
             CURLOPT_URL => config('services.fincra.url').'/collections/merchant-reference/'.$ref,
