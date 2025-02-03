@@ -2,6 +2,7 @@
 
 namespace App\Http\Resources;
 
+use App\Enums\StatusEnum;
 use App\Models\EcommerceMedicationVariation;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -21,7 +22,11 @@ class EcommerceMedicationTypeResource extends JsonResource
             'name' => $this->name,
             'slug' => $this->slug,
             'active' => $this->active,
-            'status' => $this->status,
+            'status' => match (true) {
+                in_array($this->status, StatusEnum::actives()) => StatusEnum::APPROVED->value,
+                in_array($this->status, array_column(StatusEnum::cases(), 'value'), true) => $this->status,
+                default => 'PENDING',
+            },
             // 'variations' => $this->variations,
             'variations' => $this->variations->filter(function (EcommerceMedicationVariation $variation) {
                 return $variation->active;
