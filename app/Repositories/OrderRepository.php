@@ -46,13 +46,37 @@ class OrderRepository
 
             $statuses = ['PENDING','PROCESSING','SHIPPED','DELIVERED','CANCELED','COMPLETED'];
 
-            // Query orders, group by status, and count each one:
-            $counts = EcommerceOrder::select('status', DB::raw('COUNT(*) as total'))
-                ->whereIn('status', $statuses) // optional filter only those statuses
-                ->groupBy('status')
-                ->get();
+            $query = EcommerceOrder::query();
 
-                return $counts;
+            //check if user is not an admin
+            $user = auth()->user();
+            if (!$user->hasRole('admin')) {
+                $businessId = $user->ownerBusinessType?->id ?: $user->businesses()
+                        ->firstWhere('user_id', $user->id)?->id;
+                // $query->where('business_id', $businessId);
+
+                    $query->whereHas('orderDetails', function ($q) use ($businessId) {
+                        $q->where('supplier_id', $businessId);
+                    });
+            }
+
+            // Query orders, group by status, and count each one
+            $counts = $query->select('status', DB::raw('COUNT(*) as total'))
+            ->whereIn('status', $statuses) // Optional: filter only those statuses
+            ->groupBy('status')
+            ->get()
+            ->pluck('total', 'status'); // Convert to an associative array
+
+            // Create a default collection with all statuses and a count of zero
+            $defaultCounts = collect($statuses)->flip()->map(fn() => 0);
+
+            // Merge the database results with the default collection
+            $result = $defaultCounts->merge($counts)->map(fn($total, $status) => [
+            'status' => $status,
+            'total' => $total,
+            ])->values();
+
+                return $result;
 
         } catch (\Throwable $th) {
             throw $th;

@@ -5,6 +5,7 @@ namespace App\Repositories;
 use App\Helpers\UtilityHelper;
 use App\Models\EcommerceOrder;
 use App\Models\EcommercePayment;
+use App\Models\EcommerceShopingList;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -108,6 +109,16 @@ class FincraPaymentRepository
     public function verifyFincraPayment($ref)
     {
 
+        //check if we have a payment with this ref
+        $payment = EcommercePayment::where('reference', $ref)->first();
+        if (!$payment) {
+            throw new \Exception('Payment not found');
+        }
+
+        if($payment->status != "initiated"){
+            throw new \Exception('Payment already processed');
+        }
+
         $curl = curl_init();
         curl_setopt_array($curl, [
             CURLOPT_URL => config('services.fincra.url').'/collections/merchant-reference/'.$ref,
@@ -167,6 +178,8 @@ class FincraPaymentRepository
         //send email to supplier
         $orderItems = $order->orderDetails;
 
+        $this->removeBoughtItemFromShoppingList($orderItems);
+
         for ($i = 0; $i < count($orderItems); $i++) {
             $product = $orderItems[$i]->product;
             $supplier = $orderItems[$i]->supplier;
@@ -194,5 +207,12 @@ class FincraPaymentRepository
         }
         $orderPayment->status = 'abandoned';
         $orderPayment->save();
+    }
+
+    public function removeBoughtItemFromShoppingList($orderItems)
+    {
+        for ($i=0; $i < count($orderItems); $i++) {
+            EcommerceShopingList::where('user_id', Auth::id())->where('product_id', $orderItems[$i]->ecommerce_product_id)->delete();
+        }
     }
 }

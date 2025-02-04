@@ -61,7 +61,7 @@ class SignupUserRequest extends FormRequest
     {
         return [
             'termsAndConditions.required' => 'You must agree to the terms and conditions.',
-            'businessType.in' => 'The business type must be either supplier, pharmacy or vendor',
+            'businessType.in' => 'The business type must be either supplier, pharmacy, vendor or lender',
         ];
     }
 }
