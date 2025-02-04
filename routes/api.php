@@ -161,6 +161,7 @@ Route::prefix('v1')->group(function () {
             Route::prefix('orders')->name('orders.')->group(function () {
                 Route::get('/', [SupplierEcommerceOrderController::class, 'getOrderByStatusSuppliers']);
                 Route::get('get-order-details/{id}', [SupplierEcommerceOrderController::class, 'getOrderDetailsSuppliers']);
+                Route::get('get-orders-status-count', [EcommerceOrderController::class, 'getOrderByStatusCount']);
             });
         });
 
