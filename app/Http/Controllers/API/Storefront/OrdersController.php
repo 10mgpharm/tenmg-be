@@ -27,7 +27,7 @@ class OrdersController extends Controller
         ]);
         $order = $this->ecommerceOrderService->checkout($request);
 
-        return $this->returnJsonResponse(message: 'Success', data: new EcommerceCartResource($order));
+        return $this->returnJsonResponse(message: 'Success', data: $order);
     }
 
     function getOrders(Request $request)
