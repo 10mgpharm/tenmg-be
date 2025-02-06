@@ -138,6 +138,12 @@ class FincraPaymentRepository
         $response = curl_exec($curl);
         $err = curl_error($curl);
 
+        Log::info('completeOrder', [
+            'response' => $response,
+            'url' => config('services.fincra.url'),
+            'secret' => config('services.fincra.secret'),
+            'ref' => config('services.fincra.url').'/collections/merchant-reference/'.$ref,
+        ]);
         curl_close($curl);
 
         if ($err) {
