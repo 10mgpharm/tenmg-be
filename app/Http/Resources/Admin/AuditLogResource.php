@@ -14,6 +14,12 @@ class AuditLogResource extends JsonResource
      */
     public function toArray(Request $request): array
     {
-        return parent::toArray($request);
+
+    return [
+        'description' => $this->description,
+        'event' => $this->event,
+        'createAt' => $this->created_at ? $this->created_at->format('M d, y h:i A') : null,
+        'properties' => $this->properties->except(['actor_business_id', 'target_business_id'])->toArray(),
+    ];
     }
 }
