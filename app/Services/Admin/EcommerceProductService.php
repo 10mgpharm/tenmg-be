@@ -112,10 +112,10 @@ class EcommerceProductService implements IEcommerceProductService
                     ]
                 );
 
-                $validated['status'] = isset($validated['active']) && $validated['active'] === true 
-                ? (isset($validated['status']) && in_array($validated['status'], StatusEnum::actives()) 
-                    ? $validated['status'] 
-                    : $validated['status'] ?? StatusEnum::ACTIVE->value) 
+                $validated['status'] = isset($validated['active']) && $validated['active'] === true
+                ? (isset($validated['status']) && in_array($validated['status'], StatusEnum::actives())
+                    ? $validated['status']
+                    : $validated['status'] ?? StatusEnum::ACTIVE->value)
                 : ($validated['status'] ?? StatusEnum::INACTIVE->value);
 
                 $validated['active'] = (in_array($validated['status'], StatusEnum::actives()))
@@ -308,7 +308,7 @@ class EcommerceProductService implements IEcommerceProductService
                             'ecommerce_product_id' => $product->id,
                             'business_id' => $validated['business_id'],
                         ], fn($each) => $each !== null && $each !== false);
-                    
+
                         // Update the variation attributes
                         $variation->update([
                             ...$updated,
@@ -332,10 +332,10 @@ class EcommerceProductService implements IEcommerceProductService
                     $validated['thumbnail_file_id'] = $created->id;
                 }
 
-                $validated['status'] = isset($validated['active']) && $validated['active'] === true 
-                ? (isset($validated['status']) && in_array($validated['status'], StatusEnum::actives()) 
-                    ? $validated['status'] 
-                    : $validated['status'] ?? StatusEnum::ACTIVE->value) 
+                $validated['status'] = isset($validated['active']) && $validated['active'] === true
+                ? (isset($validated['status']) && in_array($validated['status'], StatusEnum::actives())
+                    ? $validated['status']
+                    : $validated['status'] ?? StatusEnum::ACTIVE->value)
                 : ($validated['status'] ?? ($product->status ?? StatusEnum::INACTIVE->value));
 
                 $validated['active'] = (in_array($validated['status'], StatusEnum::actives()))
@@ -381,13 +381,13 @@ class EcommerceProductService implements IEcommerceProductService
             ->when(
                 $request->input('status'),
                 fn($query, $status) => $query->whereIn(
-                    'status', 
+                    'status',
                     is_array($status)
                         ? array_unique(array_merge(...array_map(fn($s) => StatusEnum::mapper(trim($s)), $status)))
                         : array_unique(array_merge(...array_map(fn($s) => StatusEnum::mapper(trim($s)), explode(",", $status))))
                 )
             )
-            
+
             // Filter by active status (active/inactive mapped to 1/0)
             ->when(
                 $request->input('active'),
@@ -398,7 +398,7 @@ class EcommerceProductService implements IEcommerceProductService
             ->when($request->input('inventory'), function ($query, $inventory) {
                 $inventories = is_array($inventory) ? $inventory : explode(',', $inventory);
                 $inventories = array_unique(array_map('trim', $inventories));
-            
+
                 $query->where(function ($query) use ($inventories) {
                     foreach ($inventories as $status) {
                         $query->when(
@@ -416,7 +416,7 @@ class EcommerceProductService implements IEcommerceProductService
                     }
                 });
             })
-            
+
             // Filter by category names (case-insensitive partial match)
             ->when($request->input('category'), function ($query, $category) {
                 $categories = is_array($category) ? $category : explode(',', $category);

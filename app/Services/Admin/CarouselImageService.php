@@ -55,6 +55,7 @@ class CarouselImageService implements ICarouselImageService
                         request()->file('image'),
                         $carousel_image->id,
                         CarouselImage::class,
+                        true
                     );
                     $carousel_image->update(['image_file_id' => $created->id]);
                 }
@@ -85,6 +86,7 @@ class CarouselImageService implements ICarouselImageService
                         request()->file('image'),
                         $carousel_image->id,
                         CarouselImage::class,
+                        true
                     );
                     $validated['image_file_id'] = $created->id;
                 }

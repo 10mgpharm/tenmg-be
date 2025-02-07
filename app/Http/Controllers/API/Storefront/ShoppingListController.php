@@ -40,6 +40,15 @@ class ShoppingListController extends Controller
         );
     }
 
+    function getShoppingListAdmin(Request $request)
+    {
+        $list = $this->shoppingListService->getShoppingListAdmin($request->all(), $request->perPage ?? 10);
+        return $this->returnJsonResponse(
+            message: 'Shopping list retrieved successfully',
+            data: EcommerceShoppingListResource::collection($list)->response()->getData(true)
+        );
+    }
+
     function removeItemFromSHoppingList($id)
     {
         $deleted = $this->shoppingListService->removeItemFromShoppingList($id);

@@ -398,6 +398,12 @@ Route::prefix('v1')->group(function () {
                 Route::post('change-order-status', [EcommerceOrderController::class, 'changeOrderStatus']);
                 Route::get('get-order-details/{id}', [EcommerceOrderController::class, 'getOrderDetails']);
             });
+
+            Route::prefix('shopping-list')->name('shopping-list.')->group(function () {
+                Route::get('/', [ShoppingListController::class, 'getShoppingListAdmin']);
+                Route::post('add-shopping-list', [ShoppingListController::class, 'addShoppingList']);
+                Route::delete('remove-item/{id}', [ShoppingListController::class, 'removeItemFromSHoppingList']);
+            });
         });
 
         // STOREFRONTS specific routes

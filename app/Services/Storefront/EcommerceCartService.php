@@ -61,7 +61,6 @@ class EcommerceCartService
                         $item->save();
                     }
 
-
                 } else {
 
                     $product = EcommerceProduct::find($request->productId);
@@ -83,7 +82,7 @@ class EcommerceCartService
 
                 //update cart total
                 $cart->order_total = $cart->orderDetails()->sum('discount_price');
-                $cart->grand_total = $cart->orderDetails()->sum('discount_price')+$cart->orderDetails()->sum('tenmg_commission');
+                $cart->grand_total = $cart->orderDetails()->sum('discount_price');
                 $cart->qty_total = $cart->orderDetails()->sum('quantity');
                 $cart->save();
 
@@ -100,7 +99,7 @@ class EcommerceCartService
                     'customer_id' => Auth::id(),
                     'qty_total' => $request->qty,
                     'order_total' => $orderPrice * $request->qty,
-                    'grand_total' => $orderPrice * $request->qty+$tenmgPercentCommission,
+                    'grand_total' => $orderPrice * $request->qty,
                     'delivery_address' => "address",
                     'status' => 'CART',
                     'logistic_total' => 0,
@@ -162,7 +161,7 @@ class EcommerceCartService
             }
 
             $cart->order_total = $cart->orderDetails()->sum('discount_price');
-            $cart->grand_total = $cart->orderDetails()->sum('discount_price')+$cart->orderDetails()->sum('tenmg_commission');
+            $cart->grand_total = $cart->orderDetails()->sum('discount_price');
             $cart->qty_total = $cart->orderDetails()->sum('quantity');
             $cart->save();
 
@@ -200,7 +199,7 @@ class EcommerceCartService
                 'customer_id' => Auth::id(),
                 'qty_total' => $request->qty,
                 'order_total' => $orderPrice * $request->qty,
-                'grand_total' => $orderPrice * $request->qty+$tenmgPercentCommission,
+                'grand_total' => $orderPrice * $request->qty,
                 'delivery_address' => "address",
                 'status' => 'PENDING',
                 'logistic_total' => 0,

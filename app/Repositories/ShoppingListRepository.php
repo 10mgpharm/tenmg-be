@@ -53,6 +53,24 @@ class ShoppingListRepository
         return $list;
     }
 
+    function getShoppingListAdmin($filters, $perPage):\Illuminate\Contracts\Pagination\LengthAwarePaginator
+    {
+
+        $query = EcommerceShopingList::query();
+
+        // Search logic
+        $query->when(isset($filters['search']), function ($query) use ($filters) {
+            $searchTerm = "%{$filters['search']}%";
+            return $query->where(function ($query) use ($searchTerm) {
+                $query->where('product_name', 'like', $searchTerm);
+            });
+        });
+
+        $list = $query->orderBy('created_at', 'DESC')->paginate($perPage);
+
+        return $list;
+    }
+
     function removeItemFromSHoppingList($id)
     {
         $item = EcommerceShopingList::find($id);
