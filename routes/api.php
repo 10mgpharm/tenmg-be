@@ -17,6 +17,7 @@ use App\Http\Controllers\API\Admin\EcommerceProductController as AdminEcommerceP
 use App\Http\Controllers\API\Admin\FaqController;
 use App\Http\Controllers\API\Admin\MedicationTypeController as AdminMedicationTypeController;
 use App\Http\Controllers\API\Admin\UsersController;
+use App\Http\Controllers\API\Vendor\UsersController as VendorUsersController;
 use App\Http\Controllers\API\Auth\AuthenticatedController;
 use App\Http\Controllers\API\Auth\PasswordController;
 use App\Http\Controllers\API\Auth\SignupUserController;
@@ -184,6 +185,9 @@ Route::prefix('v1')->group(function () {
                 // Invites/Team members
                 Route::get('invite/team-members', [InviteController::class, 'members'])->name('invite.team-members');
                 Route::apiResource('invite', InviteController::class);
+
+                Route::patch('users/{user}/status', [VendorUsersController::class, 'status']);
+                Route::apiResource('users', VendorUsersController::class);
             });
 
             Route::prefix('customers')->group(function () {

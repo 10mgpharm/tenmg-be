@@ -273,4 +273,21 @@ class User extends Authenticatable implements MustVerifyEmail
     {
         return $this->hasMany(EcommerceCategory::class, 'created_by_id')->latest('id');
     }
+
+    /**
+     * Define a query scope for filtering by business_id
+     */
+    public function scopeWithinBusiness($query)
+    {
+        $user = request()->user();
+    
+        // Get the business ID of the request user
+        $business = $user->ownerBusinessType ?? $user->businesses()->first();
+    
+        // Get user IDs that belong to the same business
+        $userIds = BusinessUser::where('business_id', $business?->id)->pluck('user_id');
+    
+        return $query->whereIn('id', $userIds);
+    }
+
 }

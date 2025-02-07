@@ -9,6 +9,7 @@ use App\Models\EcommerceShopingList;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 
 class FincraPaymentRepository
 {
@@ -111,11 +112,11 @@ class FincraPaymentRepository
 
         //check if we have a payment with this ref
         $payment = EcommercePayment::where('reference', $ref)->first();
-        if (!$payment) {
+        if (! $payment) {
             throw new \Exception('Payment not found');
         }
 
-        if($payment->status != "initiated"){
+        if ($payment->status != 'initiated') {
             throw new \Exception('Payment already processed');
         }
 
@@ -137,6 +138,12 @@ class FincraPaymentRepository
         $response = curl_exec($curl);
         $err = curl_error($curl);
 
+        Log::info('completeOrder', [
+            'response' => $response,
+            'url' => config('services.fincra.url'),
+            'secret' => config('services.fincra.secret'),
+            'ref' => config('services.fincra.url').'/collections/merchant-reference/'.$ref,
+        ]);
         curl_close($curl);
 
         if ($err) {
@@ -149,6 +156,8 @@ class FincraPaymentRepository
 
     public function completeOrder($data)
     {
+        Log::info('completeOrder', ['data' => $data]);
+
         $body = $data->data;
         $merchantReference = $body->merchantReference;
         $status = $body->status;
@@ -211,7 +220,7 @@ class FincraPaymentRepository
 
     public function removeBoughtItemFromShoppingList($orderItems)
     {
-        for ($i=0; $i < count($orderItems); $i++) {
+        for ($i = 0; $i < count($orderItems); $i++) {
             EcommerceShopingList::where('user_id', Auth::id())->where('product_id', $orderItems[$i]->ecommerce_product_id)->delete();
         }
     }
