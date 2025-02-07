@@ -33,6 +33,17 @@ class ShoppingListService
         }
     }
 
+    function getShoppingListAdmin(array $filters, $perPage)
+    {
+
+        try {
+            return $this->shoppingListRepository->getShoppingListAdmin($filters, $perPage);
+        } catch (\Throwable $th) {
+            throw $th;
+        }
+
+    }
+
     function removeItemFromSHoppingList($id)
     {
         try {
