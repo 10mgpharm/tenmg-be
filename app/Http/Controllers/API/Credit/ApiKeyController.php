@@ -46,7 +46,7 @@ class ApiKeyController extends Controller
         $request->validated();
 
         $business = $request->user()->businesses->first();
-        $result = $this->apiKeyService->updateApiKeyConfig($business, $request->environment, $request->webhook_url, $request->callback_url);
+        $result = $this->apiKeyService->updateApiKeyConfig($business, $request->environment, $request->webhookUrl, $request->callbackUrl);
 
         return $this->returnJsonResponse(
             message: 'Api Url configuration updated.',

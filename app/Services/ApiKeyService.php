@@ -55,8 +55,6 @@ class ApiKeyService implements IApiKeyService
 
     public function updateApiKeyConfig(Business $business, string $environment, string $webhookUrl, string $callbackUrl): ?ApiKey
     {
-        $hashedShortName = hash('sha256', $business->short_name.\Illuminate\Support\Str::random(48));
-
         $apiKey = $this->apiKeyRepository->updateVendorKey($business, $environment == 'test' ?
             [
                 'test_webhook_url' => $webhookUrl,
