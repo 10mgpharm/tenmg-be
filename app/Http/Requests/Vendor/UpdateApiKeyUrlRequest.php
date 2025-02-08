@@ -30,12 +30,12 @@ class UpdateApiKeyUrlRequest extends FormRequest
     {
         return [
             'environment' => ['required', 'string', Rule::in('test', 'live')],
-            'webhook_url' => ['required', 'string', 'url', function ($attribute, $value, $fail) {
+            'webhookUrl' => ['required', 'string', 'url', function ($attribute, $value, $fail) {
                 if (! preg_match('/^https?:\/\//', $value)) {
                     $fail($attribute.' must be a valid URL starting with http:// or https://');
                 }
             }],
-            'callback_url' => ['required', 'string', 'url', function ($attribute, $value, $fail) {
+            'callbackUrl' => ['required', 'string', 'url', function ($attribute, $value, $fail) {
                 if (! preg_match('/^https?:\/\//', $value)) {
                     $fail($attribute.' must be a valid URL starting with http:// or https://');
                 }
