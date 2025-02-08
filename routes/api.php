@@ -21,6 +21,7 @@ use App\Http\Controllers\API\Auth\AuthenticatedController;
 use App\Http\Controllers\API\Auth\PasswordController;
 use App\Http\Controllers\API\Auth\SignupUserController;
 use App\Http\Controllers\API\Auth\VerifyEmailController;
+use App\Http\Controllers\API\Credit\ApiKeyController;
 use App\Http\Controllers\API\Credit\CustomerController;
 use App\Http\Controllers\API\Credit\LoanApplicationController;
 use App\Http\Controllers\API\Credit\LoanController;
@@ -343,6 +344,17 @@ Route::prefix('v1')->group(function () {
                     Route::post('/{id}/repay', [LoanController::class, 'repayLoan'])->name('loans.repay');
                     Route::post('/{id}/liquidate', [LoanController::class, 'liquidateLoan'])->name('loans.liquidate');
                 });
+            });
+
+            Route::prefix('api_keys')->group(function () {
+                // Get api key
+                Route::get('/', [ApiKeyController::class, 'index'])->name('apikeys.index');
+
+                // Generate api keys
+                Route::patch('/', [ApiKeyController::class, 'update'])->name('apikeys.update');
+
+                // Generate api keys
+                Route::post('generate', [ApiKeyController::class, 'regenerateKey'])->name('apikeys.generate');
             });
         });
 

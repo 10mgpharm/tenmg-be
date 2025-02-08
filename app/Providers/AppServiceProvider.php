@@ -10,14 +10,17 @@ use App\Models\PassportClient;
 use App\Models\PassportPersonalAccessClient;
 use App\Models\PassportRefreshToken;
 use App\Models\PassportToken;
+use App\Repositories\ApiKeyRepository;
 use App\Repositories\CustomerRepository;
 use App\Services\ActivityLogService;
 use App\Services\AffordabilityService;
+use App\Services\ApiKeyService;
 use App\Services\AttachmentService;
 use App\Services\AuthService;
 use App\Services\CustomerService;
 use App\Services\Interfaces\IActivityLogService;
 use App\Services\Interfaces\IAffordabilityService;
+use App\Services\Interfaces\IApiKeyService;
 use App\Services\Interfaces\IAuthService;
 use App\Services\Interfaces\ICustomerService;
 use App\Services\Interfaces\IRuleEngineService;
@@ -55,6 +58,13 @@ class AppServiceProvider extends ServiceProvider
         $this->app->bind(ITxnHistoryService::class, TransactionHistoryService::class);
         $this->app->bind(IRuleEngineService::class, RuleEngineService::class);
         $this->app->bind(IAffordabilityService::class, AffordabilityService::class);
+
+        $this->app->bind(abstract: IApiKeyService::class, concrete: function ($app) {
+            return new ApiKeyService(
+                apiKeyRepository: $app->make(ApiKeyRepository::class),
+            );
+        }, shared: true);
+
     }
 
     /**

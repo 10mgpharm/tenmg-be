@@ -49,4 +49,22 @@ class ApiKeyRepository
             $data
         );
     }
+
+    public function getVendorKeys(Business $business): ?ApiKey
+    {
+        return ApiKey::where('business_id', $business?->id)->first();
+    }
+
+    public function updateVendorKey(Business $business, array $data): ?ApiKey
+    {
+        $apiKey = ApiKey::where('business_id', $business?->id)->first();
+
+        if ($apiKey) {
+            $apiKey->update($data);
+
+            return $apiKey;
+        }
+
+        return null;
+    }
 }

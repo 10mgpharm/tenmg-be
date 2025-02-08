@@ -15,20 +15,20 @@ class DeleteUserRequest extends FormRequest
     {
 
         $admin = $this->user();
-    
-        if (!$admin) {
+
+        if (! $admin) {
             return false; // Ensure there is a logged-in user
         }
 
         $_user = $this->route('user');
 
-        if(
+        if (
             $_user->businesses()->first()?->id !== ($admin->ownerBusinessType?->id ?? $admin->businesses()->first()?->id) ||
             $_user->id == $admin->id
-            ){
+        ) {
             return false;
         }
-        
+
         return $admin->ownerBusinessType && $admin->hasRole('vendor');
     }
 
@@ -40,7 +40,7 @@ class DeleteUserRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'status' => ['required', 'string', new Enum(StatusEnum::class),],
+            'status' => ['required', 'string', new Enum(StatusEnum::class)],
         ];
     }
 
@@ -54,7 +54,7 @@ class DeleteUserRequest extends FormRequest
         $user = $this->user();
         $_user = $this->route('user');
 
-        if (!$user) {
+        if (! $user) {
             abort(response()->json([
                 'message' => 'Unauthenticated.',
             ], 403));
@@ -66,18 +66,18 @@ class DeleteUserRequest extends FormRequest
             ], 403));
         }
 
-        if (!$user->hasRole('vendor')) {
+        if (! $user->hasRole('vendor')) {
             abort(response()->json([
                 'message' => 'You do not have the required role to delete this resource.',
             ], 403));
         }
-    
-        if (!$user->ownerBusinessType) {
+
+        if (! $user->ownerBusinessType) {
             abort(response()->json([
                 'message' => 'You must own the business to delete this resource.',
             ], 403));
         }
-    
+
         abort(response()->json([
             'message' => 'You are not authorized to delete this resource.',
         ], 403));
