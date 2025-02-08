@@ -3,17 +3,14 @@
 namespace App\Services;
 
 use App\Helpers\UtilityHelper;
-use App\Models\CreditTxnHistoryEvaluation;
 use App\Models\Customer;
 use App\Models\DebitMandate;
 use App\Models\LoanApplication;
 use App\Models\User;
 use App\Notifications\CustomerLoanApplicationNotification;
-use App\Repositories\ApiKeyRepository;
 use App\Repositories\LoanApplicationRepository;
 use Exception;
 use Illuminate\Database\Eloquent\Collection;
-use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Notification;
 
@@ -31,7 +28,7 @@ class LoanApplicationService
 
         $mandate = DebitMandate::where('customer_id', $data['customerId'])->first();
 
-        if(!$mandate){
+        if (! $mandate) {
             throw new Exception('Customer does not have a debit mandate', Response::HTTP_BAD_REQUEST);
         }
 
@@ -84,7 +81,7 @@ class LoanApplicationService
         $data['businessId'] = $vendor->id;
         $data['source'] = 'API';
 
-        $application = $this->loanApplicationRepository->create($data);//
+        $application = $this->loanApplicationRepository->create($data); //
 
         $token = $user->createToken('Full Access Token', ['full']);
 
