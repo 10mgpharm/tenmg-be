@@ -22,6 +22,10 @@ class ApiKeyRepository
         $keyPart = substr($hashedShortName, 0, 24) ?: \Illuminate\Support\Str::random(24);
         $secretPart = substr($hashedShortName, 25, 48) ?: \Illuminate\Support\Str::random(48);
 
+        // Generate different keyPart and secretPart for test environment
+        $testKeyPart = \Illuminate\Support\Str::random(24);
+        $testSecretPart = \Illuminate\Support\Str::random(48);
+
         // Generate unique encryption keys
         do {
             $encryptionKey = bin2hex(random_bytes(16));
@@ -32,10 +36,10 @@ class ApiKeyRepository
         } while (ApiKey::where('test_encryption_key', $testEncryptionKey)->exists());
 
         $data = [
-            'key' => 'key_'.$keyPart,
-            'secret' => 'sec_'.$secretPart,
-            'test_key' => 'test_key_'.$keyPart,
-            'test_secret' => 'test_sec_'.$secretPart,
+            'key' => 'pk_live_'.$keyPart,
+            'secret' => 'sk_live_'.$secretPart,
+            'test_key' => 'pk_test_'.$testKeyPart,
+            'test_secret' => 'sk_test_'.$testSecretPart,
             'encryption_key' => $encryptionKey,
             'test_encryption_key' => $testEncryptionKey,
         ];

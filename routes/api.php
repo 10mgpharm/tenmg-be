@@ -17,7 +17,6 @@ use App\Http\Controllers\API\Admin\EcommerceProductController as AdminEcommerceP
 use App\Http\Controllers\API\Admin\FaqController;
 use App\Http\Controllers\API\Admin\MedicationTypeController as AdminMedicationTypeController;
 use App\Http\Controllers\API\Admin\UsersController;
-use App\Http\Controllers\API\Vendor\UsersController as VendorUsersController;
 use App\Http\Controllers\API\Auth\AuthenticatedController;
 use App\Http\Controllers\API\Auth\PasswordController;
 use App\Http\Controllers\API\Auth\SignupUserController;
@@ -38,10 +37,11 @@ use App\Http\Controllers\API\Storefront\ProductController as StorefrontProductCo
 use App\Http\Controllers\API\Storefront\ShippingAddressController as StorefrontShippingAddressController;
 use App\Http\Controllers\API\Storefront\ShoppingListController;
 use App\Http\Controllers\API\Storefront\StorefrontController;
+use App\Http\Controllers\API\Storefront\WishListController;
 use App\Http\Controllers\API\Supplier\EcommerceProductController as SupplierEcommerceProductController;
+use App\Http\Controllers\API\Vendor\UsersController as VendorUsersController;
 use App\Http\Controllers\API\Webhooks\PaystackWebhookController;
 use App\Http\Controllers\BusinessSettingController;
-use App\Http\Controllers\API\Storefront\WishListController;
 use App\Http\Controllers\InviteController;
 use App\Http\Controllers\Supplier\DashboardController as SupplierDashboardController;
 use App\Http\Controllers\Supplier\EcommerceBrandController as SupplierEcommerceBrandController;
@@ -252,6 +252,7 @@ Route::prefix('v1')->group(function () {
                 Route::get('/{customerId}', [TransactionHistoryController::class, 'index'])->name('vendor.txn_history');
 
             });
+
             // Loan Application
             Route::prefix('loan-applications')->group(function () {
 
@@ -343,7 +344,6 @@ Route::prefix('v1')->group(function () {
                     Route::post('/{id}/liquidate', [LoanController::class, 'liquidateLoan'])->name('loans.liquidate');
                 });
             });
-
         });
 
         // ADMIN specific routes
@@ -457,7 +457,7 @@ Route::prefix('v1')->group(function () {
                 Route::get('/cancel/{ref}', [OrdersController::class, 'cancelPayment']);
             });
 
-        });//OrderPaymentController
+        }); //OrderPaymentController
 
     });
 
