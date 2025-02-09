@@ -16,6 +16,7 @@ use App\Models\CreditLendersWallet;
 use App\Models\Role;
 use App\Models\User;
 use App\Repositories\ApiKeyRepository;
+use App\Repositories\CreditVendorWalletRepository;
 use App\Services\Interfaces\IAuthService;
 use Exception;
 use Illuminate\Auth\Events\Verified;
@@ -36,7 +37,7 @@ class AuthService implements IAuthService
     /**
      * @throws Exception
      */
-    public function __construct(public ApiKeyRepository $apiKeyRepository) {}
+    public function __construct(public ApiKeyRepository $apiKeyRepository, public CreditVendorWalletRepository $creditVendorRepository) {}
 
     /**
      * Get user
@@ -343,6 +344,7 @@ class AuthService implements IAuthService
                 break;
             case BusinessType::VENDOR:
                 $this->apiKeyRepository->createVendorApiKey($adminBusiness);
+                $this->creditVendorRepository->createVendorWallet($adminBusiness);
                 break;
             default:
                 break;
