@@ -102,7 +102,7 @@ class UsersController extends Controller
         return $user
             ? $this->returnJsonResponse(
                 message: 'User successfully fetched.',
-                data: new UserWithBusinessResource($user->load('businesses'))
+                data: new UserWithBusinessResource($user->load(['businesses', 'actions']))
             )
             : $this->returnJsonResponse(
                 message: 'Oops, cannot fetch user at the moment. Please try again later.'

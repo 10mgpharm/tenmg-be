@@ -15,17 +15,11 @@ class UserWithBusinessResource extends JsonResource
      */
     public function toArray(Request $request): array
     {
-        return [
-            'id' => $this->id,
-            'email' => $this->email,
-            'name' => $this->name,
-            'role' => strtoupper($this->type ?? $this->getRoleNames()->first()),
-            'phone' => $this->phone,
-            'status' => $this->active,
-            'account_status' => $this->getRawOriginal('status'),
-            'dateJoined' => $this->created_at,
-            'business' => $this->whenLoaded('businesses', fn() => $this->businesses->first() ? new BusinessResource($this->businesses->first()) : null),
-
-        ];
+        return array_merge(
+            (new UserResource($this))->toArray($request),
+            [
+                'business' => $this->whenLoaded('businesses', fn() => $this->businesses->first() ? new BusinessResource($this->businesses->first()) : null),
+            ]
+        );
     }
 }
