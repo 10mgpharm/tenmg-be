@@ -14,7 +14,7 @@ class FaqController extends Controller
      */
     public function index(Request $request)
     {
-        $faqs = Faq::latest();
+        $faqs = Faq::latest()->get();
 
         return $this->returnJsonResponse(
             message: 'Faqs successfully fetched.',
