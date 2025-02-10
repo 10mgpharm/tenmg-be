@@ -21,6 +21,7 @@ class DatabaseSeeder extends Seeder
             AffordabilitySeeder::class,
             DocumentTypeSeeder::class,
             NotificationSeeder::class,
+            VendorApiKeySeeder::class,
         ]);
     }
 }

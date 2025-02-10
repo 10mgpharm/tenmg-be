@@ -15,6 +15,8 @@ use App\Models\BusinessUser;
 use App\Models\CreditLendersWallet;
 use App\Models\Role;
 use App\Models\User;
+use App\Repositories\ApiKeyRepository;
+use App\Repositories\CreditVendorWalletRepository;
 use App\Services\Interfaces\IAuthService;
 use Exception;
 use Illuminate\Auth\Events\Verified;
@@ -35,7 +37,7 @@ class AuthService implements IAuthService
     /**
      * @throws Exception
      */
-    public function __construct() {}
+    public function __construct(public ApiKeyRepository $apiKeyRepository, public CreditVendorWalletRepository $creditVendorRepository) {}
 
     /**
      * Get user
@@ -131,12 +133,8 @@ class AuthService implements IAuthService
                 ['role_id' => $userRole->id]
             );
 
-            //check if the user is a supplier
-            if ($businessType == BusinessType::SUPPLIER) {
-                $this->createEcommerceWallet($adminBusiness);
-            }elseif($businessType == BusinessType::LENDER){
-                $this->createLendersWallet($adminBusiness);
-            }
+            // handle dependency signups step
+            $this->handleAccountSetup($adminBusiness, $businessType);
 
             (new OtpService)->forUser($user)
                 ->generate(OtpType::SIGNUP_EMAIL_VERIFICATION)
@@ -306,12 +304,8 @@ class AuthService implements IAuthService
                 ['role_id' => $userRole->id]
             );
 
-            //check if the user is a supplier
-            if ($businessType == BusinessType::SUPPLIER) {
-                $this->createEcommerceWallet($adminBusiness);
-            }elseif($businessType == BusinessType::LENDER){
-                $this->createLendersWallet($adminBusiness);
-            }
+            // handle dependency signups step
+            $this->handleAccountSetup($adminBusiness, $businessType);
 
             DB::commit();
         } catch (\Throwable $th) {
@@ -339,6 +333,24 @@ class AuthService implements IAuthService
         $business->update($data);
     }
 
+    public function handleAccountSetup(Business $adminBusiness, $businessType)
+    {
+        switch ($businessType) {
+            case BusinessType::SUPPLIER:
+                $this->createEcommerceWallet($adminBusiness);
+                break;
+            case BusinessType::LENDER:
+                $this->createLendersWallet($adminBusiness);
+                break;
+            case BusinessType::VENDOR:
+                $this->apiKeyRepository->createVendorApiKey($adminBusiness);
+                $this->creditVendorRepository->createVendorWallet($adminBusiness);
+                break;
+            default:
+                break;
+        }
+    }
+
     public function createEcommerceWallet($business)
     {
         $business->wallet()->create([
@@ -351,7 +363,7 @@ class AuthService implements IAuthService
 
     public function createLendersWallet($business)
     {
-        $walletTypes = ["investment", "deposit"];
+        $walletTypes = ['investment', 'deposit'];
         foreach ($walletTypes as $type) {
             CreditLendersWallet::create([
                 'lender_id' => $business->id,
