@@ -14,6 +14,9 @@ class EcommerceShoppingListResource extends JsonResource
      */
     public function toArray(Request $request): array
     {
+
+        $productImage = new EcommerceProductResource($this->product);
+
         return [
             'id' => $this->id,
             'productName' => $this->product_name,
@@ -21,7 +24,7 @@ class EcommerceShoppingListResource extends JsonResource
             'purchaseDate' => $this->purchase_date,
             'productId' => $this->product_id,
             'description' => $this->description,
-            'image' =>$this->attachment?->url ?? "N/A",
+            'image' => $productImage != null ?  $productImage?->thumbnailFile?->url ?? "N/A":$this->attachment ?? "N/A",
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
         ];
