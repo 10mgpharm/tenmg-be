@@ -28,6 +28,7 @@ use App\Http\Controllers\API\Credit\LoanController;
 use App\Http\Controllers\API\Credit\LoanOfferController;
 use App\Http\Controllers\API\Credit\TransactionHistoryController;
 use App\Http\Controllers\API\EcommerceDiscountController;
+use App\Http\Controllers\API\MessageController;
 use App\Http\Controllers\API\ProfileController;
 use App\Http\Controllers\API\ResendOtpController;
 use App\Http\Controllers\API\Storefront\CartController;
@@ -126,6 +127,8 @@ Route::prefix('v1')->group(function () {
                 Route::patch('subscriptions', [AccountNotificationController::class, 'subscriptions']);
                 Route::patch('{notification}/subscription', [AccountNotificationController::class, 'subscription']);
             });
+
+            Route::apiResource('messages', MessageController::class);
         });
 
         // SUPPLIER specific routes
