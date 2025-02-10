@@ -15,7 +15,7 @@ class EcommerceShoppingListResource extends JsonResource
     public function toArray(Request $request): array
     {
 
-        $productImage = new EcommerceProductResource($this->product); //attachment
+        $productImage = new EcommerceProductResource($this->product);
 
         return [
             'id' => $this->id,
