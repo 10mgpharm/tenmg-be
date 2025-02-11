@@ -53,4 +53,10 @@ class OrdersController extends Controller
         $this->ecommerceOrderService->cancelPayment($ref);
         return $this->returnJsonResponse(message: 'Success');
     }
+
+    function verifyFincraPaymentWebHook($ref)
+    {
+        $orderPayment = $this->ecommerceOrderService->verifyFincraPaymentWebhook($ref);
+        // return $this->returnJsonResponse(message: 'Success', data: $orderPayment);
+    }
 }
