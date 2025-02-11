@@ -14,5 +14,5 @@ class Faq extends Model
      *
      * @var array<int, string>
      */
-    protected $fillable = ['question', 'answer'];
+    protected $fillable = ['question', 'answer', 'created_by_id', 'updated_by_id'];
 }

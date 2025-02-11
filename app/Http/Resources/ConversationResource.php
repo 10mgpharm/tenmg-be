@@ -1,11 +1,11 @@
 <?php
 
-namespace App\Http\Resources\Storefront;
+namespace App\Http\Resources;
 
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
-class FaqResource extends JsonResource
+class ConversationResource extends JsonResource
 {
     /**
      * Transform the resource into an array.
@@ -16,8 +16,9 @@ class FaqResource extends JsonResource
     {
         return [
             'id' => $this->id,
-            'question' => $this->question,
-            'answer' => $this->answer,
+            'sender' => $this->sender->only(['id', 'name']),
+            'receiver' => $this->receiver->only(['id', 'name']),
+            'latest' => new MessageResource($this->messages()->latest('id')->first()),
         ];
     }
 }
