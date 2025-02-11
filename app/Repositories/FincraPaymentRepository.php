@@ -29,6 +29,7 @@ class FincraPaymentRepository
 
         $order->delivery_type = $request->deliveryType;
         $order->delivery_address = $request->deliveryAddress;
+        $order->payment_status = "PAYMENT_INITIATED";
         $order->save();
 
         //ensure we have only one instance of order payment for each order
@@ -149,8 +150,35 @@ class FincraPaymentRepository
         if ($err) {
             echo 'cURL Error #:'.$err;
         } else {
-            return $this->completeOrder(json_decode($response));
+            if(!isset($response)){
+                return $this->changePaymentToPending($ref);
+            }else{
+                return $this->completeOrder(json_decode($response));
+            }
+
         }
+
+    }
+
+    public function changePaymentToPending($ref)
+    {
+
+        // //get the order payment instance
+        $orderPayment = EcommercePayment::where('reference', $ref)->first();
+        //check if payment record exist
+        if(!$orderPayment){
+            throw new \Exception('Payment not found');
+        }
+        // //update external reference
+        $orderPayment->status = 'pending';
+        $orderPayment->save();
+
+        //get order for payment
+        $order = EcommerceOrder::find($orderPayment->order_id);
+        $order->payment_status = "PENDING_PAYMENT_CONFIRMATION";
+        $order->save();
+
+        return $orderPayment;
 
     }
 
@@ -178,6 +206,7 @@ class FincraPaymentRepository
         //update order status
         $order = EcommerceOrder::find($orderPayment->order_id);
         $order->status = 'PENDING';
+        $order->payment_status = "PAYMENT_SUCCESSFUL";
         $order->save();
 
         //send email to customer.
@@ -218,10 +247,59 @@ class FincraPaymentRepository
         $orderPayment->save();
     }
 
+    public function failedPayment($ref)
+    {
+        $orderPayment = EcommercePayment::where('reference', $ref)->first();
+        if (! $orderPayment) {
+            throw new \Exception('Order payment not found');
+        }
+        if ($orderPayment->status != 'initiated') {
+            throw new \Exception('Order payment not initiated');
+        }
+        $orderPayment->status = 'failed';
+        $orderPayment->save();
+    }
+
     public function removeBoughtItemFromShoppingList($orderItems)
     {
         for ($i = 0; $i < count($orderItems); $i++) {
             EcommerceShopingList::where('user_id', Auth::id())->where('product_id', $orderItems[$i]->ecommerce_product_id)->delete();
+        }
+    }
+
+    public function verifyFincraPaymentWebhook(Request $request)
+    {
+        $merchantWebhookSecretKey = config('services.fincra.secret');
+        $payload = $request->getContent();
+
+        // Generate the HMAC using SHA512
+        $encryptedData = hash_hmac('sha512', $payload, $merchantWebhookSecretKey);
+
+        // Get the signature from the request headers
+        $signatureFromWebhook = $request->header('signature');
+
+        // Compare the generated HMAC with the signature from the webhook
+        if ($encryptedData === $signatureFromWebhook) {
+
+            $data = json_decode($payload);
+
+            $event = $data->event;
+
+            switch ($event) {
+                case 'charge.successful':
+                    $this->completeOrder($data);
+                    break;
+                case 'charge.failed':
+                    $this->failedPayment($data->data->merchantReference);
+                    break;
+                default:
+
+                    break;
+            }
+
+        } else {
+
+
         }
     }
 }

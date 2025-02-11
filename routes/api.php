@@ -34,6 +34,8 @@ use App\Http\Controllers\API\ResendOtpController;
 use App\Http\Controllers\API\Storefront\CartController;
 use App\Http\Controllers\API\Storefront\CategoryController as StorefrontCategoryController;
 use App\Http\Controllers\API\Storefront\FaqController as StorefrontFaqController;
+use App\Http\Controllers\API\Storefront\FincraWebhookController;
+use App\Http\Controllers\API\Storefront\OrderPaymentController;
 use App\Http\Controllers\API\Storefront\OrdersController;
 use App\Http\Controllers\API\Storefront\ProductController as StorefrontProductController;
 use App\Http\Controllers\API\Storefront\ShippingAddressController as StorefrontShippingAddressController;
@@ -476,5 +478,23 @@ Route::prefix('v1')->group(function () {
 
     });
 
+    Route::prefix('lender')->name('lender.')->middleware(['roleCheck:lender'])->group(function () {
+
+        Route::prefix('settings')->name('settings.')->group(function () {
+            Route::get('/', [BusinessSettingController::class, 'show']);
+
+            // Update business information
+            Route::match(['post', 'patch'], 'business-information', [BusinessSettingController::class, 'businessInformation']);
+
+            // Update business account license number, expiry date and cac doc
+            Route::patch('license/withdraw', [BusinessSettingController::class, 'withdraw']);
+            Route::match(['post', 'patch'], 'license', [BusinessSettingController::class, 'license']);
+            Route::get('license', [BusinessSettingController::class, 'getBusinessStatus']);
+        });
+
+    });
+
     Route::post('/webhooks/vendor/direct-debit/mandate', [PaystackWebhookController::class, 'handle'])->name('webhooks.paystack.direct_debit');
 });
+
+Route::post("/fincra/webook", [FincraWebhookController::class, 'verifyFincraPaymentWebHook']);

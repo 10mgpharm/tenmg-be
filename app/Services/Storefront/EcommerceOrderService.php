@@ -55,6 +55,11 @@ class EcommerceOrderService
         return $this->fincraPaymentRepository->verifyFincraPayment($ref);
     }
 
+    function verifyFincraPaymentWebhook($ref)
+    {
+        return $this->fincraPaymentRepository->verifyFincraPaymentWebhook($ref);
+    }
+
     function cancelPayment($ref)
     {
         return $this->fincraPaymentRepository->cancelPayment($ref);
