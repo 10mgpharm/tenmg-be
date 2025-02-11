@@ -34,6 +34,7 @@ use App\Http\Controllers\API\ResendOtpController;
 use App\Http\Controllers\API\Storefront\CartController;
 use App\Http\Controllers\API\Storefront\CategoryController as StorefrontCategoryController;
 use App\Http\Controllers\API\Storefront\FaqController as StorefrontFaqController;
+use App\Http\Controllers\API\Storefront\FincraWebhookController;
 use App\Http\Controllers\API\Storefront\OrderPaymentController;
 use App\Http\Controllers\API\Storefront\OrdersController;
 use App\Http\Controllers\API\Storefront\ProductController as StorefrontProductController;
@@ -496,4 +497,4 @@ Route::prefix('v1')->group(function () {
     Route::post('/webhooks/vendor/direct-debit/mandate', [PaystackWebhookController::class, 'handle'])->name('webhooks.paystack.direct_debit');
 });
 
-Route::post("/fincra/webook", [OrdersController::class, 'verifyFincraPaymentWebHook']);
+Route::post("/fincra/webook", [FincraWebhookController::class, 'verifyFincraPaymentWebHook']);

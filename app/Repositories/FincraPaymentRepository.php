@@ -267,10 +267,23 @@ class FincraPaymentRepository
 
         // Compare the generated HMAC with the signature from the webhook
         if ($encryptedData === $signatureFromWebhook) {
-            // Process the webhook if the signature matches
-            $this->completeOrder(json_decode($payload));
+
+            $data = json_decode($payload);
+
+            $event = $data->event;
+
+            switch ($event) {
+                case 'charge.successful':
+                    $this->completeOrder($data);
+                    break;
+
+                default:
+
+                    break;
+            }
+
         } else {
-            // Discard the webhook if the signature does not match
+
 
         }
     }
