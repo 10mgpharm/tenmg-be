@@ -247,6 +247,19 @@ class FincraPaymentRepository
         $orderPayment->save();
     }
 
+    public function failedPayment($ref)
+    {
+        $orderPayment = EcommercePayment::where('reference', $ref)->first();
+        if (! $orderPayment) {
+            throw new \Exception('Order payment not found');
+        }
+        if ($orderPayment->status != 'initiated') {
+            throw new \Exception('Order payment not initiated');
+        }
+        $orderPayment->status = 'failed';
+        $orderPayment->save();
+    }
+
     public function removeBoughtItemFromShoppingList($orderItems)
     {
         for ($i = 0; $i < count($orderItems); $i++) {
@@ -276,7 +289,9 @@ class FincraPaymentRepository
                 case 'charge.successful':
                     $this->completeOrder($data);
                     break;
-
+                case 'charge.failed':
+                    $this->failedPayment($data->data->merchantReference);
+                    break;
                 default:
 
                     break;

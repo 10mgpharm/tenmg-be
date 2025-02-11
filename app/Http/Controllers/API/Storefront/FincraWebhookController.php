@@ -5,6 +5,7 @@ namespace App\Http\Controllers\API\Storefront;
 use App\Http\Controllers\Controller;
 use App\Repositories\FincraPaymentRepository;
 use App\Services\Storefront\EcommerceOrderService;
+use Illuminate\Http\Request;
 
 class FincraWebhookController extends Controller
 {
@@ -16,8 +17,8 @@ class FincraWebhookController extends Controller
         $this->fincraPaymentRepository = $fincraPaymentRepository;
     }
 
-    function verifyFincraPaymentWebHook($ref)
+    function verifyFincraPaymentWebHook(Request $request)
     {
-        return $this->fincraPaymentRepository->verifyFincraPaymentWebHook($ref);
+        return $this->fincraPaymentRepository->verifyFincraPaymentWebHook($request);
     }
 }
