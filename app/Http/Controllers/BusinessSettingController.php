@@ -10,13 +10,14 @@ use App\Http\Resources\BusinessResource;
 use App\Models\Business;
 use App\Models\User;
 use App\Services\AttachmentService;
+use App\Services\Lender\BankAccountService;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Auth;
 
 class BusinessSettingController extends Controller
 {
-    public function __construct(private AttachmentService $attachmentService) {}
+    public function __construct(private AttachmentService $attachmentService, private BankAccountService $bankAccountService) {}
 
     /**
      * Display the business details associated with the authenticated user.
@@ -182,5 +183,25 @@ class BusinessSettingController extends Controller
         return $this->returnJsonResponse(
             message: 'Oops, can\'t update license at the moment. Please try again later.'
         );
+    }
+
+    public function businessBankAccount(Request $request)
+    {
+
+        $request->validate([
+            'bankName' => 'required|string',
+            'bankCode' => 'required',
+            'accountName' => 'required',
+            'accountNumber' => 'required|digits:10',
+            'bvn' => 'required'
+        ]);
+
+        $bankData = $this->bankAccountService->addUpdateBankAccount($request);
+
+        return $this->returnJsonResponse(
+            message: 'Business account created/updated',
+            data: $bankData
+        );
+
     }
 }
