@@ -31,12 +31,16 @@ use App\Http\Controllers\API\EcommerceDiscountController;
 use App\Http\Controllers\API\MessageController;
 use App\Http\Controllers\API\ProfileController;
 use App\Http\Controllers\API\ResendOtpController;
+use App\Http\Controllers\API\Storefront\BrandController as StorefrontBrandController;
 use App\Http\Controllers\API\Storefront\CartController;
 use App\Http\Controllers\API\Storefront\CategoryController as StorefrontCategoryController;
 use App\Http\Controllers\API\Storefront\FaqController as StorefrontFaqController;
 use App\Http\Controllers\API\Storefront\FincraWebhookController;
+use App\Http\Controllers\API\Storefront\MeasurementController as StorefrontMeasurementController;
+use App\Http\Controllers\API\Storefront\MedicationTypeController as StorefrontMedicationTypeController;
 use App\Http\Controllers\API\Storefront\OrderPaymentController;
 use App\Http\Controllers\API\Storefront\OrdersController;
+use App\Http\Controllers\API\Storefront\PresentationController as StorefrontPresentationController;
 use App\Http\Controllers\API\Storefront\ProductController as StorefrontProductController;
 use App\Http\Controllers\API\Storefront\ShippingAddressController as StorefrontShippingAddressController;
 use App\Http\Controllers\API\Storefront\ShoppingListController;
@@ -407,6 +411,7 @@ Route::prefix('v1')->group(function () {
 
             Route::prefix('system-setup')->name('system-setup.')->group(function () {
                 Route::get('storefront-images/search', [CarouselImageController::class, 'search']);
+                Route::apiResource('storefront-images', CarouselImageController::class);
             });
 
             Route::prefix('orders')->name('orders.')->group(function () {
@@ -439,6 +444,10 @@ Route::prefix('v1')->group(function () {
             });
 
             Route::get('/', StorefrontController::class);
+            Route::get('brands', [StorefrontBrandController::class, 'search']);
+            Route::get('presentations', [StorefrontPresentationController::class, 'search']);
+            Route::get('measurements', [StorefrontMeasurementController::class, 'search']);
+            Route::get('medication-types', [StorefrontMedicationTypeController::class, 'search']);
             Route::get('/categories/search', [StorefrontCategoryController::class, 'search']);
             Route::get('/categories/{category:slug}', [StorefrontCategoryController::class, 'products']);
 
