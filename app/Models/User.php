@@ -243,6 +243,14 @@ class User extends Authenticatable implements MustVerifyEmail
     }
 
     /**
+     * Get the invite record associated to the user.
+     */
+    public function invited()
+    {
+        return $this->belongsTo(Invite::class, 'user_id');
+    }
+
+    /**
      * Get the ecommerce medication types created by the user.
      */
     public function medicationTypes()

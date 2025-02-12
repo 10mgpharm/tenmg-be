@@ -7,6 +7,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Vendor\DeleteUserRequest;
 use App\Http\Requests\Vendor\ListUsersRequest;
 use App\Http\Requests\Vendor\ShowUsersRequest;
+use App\Http\Requests\Vendor\UpdateUserRequest;
 use App\Http\Requests\Vendor\UpdateUserStatusRequest;
 use App\Http\Resources\Admin\UserResource as AdminUserResource;
 use App\Models\User;
@@ -107,6 +108,53 @@ class UsersController extends Controller
             data: new AdminUserResource($user->refresh())
         );
     }
+
+    /**
+     * Update the specified user's role and other details.
+     *
+     * Validates the request data, updates the user's role (removes the current role and assigns the new one), 
+     * and returns a JSON response with the updated user data.
+     *
+     * @param UpdateUserRequest $request The validated request instance containing the user's updated data.
+     * @param User $user The user to be updated.
+     * @return \Illuminate\Http\JsonResponse JSON response containing the updated user data and a success message.
+     */
+    public function update(UpdateUserRequest $request, User $user)
+    {
+        $validated = $request->validated();
+
+        // If no valid data to update, return early with a message.
+        if (empty($validated)) {
+            return $this->returnJsonResponse(
+                message: 'Nothing to update.'
+            );
+        }
+
+        // If the user is invited and has a role_id to update, update the invite's role_id
+        if ($user->invited()->exists() && isset($validated['role_id'])) {
+            $user->invited()->update(['role_id' => $validated['role_id']]);
+        }
+
+        // If a new role_id is provided in the request, remove the current role and assign the new role
+        if (isset($validated['role_id'])) {
+            // The new role_id to be assigned
+            $newRole = $validated['role_id'];
+
+            // Remove the user's current role (assuming the user has at least one role)
+            $user->removeRole($user->roles->first());
+
+            // Assign the new role to the user
+            $user->assignRole($newRole);
+        }
+
+        // Return a JSON response with the updated user data
+        return $this->returnJsonResponse(
+            message: "User successfully updated.",
+            data: new AdminUserResource($user->refresh())
+        );
+    }
+
+
 
     public function destroy(DeleteUserRequest $request, User $user)
     {
