@@ -489,6 +489,7 @@ Route::prefix('v1')->group(function () {
 
             Route::prefix('settings')->name('settings.')->group(function () {
                 Route::get('/', [BusinessSettingController::class, 'show']);
+                Route::match(['post', 'patch'], 'business-account', [BusinessSettingController::class, 'businessBankAccount']);
 
                 // Update business information
                 Route::match(['post', 'patch'], 'business-information', [BusinessSettingController::class, 'businessInformation']);
