@@ -474,22 +474,22 @@ Route::prefix('v1')->group(function () {
                 Route::get('/cancel/{ref}', [OrdersController::class, 'cancelPayment']);
             });
 
-        }); //OrderPaymentController
+        });
 
-    });
+        Route::prefix('lender')->name('lender.')->middleware(['roleCheck:lender'])->group(function () {
 
-    Route::prefix('lender')->name('lender.')->middleware(['roleCheck:lender'])->group(function () {
+            Route::prefix('settings')->name('settings.')->group(function () {
+                Route::get('/', [BusinessSettingController::class, 'show']);
 
-        Route::prefix('settings')->name('settings.')->group(function () {
-            Route::get('/', [BusinessSettingController::class, 'show']);
+                // Update business information
+                Route::match(['post', 'patch'], 'business-information', [BusinessSettingController::class, 'businessInformation']);
 
-            // Update business information
-            Route::match(['post', 'patch'], 'business-information', [BusinessSettingController::class, 'businessInformation']);
+                // Update business account license number, expiry date and cac doc
+                Route::patch('license/withdraw', [BusinessSettingController::class, 'withdraw']);
+                Route::match(['post', 'patch'], 'license', [BusinessSettingController::class, 'license']);
+                Route::get('license', [BusinessSettingController::class, 'getBusinessStatus']);
+            });
 
-            // Update business account license number, expiry date and cac doc
-            Route::patch('license/withdraw', [BusinessSettingController::class, 'withdraw']);
-            Route::match(['post', 'patch'], 'license', [BusinessSettingController::class, 'license']);
-            Route::get('license', [BusinessSettingController::class, 'getBusinessStatus']);
         });
 
     });
