@@ -36,6 +36,7 @@ class EcommerceDiscount extends Model
         'minimum_order_amount',
         'maximum_discount_amount',
         'status',
+        'usage_count'
 
     ];
 
