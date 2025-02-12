@@ -193,7 +193,7 @@ class BusinessSettingController extends Controller
             'bankCode' => 'required',
             'accountName' => 'required',
             'accountNumber' => 'required|digits:10',
-            'bvn' => 'required'
+            'bvn' => 'required|digits:10'
         ]);
 
         $bankData = $this->bankAccountService->addUpdateBankAccount($request);
