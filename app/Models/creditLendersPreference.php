@@ -5,7 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class creditLendersPreference extends Model
+class CreditLendersPreference extends Model
 {
     use HasFactory;
 
@@ -19,6 +19,7 @@ class creditLendersPreference extends Model
 
     protected $casts = [
         'loan_tenure' => 'array',
-        'credit_score_category' => 'array'
+        'credit_score_category' => 'array',
+        'auto_accept' => 'boolean'
     ];
 }

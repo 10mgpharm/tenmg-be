@@ -19,8 +19,10 @@ class LoanPreferenceController extends Controller
     public function createUpdateLoanPreference(Request $request)
     {
         $request->validate([
-            'loanTenure' => 'required|in:3,6,9,12',
-            'creditScoreCategory' => 'required|in:A,B,C,D',
+            'loanTenure' => 'required|array',
+            'loanTenure.*' => 'in:3,6,9,12',
+            'creditScoreCategory' => 'required|array',
+            'creditScoreCategory.*' => 'in:A,B,C,D',
         ]);
 
         $user = $request->user();
@@ -33,8 +35,39 @@ class LoanPreferenceController extends Controller
 
         return $this->returnJsonResponse(
             data: $loanPreference,
-            message: 'Loan Preference Updated Successfully',
-            status: 200
+            message: 'Loan Preference Updated Successfully'
+        );
+
+    }
+
+    public function getLoanPreference()
+    {
+        $loanPreference = $this->loanPreferenceService->getLoanPreference();
+        return $this->returnJsonResponse(
+            data: $loanPreference,
+            message: 'Loan Preference Successfully fetched'
+        );
+    }
+
+    public function getLoanPreferencePrefill()
+    {
+        $prefill = $this->loanPreferenceService->getLoanPreferencePrefill();
+        return $this->returnJsonResponse(
+            data: $prefill,
+            message: 'Loan Preference prefill'
+        );
+    }
+
+    public function updateAutoAcceptStatus(Request $request)
+    {
+        $request->validate([
+            'status' => 'required|boolean'
+        ]);
+
+        $loanPreference = $this->loanPreferenceService->updateAutoAcceptStatus($request);
+        return $this->returnJsonResponse(
+            data: $loanPreference,
+            message: 'Loan Preference auto accept status updated'
         );
 
     }

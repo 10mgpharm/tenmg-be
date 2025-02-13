@@ -29,6 +29,7 @@ use App\Http\Controllers\API\Credit\LoanController;
 use App\Http\Controllers\API\Credit\LoanOfferController;
 use App\Http\Controllers\API\Credit\TransactionHistoryController;
 use App\Http\Controllers\API\EcommerceDiscountController;
+use App\Http\Controllers\API\Lender\LoanPreferenceController;
 use App\Http\Controllers\API\MessageController;
 use App\Http\Controllers\API\ProfileController;
 use App\Http\Controllers\API\ResendOtpController;
@@ -510,6 +511,12 @@ Route::prefix('v1')->group(function () {
                 Route::patch('license/withdraw', [BusinessSettingController::class, 'withdraw']);
                 Route::match(['post', 'patch'], 'license', [BusinessSettingController::class, 'license']);
                 Route::get('license', [BusinessSettingController::class, 'getBusinessStatus']);
+
+                //loan preferences
+                Route::patch('update-loan-preferences', [LoanPreferenceController::class, 'createUpdateLoanPreference']);
+                Route::get('get-loan-preferences', [LoanPreferenceController::class, 'getLoanPreference']);
+                Route::get('get-loan-preferences-prefill', [LoanPreferenceController::class, 'getLoanPreferencePrefill']);
+                Route::patch('update-auto-accept-status', [LoanPreferenceController::class, 'updateAutoAcceptStatus']);
             });
 
         });
