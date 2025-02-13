@@ -27,10 +27,11 @@ class BusinessSettingController extends Controller
     public function show(ShowBusinessSettingRequest $request)
     {
         $user = $request->user()->load('ownerBusinessType.owner');
+        $business = $user->ownerBusinessType ?? $user->businesses()?->first();
 
         return $this->returnJsonResponse(
             message: 'Business details successfully retrieved.',
-            data: (new BusinessResource($user->ownerBusinessType))
+            data: (new BusinessResource($business))
         );
     }
 
@@ -49,12 +50,13 @@ class BusinessSettingController extends Controller
             array_flip(['name', 'contact_person', 'contact_phone', 'contact_email', 'address', 'contact_person_position'])
         ));  // since fillable isn't used.
 
-        $user->ownerBusinessType()->update($data);
-        $user->ownerBusinessType->refresh();
+        $business = $user->ownerBusinessType ?? $user->businesses()?->first();
+        $business->update($data);
+        $business->refresh();
 
         return $this->returnJsonResponse(
             message: 'Business information successfully updated.',
-            data: (new BusinessResource($user->ownerBusinessType))
+            data: (new BusinessResource($business))
         );
     }
 
@@ -71,6 +73,7 @@ class BusinessSettingController extends Controller
 
         $validated = $request->validated();
         $user = $request->user();
+        $business = $user->ownerBusinessType ?? $user->businesses()?->first();
 
         $data = array_filter(array_intersect_key(
             $validated,
@@ -81,7 +84,7 @@ class BusinessSettingController extends Controller
         if ($request->hasFile('cacDocument')) {
             $created = $this->attachmentService->saveNewUpload(
                 $request->file('cacDocument'),
-                $user->ownerBusinessType?->id,
+                $business?->id,
                 Business::class,
             );
 
@@ -89,14 +92,14 @@ class BusinessSettingController extends Controller
             $data['expiry_date'] = $request->expiryDate;
         }
 
-        $updated = $user->ownerBusinessType()->update($data);
+        $updated = $business?->update($data);
         if ($updated) {
-            $user->ownerBusinessType()->update([
+            $business?->update([
                 'license_verification_status' => 'PENDING'
             ]);
         }
 
-        $ownerBusiness = $user->ownerBusinessType()->first();
+        $ownerBusiness = $business;
         $licenseFile = $ownerBusiness->cac ?? null;
 
         $user->sendLicenseVerificationNotification('Your request has been received and is currently under review. You will receive a response from us shortly.', Auth::user());

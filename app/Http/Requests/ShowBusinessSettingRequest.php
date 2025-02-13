@@ -11,6 +11,12 @@ class ShowBusinessSettingRequest extends FormRequest
      */
     public function authorize(): bool
     {
+        $user = $this->user();
+        
+        if($user->hasRole('admin')){
+            return true;
+        }
+
         return (bool) $this->user()->ownerBusinessType;
     }
 
