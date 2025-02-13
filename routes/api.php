@@ -399,6 +399,11 @@ Route::prefix('v1')->group(function () {
                 Route::apiResource('faqs', FaqController::class);
                 Route::get('audit-logs', [AuditLogController::class, 'index']);
                 Route::get('audit-logs/search', [AuditLogController::class, 'search']);
+
+
+                Route::get('/', [BusinessSettingController::class, 'show']);
+                // Update business information
+                Route::match(['post', 'patch'], 'business-information', [BusinessSettingController::class, 'businessInformation']);
             });
 
             Route::get('discounts/search', [EcommerceDiscountController::class, 'search']);

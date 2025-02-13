@@ -13,6 +13,11 @@ class BusinessSettingPersonalInformationRequest extends FormRequest
      */
     public function authorize(): bool
     {
+        $user = $this->user();
+
+        if($user->hasRole('admin')){
+            return true;
+        }
         return (bool) $this->user()->ownerBusinessType;
     }
 
@@ -38,13 +43,15 @@ class BusinessSettingPersonalInformationRequest extends FormRequest
      */
     public function rules(): array
     {
+        $user = $this->user();
+        $business = $user->ownerBusinessType ?? $user->businesses()->first();
 
         return [
             'name' => [
                 'required',
                 'string',
                 'max:255',
-                Rule::unique('businesses', 'name')->ignore($this->user()->id, 'owner_id'),
+                Rule::unique('businesses', 'name')->ignore($business?->id, 'id'),
             ],
             'contact_person' => ['required', 'string', 'min:3', 'max:255'],
             'contact_phone' => [
