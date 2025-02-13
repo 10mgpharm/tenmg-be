@@ -27,6 +27,8 @@ class CreateBnplDemoFlowSeeder extends Seeder
         private AttachmentService $attachmentService,
     ) {
         $this->authService = $authService;
+        $this->customerService = $customerService;
+        $this->attachmentService = $attachmentService;
     }
 
     /**
