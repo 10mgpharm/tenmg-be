@@ -23,6 +23,11 @@ class CustomerRepository
         return Customer::whereId($id)->with('lastEvaluationHistory.creditScore')->first();
     }
 
+    public function findWhere(array $data): ?Customer
+    {
+        return Customer::where($data)->with('lastEvaluationHistory.creditScore')->first();
+    }
+
     public function update(Customer $customer, array $data): bool
     {
         $payload = [];

@@ -22,6 +22,8 @@ class DatabaseSeeder extends Seeder
             DocumentTypeSeeder::class,
             NotificationSeeder::class,
             VendorApiKeySeeder::class,
+            VendorCreditWalletSeeder::class,
+            CreateBnplDemoFlowSeeder::class,
         ]);
     }
 }

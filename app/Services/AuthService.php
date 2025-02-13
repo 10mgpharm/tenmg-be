@@ -368,7 +368,7 @@ class AuthService implements IAuthService
             CreditLendersWallet::create([
                 'lender_id' => $business->id,
                 'type' => $type,
-                'previous_balance' => 0,
+                'prev_balance' => 0,
                 'current_balance' => 0,
             ]);
         }

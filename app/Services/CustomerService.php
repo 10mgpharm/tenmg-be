@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Models\Business;
 use App\Models\Customer;
 use App\Repositories\CustomerRepository;
 use App\Services\Interfaces\ICustomerService;
@@ -18,19 +19,30 @@ class CustomerService implements ICustomerService
         private TransactionHistoryService $transactionHistoryService,
     ) {}
 
-    public function createCustomer(array $data, File|UploadedFile|string|null $file = null): Customer
+    public function createCustomer(array $data, File|UploadedFile|string|null $file = null, ?Business $mocked = null): Customer
     {
-        $data['vendorId'] = $this->authService->getBusiness()?->id;
-        $data['created_by'] = $this->authService->getUser()->id;
+        $isMocked = (bool) $mocked;
+        $user = $isMocked ? $mocked->owner : $this->authService->getUser();
+
+        $data['vendorId'] = $isMocked ? $mocked->id : $this->authService->getBusiness()?->id;
+        $data['created_by'] = $user->id;
 
         $customer = $this->customerRepository->create($data);
 
         if ($file?->isValid() && $customer) {
-            $evaluationData = $this->transactionHistoryService->uploadTransactionHistory(file: $file, customerId: $customer->id);
-            $this->transactionHistoryService->evaluateTransactionHistory($evaluationData['txn_history_evaluation']?->id);
+            $evaluationData = $this->transactionHistoryService->uploadTransactionHistory(file: $file, customerId: $customer->id, user: $user);
+            $this->transactionHistoryService->evaluateTransactionHistory(
+                transactionHistoryId: $evaluationData['txn_history_evaluation']?->id,
+                user: $user
+            );
         }
 
-        $this->activityLogService->logActivity(model: $customer, causer: $this->authService->getUser(), action: 'created', properties: ['attributes' => $data]);
+        $this->activityLogService->logActivity(
+            model: $customer,
+            causer: $user,
+            action: 'created',
+            properties: ['attributes' => $data]
+        );
 
         return $customer;
     }
@@ -38,6 +50,11 @@ class CustomerService implements ICustomerService
     public function getCustomerById(int $id): ?Customer
     {
         return $this->customerRepository->findById($id);
+    }
+
+    public function getCustomerByEmail(string $email): ?Customer
+    {
+        return $this->customerRepository->findWhere(['email' => $email]);
     }
 
     public function updateCustomer(int $id, array $data): ?Customer

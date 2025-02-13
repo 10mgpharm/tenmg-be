@@ -6,6 +6,7 @@ use App\Helpers\UtilityHelper;
 use App\Models\CreditScore;
 use App\Models\CreditTxnHistoryEvaluation;
 use App\Models\FileUpload;
+use App\Models\User;
 use App\Repositories\CreditBusinessRuleRepository;
 use App\Repositories\CreditScoreRepository;
 use App\Repositories\CustomerRepository;
@@ -63,7 +64,7 @@ class TransactionHistoryService implements ITxnHistoryService
         return $this->transactionHistoryRepository->listAllCreditScore($filters, $perPage);
     }
 
-    public function uploadTransactionHistory(File|UploadedFile|string $file, int $customerId): array
+    public function uploadTransactionHistory(File|UploadedFile|string $file, int $customerId, User $user): array
     {
         $customer = $this->customerRepository->findById($customerId);
 
@@ -75,7 +76,7 @@ class TransactionHistoryService implements ITxnHistoryService
         $this->activityLogService->logActivity(
             logName: 'TransactionHistory',
             model: $customer,
-            causer: $this->authService->getUser(),
+            causer: $user,
             action: 'Uploading transaction history for customer',
             properties: ['file_format' => strtoupper($file->getClientOriginalExtension())]
         );
@@ -87,7 +88,7 @@ class TransactionHistoryService implements ITxnHistoryService
             'file_format' => strtoupper($file->getClientOriginalExtension()) == 'XLSX' ? 'EXCEL' : strtoupper($file->getClientOriginalExtension()),
             'source' => 'API',
             'status' => 'PENDING',
-            'created_by_id' => $this->authService->getId(),
+            'created_by_id' => $user->id,
         ];
 
         $txnHistoryEvaluation = $this->transactionHistoryRepository->createTransactionHistoryEvaluation($evaluationData);
@@ -110,7 +111,7 @@ class TransactionHistoryService implements ITxnHistoryService
         $this->activityLogService->logActivity(
             logName: 'TransactionHistory',
             model: $txnHistoryEvaluation,
-            causer: $this->authService->getUser(),
+            causer: $user,
             action: 'Successfully uploaded transaction history',
             properties: ['file' => $fileUpload->url]
         );
@@ -126,7 +127,7 @@ class TransactionHistoryService implements ITxnHistoryService
         return $this->transactionHistoryRepository->viewTransactionHistory($fileUpload);
     }
 
-    public function evaluateTransactionHistory(int $transactionHistoryId): array
+    public function evaluateTransactionHistory(int $transactionHistoryId, User $user): array
     {
         try {
             // 1. Fetch the transaction history evaluation entry by ID
@@ -136,7 +137,7 @@ class TransactionHistoryService implements ITxnHistoryService
             $this->activityLogService->logActivity(
                 logName: 'TransactionHistory',
                 model: $txnHistoryEvaluation,
-                causer: $this->authService->getUser(),
+                causer: $user,
                 action: 'Evaluating transaction history for customer',
             );
 
@@ -199,7 +200,7 @@ class TransactionHistoryService implements ITxnHistoryService
             $creditScore = $this->creditScoreRepository->store([
                 'business_id' => $txnHistoryEvaluation->business_id,
                 'customer_id' => $txnHistoryEvaluation->customer_id,
-                'identifier' => UtilityHelper::generateSlug("CSC"),
+                'identifier' => UtilityHelper::generateSlug('CSC'),
                 'txn_evaluation_id' => $txnHistoryEvaluation->id,
                 'category' => $category,
                 'business_rule_json' => json_encode($activeRules),
@@ -207,7 +208,7 @@ class TransactionHistoryService implements ITxnHistoryService
                 'score_percent' => $creditScore['score_percent'],
                 'score_value' => $creditScore['score_value'],
                 'score_total' => $creditScore['score_total'],
-                'created_by_id' => $this->authService->getId(),
+                'created_by_id' => $user->id,
                 'source' => 'API',
                 'affordability' => json_encode($affordability),
             ]);
@@ -218,7 +219,7 @@ class TransactionHistoryService implements ITxnHistoryService
             $this->activityLogService->logActivity(
                 logName: 'TransactionHistory',
                 model: $txnHistoryEvaluation,
-                causer: $this->authService->getUser(),
+                causer: $user,
                 action: 'Transaction history evaluation completed',
             );
 
@@ -237,10 +238,10 @@ class TransactionHistoryService implements ITxnHistoryService
         return $this->transactionHistoryRepository->creditScoreBreakDown($txnEvaluationId);
     }
 
-    public function uploadAndEvaluateTransactionHistory(File|UploadedFile|string $file, int $customerId): array
+    public function uploadAndEvaluateTransactionHistory(File|UploadedFile|string $file, int $customerId, User $user): array
     {
-        $evaluationData = $this->uploadTransactionHistory(file: $file, customerId: $customerId);
+        $evaluationData = $this->uploadTransactionHistory(file: $file, customerId: $customerId, user: $user);
 
-        return $this->evaluateTransactionHistory($evaluationData['txn_history_evaluation']?->id);
+        return $this->evaluateTransactionHistory(transactionHistoryId: $evaluationData['txn_history_evaluation']?->id, user: $user);
     }
 }

@@ -2,15 +2,18 @@
 
 namespace App\Services\Interfaces;
 
+use App\Models\Business;
 use App\Models\Customer;
 use File;
 use Illuminate\Http\UploadedFile;
 
 interface ICustomerService
 {
-    public function createCustomer(array $data, File|UploadedFile|string|null $file = null): Customer;
+    public function createCustomer(array $data, File|UploadedFile|string|null $file = null, ?Business $mocked = null): Customer;
 
     public function getCustomerById(int $id): ?Customer;
+
+    public function getCustomerByEmail(string $email): ?Customer;
 
     public function updateCustomer(int $id, array $data): ?Customer;
 

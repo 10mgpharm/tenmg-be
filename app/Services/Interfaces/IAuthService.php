@@ -69,4 +69,9 @@ interface IAuthService
      * @return void
      */
     public function completeCredentialSignUp(CompleteUserSignupRequest $request);
+
+    /**
+     * handle account setup
+     */
+    public function handleAccountSetup(Business $adminBusiness, $businessType);
 }

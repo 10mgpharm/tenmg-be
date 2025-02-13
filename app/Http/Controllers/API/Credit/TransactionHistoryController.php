@@ -57,6 +57,7 @@ class TransactionHistoryController extends Controller
         $result = $this->txnHistoryService->uploadTransactionHistory(
             file: $request->file('file'),
             customerId: $request->customerId,
+            user: $request->user(),
         );
 
         // Return a success response with file and evaluation details
@@ -122,7 +123,10 @@ class TransactionHistoryController extends Controller
         ]);
 
         // Call the service to evaluate the transaction history
-        $evaluation = $this->txnHistoryService->evaluateTransactionHistory($request->transactionHistoryId);
+        $evaluation = $this->txnHistoryService->evaluateTransactionHistory(
+            transactionHistoryId: $request->transactionHistoryId,
+            user: $request->user
+        );
 
         return $this->returnJsonResponse(message: 'Transaction history evaluated successfully.', data: $evaluation);
     }
@@ -146,6 +150,7 @@ class TransactionHistoryController extends Controller
         $result = $this->txnHistoryService->uploadAndEvaluateTransactionHistory(
             file: $request->file('file'),
             customerId: $request->customerId,
+            user: $request->user(),
         );
 
         // Return a success response with file and evaluation details
