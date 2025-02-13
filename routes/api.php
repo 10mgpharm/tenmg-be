@@ -21,6 +21,7 @@ use App\Http\Controllers\API\Auth\AuthenticatedController;
 use App\Http\Controllers\API\Auth\PasswordController;
 use App\Http\Controllers\API\Auth\SignupUserController;
 use App\Http\Controllers\API\Auth\VerifyEmailController;
+use App\Http\Controllers\API\Bank\BankController;
 use App\Http\Controllers\API\Credit\ApiKeyController;
 use App\Http\Controllers\API\Credit\CustomerController;
 use App\Http\Controllers\API\Credit\LoanApplicationController;
@@ -135,6 +136,12 @@ Route::prefix('v1')->group(function () {
             });
 
             Route::apiResource('messages', MessageController::class);
+        });
+
+        Route::prefix('bank')->group(function () {
+            Route::get('/list', [BankController::class, 'getBankList']);
+            Route::post('/verify-account', [BankController::class, 'verifyBankAccount']);
+
         });
 
         // SUPPLIER specific routes
