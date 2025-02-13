@@ -17,11 +17,13 @@ use App\Services\AffordabilityService;
 use App\Services\ApiKeyService;
 use App\Services\AttachmentService;
 use App\Services\AuthService;
+use App\Services\ClientService;
 use App\Services\CustomerService;
 use App\Services\Interfaces\IActivityLogService;
 use App\Services\Interfaces\IAffordabilityService;
 use App\Services\Interfaces\IApiKeyService;
 use App\Services\Interfaces\IAuthService;
+use App\Services\Interfaces\IClientService;
 use App\Services\Interfaces\ICustomerService;
 use App\Services\Interfaces\IRuleEngineService;
 use App\Services\Interfaces\ITxnHistoryService;
@@ -65,6 +67,12 @@ class AppServiceProvider extends ServiceProvider
             );
         }, shared: true);
 
+        $this->app->bind(abstract: IClientService::class, concrete: function ($app) {
+            return new ClientService(
+                customerRepository: $app->make(CustomerRepository::class),
+                apiKeyRepository: $app->make(ApiKeyRepository::class),
+            );
+        }, shared: true);
     }
 
     /**

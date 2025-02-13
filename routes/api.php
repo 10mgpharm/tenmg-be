@@ -22,6 +22,7 @@ use App\Http\Controllers\API\Auth\PasswordController;
 use App\Http\Controllers\API\Auth\SignupUserController;
 use App\Http\Controllers\API\Auth\VerifyEmailController;
 use App\Http\Controllers\API\Credit\ApiKeyController;
+use App\Http\Controllers\API\Credit\ClientController;
 use App\Http\Controllers\API\Credit\CustomerController;
 use App\Http\Controllers\API\Credit\LoanApplicationController;
 use App\Http\Controllers\API\Credit\LoanController;
@@ -38,7 +39,6 @@ use App\Http\Controllers\API\Storefront\FaqController as StorefrontFaqController
 use App\Http\Controllers\API\Storefront\FincraWebhookController;
 use App\Http\Controllers\API\Storefront\MeasurementController as StorefrontMeasurementController;
 use App\Http\Controllers\API\Storefront\MedicationTypeController as StorefrontMedicationTypeController;
-use App\Http\Controllers\API\Storefront\OrderPaymentController;
 use App\Http\Controllers\API\Storefront\OrdersController;
 use App\Http\Controllers\API\Storefront\PresentationController as StorefrontPresentationController;
 use App\Http\Controllers\API\Storefront\ProductController as StorefrontProductController;
@@ -400,7 +400,6 @@ Route::prefix('v1')->group(function () {
                 Route::get('audit-logs', [AuditLogController::class, 'index']);
                 Route::get('audit-logs/search', [AuditLogController::class, 'search']);
 
-
                 Route::get('/', [BusinessSettingController::class, 'show']);
                 // Update business information
                 Route::match(['post', 'patch'], 'business-information', [BusinessSettingController::class, 'businessInformation']);
@@ -510,6 +509,19 @@ Route::prefix('v1')->group(function () {
     });
 
     Route::post('/webhooks/vendor/direct-debit/mandate', [PaystackWebhookController::class, 'handle'])->name('webhooks.paystack.direct_debit');
+
+    // Client APIs
+    Route::prefix('client')->middleware('clientAuth')->group(function () {
+        // get customers
+        Route::get('/customers', [ClientController::class, 'getCustomers'])->name('client.customers');
+
+        Route::prefix('application')->group(function () {
+            // [BNPL] start external application
+            Route::post('/start', [ClientController::class, 'startApplication'])->name('client.customers');
+
+        });
+
+    });
 });
 
-Route::post("/fincra/webook", [FincraWebhookController::class, 'verifyFincraPaymentWebHook']);
+Route::post('/fincra/webook', [FincraWebhookController::class, 'verifyFincraPaymentWebHook']);

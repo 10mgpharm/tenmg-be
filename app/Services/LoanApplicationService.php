@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Helpers\UtilityHelper;
+use App\Models\Business;
 use App\Models\Customer;
 use App\Models\DebitMandate;
 use App\Models\LoanApplication;
@@ -82,6 +83,61 @@ class LoanApplicationService
         $data['source'] = 'API';
 
         $application = $this->loanApplicationRepository->create($data); //
+
+        $token = $user->createToken('Full Access Token', ['full']);
+
+        $link = config('app.frontend_url').'/widgets/applications/'.$application->identifier.'?token='.$token->accessToken;
+
+        $customer = $application->customer;
+
+        // notifation to customer here
+        Notification::route('mail', [
+            $customer?->email => $customer?->name,
+        ])->notify(new CustomerLoanApplicationNotification($link));
+
+        return $link;
+    }
+
+    // Submit Loan Application link
+    public function generateExternalApplicationLink(Business $vendor, array $data)
+    {
+        if (array_key_exists('reference', $data) && isset($data['reference'])) {
+            $customer = Customer::firstOrCreate(
+                [
+                    'reference' => $data['reference'],
+                    'business_id' => $vendor->id,
+                ],
+                [
+                    'business_id' => $vendor->id,
+                    'name' => $data['name'],
+                    'email' => $data['email'],
+                    'phone' => $data['phone'],
+                    'reference' => array_key_exists('reference', $data) ? $data['reference'] : null,
+                    'identifier' => UtilityHelper::generateSlug('CUS'),
+                    'active' => true,
+                ]);
+
+        } else {
+            $customer = Customer::create(
+                [
+                    'business_id' => $vendor->id,
+                    'name' => $data['name'],
+                    'email' => $data['email'],
+                    'phone' => $data['phone'],
+                    'reference' => array_key_exists('reference', $data) ? $data['reference'] : null,
+                    'identifier' => UtilityHelper::generateSlug('CUS'),
+                    'active' => true,
+                ]);
+        }
+
+        $user = User::find($vendor->owner_id);
+
+        $data['businessId'] = $vendor->id;
+        $data['customerId'] = $customer->id;
+        $data['requestedAmount'] = $customer->requestedAmount;
+        $data['source'] = 'API';
+
+        $application = $this->loanApplicationRepository->create($data);
 
         $token = $user->createToken('Full Access Token', ['full']);
 

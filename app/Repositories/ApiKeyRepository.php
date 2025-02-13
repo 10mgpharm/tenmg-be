@@ -4,6 +4,7 @@ namespace App\Repositories;
 
 use App\Models\ApiKey;
 use App\Models\Business;
+use Exception;
 
 class ApiKeyRepository
 {
@@ -66,5 +67,31 @@ class ApiKeyRepository
         }
 
         return null;
+    }
+
+    public function verifyPublicKeyExist($publicKey): ?Business
+    {
+        $key = ApiKey::where('key', $publicKey)
+            ->orWhere('test_key', $publicKey)
+            ->first();
+
+        if (! $key) {
+            throw new Exception('Invalid key params');
+        }
+
+        return $key->business;
+    }
+
+    public function verifySecretKeyExist($secretKey): ?Business
+    {
+        $key = ApiKey::where('secret', $secretKey)
+            ->orWhere('test_secret', $secretKey)
+            ->first();
+
+        if (! $key) {
+            throw new Exception('Invalid key params');
+        }
+
+        return $key->business;
     }
 }

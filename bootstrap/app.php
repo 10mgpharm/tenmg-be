@@ -3,6 +3,7 @@
 use App\Common\ResponseMessages;
 use App\Helpers\UtilityHelper;
 use App\Http\Middleware\CamelCaseMiddleware;
+use App\Http\Middleware\ClientPublicApiMiddleware;
 use App\Http\Middleware\Cors;
 use App\Http\Middleware\ForceJsonResponse;
 use App\Http\Middleware\HandleAuthProvider;
@@ -46,6 +47,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'admin' => IsAdmin::class,
             'auth.provider' => HandleAuthProvider::class,
             'roleCheck' => RoleCheckMiddleware::class,
+            'clientAuth' => ClientPublicApiMiddleware::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {

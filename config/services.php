@@ -45,6 +45,12 @@ return [
         'url' => env('FINCRA_BASE_URL', 'https://api.paystack.co'),
     ],
 
+    'tenmg' => [
+        'public' => env('TENMG_PUBKEY'),
+        'secret' => env('TENMG_SECKEY'),
+        'url' => env('TENMG_BASE_URL', 'https://staging-api.10mg.ai'),
+    ],
+
     'google' => [
         'oauth_url' => env('GOOGLE_OAUTH2_URL'),
     ],

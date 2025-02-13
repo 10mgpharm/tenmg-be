@@ -8,6 +8,7 @@ use App\Helpers\UtilityHelper;
 use App\Models\Business;
 use App\Models\BusinessUser;
 use App\Models\User;
+use App\Repositories\ApiKeyRepository;
 use App\Services\AttachmentService;
 use App\Services\Interfaces\IAuthService;
 use App\Services\Interfaces\ICustomerService;
@@ -25,10 +26,12 @@ class CreateBnplDemoFlowSeeder extends Seeder
         private IAuthService $authService,
         private ICustomerService $customerService,
         private AttachmentService $attachmentService,
+        private ApiKeyRepository $apiKeyRepository,
     ) {
         $this->authService = $authService;
         $this->customerService = $customerService;
         $this->attachmentService = $attachmentService;
+        $this->apiKeyRepository = $apiKeyRepository;
     }
 
     /**
@@ -44,22 +47,13 @@ class CreateBnplDemoFlowSeeder extends Seeder
 
         // create demo vendor
         $vendor = $this->createDemoUser(BusinessType::VENDOR, 'Danjuma Kehinde', 'vendor@demo.com', 'Demo Vendor');
-        //TODO: update vendor business info
 
-        // create vendor customers
-        $customer1 = $this->customerService->getCustomerByEmail('customer1@demo.com');
-        if (! $customer1) {
-            $customer1 = $this->customerService->createCustomer(
-                data: [
-                    'name' => 'Pharm. Saadat Adeola',
-                    'email' => 'customer1@demo.com',
-                    'phone' => '08093570289',
-                    'reference' => UtilityHelper::generateSlug('CUS'),
-                ],
-                file: null,
-                mocked: $vendor
-            );
-        }
+        $this->apiKeyRepository->updateVendorKey($vendor, [
+            'key' => 'pk_live_DEMO_REMOVED_PLACEHOLDER',
+            'secret' => 'sk_live_DEMO_REMOVED_PLACEHOLDER',
+            'test_key' => 'pk_test_DEMO_REMOVED_PLACEHOLDER',
+            'test_secret' => 'sk_test_DEMO_REMOVED_PLACEHOLDER',
+        ]);
 
         // create vendor customers with transaction history
         $filePath = 'mock/txn_history_sample.csv';
@@ -73,16 +67,31 @@ class CreateBnplDemoFlowSeeder extends Seeder
                 test: true
             );
         }
-        $customer2 = $this->customerService->getCustomerByEmail('customer2@demo.com');
-        if (! $customer2) {
-            $customer2 = $this->customerService->createCustomer(
+        $customer1 = $this->customerService->getCustomerByEmail('customer1@demo.com');
+        if (! $customer1) {
+            $customer1 = $this->customerService->createCustomer(
                 data: [
-                    'name' => 'Pharm. Daniel Aminat',
-                    'email' => 'customer2@demo.com',
+                    'name' => 'Daniel Aminat - Verified',
+                    'email' => 'customer1@demo.com',
                     'phone' => '08093570288',
                     'reference' => UtilityHelper::generateSlug('CUS'),
                 ],
                 file: $file,
+                mocked: $vendor
+            );
+        }
+
+        // create vendor customers
+        $customer2 = $this->customerService->getCustomerByEmail('customer2@demo.com');
+        if (! $customer2) {
+            $customer2 = $this->customerService->createCustomer(
+                data: [
+                    'name' => 'Saadat Adeola - UnVerified',
+                    'email' => 'customer2@demo.com',
+                    'phone' => '08093570280',
+                    'reference' => UtilityHelper::generateSlug('CUS'),
+                ],
+                file: null,
                 mocked: $vendor
             );
         }
