@@ -33,11 +33,9 @@ class ClientController extends Controller
 
         $business = $request->business;
 
-        $requestData = $request->toArray();
-
         $applicationLink = $this->loanApplicationService->generateExternalApplicationLink(
             vendor: $business,
-            data: array_key_exists('customer', $requestData) ? $requestData['customer'] : [],
+            data: $request->toArray(),
         );
 
         return $this->returnJsonResponse(

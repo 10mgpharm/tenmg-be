@@ -101,18 +101,21 @@ class LoanApplicationService
     // Submit Loan Application link
     public function generateExternalApplicationLink(Business $vendor, array $data)
     {
-        if (array_key_exists('reference', $data) && isset($data['reference'])) {
+        $requestedAmount = $data['$requestedAmount'];
+        $customerData = array_key_exists('customer', $data) ? $data['customer'] : [];
+
+        if (array_key_exists('reference', $customerData) && isset($customerData['reference'])) {
             $customer = Customer::firstOrCreate(
                 [
-                    'reference' => $data['reference'],
+                    'reference' => $customerData['reference'],
                     'business_id' => $vendor->id,
                 ],
                 [
                     'business_id' => $vendor->id,
-                    'name' => $data['name'],
-                    'email' => $data['email'],
-                    'phone' => $data['phone'],
-                    'reference' => array_key_exists('reference', $data) ? $data['reference'] : null,
+                    'name' => $customerData['name'],
+                    'email' => $customerData['email'],
+                    'phone' => $customerData['phone'],
+                    'reference' => array_key_exists('reference', $customerData) ? $customerData['reference'] : null,
                     'identifier' => UtilityHelper::generateSlug('CUS'),
                     'active' => true,
                 ]);
@@ -121,10 +124,10 @@ class LoanApplicationService
             $customer = Customer::create(
                 [
                     'business_id' => $vendor->id,
-                    'name' => $data['name'],
-                    'email' => $data['email'],
-                    'phone' => $data['phone'],
-                    'reference' => array_key_exists('reference', $data) ? $data['reference'] : null,
+                    'name' => $customerData['name'],
+                    'email' => $customerData['email'],
+                    'phone' => $customerData['phone'],
+                    'reference' => array_key_exists('reference', $customerData) ? $customerData['reference'] : null,
                     'identifier' => UtilityHelper::generateSlug('CUS'),
                     'active' => true,
                 ]);
@@ -134,7 +137,7 @@ class LoanApplicationService
 
         $data['businessId'] = $vendor->id;
         $data['customerId'] = $customer->id;
-        $data['requestedAmount'] = $customer->requestedAmount;
+        $data['requestedAmount'] = $requestedAmount;
         $data['source'] = 'API';
 
         $application = $this->loanApplicationRepository->create($data);
