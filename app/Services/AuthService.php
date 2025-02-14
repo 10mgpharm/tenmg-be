@@ -18,9 +18,11 @@ use App\Models\User;
 use App\Repositories\ApiKeyRepository;
 use App\Repositories\CreditVendorWalletRepository;
 use App\Services\Interfaces\IAuthService;
+use App\Services\Lender\LoanPreferenceService;
 use Exception;
 use Illuminate\Auth\Events\Verified;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -37,7 +39,7 @@ class AuthService implements IAuthService
     /**
      * @throws Exception
      */
-    public function __construct(public ApiKeyRepository $apiKeyRepository, public CreditVendorWalletRepository $creditVendorRepository) {}
+    public function __construct(public ApiKeyRepository $apiKeyRepository, public CreditVendorWalletRepository $creditVendorRepository, private LoanPreferenceService $loanPreferenceService) {}
 
     /**
      * Get user
@@ -341,6 +343,8 @@ class AuthService implements IAuthService
                 break;
             case BusinessType::LENDER:
                 $this->createLendersWallet($adminBusiness);
+                $request = new Request(['business_id' => $adminBusiness->id]);
+                $this->loanPreferenceService->createUpdateLoanPreference($request);
                 break;
             case BusinessType::VENDOR:
                 $this->apiKeyRepository->createVendorApiKey($adminBusiness);
