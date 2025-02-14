@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->foreignId('lender_id')->constrained('businesses')->cascadeOnDelete();
             $table->json('loan_tenure');
-            $table->json('loan_interest');
+            $table->decimal('loan_interest');
             $table->json('credit_score_category');
             $table->boolean('auto_accept')->default(true);
             $table->timestamps();
