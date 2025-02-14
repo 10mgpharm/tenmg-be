@@ -7,14 +7,13 @@ use App\Http\Resources\LoadApplicationResource;
 use App\Models\Business;
 use App\Models\LoanApplication;
 use App\Settings\CreditSettings;
-use Illuminate\Http\Request;
-use Laravel\Passport\Token;
-use Lcobucci\JWT\Parser;
 
 class LoanApplicationRepository
 {
     public function create(array $data)
     {
+        $creditSettings = new CreditSettings;
+
         return LoanApplication::create([
             'business_id' => $data['businessId'],
             'identifier' => UtilityHelper::generateSlug('APP'),
@@ -22,10 +21,10 @@ class LoanApplicationRepository
             'requested_amount' => $data['requestedAmount'] ?? null,
             'interest_amount' => $data['interestAmount'] ?? 0,
             'total_amount' => $data['totalAmount'] ?? 0,
-            'interest_rate' => $data['interestRate'] ?? config('app.interest_rate'),
+            'interest_rate' => $creditSettings->interest_config,
             'duration_in_months' => $data['durationInMonths'] ?? null,
             'source' => $data['source'] ?? 'DASHBOARD',
-            'status' => 'PENDING',
+            'status' => 'INITIATED',
         ]);
     }
 
@@ -58,7 +57,7 @@ class LoanApplicationRepository
         return LoanApplication::whereIdentifier($reference)->with(['customer.lastEvaluationHistory.creditScore', 'business.logo'])->first();
     }
 
-    public function getAll(array $criteria, int $perPage = 15):\Illuminate\Contracts\Pagination\LengthAwarePaginator
+    public function getAll(array $criteria, int $perPage = 15): \Illuminate\Contracts\Pagination\LengthAwarePaginator
     {
         $query = LoanApplication::query();
 
@@ -92,7 +91,7 @@ class LoanApplicationRepository
         return LoanApplication::destroy($id);
     }
 
-    public function filter(array $criteria, int $perPage = 15):\Illuminate\Contracts\Pagination\LengthAwarePaginator
+    public function filter(array $criteria, int $perPage = 15): \Illuminate\Contracts\Pagination\LengthAwarePaginator
     {
         $query = LoanApplication::query();
 
@@ -100,6 +99,7 @@ class LoanApplicationRepository
 
         $query->when(isset($criteria['search']), function ($query) use ($criteria) {
             $searchTerm = "%{$criteria['search']}%";
+
             return $query->where(function ($query) use ($searchTerm) {
                 $query->where('credit_applications.identifier', 'like', $searchTerm)
                     ->orWhereHas('customer', function ($q) use ($searchTerm) {
@@ -158,16 +158,15 @@ class LoanApplicationRepository
         // $vendor = $application->business;
         // $customer = $application->customer;
 
-        $creditSettings = new CreditSettings();
-
+        $creditSettings = new CreditSettings;
 
         $data = [
             'application' => new LoadApplicationResource($application),
             'bvnStatus' => false,
             'accountMandateStatus' => false,
             'interestConfig' => [
-                'rate' => $creditSettings->interest_config
-            ]
+                'rate' => $creditSettings->interest_config,
+            ],
         ];
 
         return $data;

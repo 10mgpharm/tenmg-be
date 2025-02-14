@@ -278,11 +278,6 @@ Route::prefix('v1')->group(function () {
                     'sendApplicationLink',
                 ])->name('vendor.applications.apply');
 
-                Route::get('/verify-application-link/{reference}', [
-                    LoanApplicationController::class,
-                    'verifyApplicationLink',
-                ])->name('vendor.applications.verify')->withoutMiddleware(['roleCheck:vendor', 'scope:full']);
-
                 // Retrieve Vendor Customizations
                 Route::get('/customisations', [LoanApplicationController::class, 'getCustomisations'])->name('vendor.applications.customisations');
 
@@ -519,6 +514,9 @@ Route::prefix('v1')->group(function () {
             // [BNPL] start external application
             Route::post('/start', [ClientController::class, 'startApplication'])->name('client.customers');
 
+            Route::get('/verify/{reference}', [LoanApplicationController::class, 'verifyApplicationLink'])
+                ->middleware(['auth:api'])
+                ->name('vendor.applications.verify');
         });
 
     });

@@ -101,7 +101,7 @@ class LoanApplicationService
     // Submit Loan Application link
     public function generateExternalApplicationLink(Business $vendor, array $data)
     {
-        $requestedAmount = $data['$requestedAmount'];
+        $requestedAmount = $data['requestedAmount'];
         $customerData = array_key_exists('customer', $data) ? $data['customer'] : [];
 
         if (array_key_exists('reference', $customerData) && isset($customerData['reference'])) {
