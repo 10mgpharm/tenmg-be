@@ -3,10 +3,13 @@
 namespace App\Repositories;
 
 use App\Helpers\UtilityHelper;
+use App\Http\Resources\BusinessLimitedRecordResource;
+use App\Http\Resources\CreditCustomerResource;
 use App\Http\Resources\LoadApplicationResource;
 use App\Models\Business;
 use App\Models\LoanApplication;
 use App\Settings\CreditSettings;
+use Exception;
 
 class LoanApplicationRepository
 {
@@ -150,23 +153,35 @@ class LoanApplicationRepository
             ->get();
     }
 
+    const LINK_EXPIRED = 24;
+
     public function verifyApplicationLink($reference)
     {
-
-        //get the application
         $application = LoanApplication::where('identifier', $reference)->first();
-        // $vendor = $application->business;
-        // $customer = $application->customer;
+
+        if (! $application) {
+            throw new Exception('Provided application link does not exist');
+        }
+
+        if ($application->created_at->diffInHours(now()) > $this::LINK_EXPIRED) {
+            $application->status = 'EXPIRED';
+            $application->save();
+
+            throw new Exception('Application link expired');
+        }
+
+        $vendor = $application->business;
+        $customer = $application->customer;
 
         $creditSettings = new CreditSettings;
 
         $data = [
-            'application' => new LoadApplicationResource($application),
-            'bvnStatus' => false,
-            'accountMandateStatus' => false,
+            'customer' => new CreditCustomerResource($customer),
+            'business' => new BusinessLimitedRecordResource($vendor),
             'interestConfig' => [
                 'rate' => $creditSettings->interest_config,
             ],
+            'application' => new LoadApplicationResource($application),
         ];
 
         return $data;

@@ -520,19 +520,26 @@ Route::prefix('v1')->group(function () {
     Route::post('/webhooks/vendor/direct-debit/mandate', [PaystackWebhookController::class, 'handle'])->name('webhooks.paystack.direct_debit');
 
     // Client APIs
-    Route::prefix('client')->middleware('clientAuth')->group(function () {
+    Route::prefix('client')->group(function () {
+
         // get customers
-        Route::get('/customers', [ClientController::class, 'getCustomers'])->name('client.customers');
+        Route::get('/customers', [ClientController::class, 'getCustomers'])
+            ->middleware('clientAuth')
+            ->name('client.customers');
 
-        Route::prefix('application')->group(function () {
+        Route::prefix('applications')->group(function () {
+
             // [BNPL] start external application
-            Route::post('/start', [ClientController::class, 'startApplication'])->name('client.customers');
+            Route::post('/start', [ClientController::class, 'startApplication'])
+                ->middleware('clientAuth')
+                ->name('client.customers');
 
-            Route::get('/verify/{reference}', [LoanApplicationController::class, 'verifyApplicationLink'])
+            // [BNPL] get external application config
+            Route::get('/config/{reference}', [LoanApplicationController::class, 'verifyApplicationLink'])
                 ->middleware(['auth:api'])
-                ->name('vendor.applications.verify');
-        });
+                ->name('client.applications.config');
 
+        });
     });
 });
 

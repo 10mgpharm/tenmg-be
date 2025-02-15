@@ -5,7 +5,6 @@ namespace App\Http\Middleware;
 use App\Services\Interfaces\IClientService;
 use Closure;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Log;
 use Symfony\Component\HttpFoundation\Response;
 
 class ClientPublicApiMiddleware
@@ -44,12 +43,6 @@ class ClientPublicApiMiddleware
             'source' => 'API',
             'type' => 'client',
             'business' => $business,
-        ]);
-
-        Log::info([
-            'pbKey' => $pbKey,
-            'scKey' => $scKey,
-            'business' => $request->business,
         ]);
 
         return $next($request);
