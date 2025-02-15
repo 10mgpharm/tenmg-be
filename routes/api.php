@@ -522,23 +522,33 @@ Route::prefix('v1')->group(function () {
     // Client APIs
     Route::prefix('client')->group(function () {
 
-        // get customers
+        // [BNPL] get customers
         Route::get('/customers', [ClientController::class, 'getCustomers'])
             ->middleware('clientAuth')
             ->name('client.customers');
 
+        // [BNPL] get banks
+        Route::prefix('banks')->group(function () {
+            Route::get('/', [BankController::class, 'getBankList'])
+                ->middleware(['auth:api'])
+                ->name('client.bank.list');
+
+            Route::post('/account/verify', [BankController::class, 'verifyBankAccount'])
+                ->middleware(['auth:api'])
+                ->name('client.bank.verify');
+        });
+
         Route::prefix('applications')->group(function () {
 
-            // [BNPL] start external application
+            // [BNPL] start application
             Route::post('/start', [ClientController::class, 'startApplication'])
                 ->middleware('clientAuth')
-                ->name('client.customers');
+                ->name('client.applications.start');
 
-            // [BNPL] get external application config
+            // [BNPL] get application config
             Route::get('/config/{reference}', [LoanApplicationController::class, 'verifyApplicationLink'])
                 ->middleware(['auth:api'])
                 ->name('client.applications.config');
-
         });
     });
 });
