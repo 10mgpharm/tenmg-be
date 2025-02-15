@@ -3,29 +3,27 @@
 namespace App\Services\Lender;
 
 use App\Models\Affordability;
-use App\Models\CreditLendersPreference;
+use App\Models\CreditLenderPreference;
 use App\Settings\CreditSettings;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 
 class LoanPreferenceService
 {
-
     public function createUpdateLoanPreference(Request $request)
     {
 
-        $creditSettings = new CreditSettings();
+        $creditSettings = new CreditSettings;
         $loanInterest = $creditSettings->interest_config;
 
-        $createUpdatePrefs = CreditLendersPreference::UpdateOrCreate(
+        $createUpdatePrefs = CreditLenderPreference::UpdateOrCreate(
             [
-                'lender_id' => $request->business_id
+                'lender_id' => $request->business_id,
             ],
             [
                 'lender_id' => $request->business_id,
                 'loan_tenure' => $request->loanTenure ?? [3],
                 'loan_interest' => $loanInterest,
-                'credit_score_category' => $request->creditScoreCategory ?? ["A"]
+                'credit_score_category' => $request->creditScoreCategory ?? ['A'],
             ]
         );
 
@@ -35,10 +33,10 @@ class LoanPreferenceService
     public function getLoanPreference()
     {
         $user = request()->user();
-            $business_id = $user->ownerBusinessType?->id
-                ?: $user->businesses()->firstWhere('user_id', $user->id)?->id;
+        $business_id = $user->ownerBusinessType?->id
+            ?: $user->businesses()->firstWhere('user_id', $user->id)?->id;
 
-        $loanPreference = CreditLendersPreference::where('lender_id', $business_id)->first();
+        $loanPreference = CreditLenderPreference::where('lender_id', $business_id)->first();
 
         return $loanPreference;
     }
@@ -47,25 +45,25 @@ class LoanPreferenceService
     {
 
         $categories = Affordability::select('category as value', 'lower_bound as loanAbove')
-        ->get()
-        ->toArray();
-        $loanTenure = ['3','6','9','12'];
+            ->get()
+            ->toArray();
+        $loanTenure = ['3', '6', '9', '12'];
 
         $loanTenureResult = array_map(function ($item) {
             return [
                 'value' => (int) $item,
-                'label' => "{$item} months"
+                'label' => "{$item} months",
             ];
         }, $loanTenure);
 
-        $creditSettings = new CreditSettings();
+        $creditSettings = new CreditSettings;
         $loanInterest = $creditSettings->interest_config;
 
-        $data = array(
+        $data = [
             'categories' => $categories,
             'loanTenure' => $loanTenureResult,
-            'interestRate' => 'Your interest '.$loanInterest.'%, Processing fee (0%)'
-        );
+            'interestRate' => 'Your interest '.$loanInterest.'%, Processing fee (0%)',
+        ];
 
         return $data;
 
@@ -74,14 +72,13 @@ class LoanPreferenceService
     public function updateAutoAcceptStatus(Request $request)
     {
         $user = request()->user();
-            $business_id = $user->ownerBusinessType?->id
-                ?: $user->businesses()->firstWhere('user_id', $user->id)?->id;
+        $business_id = $user->ownerBusinessType?->id
+            ?: $user->businesses()->firstWhere('user_id', $user->id)?->id;
 
-        $loanPreference = CreditLendersPreference::where('lender_id', $business_id)->first();
+        $loanPreference = CreditLenderPreference::where('lender_id', $business_id)->first();
         $loanPreference->auto_accept = $request->status;
         $loanPreference->save();
 
         return $loanPreference;
     }
-
 }
