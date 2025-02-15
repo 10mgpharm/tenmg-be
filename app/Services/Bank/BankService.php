@@ -2,6 +2,8 @@
 
 namespace App\Services\Bank;
 
+use App\Models\CreditCustomerBank;
+use App\Models\Customer;
 use Illuminate\Http\Request;
 
 class BankService
@@ -47,6 +49,15 @@ class BankService
         }
     }
 
+    public function getDefaultBank($businessId, Customer $customer): ?CreditCustomerBank
+    {
+        return CreditCustomerBank::where('customer_id', $customer->id)
+            ->where('business_id', $businessId)
+            ->where('is_default', 1)
+            ->where('active', 1)
+            ->first();
+    }
+
     public function verifyBankAccount(Request $request)
     {
         try {
@@ -90,5 +101,42 @@ class BankService
         } catch (\Throwable $th) {
             throw $th;
         }
+    }
+
+    public function createBank(array $requestData): ?CreditCustomerBank
+    {
+        $businessId = $requestData['businessId'];
+
+        $customer = Customer::where('business_id', $businessId)
+            ->where(function ($query) use ($requestData) {
+                $query->where('reference', $requestData['identifier'])
+                    ->orWhere('identifier', $requestData['identifier']);
+            })
+            ->first();
+
+        if (! $customer) {
+            throw new \Exception('Customer not found for the selected business');
+        }
+
+        $defaultBank = $this->getDefaultBank($businessId, $customer);
+        if ($defaultBank) {
+            $defaultBank->is_default = 0;
+            $defaultBank->save();
+        }
+
+        return CreditCustomerBank::firstOrCreate([
+            'business_id' => $businessId,
+            'customer_id' => $customer->id,
+            'account_number' => $requestData['accountNumber'],
+        ],
+            [
+                'business_id' => $businessId,
+                'customer_id' => $customer->id,
+                'account_number' => $requestData['accountNumber'],
+                'account_name' => $requestData['accountName'],
+                'bank_name' => $requestData['bankName'],
+                'bank_code' => $requestData['bankCode'],
+                'is_default' => 1,
+            ]);
     }
 }

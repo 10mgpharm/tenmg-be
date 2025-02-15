@@ -7,6 +7,7 @@ use App\Http\Resources\BusinessLimitedRecordResource;
 use App\Http\Resources\CreditCustomerResource;
 use App\Http\Resources\LoadApplicationResource;
 use App\Models\Business;
+use App\Models\CreditCustomerBank;
 use App\Models\LoanApplication;
 use App\Settings\CreditSettings;
 use Exception;
@@ -175,6 +176,12 @@ class LoanApplicationRepository
 
         $creditSettings = new CreditSettings;
 
+        $defaultBank = CreditCustomerBank::where('customer_id', $customer->id)
+            ->where('business_id', $vendor->id)
+            ->where('is_default', 1)
+            ->where('active', 1)
+            ->first();
+
         $data = [
             'customer' => new CreditCustomerResource($customer),
             'business' => new BusinessLimitedRecordResource($vendor),
@@ -182,6 +189,7 @@ class LoanApplicationRepository
                 'rate' => $creditSettings->interest_config,
             ],
             'application' => new LoadApplicationResource($application),
+            'defaultBank' => $defaultBank, //default bank for mandate authorisation
         ];
 
         return $data;

@@ -529,9 +529,17 @@ Route::prefix('v1')->group(function () {
 
         // [BNPL] get banks
         Route::prefix('banks')->group(function () {
+            Route::match(['post', 'patch'], '/', [BankController::class, 'store'])
+                ->middleware(['auth:api'])
+                ->name('client.bank.store');
+
             Route::get('/', [BankController::class, 'getBankList'])
                 ->middleware(['auth:api'])
                 ->name('client.bank.list');
+
+            Route::get('/default/{customer:identifier}', [BankController::class, 'getDefaultBank'])
+                ->middleware(['auth:api'])
+                ->name('client.bank.default');
 
             Route::post('/account/verify', [BankController::class, 'verifyBankAccount'])
                 ->middleware(['auth:api'])

@@ -22,6 +22,11 @@ class Customer extends Model
         'active',
     ];
 
+    public function banks()
+    {
+        return $this->hasMany(CreditCustomerBank::class);
+    }
+
     public function business()
     {
         return $this->belongsTo(Business::class);

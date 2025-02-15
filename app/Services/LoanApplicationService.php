@@ -10,6 +10,8 @@ use App\Models\LoanApplication;
 use App\Models\User;
 use App\Notifications\CustomerLoanApplicationNotification;
 use App\Repositories\LoanApplicationRepository;
+use App\Repositories\LoanRepository;
+use App\Repositories\RepaymentScheduleRepository;
 use Exception;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\Response;
@@ -21,6 +23,8 @@ class LoanApplicationService
         private LoanApplicationRepository $loanApplicationRepository,
         private AuthService $authService,
         private NotificationService $notificationService,
+        private RepaymentScheduleRepository $repaymentScheduleRepository,
+        private LoanRepository $loanRepository,
     ) {}
 
     // Create Loan Application
@@ -140,10 +144,42 @@ class LoanApplicationService
         $data['requestedAmount'] = $requestedAmount;
         $data['source'] = 'API';
 
+        // check if there is a pending or ongoing loan application for this customer
+        $ongoingApplication = LoanApplication::where('customer_id', $customer->id)
+            ->where('business_id', $vendor->id)
+            ->whereIn('status', ['INITIATED', 'PENDING_MANDATE'])
+            ->first();
+
+        if ($ongoingApplication) {
+            $token = $user->createToken('Full Access Token', ['full']);
+            $link = config('app.frontend_url').'/widgets/applications/'.$ongoingApplication->identifier.'?token='.$token->accessToken;
+
+            $customer = $ongoingApplication->customer;
+
+            // notifation to customer here
+            Notification::route('mail', [
+                $customer?->email => $customer?->name,
+            ])->notify(new CustomerLoanApplicationNotification($link));
+
+            return $link;
+        }
+
+        // check if there is an already approved loan which is not completely paid yet for this customer
+        $loans = $this->loanRepository->fetchLoansByCustomerId($customer->id);
+        $hasOngoingLoan = false;
+        foreach ($loans as $loan) {
+            if ($loan['status'] === 'ONGOING_REPAYMENT') {
+                $hasOngoingLoan = true;
+                break;
+            }
+        }
+
+        if ($hasOngoingLoan) {
+            throw new Exception('Customer already has an ongoing loan', Response::HTTP_PRECONDITION_FAILED);
+        }
+
         $application = $this->loanApplicationRepository->create($data);
-
         $token = $user->createToken('Full Access Token', ['full']);
-
         $link = config('app.frontend_url').'/widgets/applications/'.$application->identifier.'?token='.$token->accessToken;
 
         $customer = $application->customer;
