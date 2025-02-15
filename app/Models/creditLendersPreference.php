@@ -5,14 +5,6 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-/**
- * @property int $id
- * @property int $lender_id
- * @property array $loan_tenure
- * @property int $loan_interest
- * @property array $credit_score_category
- * @property bool $auto_accept
- */
 class CreditLendersPreference extends Model
 {
     use HasFactory;
