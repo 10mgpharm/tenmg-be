@@ -15,15 +15,18 @@ class LoanPreferenceService
         $creditSettings = new CreditSettings;
         $loanInterest = $creditSettings->interest_config;
 
+        $tenure = $request->loanTenure ?? [3];
+        $credit_score = $request->creditScoreCategory ?? ['A'];
+
         $createUpdatePrefs = CreditLenderPreference::UpdateOrCreate(
             [
                 'lender_id' => $request->business_id,
             ],
             [
                 'lender_id' => $request->business_id,
-                'loan_tenure' => $request->loanTenure ?? [3],
+                'loan_tenure' => json_encode($tenure),
                 'loan_interest' => $loanInterest,
-                'credit_score_category' => $request->creditScoreCategory ?? ['A'],
+                'credit_score_category' => json_encode($credit_score),
             ]
         );
 
