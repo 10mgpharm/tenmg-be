@@ -32,7 +32,8 @@ return new class extends Migration
             $table->string('customer_email')->nullable();
             $table->string('customer_phone')->nullable();
 
-            $table->string('reference')->nullable()->unique();
+            $table->string('identifier')->nullable();
+            $table->string('reference')->nullable();
             $table->enum('status', ['initiated', 'approved', 'completed', 'failed', 'pending'])->default('initiated');
 
             $table->string('currency')->nullable()->default('NGN');
