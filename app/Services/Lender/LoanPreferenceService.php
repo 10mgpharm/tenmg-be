@@ -24,9 +24,9 @@ class LoanPreferenceService
             ],
             [
                 'lender_id' => $request->business_id,
-                'loan_tenure' => json_encode($tenure),
+                'loan_tenure' => $tenure,
                 'loan_interest' => $loanInterest,
-                'credit_score_category' => json_encode($credit_score),
+                'credit_score_category' => $credit_score,
             ]
         );
 
