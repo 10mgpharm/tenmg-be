@@ -9,7 +9,7 @@ class CreditLenderPreference extends Model
 {
     use HasFactory;
 
-    protected $table = 'credit_lender_preferences';
+    protected $table = 'credit_lenders_preferences';
 
     protected $fillable = [
         'lender_id',
