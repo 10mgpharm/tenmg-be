@@ -136,6 +136,7 @@ Route::prefix('v1')->group(function () {
                 Route::patch('{notification}/subscription', [AccountNotificationController::class, 'subscription']);
             });
 
+            Route::get('messages/start-conversation', [MessageController::class, 'startConversation']);
             Route::apiResource('messages', MessageController::class);
         });
 
