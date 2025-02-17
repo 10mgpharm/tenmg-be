@@ -82,4 +82,9 @@ class Business extends Model
     {
         return $this->hasOne(EcommerceWallet::class, 'business_id');
     }
+
+    public function getLenderBusinessBankAccount()
+    {
+        return $this->hasOne(CreditLenderBankAccounts::class, 'lender_id', 'id');
+    }
 }
