@@ -5,7 +5,9 @@ namespace App\Http\Controllers\API;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\SendMessageRequest;
 use App\Http\Resources\MessageResource;
+use App\Http\Resources\UserResource;
 use App\Models\Conversation;
+use App\Models\User;
 use App\Services\MessageService;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
@@ -86,4 +88,29 @@ class MessageController extends Controller
             data: $messages
         );
     }
+
+    public function startConversation(Request $request): JsonResponse
+    {
+        $user = $request->user();
+        $query = User::query()->where('id', '!=', $user->id)->when(
+            $request->input('search'),
+            fn($query, $search) =>
+            $query->where('name', 'like', "%{$search}%")->orWhere('email', 'like', "%{$search}%")
+        );
+
+        if(!$user->hasRole('admin')){
+            $query = $query->withinBusiness()->orWhereHas('roles', fn ($q) => $q->where('name', 'admin'));
+        }
+
+        $users = $query->paginate($request->get('perPage', 30))
+        ->withQueryString()
+        ->through(fn(User $message) => new UserResource($message));
+
+        return $this->returnJsonResponse(
+            message: 'Conversable users successfully fetched.',
+            data: $users
+        );
+    }
+
+
 }
