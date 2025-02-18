@@ -288,13 +288,13 @@ class User extends Authenticatable implements MustVerifyEmail
     public function scopeWithinBusiness($query)
     {
         $user = request()->user();
-    
+
         // Get the business ID of the request user
         $business = $user->ownerBusinessType ?? $user->businesses()->first();
-    
+
         // Get user IDs that belong to the same business
         $userIds = BusinessUser::where('business_id', $business?->id)->pluck('user_id');
-    
+
         return $query->whereIn('id', $userIds);
     }
 
