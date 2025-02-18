@@ -99,8 +99,9 @@ class MessageController extends Controller
         );
 
         if(!$user->hasRole('admin')){
-            $query = $query->withinBusiness();
+            $query = $query->withinBusiness()->orWhereHas('roles', fn ($q) => $q->where('name', 'admin'));
         }
+
         $users = $query->paginate($request->get('perPage', 30))
         ->withQueryString()
         ->through(fn(User $message) => new UserResource($message));
