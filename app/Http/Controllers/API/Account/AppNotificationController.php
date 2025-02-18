@@ -6,15 +6,16 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Account\ListAllNotificationsRequest;
 use App\Http\Requests\Account\NotificationSubscriptionRequest;
 use App\Http\Requests\Account\NotificationSubscriptionsRequest;
-use App\Http\Resources\NotificationResource;
-use App\Models\Notification;
+use App\Http\Resources\AppNotificationResource;
+use App\Models\AppNotification;
+use App\Services\AppNotificationSubscriptionService;
 use App\Services\NotificationSubscriptionService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
-class NotificationController extends Controller
+class AppNotificationController extends Controller
 {
-    public function __construct(private NotificationSubscriptionService $notificationSubscriptionService) {}
+    public function __construct(private AppNotificationSubscriptionService $notificationSubscriptionService) {}
 
     /**
      * Display a listing of notifications.
@@ -35,7 +36,7 @@ class NotificationController extends Controller
      *
      * @param  Request  $request
      */
-    public function subscription(NotificationSubscriptionRequest $request, Notification $notification): JsonResponse
+    public function subscription(NotificationSubscriptionRequest $request, AppNotification $notification): JsonResponse
     {
         $user = $request->user();
         $notification = $this->notificationSubscriptionService->subscription($user, $notification);
@@ -43,12 +44,12 @@ class NotificationController extends Controller
         if ($notification->subscribers()->where('user_id', $user->id)->exists()) {
             return $this->returnJsonResponse(
                 message: 'You have successfully subscribed to the notification.',
-                data: new NotificationResource($notification)
+                data: new AppNotificationResource($notification)
             );
         }
         return $this->returnJsonResponse(
             message: 'You have successfully unsubscribed from the notification.',
-            data: new NotificationResource($notification)
+            data: new AppNotificationResource($notification)
         );
     }
 
@@ -66,7 +67,7 @@ class NotificationController extends Controller
 
         return $this->returnJsonResponse(
             message: 'You have successfully updated your notifications.',
-            data: NotificationResource::collection($notifications)->response()->getData(true)
+            data: AppNotificationResource::collection($notifications)->response()->getData(true)
         );
     }
 }

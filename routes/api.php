@@ -1,8 +1,9 @@
 <?php
 
+use App\Http\Controllers\Admin\AppNotificationController;
 use App\Http\Controllers\Admin\NotificationController;
 use App\Http\Controllers\API\Account\AccountController;
-use App\Http\Controllers\API\Account\NotificationController as AccountNotificationController;
+use App\Http\Controllers\API\Account\AppNotificationController as AccountAppNotificationController;
 use App\Http\Controllers\API\Account\PasswordUpdateController;
 use App\Http\Controllers\API\Account\TwoFactorAuthenticationController;
 use App\Http\Controllers\API\Admin\AuditLogController;
@@ -131,9 +132,9 @@ Route::prefix('v1')->group(function () {
                 });
 
             Route::prefix('notifications')->group(function () {
-                Route::get('/', [AccountNotificationController::class, 'index']);
-                Route::patch('subscriptions', [AccountNotificationController::class, 'subscriptions']);
-                Route::patch('{notification}/subscription', [AccountNotificationController::class, 'subscription']);
+                Route::get('/', [AccountAppNotificationController::class, 'index']);
+                Route::patch('subscriptions', [AccountAppNotificationController::class, 'subscriptions']);
+                Route::patch('{notification}/subscription', [AccountAppNotificationController::class, 'subscription']);
             });
 
             Route::get('messages/start-conversation', [MessageController::class, 'startConversation']);
@@ -380,7 +381,7 @@ Route::prefix('v1')->group(function () {
                 Route::apiResource('medication-types', AdminMedicationTypeController::class);
                 Route::get('medication-types/{medication_type:id}/medication-variations', [AdminMedicationTypeController::class, 'getVariationsByMedicationType']);
 
-                Route::apiResource('notification', NotificationController::class);
+                Route::apiResource('notification', AppNotificationController::class);
                 Route::apiResource('categories', AdminEcommerceCategoryController::class);
 
                 Route::get('measurements/dropdown', [AdminEcommerceMeasurementController::class, 'getDropdown']);

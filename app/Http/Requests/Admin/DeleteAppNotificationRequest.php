@@ -6,7 +6,7 @@ use App\Models\Notification;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\ValidationException;
 
-class DeleteNotificationRequest extends FormRequest
+class DeleteAppNotificationRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.

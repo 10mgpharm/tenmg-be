@@ -4,7 +4,7 @@ namespace App\Http\Requests\Admin;
 
 use Illuminate\Foundation\Http\FormRequest;
 
-class UpdateNotificationRequest extends FormRequest
+class UpdateAppNotificationRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -42,7 +42,7 @@ class UpdateNotificationRequest extends FormRequest
                 'required',
                 'string',
                 'max:255',
-                'unique:notifications,name,'.$this->notification->id,
+                'unique:app_notifications,name,'.$this->notification->id,
             ],
             'description' => ['string', 'nullable', 'sometimes'],
             'is_admin' => ['required_if:is_supplier,true', 'required_if:is_pharmacy,true', 'required_if:is_vendor,true'],
