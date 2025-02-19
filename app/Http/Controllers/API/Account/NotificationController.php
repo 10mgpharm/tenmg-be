@@ -4,7 +4,6 @@ namespace App\Http\Controllers\API\Account;
 
 use App\Http\Controllers\Controller;
 use App\Http\Resources\NotificationResource;
-use App\Models\Notification;
 use Illuminate\Http\Request;
 use Illuminate\Notifications\DatabaseNotification;
 

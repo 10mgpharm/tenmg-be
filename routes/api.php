@@ -131,7 +131,7 @@ Route::prefix('v1')->group(function () {
                     Route::post('verify', 'verify');
                 });
 
-            Route::apiResource('notifications', NotificationController ::class);
+            Route::apiResource('notifications', NotificationController::class);
 
             Route::prefix('app-notifications')->group(function () {
                 Route::get('/', [AccountAppNotificationController::class, 'index']);
@@ -141,6 +141,12 @@ Route::prefix('v1')->group(function () {
 
             Route::get('messages/start-conversation', [MessageController::class, 'startConversation']);
             Route::apiResource('messages', MessageController::class);
+            Route::post('/save-fcm-token', function (Request $request) {
+                $user = $request->user();
+                $user->update(['fcm_token' => $request->fcm_token]);
+            
+                return response()->json(['message' => 'FCM token saved successfully.']);
+            });
         });
 
         Route::prefix('bank')->group(function () {

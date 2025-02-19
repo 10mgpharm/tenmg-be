@@ -6,6 +6,8 @@ use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
+use Kreait\Firebase\Messaging\CloudMessage;
+use Kreait\Firebase\Messaging\Notification as FirebaseMessagingNotification;
 
 class NewMessageNotification extends Notification
 {
@@ -52,6 +54,15 @@ class NewMessageNotification extends Notification
         ];
     }
 
+    public function toFirebase(object $notifiable)
+    {
+        $messaging = app('firebase.messaging');
+
+        $message = CloudMessage::new()->toToken($notifiable->fcm_token)
+            ->withNotification(FirebaseMessagingNotification::create('New Notification', $this->message));
+
+        $messaging->send($message);
+    }
     /**
      * Get the array representation of the notification.
      *
