@@ -7,6 +7,7 @@ use App\Http\Resources\MessageResource;
 use App\Models\Conversation;
 use App\Models\Message;
 use App\Models\User;
+use App\Notifications\NewMessageNotification;
 use App\Services\Interfaces\IMessageService;
 use Exception;
 use Illuminate\Http\Request;
@@ -39,6 +40,8 @@ class MessageService implements IMessageService
                 $validated['business_id'] = $sender->ownerBusinessType?->id ?: $sender->businesses()->first()?->id;
                 $validated['sender_id'] = $sender->id;
 
+                $receiver = User::find($validated['receiver_id']);
+
                 // Find existing conversation between these users
                 $conversation = Conversation::where(
                     fn($query) => $query->where(
@@ -57,7 +60,7 @@ class MessageService implements IMessageService
                 $message = $conversation->messages()->create($validated);
 
                 if ($message) {
-                    // TODO: Broadcast message for real-time updates
+                    $receiver->notify(new NewMessageNotification('You have received a new message.'));
                     return $message;
                 }
 
