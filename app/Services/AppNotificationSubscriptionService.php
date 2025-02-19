@@ -6,10 +6,10 @@ use App\Http\Resources\AppNotificationResource;
 use App\Models\AppNotification;
 use App\Models\NotificationSetting;
 use App\Models\User;
-use App\Services\Interfaces\INotificationSubscriptionService;
+use App\Services\Interfaces\IAppNotificationSubscriptionService;
 use Illuminate\Pagination\LengthAwarePaginator;
 
-class AppNotificationSubscriptionService implements INotificationSubscriptionService
+class AppNotificationSubscriptionService implements IAppNotificationSubscriptionService
 {
     /**
      * Retrieve a paginated collection of notifications tailored to the user's role.
@@ -86,13 +86,13 @@ class AppNotificationSubscriptionService implements INotificationSubscriptionSer
     public function subscriptions(User $user, array $notificationIds): LengthAwarePaginator
     {
         NotificationSetting::where('user_id', $user->id)
-            ->whereNotIn('notification_id', $notificationIds)
+            ->whereNotIn('app_notification_id', $notificationIds)
             ->delete();
 
         foreach ($notificationIds as $notificationId) {
             NotificationSetting::firstOrCreate([
                 'user_id' => $user->id,
-                'notification_id' => $notificationId,
+                'app_notification_id' => $notificationId,
             ]);
         }
 
