@@ -6,6 +6,7 @@ use App\Http\Controllers\API\Account\AppNotificationController as AccountAppNoti
 use App\Http\Controllers\API\Account\NotificationController;
 use App\Http\Controllers\API\Account\PasswordUpdateController;
 use App\Http\Controllers\API\Account\TwoFactorAuthenticationController;
+use App\Http\Controllers\API\Account\UpdateFcmTokenController;
 use App\Http\Controllers\API\Admin\AuditLogController;
 use App\Http\Controllers\API\Admin\BusinessLicenseController;
 use App\Http\Controllers\API\Admin\CarouselImageController;
@@ -141,12 +142,7 @@ Route::prefix('v1')->group(function () {
 
             Route::get('messages/start-conversation', [MessageController::class, 'startConversation']);
             Route::apiResource('messages', MessageController::class);
-            Route::post('/save-fcm-token', function (Request $request) {
-                $user = $request->user();
-                $user->update(['fcm_token' => $request->fcm_token]);
-            
-                return response()->json(['message' => 'FCM token saved successfully.']);
-            });
+            Route::post('/fcm-token', UpdateFcmTokenController::class);
         });
 
         Route::prefix('bank')->group(function () {
