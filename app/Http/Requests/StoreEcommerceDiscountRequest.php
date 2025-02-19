@@ -37,6 +37,7 @@ class StoreEcommerceDiscountRequest extends FormRequest
             'customer_limit' => $this->input('customerLimit'),
             'start_date' => $this->input('startDate'),
             'end_date' => $this->input('endDate'),
+            'all_products' => $this->input('allProducts'),
         ]);
     }
 
@@ -54,7 +55,9 @@ class StoreEcommerceDiscountRequest extends FormRequest
         return [
             'application_method' => ['required', new Enum(DiscountApplicationMethodEnum::class),],
             'coupon_code' => [
-                'required',
+                'nullable',
+                'sometimes',
+                'required_if:application_method,COUPON',
                 'string',
                 'min:4',
                 'max:255',
@@ -84,6 +87,7 @@ class StoreEcommerceDiscountRequest extends FormRequest
                     }
                 },
             ],
+            'all_products' => ['sometimes', 'nullable', 'boolean'],
             'customer_limit' => ['required', new Enum(DiscountCustomerLimitEnum::class),],
             'start_date' => ['sometimes', 'nullable', 'date', 'after_or_equal:today'],
             'end_date' => ['sometimes', 'nullable', 'date', 'after_or_equal:start_date',],

@@ -43,6 +43,7 @@ class UpdateEcommerceDiscountRequest extends FormRequest
             'customer_limit' => $this->input('customerLimit'),
             'start_date' => $this->input('startDate'),
             'end_date' => $this->input('endDate'),
+            'all_products' => $this->input('allProducts'),
         ]);
     }
 
@@ -103,6 +104,7 @@ class UpdateEcommerceDiscountRequest extends FormRequest
                     }
                 },
             ],
+            'all_products' => ['sometimes', 'nullable', 'boolean'],
             'customer_limit' => ['sometimes', 'nullable', new Enum(DiscountCustomerLimitEnum::class),],
             'start_date' => ['sometimes', 'nullable', 'date', 'after_or_equal:today'],
             'end_date' => ['sometimes', 'nullable', 'date', 'after_or_equal:start_date',],
