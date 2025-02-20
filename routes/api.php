@@ -414,6 +414,7 @@ Route::prefix('v1')->group(function () {
                 Route::match(['post', 'patch'], 'business-information', [BusinessSettingController::class, 'businessInformation']);
             });
 
+            Route::get('discounts/count', [EcommerceDiscountController::class, 'count']);
             Route::get('discounts/search', [EcommerceDiscountController::class, 'search']);
             Route::apiResource('discounts', EcommerceDiscountController::class);
             Route::patch('users/{user}/status', [UsersController::class, 'status']);
