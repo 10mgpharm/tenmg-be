@@ -3,29 +3,30 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Admin\DeleteAppNotificationRequest;
 use App\Http\Requests\Admin\DeleteNotificationRequest;
-use App\Http\Requests\Admin\ListAllNotificationsRequest;
-use App\Http\Requests\Admin\ShowNotificationRequest;
-use App\Http\Requests\Admin\StoreNotificationRequest;
-use App\Http\Requests\Admin\UpdateNotificationRequest;
-use App\Http\Resources\NotificationResource;
-use App\Models\Notification;
+use App\Http\Requests\Admin\ListAllAppNotificationsRequest;
+use App\Http\Requests\Admin\ShowAppNotificationRequest;
+use App\Http\Requests\Admin\StoreAppNotificationRequest;
+use App\Http\Requests\Admin\UpdateAppNotificationRequest;
+use App\Http\Resources\AppNotificationResource;
+use App\Models\AppNotification;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 
-class NotificationController extends Controller
+class AppNotificationController extends Controller
 {
     /**
      * Display a listing of notifications.
      */
-    public function index(ListAllNotificationsRequest $request): JsonResponse
+    public function index(ListAllAppNotificationsRequest $request): JsonResponse
     {
-        $notifications = Notification::latest()->paginate();
+        $notifications = AppNotification::latest()->paginate();
 
         return $this->returnJsonResponse(
             message: 'Notifications successfully fetched.',
-            data: NotificationResource::collection($notifications)->response()->getData(true)
+            data: AppNotificationResource::collection($notifications)->response()->getData(true)
         );
     }
 
@@ -34,15 +35,15 @@ class NotificationController extends Controller
      *
      * @param  Request  $request
      */
-    public function store(StoreNotificationRequest $request): JsonResponse
+    public function store(StoreAppNotificationRequest $request): JsonResponse
     {
         $validated = $request->validated();
 
-        $notification = Notification::create($validated);
+        $notification = AppNotification::create($validated);
 
         return $this->returnJsonResponse(
             message: 'Notifications created successfully.',
-            data: new NotificationResource($notification),
+            data: new AppNotificationResource($notification),
             statusCode: Response::HTTP_CREATED,
         );
     }
@@ -50,11 +51,11 @@ class NotificationController extends Controller
     /**
      * Display the specified notification.
      */
-    public function show(ShowNotificationRequest $request, Notification $notification): JsonResponse
+    public function show(ShowAppNotificationRequest $request, AppNotification $notification): JsonResponse
     {
         return $this->returnJsonResponse(
             message: 'Notification details fetched successfully.',
-            data: new NotificationResource($notification),
+            data: new AppNotificationResource($notification),
         );
     }
 
@@ -63,7 +64,7 @@ class NotificationController extends Controller
      *
      * @param  Request  $request
      */
-    public function update(UpdateNotificationRequest $request, Notification $notification): JsonResponse
+    public function update(UpdateAppNotificationRequest $request, AppNotification $notification): JsonResponse
     {
         $validated = $request->validated();
 
@@ -78,7 +79,7 @@ class NotificationController extends Controller
     /**
      * Remove the specified notification from storage.
      */
-    public function destroy(DeleteNotificationRequest $request, Notification $notification): JsonResponse
+    public function destroy(DeleteAppNotificationRequest $request, AppNotification $notification): JsonResponse
     {
         $notification->delete();
 

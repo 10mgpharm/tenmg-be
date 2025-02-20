@@ -2,7 +2,7 @@
 
 namespace Database\Seeders;
 
-use App\Models\Notification;
+use App\Models\AppNotification;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
@@ -149,7 +149,7 @@ class NotificationSeeder extends Seeder
 
         $notifications = [...$admin_notifications, ...$vendor_notifications, ...$supplier_notifications ];
         foreach ($notifications as $notification) {
-            Notification::create($notification);
+            AppNotification::create($notification);
         }
     }
 }

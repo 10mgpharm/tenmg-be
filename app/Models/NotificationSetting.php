@@ -31,7 +31,7 @@ class NotificationSetting extends Model
      */
     public function notification()
     {
-        return $this->belongsTo(Notification::class);
+        return $this->belongsTo(AppNotification::class);
     }
 
     /**

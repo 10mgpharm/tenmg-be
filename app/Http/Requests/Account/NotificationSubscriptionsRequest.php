@@ -2,7 +2,7 @@
 
 namespace App\Http\Requests\Account;
 
-use App\Models\Notification;
+use App\Models\AppNotification;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
@@ -21,7 +21,7 @@ class NotificationSubscriptionsRequest extends FormRequest
 
         // Fetch notifications based on IDs to ensure authorization for each notification
         $notificationIds = $this->input('notificationIds', []);
-        $notifications = Notification::whereIn('id', $notificationIds)->get();
+        $notifications = AppNotification::whereIn('id', $notificationIds)->get();
 
         foreach ($notifications as $notification) {
             if (
@@ -56,7 +56,7 @@ class NotificationSubscriptionsRequest extends FormRequest
     {
         return [
             'notification_ids' => ['array'],
-            'notification_ids.*' => ['sometimes', Rule::exists(Notification::class, 'id')],
+            'notification_ids.*' => ['sometimes', Rule::exists(AppNotification::class, 'id')],
         ];
     }
 
