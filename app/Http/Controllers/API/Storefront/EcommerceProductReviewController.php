@@ -27,7 +27,7 @@ class EcommerceProductReviewController extends Controller
             fn($query, $type) => strtoupper($type) == 'REVIEWED' ? $query : null) // TODO: ...
         ->paginate($request->has('perPage') ? $request->perPage : 20)
         ->withQueryString()
-        ->through(fn(EcommerceProductReview $item) => EcommerceProductReviewResource::make($item));;
+        ->through(fn(EcommerceProductReview $item) => EcommerceProductReviewResource::make($item));
 
         return $this->returnJsonResponse(
             message: 'Reviews successfully fetched.',

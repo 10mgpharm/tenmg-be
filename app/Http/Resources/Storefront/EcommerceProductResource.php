@@ -10,6 +10,7 @@ use App\Http\Resources\EcommerceMedicationTypeResource;
 use App\Http\Resources\EcommerceMedicationVariationResource;
 use App\Http\Resources\EcommercePresentationResource;
 use App\Models\EcommerceProduct;
+use App\Models\EcommerceProductReview;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
@@ -68,7 +69,11 @@ class EcommerceProductResource extends JsonResource
                         ->latest('id')
                         ->get()
                 ),
-            )
+            ),
+            'reviews' => $this->whenLoaded('reviews', fn() => $this->reviews()
+                ->paginate($request->has('perPage') ? $request->perPage : 20)
+                ->withQueryString()
+                ->through(fn(EcommerceProductReview $item) => EcommerceProductReviewResource::make($item)))
         ];
 
 
