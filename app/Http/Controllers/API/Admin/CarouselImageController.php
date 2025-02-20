@@ -58,12 +58,12 @@ class CarouselImageController extends Controller
     /**
      * Update an existing carousel image in the database.
      */
-    public function update(StoreCarouselImageRequest $request, CarouselImage $carousel_image): JsonResponse
+    public function update(StoreCarouselImageRequest $request, CarouselImage $storefront_image): JsonResponse
     {
         $validated = $request->validated();
         $user = $request->user();
 
-        $updated = $this->carouselImageService->update($validated, $user, $carousel_image);
+        $updated = $this->carouselImageService->update($validated, $user, $storefront_image);
 
         if (! $updated) {
             return $this->returnJsonResponse(
@@ -73,17 +73,17 @@ class CarouselImageController extends Controller
 
         return $this->returnJsonResponse(
             message: 'Carousel image updated successfully.',
-            data: new CarouselImageResource($carousel_image->refresh()),
+            data: new CarouselImageResource($storefront_image->refresh()),
             statusCode: Response::HTTP_OK,
         );
     }
 
-    public function destroy(DeleteCarouselImageRequest $request, CarouselImage $carousel_image)
+    public function destroy(DeleteCarouselImageRequest $request, CarouselImage $storefront_image)
     {
-        $carousel_image->delete();
+        $storefront_image->delete();
 
         return $this->returnJsonResponse(
-            message: 'Product successfully deleted.',
+            message: 'Carousel image successfully deleted.',
         );
     }
 
