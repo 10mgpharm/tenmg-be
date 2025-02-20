@@ -39,6 +39,7 @@ use App\Http\Controllers\API\ResendOtpController;
 use App\Http\Controllers\API\Storefront\BrandController as StorefrontBrandController;
 use App\Http\Controllers\API\Storefront\CartController;
 use App\Http\Controllers\API\Storefront\CategoryController as StorefrontCategoryController;
+use App\Http\Controllers\API\Storefront\EcommerceProductReviewController;
 use App\Http\Controllers\API\Storefront\FaqController as StorefrontFaqController;
 use App\Http\Controllers\API\Storefront\FincraWebhookController;
 use App\Http\Controllers\API\Storefront\MeasurementController as StorefrontMeasurementController;
@@ -497,6 +498,7 @@ Route::prefix('v1')->group(function () {
                 Route::get('/cancel/{ref}', [OrdersController::class, 'cancelPayment']);
             });
 
+            Route::apiResource('reviews', EcommerceProductReviewController::class);
         });
 
         Route::prefix('lender')->name('lender.')->middleware(['roleCheck:lender'])->group(function () {
