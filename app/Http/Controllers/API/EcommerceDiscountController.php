@@ -160,4 +160,26 @@ class EcommerceDiscountController extends Controller
         );
     }
 
+    public function count(ListEcommerceDiscountRequest $request)
+    {
+
+        $result = EcommerceDiscount::businesses()
+            ->selectRaw('
+                COUNT(*) as total,
+                SUM(CASE WHEN status = "ACTIVE" THEN 1 ELSE 0 END) as active,
+                SUM(CASE WHEN status = "INACTIVE" THEN 1 ELSE 0 END) as inactive
+            ')
+            ->first();
+            
+        $counts = [
+            'total' => $result->total,
+            'active' => (int) $result->getRawOriginal('active'),
+            'inactive' => (int) $result->inactive,
+        ];
+
+        return $this->returnJsonResponse(
+            message: 'Discounts successfully counted.',
+            data: $counts
+        );
+    }
 }

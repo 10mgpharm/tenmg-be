@@ -3,10 +3,8 @@
 namespace App\Http\Requests;
 
 use App\Enums\StatusEnum;
-use App\Models\Role;
 use App\Models\User;
 use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Validation\Rule;
 
 class SendMessageRequest extends FormRequest
 {
@@ -21,21 +19,25 @@ class SendMessageRequest extends FormRequest
             return false; // Ensure there is a logged-in user and a receiver
         }
 
-        $receiver = User::firstWhere('id', $this->input('receiver_id'));
+        $receiver = User::find($this->input('receiver_id'));
         
-        if (!$receiver) {
-            return false; // Receiver must exist
+        if (!$receiver || $sender->id == $receiver->id) {
+            return false; // Ensure receiver exists and sender is not the receiver
         }
         
         if ($sender->hasRole('admin')) {
             return true; // Admins can always send messages
         }
 
+        if ($receiver->getRawOriginal('status') !== StatusEnum::ACTIVE->value) {
+            return false; // Ensure receiver is active
+        }
+        
         // Only allow messaging within the same business unless sender is an admin
         return ($sender->ownerBusinessType?->id ?? $sender->businesses()->first()?->id) ===
-            ($receiver->ownerBusinessType?->id ?? $receiver->businesses()->first()?->id);
+            ($receiver->ownerBusinessType?->id ?? $receiver->businesses()->first()?->id) ||
+            $receiver->hasRole('admin'); // Allow messaging admins
     }
-
 
     /**
      * Get the validation rules that apply to the request.
@@ -45,13 +47,12 @@ class SendMessageRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'message' => ['required', 'string',],
+            'message' => ['required', 'string'],
             'attachments' => ['sometimes', 'nullable', 'array'],
-            'attachments.*' => ['sometimes', 'file', 'size:1024',],
+            'attachments.*' => ['sometimes', 'file', 'size:1024'],
             'receiver_id' => ['required', 'exists:users,id'],
         ];
     }
-
 
     /**
      * Custom response for failed authorization.
@@ -61,7 +62,7 @@ class SendMessageRequest extends FormRequest
     public function failedAuthorization()
     {
         $sender = $this->user();
-        $receiver = User::firstWhere('id', $this->input('receiver_id'));
+        $receiver = User::find($this->input('receiver_id'));
 
         if (!$sender) {
             abort(response()->json([
@@ -70,11 +71,16 @@ class SendMessageRequest extends FormRequest
         }
 
         if (!$receiver) {
-            abort(response()->json([
+            abort( response()->json([
                 'message' => 'The account is not available to receive messages.',
             ], 403));
         }
 
+        if ($sender->id == $receiver->id) {
+            abort( response()->json([
+                'message' => 'You cannot send a message to yourself.',
+            ], 403));
+        }
 
         $send_business_id = $sender->ownerBusinessType?->id
             ?: $sender->businesses()->first()?->id;
@@ -82,16 +88,15 @@ class SendMessageRequest extends FormRequest
         $receiver_business_id = $receiver->ownerBusinessType?->id
             ?: $receiver->businesses()->first()?->id;
 
-
         if ($receiver->getRawOriginal('status') !== StatusEnum::ACTIVE->value) {
             abort(response()->json([
                 'message' => 'The account is no longer available to receive messages.',
             ], 403));
         }
 
-        if ($send_business_id !== $receiver_business_id) {
+        if ($send_business_id !== $receiver_business_id && !$receiver->hasRole('admin')) {
             abort(response()->json([
-                'message' => 'You are not authorized to send messages outside your business.',
+                'message' => 'You are not authorized to send messages outside your business, unless messaging an admin.',
             ], 403));
         }
 

@@ -3,26 +3,23 @@
 namespace App\Http\Controllers\API\Account;
 
 use App\Http\Controllers\Controller;
-use App\Http\Requests\Account\ListAllNotificationsRequest;
-use App\Http\Requests\Account\NotificationSubscriptionRequest;
-use App\Http\Requests\Account\NotificationSubscriptionsRequest;
 use App\Http\Resources\NotificationResource;
-use App\Models\Notification;
-use App\Services\NotificationSubscriptionService;
-use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Notifications\DatabaseNotification;
 
 class NotificationController extends Controller
 {
-    public function __construct(private NotificationSubscriptionService $notificationSubscriptionService) {}
-
     /**
-     * Display a listing of notifications.
+     * Display a listing of the resource.
      */
-    public function index(ListAllNotificationsRequest $request): JsonResponse
+    public function index(Request $request)
     {
         $user = $request->user();
-        $notifications = $this->notificationSubscriptionService->index($user);
+    
+        $notifications = $user->notifications()->latest('id')
+        ->paginate(request()->has('perPage') ? request()->input('perPage') : 10)
+            ->withQueryString()
+            ->through(fn(DatabaseNotification $item) => NotificationResource::make($item));
 
         return $this->returnJsonResponse(
             message: 'Notifications successfully fetched.',
@@ -30,43 +27,48 @@ class NotificationController extends Controller
         );
     }
 
-    /**
-     * Toggle subscription for a notification.
-     *
-     * @param  Request  $request
-     */
-    public function subscription(NotificationSubscriptionRequest $request, Notification $notification): JsonResponse
-    {
-        $user = $request->user();
-        $notification = $this->notificationSubscriptionService->subscription($user, $notification);
 
-        if ($notification->subscribers()->where('user_id', $user->id)->exists()) {
+    /**
+     * Display the specified resource.
+     */
+    public function show(DatabaseNotification $notification)
+    {
+        return $this->returnJsonResponse(
+            message: 'Notification details fetched successfully.',
+            data: new NotificationResource($notification),
+        );
+    }
+
+
+    /**
+     * Update the specified resource in storage.
+     */
+    public function update(Request $request, DatabaseNotification $notification)
+    {
+        if($notification->read_at) {
             return $this->returnJsonResponse(
-                message: 'You have successfully subscribed to the notification.',
-                data: new NotificationResource($notification)
+                message: 'Notification already marked as read.',
+                data: new NotificationResource($notification),
             );
         }
+
+        $notification->update(['read_at' => now()]);
+
         return $this->returnJsonResponse(
-            message: 'You have successfully unsubscribed from the notification.',
-            data: new NotificationResource($notification)
+            message: 'Notification marked as read.',
+            data: new NotificationResource($notification),
         );
     }
 
     /**
-     * subscribe and unsubscribe to notifications.
-     *
-     * @param  Request  $request
+     * Remove the specified resource from storage.
      */
-    public function subscriptions(NotificationSubscriptionsRequest $request): JsonResponse
+    public function destroy(Request $request, DatabaseNotification $notification)
     {
-        $user = $request->user();
-        $notificationIds = $request->input('notificationIds', []);
-
-        $notifications = $this->notificationSubscriptionService->subscriptions($user, $notificationIds);
+        $notification->delete();
 
         return $this->returnJsonResponse(
-            message: 'You have successfully updated your notifications.',
-            data: NotificationResource::collection($notifications)->response()->getData(true)
+            message: 'Notification deleted successfully.',
         );
     }
 }

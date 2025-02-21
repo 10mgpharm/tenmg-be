@@ -27,6 +27,7 @@ class EcommerceDiscountResource extends JsonResource
             'startDate' => $this->start_date?->format('M d, y h:i A'),
             'endDate' => $this->end_date?->format('M d, y h:i A'),
             'applicableProducts' =>  EcommerceProductResource::collection($this->whenLoaded('applicableProducts')),
+            'allProducts' => $this->all_products,
         ];
     }
 }

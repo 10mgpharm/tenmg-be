@@ -16,14 +16,9 @@ class NotificationResource extends JsonResource
     {
         return [
             'id' => $this->id,
-            'name' => $this->name,
-            'description' => $this->description,
-            'isAdmin' => $this->is_admin,
-            'isSupplier' => $this->is_supplier,
-            'isPharmacy' => $this->is_pharmacy,
-            'isVendor' => $this->is_vendor,
-            'active' => $this->active,
-            'isSubscribed' => $this->whenLoaded('subscribers', fn () => $this->subscribers->isNotEmpty()),
+            'data' => $this->data,
+            'createdAt' => $this->created_at->diffForHumans(),
+            'readAt' => $this->read_at?->diffForHumans()
         ];
     }
 }

@@ -1,10 +1,12 @@
 <?php
 
-use App\Http\Controllers\Admin\NotificationController;
+use App\Http\Controllers\Admin\AppNotificationController;
 use App\Http\Controllers\API\Account\AccountController;
-use App\Http\Controllers\API\Account\NotificationController as AccountNotificationController;
+use App\Http\Controllers\API\Account\AppNotificationController as AccountAppNotificationController;
+use App\Http\Controllers\API\Account\NotificationController;
 use App\Http\Controllers\API\Account\PasswordUpdateController;
 use App\Http\Controllers\API\Account\TwoFactorAuthenticationController;
+use App\Http\Controllers\API\Account\UpdateFcmTokenController;
 use App\Http\Controllers\API\Admin\AuditLogController;
 use App\Http\Controllers\API\Admin\BusinessLicenseController;
 use App\Http\Controllers\API\Admin\CarouselImageController;
@@ -130,13 +132,17 @@ Route::prefix('v1')->group(function () {
                     Route::post('verify', 'verify');
                 });
 
-            Route::prefix('notifications')->group(function () {
-                Route::get('/', [AccountNotificationController::class, 'index']);
-                Route::patch('subscriptions', [AccountNotificationController::class, 'subscriptions']);
-                Route::patch('{notification}/subscription', [AccountNotificationController::class, 'subscription']);
+            Route::apiResource('notifications', NotificationController::class);
+
+            Route::prefix('app-notifications')->group(function () {
+                Route::get('/', [AccountAppNotificationController::class, 'index']);
+                Route::patch('subscriptions', [AccountAppNotificationController::class, 'subscriptions']);
+                Route::patch('{notification}/subscription', [AccountAppNotificationController::class, 'subscription']);
             });
 
+            Route::get('messages/start-conversation', [MessageController::class, 'startConversation']);
             Route::apiResource('messages', MessageController::class);
+            Route::post('/fcm-token', UpdateFcmTokenController::class);
         });
 
         Route::prefix('bank')->group(function () {
@@ -379,7 +385,7 @@ Route::prefix('v1')->group(function () {
                 Route::apiResource('medication-types', AdminMedicationTypeController::class);
                 Route::get('medication-types/{medication_type:id}/medication-variations', [AdminMedicationTypeController::class, 'getVariationsByMedicationType']);
 
-                Route::apiResource('notification', NotificationController::class);
+                Route::apiResource('notification', AppNotificationController::class);
                 Route::apiResource('categories', AdminEcommerceCategoryController::class);
 
                 Route::get('measurements/dropdown', [AdminEcommerceMeasurementController::class, 'getDropdown']);
@@ -408,6 +414,7 @@ Route::prefix('v1')->group(function () {
                 Route::match(['post', 'patch'], 'business-information', [BusinessSettingController::class, 'businessInformation']);
             });
 
+            Route::get('discounts/count', [EcommerceDiscountController::class, 'count']);
             Route::get('discounts/search', [EcommerceDiscountController::class, 'search']);
             Route::apiResource('discounts', EcommerceDiscountController::class);
             Route::patch('users/{user}/status', [UsersController::class, 'status']);

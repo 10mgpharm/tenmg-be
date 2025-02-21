@@ -2,14 +2,14 @@
 
 namespace App\Services;
 
-use App\Http\Resources\NotificationResource;
-use App\Models\Notification;
+use App\Http\Resources\AppNotificationResource;
+use App\Models\AppNotification;
 use App\Models\NotificationSetting;
 use App\Models\User;
-use App\Services\Interfaces\INotificationSubscriptionService;
+use App\Services\Interfaces\IAppNotificationSubscriptionService;
 use Illuminate\Pagination\LengthAwarePaginator;
 
-class NotificationSubscriptionService implements INotificationSubscriptionService
+class AppNotificationSubscriptionService implements IAppNotificationSubscriptionService
 {
     /**
      * Retrieve a paginated collection of notifications tailored to the user's role.
@@ -20,7 +20,7 @@ class NotificationSubscriptionService implements INotificationSubscriptionServic
     public function index(User $user): LengthAwarePaginator
     {
         
-        $notifications = Notification::where(function ($query) use ($user) {
+        $notifications = AppNotification::where(function ($query) use ($user) {
             $hasRole = false;
 
             if ($user->hasRole('admin')) {
@@ -51,7 +51,7 @@ class NotificationSubscriptionService implements INotificationSubscriptionServic
         ->latest('id')
         ->paginate(request()->has('perPage') ? request()->input('perPage') : 10)
             ->withQueryString()
-            ->through(fn(Notification $item) => NotificationResource::make($item));
+            ->through(fn(AppNotification $item) => AppNotificationResource::make($item));
 
         return ($notifications);
     }
@@ -60,10 +60,10 @@ class NotificationSubscriptionService implements INotificationSubscriptionServic
      * Toggle the subscription status of a specified notification for the user.
      *
      * @param User $user The user toggling their subscription.
-     * @param Notification $notification The notification to toggle subscription on.
-     * @return Notification The updated notification instance with updated subscription status.
+     * @param AppNotification $notification The notification to toggle subscription on.
+     * @return AppNotification The updated notification instance with updated subscription status.
      */
-    public function subscription(User $user, Notification $notification): Notification
+    public function subscription(User $user, AppNotification $notification): AppNotification
     {
         if ($notification->subscribers()->where('user_id', $user->id)->exists()) {
             // Unsubscribe the user
@@ -86,13 +86,13 @@ class NotificationSubscriptionService implements INotificationSubscriptionServic
     public function subscriptions(User $user, array $notificationIds): LengthAwarePaginator
     {
         NotificationSetting::where('user_id', $user->id)
-            ->whereNotIn('notification_id', $notificationIds)
+            ->whereNotIn('app_notification_id', $notificationIds)
             ->delete();
 
         foreach ($notificationIds as $notificationId) {
             NotificationSetting::firstOrCreate([
                 'user_id' => $user->id,
-                'notification_id' => $notificationId,
+                'app_notification_id' => $notificationId,
             ]);
         }
 

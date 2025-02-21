@@ -5,7 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class Notification extends Model
+class AppNotification extends Model
 {
     use HasFactory;
 
@@ -14,7 +14,7 @@ class Notification extends Model
      *
      * @var string
      */
-    protected $table = 'notifications';
+    protected $table = 'app_notifications';
 
     /**
      * The attributes that are mass assignable.

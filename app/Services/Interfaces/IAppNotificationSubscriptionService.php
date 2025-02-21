@@ -2,11 +2,11 @@
 
 namespace App\Services\Interfaces;
 
-use App\Models\Notification;
+use App\Models\AppNotification;
 use App\Models\User;
 use Illuminate\Pagination\LengthAwarePaginator;
 
-interface INotificationSubscriptionService
+interface IAppNotificationSubscriptionService
 {
     /**
      * Retrieve a paginated collection of notifications tailored to the user's role.
@@ -31,7 +31,7 @@ interface INotificationSubscriptionService
      * @param Notification $notification The notification to toggle subscription on.
      * @return Notification The updated notification instance with updated subscription status.
      */
-    public function subscription(User $user, Notification $notification): Notification;
+    public function subscription(User $user, AppNotification $notification): AppNotification;
 
     /**
      * Update multiple notification subscriptions for the user based on the provided notification IDs.

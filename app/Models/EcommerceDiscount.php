@@ -27,6 +27,7 @@ class EcommerceDiscount extends Model
         'type',
         'amount',
         'applicable_products',
+        'all_products',
         'customer_limit',
         'start_date',
         'end_date',
@@ -36,7 +37,7 @@ class EcommerceDiscount extends Model
         'minimum_order_amount',
         'maximum_discount_amount',
         'status',
-        'usage_count'
+        'usage_count',
 
     ];
 
@@ -50,6 +51,7 @@ class EcommerceDiscount extends Model
         'applicable_products' => 'array',
         'start_date' => 'datetime',
         'end_date' => 'datetime',
+        'all_products' => 'boolean',
     ];
 
 
@@ -60,6 +62,7 @@ class EcommerceDiscount extends Model
      */
     protected $attributes = [
         'status' => 'ACTIVE',
+        'all_products' => false,
     ];
 
     /**
