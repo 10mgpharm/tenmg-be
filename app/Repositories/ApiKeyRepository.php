@@ -5,6 +5,7 @@ namespace App\Repositories;
 use App\Models\ApiKey;
 use App\Models\Business;
 use Exception;
+use Illuminate\Support\Facades\Log;
 
 class ApiKeyRepository
 {
@@ -75,6 +76,8 @@ class ApiKeyRepository
             ->orWhere('test_key', $publicKey)
             ->first();
 
+            Log::debug("public key", [$key]);
+
         if (! $key) {
             throw new Exception('Invalid key params');
         }
@@ -87,6 +90,8 @@ class ApiKeyRepository
         $key = ApiKey::where('secret', $secretKey)
             ->orWhere('test_secret', $secretKey)
             ->first();
+
+            Log::debug("secret key", [$key]);
 
         if (! $key) {
             throw new Exception('Invalid key params');

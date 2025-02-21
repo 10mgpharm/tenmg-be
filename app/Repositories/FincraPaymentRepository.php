@@ -3,6 +3,7 @@
 namespace App\Repositories;
 
 use App\Helpers\UtilityHelper;
+use App\Models\DebitMandate;
 use App\Models\EcommerceOrder;
 use App\Models\EcommercePayment;
 use App\Models\EcommerceShopingList;
@@ -267,6 +268,19 @@ class FincraPaymentRepository
         }
     }
 
+    public function completeMandateSetup($data)
+    {
+
+        $body = $data->data;
+        $status = $body->status;
+        $reference = $body->reference;
+
+        $mandate = DebitMandate::where('reference', $reference)->first();
+        $mandate->status = $status;
+        $mandate->save();
+
+    }
+
     public function verifyFincraPaymentWebhook(Request $request)
     {
         $merchantWebhookSecretKey = config('services.fincra.secret');
@@ -288,6 +302,9 @@ class FincraPaymentRepository
             switch ($event) {
                 case 'charge.successful':
                     $this->completeOrder($data);
+                    break;
+                case 'mandate.approved':
+                    $this->completeMandateSetup($data);
                     break;
                 case 'charge.failed':
                     $this->failedPayment($data->data->merchantReference);

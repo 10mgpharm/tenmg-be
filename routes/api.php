@@ -40,6 +40,7 @@ use App\Http\Controllers\API\Storefront\BrandController as StorefrontBrandContro
 use App\Http\Controllers\API\Storefront\CartController;
 use App\Http\Controllers\API\Storefront\CategoryController as StorefrontCategoryController;
 use App\Http\Controllers\API\Storefront\EcommerceProductReviewController;
+use App\Http\Controllers\API\Storefront\EcommerceProductRatingController;
 use App\Http\Controllers\API\Storefront\FaqController as StorefrontFaqController;
 use App\Http\Controllers\API\Storefront\FincraWebhookController;
 use App\Http\Controllers\API\Storefront\MeasurementController as StorefrontMeasurementController;
@@ -499,6 +500,7 @@ Route::prefix('v1')->group(function () {
             });
 
             Route::apiResource('reviews', EcommerceProductReviewController::class);
+            Route::apiResource('ratings', EcommerceProductRatingController::class);
         });
 
         Route::prefix('lender')->name('lender.')->middleware(['roleCheck:lender'])->group(function () {
@@ -566,6 +568,16 @@ Route::prefix('v1')->group(function () {
             Route::get('/config/{reference}', [LoanApplicationController::class, 'verifyApplicationLink'])
                 ->middleware(['auth:api'])
                 ->name('client.applications.config');
+
+            // [BNPL] create customer mandate
+            Route::post('/mandate/create-mandate', [LoanApplicationController::class, 'generateMandateForCustomerClient'])
+                ->middleware(['auth:api'])
+                ->name('client.applications.mandate.create-mandate');
+
+            // [BNPL] verify customer mandate
+            Route::get('/mandate/verify/{reference}', [LoanApplicationController::class, 'verifyMandateStatus'])
+                ->middleware(['auth:api'])
+                ->name('client.applications.mandate.verify');
         });
     });
 });

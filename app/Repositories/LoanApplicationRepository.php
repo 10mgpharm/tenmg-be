@@ -8,12 +8,21 @@ use App\Http\Resources\CreditCustomerResource;
 use App\Http\Resources\LoadApplicationResource;
 use App\Models\Business;
 use App\Models\CreditCustomerBank;
+use App\Models\DebitMandate;
 use App\Models\LoanApplication;
 use App\Settings\CreditSettings;
+use Carbon\Carbon;
 use Exception;
+use Illuminate\Http\Request;
+use Illuminate\Support\Str;
 
 class LoanApplicationRepository
 {
+
+    function __construct(private FincraMandateRepository $fincraMandateRepository){
+
+    }
+
     public function create(array $data)
     {
         $creditSettings = new CreditSettings;
@@ -195,4 +204,125 @@ class LoanApplicationRepository
         return $data;
 
     }
+
+    public function generateMandateForCustomerClient(Request $request)
+    {
+
+        try {
+
+            $loanApplication = LoanApplication::where('identifier', $request->loanApplicationIdentifier)->first();
+
+            $requestedAmount = $loanApplication->requested_amount;
+            $interestRate = $loanApplication->interest_rate;
+            $totalInterest = $requestedAmount * ($interestRate / 100);
+            $totalRepayment = $requestedAmount + $totalInterest;
+
+            //update load duration
+            $loanApplication->duration_in_months = $request->duration;
+            $loanApplication->interest_amount = $totalInterest;
+            $loanApplication->total_amount = $totalRepayment;
+            $loanApplication->save();
+
+            $customerId = $loanApplication->customer_id;
+            $businessId = $loanApplication->business_id;
+
+            $loanDate = Carbon::now();
+
+            $loadStartDate = $loanDate->copy()->addMonth()->endOfMonth();
+
+            $loanEndDate = $loadStartDate->copy()->addMonthsNoOverflow((int) $request->duration - 1);
+
+            $customer = $loanApplication->customer;
+
+            $request->merge(['customerId' => $customerId, 'businessId' => $businessId, 'startDate' => $loadStartDate, 'endDate' => $loanEndDate, 'amount' => $totalRepayment, 'loanAppId' => $loanApplication->id, 'customer' => $customer]);
+
+            $mandateResponseInitResponse = null;
+
+
+            if (config('app.env') != 'production') {
+
+                $uuid = Str::uuid()->toString();
+                $reference = 'mr_' . $uuid;
+
+                $mandateResponseInitResponse =  [
+                    'amount' => $totalRepayment,
+                    'description' => 'debit_mandate.',
+                    'responseDescription' => 'Welcome to NIBSS e-mandate authentication service, a seamless and convenient authentication experience. Kindly proceed with a token payment of N50:00 into account number \"0008787867\" with GTBank. This payment will trigger the  authentication of your mandate. Thank You',
+                    'startDate' => $loadStartDate,
+                    'endDate' => $loanEndDate,
+                    'status' => 'initiated',
+                    'reference' => $reference,
+                    'createdAt' => $loanDate
+                ];
+
+                $this->createOrUpdateMandateRecord($request, $mandateResponseInitResponse);
+                return $mandateResponseInitResponse;
+            }
+
+            $mandateResponseInitResponse = $this->fincraMandateRepository->generateMandateForCustomerClientMain($request);
+
+            $this->createOrUpdateMandateRecord($request, $mandateResponseInitResponse);
+            return $mandateResponseInitResponse;
+
+        } catch (\Throwable $th) {
+            throw $th;
+        }
+
+    }
+
+    public function createOrUpdateMandateRecord(Request $request, $mandate)
+    {
+
+        $debitMandate = DebitMandate::updateOrCreate(
+            [
+                'business_id' => $request->businessId,
+                'customer_id' => $request->customerId
+            ],
+            [
+                'amount' => $request->amount,
+                'application_id' => $request->loanAppId,
+                'description' => 'debit_mandate',
+                'start_date' => $mandate['startDate'],
+                'end_date' => $mandate['endDate'],
+                'customer_account_number' => $request->customerAccountNumber,
+                'customer_account_name' => $request->customerAccountName,
+                'customer_bank_code' => $request->customerBankCode,
+                'customer_address' => $request->customerAddress,
+                'customer_email' => $request->customer->email,
+                'customer_phone' => $request->customer->phone,
+                'response' => json_encode($mandate),
+                'response_description' => $mandate['responseDescription'],
+                'status' => 'initiated',
+                'reference' => $mandate['reference'],
+                'currency' => 'NGN'
+            ]
+        );
+
+    }
+
+    public function verifyMandateStatus($reference)
+    {
+
+        $debitMandate = DebitMandate::where('reference', $reference)->first();
+
+        if (config('app.env') != 'production') {
+
+            $mandateStatus =  [
+                'amount' => (int)$debitMandate->amount,
+                'description' => $debitMandate->description,
+                'responseDescription' => '',
+                'startDate' => $debitMandate->start_date,
+                'endDate' => $debitMandate->end_date,
+                'status' => $debitMandate->status,
+                'reference' => $debitMandate->reference,
+                'createdAt' => $debitMandate->created_at
+            ];
+
+            return $mandateStatus;
+        }
+
+        return $this->fincraMandateRepository->verifyMandateStatus($reference);
+    }
+
+
 }
