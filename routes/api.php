@@ -557,6 +557,16 @@ Route::prefix('v1')->group(function () {
             Route::get('/config/{reference}', [LoanApplicationController::class, 'verifyApplicationLink'])
                 ->middleware(['auth:api'])
                 ->name('client.applications.config');
+
+            // [BNPL] create customer mandate
+            Route::post('/mandate/create-mandate', [LoanApplicationController::class, 'generateMandateForCustomerClient'])
+                ->middleware(['auth:api'])
+                ->name('client.applications.mandate.create-mandate');
+
+            // [BNPL] verify customer mandate
+            Route::get('/mandate/verify/{reference}', [LoanApplicationController::class, 'verifyMandateStatus'])
+                ->middleware(['auth:api'])
+                ->name('client.applications.mandate.verify');
         });
     });
 });
