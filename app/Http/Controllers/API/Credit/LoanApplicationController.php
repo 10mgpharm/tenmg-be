@@ -147,7 +147,11 @@ class LoanApplicationController extends Controller
     {
         $request->validate([
             'duration' => 'required|in:3,6,9,12',
-            'loanApplicationIdentifier' =>'required|exists:credit_applications,identifier'
+            'loanApplicationIdentifier' =>'required|exists:credit_applications,identifier',
+            'bank' => 'required|string',
+            'customerAccountName' => 'required|string',
+            'customerAccountNumber' => 'required|string',
+            'customerBankCode' => 'required|string',
         ]);
 
         $mandate = $this->loanApplicationService->generateMandateForCustomerClient($request);
