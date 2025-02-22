@@ -141,4 +141,27 @@ class LoanApplicationController extends Controller
 
         return $this->returnJsonResponse(data: $applications);
     }
+
+
+    public function generateMandateForCustomerClient(Request $request)
+    {
+        $request->validate([
+            'duration' => 'required|in:3,6,9,12',
+            'loanApplicationIdentifier' =>'required|exists:credit_applications,identifier',
+            'bank' => 'required|string',
+            'customerAccountName' => 'required|string',
+            'customerAccountNumber' => 'required|string',
+            'customerBankCode' => 'required|string',
+        ]);
+
+        $mandate = $this->loanApplicationService->generateMandateForCustomerClient($request);
+
+        return $this->returnJsonResponse(data: $mandate);
+    }
+
+    public function verifyMandateStatus($reference)
+    {
+        $mandateStatus = $this->loanApplicationService->verifyMandateStatus($reference);
+        return $this->returnJsonResponse(data: $mandateStatus, message: 'Mandate status retrieved successfully');
+    }
 }

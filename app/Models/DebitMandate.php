@@ -13,7 +13,7 @@ class DebitMandate extends Model
 
     protected $table = 'credit_fincra_debit_mandates';
 
-    protected $guard = [];
+    protected $guarded = [];
 
     public function customer()
     {

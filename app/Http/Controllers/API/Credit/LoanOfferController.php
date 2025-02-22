@@ -100,4 +100,5 @@ class LoanOfferController extends Controller
 
         return $this->returnJsonResponse(data: $mandate);
     }
+
 }

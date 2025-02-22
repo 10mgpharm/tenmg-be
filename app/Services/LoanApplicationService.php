@@ -14,6 +14,7 @@ use App\Repositories\LoanRepository;
 use App\Repositories\RepaymentScheduleRepository;
 use Exception;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Notification;
 
@@ -285,5 +286,17 @@ class LoanApplicationService
     public function getApplicationsByCustomer(int $customerId): Collection
     {
         return $this->loanApplicationRepository->getApplicationsByCustomer($customerId);
+    }
+
+    public function generateMandateForCustomerClient(Request $request)
+    {
+
+        return $this->loanApplicationRepository->generateMandateForCustomerClient($request);
+
+    }
+
+    public function verifyMandateStatus($reference)
+    {
+        return $this->loanApplicationRepository->verifyMandateStatus($reference);
     }
 }

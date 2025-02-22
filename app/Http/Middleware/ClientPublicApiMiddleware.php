@@ -5,6 +5,7 @@ namespace App\Http\Middleware;
 use App\Services\Interfaces\IClientService;
 use Closure;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use Symfony\Component\HttpFoundation\Response;
 
 class ClientPublicApiMiddleware
@@ -36,7 +37,7 @@ class ClientPublicApiMiddleware
         }
 
         if ($scKey) {
-            $business = $this->clientService->verifyPublicKey($request->header('Secret-Key'));
+            $business = $this->clientService->verifySecretKey($request->header('Secret-Key'));
         }
 
         $request->merge([
