@@ -11,6 +11,25 @@ return new class extends Migration
      */
     public function up(): void
     {
+
+        if(Schema::hasColumn('notifications', 'name')){
+            Schema::rename('app_notifications', 'notifications');
+        }
+
+        if(!Schema::hasTable('app_notifications')) {
+            Schema::create('app_notifications', function (Blueprint $table) {
+                $table->id();
+                $table->string('name');
+                $table->text('description')->nullable();
+                $table->boolean('is_admin')->default(false);
+                $table->boolean('is_supplier')->default(false);
+                $table->boolean('is_pharmacy')->default(false);
+                $table->boolean('is_vendor')->default(false);
+                $table->boolean('active')->default(true);
+                $table->timestamps();
+            });
+        }
+
         if(!Schema::hasTable('notification_settings')){
             Schema::create('notification_settings', function (Blueprint $table) {
                 $table->id();
@@ -26,6 +45,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('notification_settings');
+        //
     }
 };

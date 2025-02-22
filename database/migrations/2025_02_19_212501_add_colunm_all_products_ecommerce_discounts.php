@@ -11,11 +11,11 @@ return new class extends Migration
      */
     public function up(): void
     {
+        if(!Schema::hasColumn('ecommerce_discounts', 'all_products')) {
         Schema::table('ecommerce_discounts', function (Blueprint $table) {
-            if(!Schema::hasColumn('ecommerce_discounts', 'all_products')) {
                 $table->boolean('all_products')->default(false)->nullable()->after('applicable_products');
-            }
-        });
+            });
+        }
     }
 
     /**
