@@ -11,19 +11,21 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('ecommerce_product_reviews', function (Blueprint $table) {
-            $table->id();
-            $table->foreignId('ecommerce_product_id')->nullable()->constrained('ecommerce_products')->nullOnDelete();
-            $table->foreignId('user_id')->nullable()->constrained('users')->nullOnDelete();
-
-            $table->string('name')->nullable();
-            $table->string('email')->nullable();
-            $table->text('comment')->nullable();
-
-            $table->timestamps();
-
-            $table->unique(['ecommerce_product_id', 'user_id',]);
-        });
+        if(!Schema::hasTable('ecommerce_product_reviews')) {
+            Schema::create('ecommerce_product_reviews', function (Blueprint $table) {
+                $table->id();
+                $table->foreignId('ecommerce_product_id')->nullable()->constrained('ecommerce_products')->nullOnDelete();
+                $table->foreignId('user_id')->nullable()->constrained('users')->nullOnDelete();
+    
+                $table->string('name')->nullable();
+                $table->string('email')->nullable();
+                $table->text('comment')->nullable();
+    
+                $table->timestamps();
+    
+                $table->unique(['ecommerce_product_id', 'user_id',]);
+            });
+        }
     }
 
     /**

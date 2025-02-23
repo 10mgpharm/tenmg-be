@@ -11,11 +11,11 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('notification_settings', function (Blueprint $table) {
-            if(Schema::hasColumn('notification_settings', 'notification_id')) {
+        if(Schema::hasColumn('notification_settings', 'notification_id')) {
+            Schema::table('notification_settings', function (Blueprint $table) {
                 $table->renameColumn('notification_id', 'app_notification_id');
-            }
-        });
+            });
+        }
     }
 
     /**
