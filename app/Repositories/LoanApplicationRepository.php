@@ -303,24 +303,6 @@ class LoanApplicationRepository
     public function verifyMandateStatus($reference)
     {
 
-        $debitMandate = DebitMandate::where('reference', $reference)->first();
-
-        if (config('app.env') != 'production') {
-
-            $mandateStatus =  [
-                'amount' => (int)$debitMandate->amount,
-                'description' => $debitMandate->description,
-                'responseDescription' => '',
-                'startDate' => $debitMandate->start_date,
-                'endDate' => $debitMandate->end_date,
-                'status' => $debitMandate->status,
-                'reference' => $debitMandate->reference,
-                'createdAt' => $debitMandate->created_at
-            ];
-
-            return $mandateStatus;
-        }
-
         return $this->fincraMandateRepository->verifyMandateStatus($reference);
     }
 

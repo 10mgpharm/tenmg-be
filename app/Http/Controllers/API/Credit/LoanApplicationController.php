@@ -5,6 +5,7 @@ namespace App\Http\Controllers\API\Credit;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\LoadApplicationResource;
 use App\Models\LoanApplication;
+use App\Repositories\FincraMandateRepository;
 use App\Services\LoanApplicationService;
 use App\Services\OfferService;
 use Illuminate\Http\JsonResponse;
@@ -13,7 +14,7 @@ use Illuminate\Support\Facades\Log;
 
 class LoanApplicationController extends Controller
 {
-    public function __construct(private LoanApplicationService $loanApplicationService, private OfferService $offerService) {}
+    public function __construct(private LoanApplicationService $loanApplicationService, private OfferService $offerService, private FincraMandateRepository $fincraMandateRepository) {}
 
     // Submit New Application via Dashboard
     public function store(Request $request)
@@ -163,5 +164,10 @@ class LoanApplicationController extends Controller
     {
         $mandateStatus = $this->loanApplicationService->verifyMandateStatus($reference);
         return $this->returnJsonResponse(data: $mandateStatus, message: 'Mandate status retrieved successfully');
+    }
+
+    public function completeLoadApplication($applicationId)
+    {
+        return $this->fincraMandateRepository->completeLoanApplication($applicationId);
     }
 }
