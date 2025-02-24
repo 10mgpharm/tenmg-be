@@ -53,6 +53,7 @@ use App\Http\Controllers\API\Storefront\ShoppingListController;
 use App\Http\Controllers\API\Storefront\StorefrontController;
 use App\Http\Controllers\API\Storefront\WishListController;
 use App\Http\Controllers\API\Supplier\EcommerceProductController as SupplierEcommerceProductController;
+use App\Http\Controllers\API\Vendor\AuditLogController as VendorAuditLogController;
 use App\Http\Controllers\API\Vendor\UsersController as VendorUsersController;
 use App\Http\Controllers\API\Webhooks\PaystackWebhookController;
 use App\Http\Controllers\BusinessSettingController;
@@ -376,6 +377,9 @@ Route::prefix('v1')->group(function () {
                 // Generate api keys
                 Route::post('generate', [ApiKeyController::class, 'regenerateKey'])->name('apikeys.generate');
             });
+
+            Route::get('audit-logs', [VendorAuditLogController::class, 'index']);
+            Route::get('audit-logs/search', [VendorAuditLogController::class, 'search']);
         });
 
         // ADMIN specific routes
