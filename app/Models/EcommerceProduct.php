@@ -155,4 +155,9 @@ class EcommerceProduct extends Model
             ->firstWhere('user_id', $user->id);
         return $query->where('business_id', $business?->id);
     }
+
+    public function reviews()
+    {
+        return $this->hasMany(EcommerceProductReview::class, 'ecommerce_product_id');
+    }
 }

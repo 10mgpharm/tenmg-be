@@ -11,11 +11,11 @@ return new class extends Migration
      */
     public function up(): void
     {
+        if(!Schema::hasColumn('users', 'fcm_token')) {
         Schema::table('users', function (Blueprint $table) {
-            if(!Schema::hasColumn('users', 'fcm_token')) {
                 $table->string('fcm_token')->nullable()->after('email');
-            }
-        });
+            });
+        }
     }
 
     /**
