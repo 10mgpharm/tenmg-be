@@ -1,12 +1,11 @@
 <?php
 
-namespace App\Http\Controllers\API\Admin;
+namespace App\Http\Controllers\API\Vendor;
 
 use App\Http\Controllers\Controller;
-use App\Http\Requests\Admin\SearchAuditLogRequest;
+use App\Http\Requests\Vendor\SearchAuditLogRequest;
 use App\Http\Resources\Admin\AuditLogResource;
 use App\Models\Activity;
-use App\Models\AuditLog;
 use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -20,7 +19,10 @@ class AuditLogController extends Controller
      */
     public function index(SearchAuditLogRequest $request): JsonResponse
     {
-        $query = Activity::query()
+        $user = $request->user();
+        $business_id = $user->ownerBusinessType?->id ?? $user->businesses()->firstWhere('user_id', $user->id)?->id;
+
+        $query = Activity::where('properties->actor_business_id', $business_id)
             ->when(
                 $request->input('event'),
                 fn($query, $vent) =>
@@ -34,11 +36,11 @@ class AuditLogController extends Controller
                         array_map(fn($s) => trim($s), is_array($crud_type) ? $crud_type : explode(",", $crud_type))
                     )
                 )
-            )         
+            )            
             ->when(
                 $request->input('ip'),
                 fn($query, $ip) => $query->whereIn(
-                    'properties->ip',
+                    'properties->ip_address',
                     array_unique(
                         array_map(fn($s) => trim($s), is_array($ip) ? $ip : explode(",", $ip))
                     )
@@ -77,7 +79,7 @@ class AuditLogController extends Controller
             ->through(fn(Activity $item) => AuditLogResource::make($item));
 
         return $this->returnJsonResponse(
-            message: 'Logs successfully fetched.',
+            message: 'Vendor logs successfully fetched.',
             data: $logs
         );
     }
