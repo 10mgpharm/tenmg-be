@@ -583,9 +583,9 @@ Route::prefix('v1')->group(function () {
                 ->middleware(['auth:api'])
                 ->name('client.applications.mandate.verify');
 
-            Route::get('/mandate/verify-test/{applicationId}', [LoanApplicationController::class, 'completeLoadApplication'])
-                ->middleware(['auth:api'])
-                ->name('client.applications.mandate.verify-test');
+            // Route::get('/mandate/verify-test/{applicationId}', [LoanApplicationController::class, 'completeLoadApplication'])
+            //     ->middleware(['auth:api'])
+            //     ->name('client.applications.mandate.verify-test');
         });
     });
 });
