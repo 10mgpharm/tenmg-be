@@ -11,8 +11,8 @@ return new class extends Migration
      */
     public function up(): void
     {
-        if(Schema::hasColumn('notifications', 'name')){
-            Schema::rename('app_notifications', 'notifications');
+        if(Schema::hasColumn('notifications', 'name') && !Schema::hasTable('app_notifications')) {
+            Schema::rename('notifications', 'app_notifications');
         }
 
         if(!Schema::hasTable('app_notifications')) {

@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Requests\Admin;
+namespace App\Http\Requests\Vendor;
 
 use Illuminate\Foundation\Http\FormRequest;
 
@@ -13,7 +13,7 @@ class SearchAuditLogRequest extends FormRequest
     {
         $user = $this->user();
 
-        return $user && $user->hasRole('admin');
+        return $user && $user->hasRole('vendor');
     }
 
     /**
@@ -38,7 +38,7 @@ class SearchAuditLogRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'crud_type' => ['nullable', 'string',],
+            'crud_type' => ['nullable', 'string'],
             'event' => ['nullable', 'string'],
             'ip' => ['nullable', 'ip'],
             'ip_address' => ['nullable', 'ip'],
