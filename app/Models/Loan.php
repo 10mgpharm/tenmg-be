@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Helpers\UtilityHelper;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
@@ -58,14 +59,12 @@ class Loan extends Model
 
         self::updating(function ($model) {
             if ($model->isDirty('status') && $model->status == 'DISBURSED') {
-                $businessCode = DB::table('businesses')->whereId($model->business_id)->value('code');
-                $model->voucher_number = "VCH-{$businessCode}-" . time() . '-' . Str::random(5);
+                $model->voucher_number = UtilityHelper::generateSlug('VCH');
             }
         });
 
         self::creating(function ($model) {
-            $businessCode = DB::table('businesses')->where('id', $model->business_id)->value('code');
-            $model->identifier = "LN-{$businessCode}-" . time() . '-' . Str::random(5);
+            $model->identifier = UtilityHelper::generateSlug('LN');
         });
     }
 }

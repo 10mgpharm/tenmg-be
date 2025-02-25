@@ -23,6 +23,7 @@ class EcommerceCartItemResource extends JsonResource
             'tenmgCommission' => $this->tenmg_commission,
             'quantity' => $this->quantity,
             'tenmgCommissionPercent' => $this->tenmg_commission_percent,
+            'supplierAmount' => $this->discount_price - $this->tenmg_commission,
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
         ];

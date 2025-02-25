@@ -14,6 +14,12 @@ use Illuminate\Support\Facades\Log;
 
 class FincraPaymentRepository
 {
+
+    function __construct(private FincraMandateRepository $fincraMandateRepository)
+    {
+
+    }
+
     public function initializePayment(Request $request)
     {
         //get the order by id
@@ -272,12 +278,9 @@ class FincraPaymentRepository
     {
 
         $body = $data->data;
-        $status = $body->status;
         $reference = $body->reference;
 
-        $mandate = DebitMandate::where('reference', $reference)->first();
-        $mandate->status = $status;
-        $mandate->save();
+        $this->fincraMandateRepository->verifyMandateStatus($reference);
 
     }
 

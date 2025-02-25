@@ -22,6 +22,8 @@ class OfferRepository
         isset($data['has_mandate']) && $payload['has_mandate'] = $data['has_mandate'];
         isset($data['has_active_debit_card']) && $payload['has_active_debit_card'] = $data['has_active_debit_card'];
         isset($data['is_valid']) && $payload['is_valid'] = $data['is_valid'];
+        isset($data['accepted_at']) && $payload['accepted_at'] = $data['accepted_at'];
+        isset($data['lender_id']) && $payload['lender_id'] = $data['lender_id'];
 
         return CreditOffer::updateOrCreate($where, $payload);
     }

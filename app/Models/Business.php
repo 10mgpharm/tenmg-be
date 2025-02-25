@@ -87,4 +87,19 @@ class Business extends Model
     {
         return $this->hasOne(CreditLenderBankAccounts::class, 'lender_id', 'id');
     }
+
+    public function getLenderPreferences()
+    {
+        return $this->hasOne(CreditLenderPreference::class, 'lender_id', 'id');
+    }
+
+    public function lendersWallet()
+    {
+        return $this->hasOne(CreditLendersWallet::class, 'lender_id', 'id')->where('type', 'deposit');
+    }
+
+    public function creditLendersPreference()
+    {
+        return $this->hasOne(CreditLenderPreference::class, 'lender_id', 'id');
+    }
 }

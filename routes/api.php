@@ -582,6 +582,10 @@ Route::prefix('v1')->group(function () {
             Route::get('/mandate/verify/{reference}', [LoanApplicationController::class, 'verifyMandateStatus'])
                 ->middleware(['auth:api'])
                 ->name('client.applications.mandate.verify');
+
+            // Route::get('/mandate/verify-test/{applicationId}', [LoanApplicationController::class, 'completeLoadApplication'])
+            //     ->middleware(['auth:api'])
+            //     ->name('client.applications.mandate.verify-test');
         });
     });
 });
