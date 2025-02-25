@@ -45,7 +45,7 @@ class OfferService
         ]);
 
         // Send offer letter to customer
-        // $this->notificationService->sendLoanOfferNotification($offer);
+        $this->notificationService->sendLoanOfferNotification($offer);
 
         return $offer;
     }

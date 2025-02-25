@@ -4,16 +4,21 @@ namespace App\Repositories;
 
 use App\Helpers\UtilityHelper;
 use App\Models\Business;
+use App\Models\CreditLendersWallet;
+use App\Models\CreditOffer;
 use App\Models\DebitMandate;
 use App\Models\LoanApplication;
+use App\Models\User;
+use App\Services\NotificationService;
 use App\Services\OfferService;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class FincraMandateRepository
 {
 
-    function __construct(private OfferRepository $offerRepository, private LoanRepository $loanRepository, private RepaymentScheduleRepository $repaymentScheduleRepository) {
+    function __construct(private OfferRepository $offerRepository, private LoanRepository $loanRepository, private RepaymentScheduleRepository $repaymentScheduleRepository, private NotificationService $notificationService) {
 
     }
 
@@ -89,11 +94,21 @@ class FincraMandateRepository
 
         try {
 
-            // return $this->completeLoadApplication();
-
             $debitMandate = DebitMandate::where('reference', $reference)->first();
 
+            //check if mandate exist
+            if(!$debitMandate){
+                throw new \Exception("Mandate not found");
+            }
+
+            //check if mandate has been approved
+            if($debitMandate->status == 'approved'){
+                throw new \Exception("Mandate already approved");
+            }
+
             if (config('app.env') != 'production') {
+                $debitMandate->status = 'approved';
+                $debitMandate->save();
 
                 $this->completeLoanApplication($debitMandate->application_id);
 
@@ -148,6 +163,11 @@ class FincraMandateRepository
                 if($data['message'] == "no Route matched with those values"){
                     throw new \Exception("No response from Fincra");
                 }
+
+                $debitMandate->status = 'approved';
+                $debitMandate->save();
+
+                $this->completeLoanApplication($debitMandate->application_id);
             }
 
         } catch (\Throwable $th) {
@@ -186,21 +206,32 @@ class FincraMandateRepository
             $query->where('auto_accept', true);
         })->where('type', 'LENDER')->whereHas('lendersWallet', function ($query) use ($amount) {
             $query->where('current_balance', '>', $amount);
-        })->whereHas('creditLendersPreference', function ($query) use ($customerCategory, $loanDuration) {
+        })->whereHas('getLenderPreferences', function ($query) use ($customerCategory, $loanDuration) {
             $query->whereRaw('JSON_CONTAINS(credit_score_category, ?)', [json_encode($customerCategory)])->whereRaw('JSON_CONTAINS(loan_tenure, ?)', [$loanDuration]);
         })->get();
 
-        $offer = $this->createOffer($loanApplication);
+        if ($lendersBusinesses->isEmpty()) {
+            $this->sendMailToLendersManualApproval($loanApplication);
+            return;
+        }
+
+        $lastSelected = CreditOffer::first();
+
+        if ($lastSelected) {
+            $currentIndex = $lendersBusinesses->search(fn($lender) => $lender->id == $lastSelected->lender_id);
+            $nextIndex = $currentIndex === false || $currentIndex === $lendersBusinesses->count() - 1 ? 0 : $currentIndex + 1;
+        } else {
+            $nextIndex = 0; // First lender
+        }
+
+        $selectedLender = $lendersBusinesses[$nextIndex];
+
+        $offer = $this->createOffer($loanApplication, $selectedLender);
         $loan = $this->createLoan($offer, $loanApplication);
-
-        //create disbursement record
-        //debit from lender wallet
-
-        return $loan;
 
     }
 
-    public function createOffer($loanApplication)
+    public function createOffer($loanApplication, $lender)
     {
 
 
@@ -217,11 +248,13 @@ class FincraMandateRepository
         $offer = $this->offerRepository->updateOrCreate([
             'customer_id' => $loanApplication->customer_id,
             'business_id' => $loanApplication->business_id,
-            'application_id' => $loanApplication->applicationId,
+            'application_id' => $loanApplication->id,
             'offer_amount' => $amount,
             'repayment_breakdown' => $repaymentBreakdown,
             'has_mandate' => true,
             'accepted_at' => Carbon::now(),
+            'lender_id' => $lender->id,
+            'is_valid' => true,
         ]);
 
         return $offer;
@@ -251,11 +284,17 @@ class FincraMandateRepository
             'status' => 'DISBURSED',
         ];
 
+        //debit lender deposit wallet
+        $lenderWallet = CreditLendersWallet::where('lender_id', $offer->lender_id)->where('type', 'deposit')->first();
+        $lenderWallet->prev_balance = $lenderWallet->current_balance;
+        $lenderWallet->current_balance -= $offer->offer_amount;
+        $lenderWallet->save();
+
         // Create the loan record
         $loan = $this->loanRepository->updateOrCreate([
             'business_id' => $loanApplication->business_id,
             'customer_id' => $loanApplication->customer_id,
-            'application_id' => $loanApplication->application_id,
+            'application_id' => $loanApplication->id,
         ], $loanData);
 
         // Generate repayment schedules
@@ -271,7 +310,71 @@ class FincraMandateRepository
             ]);
         }
 
-        return $loan;
+        $vendorBusiness = Business::where('id', $loan->business_id)->first();
+
+        //send notification to customer
+        $subject = 'Loan Application Approved';
+        $message = "Your credit has been paid you can proceed to confirm your order from the vendor ".$vendorBusiness->name;
+        $this->notificationService->sendCustomerNotification($loanApplication->customer_id, $subject, $message);
+
+        //send notification to vendor
+        $user = User::where('id', $vendorBusiness->owner_id)->first();
+        $message = "Your customer".$loanApplication->customer->name." has been approved you can proceed to confirm the order from the customer";
+        $vendorBusiness->owner->sendOrderConfirmationNotification($message, $user);
+
+        //send notification to lender
+        $message = "A loan request has been approved and disbursed to a customer. You can view the loan details on your dashboard";
+        $lenderBusiness = Business::where('id', $offer->lender_id)->first();
+        $user = User::where('id', $lenderBusiness->owner_id)->first();
+        $lenderBusiness->owner->sendOrderConfirmationNotification($message, $user);
+
+        $this->createDisbursementRecord($loan, $offer->lender_id);
+
+    }
+
+    public function createDisbursementRecord($loan, $lenderId)
+    {
+        //create disbursement record using
+        DB::table('credit_disbursements')->updateOrInsert([
+            'identifier' => UtilityHelper::generateSlug('LND'),
+            'business_id' => $loan->business_id,
+            'customer_id' => $loan->customer_id,
+            'application_id' => $loan->application_id,
+            'loan_id' => $loan->id,
+            'disbursed_amount' => $loan->total_amount,
+            'voucher_code' => $loan->identifier,
+            'status' => 'DISBURSED',
+            'lender_id' => $lenderId
+        ]);
+    }
+
+    public function sendMailToLendersManualApproval($loanApplication)
+    {
+        $creditScore = $loanApplication->customer->creditScore;
+
+        $amount = $loanApplication->requested_amount;
+        $customerCategory = $creditScore->category;
+        $loanDuration = $loanApplication->duration_in_months;
+
+        $lendersBusinesses = Business::whereHas('getLenderPreferences', function($query) {
+            $query->where('auto_accept', true);
+        })->where('type', 'LENDER')->whereHas('lendersWallet', function ($query) use ($amount) {
+            $query->where('current_balance', '>', $amount);
+        })->whereHas('getLenderPreferences', function ($query) use ($customerCategory, $loanDuration) {
+            $query->whereRaw('JSON_CONTAINS(credit_score_category, ?)', [json_encode($customerCategory)])->whereRaw('JSON_CONTAINS(loan_tenure, ?)', [$loanDuration]);
+        })->get();
+
+        //send email to all found lenders
+        for ($i=0; $i < count($lendersBusinesses); $i++) {
+
+            $message = "A loan request has been made by a customer. You can proceed to approve the loan request from your dashboard";
+            $user = User::where('id', $lendersBusinesses[$i]->owner_id)->first();
+            $lendersBusinesses[$i]->owner->sendOrderConfirmationNotification($message, $user);
+
+        }
+
+
+
 
     }
 

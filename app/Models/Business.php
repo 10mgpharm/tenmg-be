@@ -95,7 +95,7 @@ class Business extends Model
 
     public function lendersWallet()
     {
-        return $this->hasOne(CreditLendersWallet::class, 'lender_id', 'id')->where('type', 'investment');
+        return $this->hasOne(CreditLendersWallet::class, 'lender_id', 'id')->where('type', 'deposit');
     }
 
     public function creditLendersPreference()

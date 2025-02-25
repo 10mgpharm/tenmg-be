@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Helpers\UtilityHelper;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
@@ -23,6 +24,7 @@ class CreditOffer extends Model
         'has_mandate',
         'has_active_debit_card',
         'is_valid',
+        'lender_id'
     ];
 
     public function application()
@@ -44,8 +46,7 @@ class CreditOffer extends Model
     {
         parent::boot();
         self::creating(function ($model) {
-            $businessCode = DB::table('businesses')->where('id', $model->business_id)->value('code');
-            $model->identifier = "LO-{$businessCode}-".time().'-'.Str::random(5);
+            $model->identifier = UtilityHelper::generateSlug('LO');
         });
     }
 }
