@@ -41,7 +41,7 @@ class StoreEcommerceProductReviewRequest extends FormRequest
         return [
             'ecommerce_product_id' => [
                 'required',
-                // Rule::exists(EcommerceProduct::class, 'id'),
+                Rule::exists(EcommerceProduct::class, 'id'),
                 Rule::unique('ecommerce_product_reviews', 'ecommerce_product_id')
                     ->where(fn($query) => $query->where('user_id', $this->user()->id)),
             ],
