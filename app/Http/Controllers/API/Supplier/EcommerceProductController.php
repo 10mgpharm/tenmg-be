@@ -11,6 +11,7 @@ use App\Http\Requests\Supplier\UpdateEcommerceProductRequest;
 use App\Http\Resources\EcommerceProductResource;
 use App\Models\EcommerceProduct;
 use App\Services\Admin\EcommerceProductService;
+use App\Services\AuditLogService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
@@ -128,6 +129,22 @@ class EcommerceProductController extends Controller
      */
     public function destroy(DeleteEcommerceProductRequest $request, EcommerceProduct $product)
     {
+        // Log the deletion of the product
+        AuditLogService::log(
+            target: $product, // The product is the target (it is being deleted)
+            event: 'delete.product',
+            action: "Product was deleted by {$request->user()->name}",
+            description: "{$request->user()->name} deleted a product with the name $product->name",
+            crud_type: 'DELETE', // Use 'DELETE' for deletion actions
+            properties: [
+                'product_name' => $product->name,
+                'product_description' => $product->description,
+                'product_price' => $product->price,
+                'product_quantity' => $product->quantity,
+                'product_status' => $product->status,
+            ]
+        );
+
         $product->delete();
 
         return $this->returnJsonResponse(

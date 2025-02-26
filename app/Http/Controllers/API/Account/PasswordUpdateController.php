@@ -5,6 +5,7 @@ namespace App\Http\Controllers\API\Account;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\PasswordUpdateRequest;
 use App\Http\Resources\UserResource;
+use App\Services\AuditLogService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
@@ -33,6 +34,19 @@ class PasswordUpdateController extends Controller
                     $user->tokens()->where('id', '!=', $currentToken->id)->delete();
                 }
             });
+
+            AuditLogService::log(
+                target: $$user, // The user is the target (it is being updated)
+                event: 'update.user',
+                action: "{$user->name} updated their password",
+                description: "$user->name updated their password and all other sessions were logged out",
+                crud_type: 'UPDATED', // Use 'UPDATE' for updating actions
+                properties: [
+                    'token_expires_at' => $currentToken->expires_at?->toDateTimeString(),
+                    'token_scope' => 'full',
+                ]
+            );
+        
 
             return $this->returnJsonResponse(
                 message: 'Password updated successfully.',
