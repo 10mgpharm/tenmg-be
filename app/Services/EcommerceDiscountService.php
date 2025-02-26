@@ -90,7 +90,27 @@ class EcommerceDiscountService implements IEcommerceDiscountService
                 $validated['business_id'] = $user->ownerBusinessType?->id ?: $user->businesses()
                     ->firstWhere('user_id', $user->id)?->id;
 
-                return EcommerceDiscount::create($validated);
+                $discount = EcommerceDiscount::create($validated);
+
+                if($discount){
+                    AuditLogService::log(
+                        target: $discount, // The discount is the target (it is being created)
+                        event: 'create.discountcode',
+                        action: "Discount code created by $user->name",
+                        description: "{$user->name} created a discount code with the code: $discount->coupon_code",
+                        crud_type: 'CREATE', // Use 'CREATE' for creation actions
+                        properties: [
+                            'discount_code' => $discount->coupon_code,
+                            'discount_type' => $discount->type,
+                            'discount_amount' => $discount->amount,
+                            'discount_percentage' => $discount->percentage,
+                            'discount_start_date' => $discount->start_date,
+                            'discount_end_date' => $discount->end_date,
+                            'discount_status' => $discount->status,
+                        ]
+                    );
+                }
+                return $discount;
             });
         } catch (Exception $e) {
             throw new Exception('Failed to create discount: ' . $e->getMessage());
@@ -113,7 +133,26 @@ class EcommerceDiscountService implements IEcommerceDiscountService
                 $validated['updated_by_id'] = $user->id;
                 $validated = array_filter($validated);
 
-                return $discount->update($validated);
+                $isUpdated = $discount->update($validated);
+                if ($isUpdated) {
+                    AuditLogService::log(
+                        target: $discount, // The discount is the target (it is being updated)
+                        event: 'update.discountcode',
+                        action: "Discount code was updated by $user->name",
+                        description: "{$user->name} updated a discount code with the code  $discount->coupon_code",
+                        crud_type: 'CREATE', // Use 'CREATE' for creation actions
+                        properties: [
+                            'discount_code' => $discount->coupon_code,
+                            'discount_type' => $discount->type,
+                            'discount_amount' => $discount->amount,
+                            'discount_percentage' => $discount->percentage,
+                            'discount_start_date' => $discount->start_date,
+                            'discount_end_date' => $discount->end_date,
+                            'discount_status' => $discount->status,
+                        ]
+                    );
+                }
+                return $isUpdated;
             });
         } catch (Exception $e) {
             throw new Exception('Failed to update discount: ' . $e->getMessage());
