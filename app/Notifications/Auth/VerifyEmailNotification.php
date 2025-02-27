@@ -37,14 +37,17 @@ class VerifyEmailNotification extends Notification implements ShouldQueue
     public function toMail($notifiable)
     {
         return (new MailMessage)
-            ->subject(Lang::get('Verify Email Address'))
-            ->greeting(Lang::get('Hello '.$notifiable->name))
-            ->line(Lang::get('Your account has been created on '.config('app.name')))
-            ->line(Lang::get('Use the code below to verify your account'))
-            ->line('Code: '.$this->code)
-            ->line('This code will expire in 15 minutes.')
-            ->salutation(config('app.name'))
-            ->line(Lang::get('If you are not sure about this account, no further action is required.'));
+            ->subject(Lang::get('Verify Your Account on ' . config('app.name')))
+            ->greeting(Lang::get('Hello ' . $notifiable->name . ','))
+            ->line(Lang::get('Welcome to ' . config('app.name') . '!'))
+            ->line(Lang::get('To complete your registration and verify your account, use the code below:'))
+            ->line(__('**Verification Code: ') . $this->code . '**')
+            ->line(__('This code will expire in **15 minutes.**'))
+            ->line(__('We’re excited to have you on board as a ') . '**' . ucfirst($notifiable->type ?? $notifiable->getRoleNames()->first()) . '**' . __(' and look forward to working with you. If you have any questions, please contact us at ') . '**' . config('mail.from.support') . '**.')
+            ->line(__('No action is required if you did not request an account or are unsure about this email.'))
+            ->line('')
+            ->line('Best Regards,')
+            ->salutation(Lang::get('The '.  config('app.name') . ' Team'));
     }
 
     /**
