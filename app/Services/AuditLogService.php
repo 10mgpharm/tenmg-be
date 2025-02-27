@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Models\User;
 use Illuminate\Database\Eloquent\Model;
 use Spatie\Activitylog\Models\Activity;
 
@@ -33,7 +34,9 @@ class AuditLogService
         $actorBusinessId = $actor->ownerBusinessType?->id ?? $actor->businesses()->firstWhere('user_id', $actor->id)?->id;
 
         // Determine the business ID for the target (resource being acted upon)
-        $targetBusinessId = $target?->ownerBusinessType?->id ?? $target?->businesses()->firstWhere('user_id', $target?->id)?->id ?? $businessId ?? $actorBusinessId;
+        if ($target instanceof User) {
+            $targetBusinessId = $target->ownerBusinessType?->id ?? $target->businesses()->firstWhere('user_id', $target->id)?->id;
+        } else $targetBusinessId = $target?->business_id ?? $businessId ?? $actorBusinessId;
 
         // Merge default properties with custom properties
         $properties = array_merge([

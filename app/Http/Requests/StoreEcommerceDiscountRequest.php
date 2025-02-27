@@ -80,10 +80,10 @@ class StoreEcommerceDiscountRequest extends FormRequest
                 'array',
                 function ($attribute, $value, $fail) use ($business_id) {
                     $invalidProducts = collect($value)
-                        ->filter(fn($productId) => !EcommerceProduct::where('id', $productId)->where('business_id', $business_id)->exists());
+                        ->filter(fn($productId) => !EcommerceProduct::where('id', $productId)->exists());
 
                     if ($invalidProducts->isNotEmpty()) {
-                        $fail("Some products do not belong to the current business.");
+                        $fail("Some products do not exists.");
                     }
                 },
             ],
