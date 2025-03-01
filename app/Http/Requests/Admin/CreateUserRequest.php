@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests\Admin;
 
+use App\Helpers\UtilityHelper;
 use App\Models\Role;
 use App\Rules\BusinessEmail;
 use Illuminate\Foundation\Http\FormRequest;
@@ -32,7 +33,7 @@ class CreateUserRequest extends FormRequest
     {
         $roleName = $this->input('businessType') == 'pharmacy' ? 'customer' : $this->input('businessType');
         $role = Role::where('name', $roleName)
-        ->whereIn('name', ['vendor', 'supplier', 'customer'])
+        ->whereIn('name', UtilityHelper::getAllowedBusinessTypes())
         ->first();
 
         $this->merge([
