@@ -49,7 +49,7 @@ class VerifyEmailNotification extends Notification implements ShouldQueue
             ->line(Lang::get('To complete your registration and verify your account, use the code below:'))
             ->line(__('**Verification Code: ') . $this->code . '**')
             ->line(__('This code will expire in **15 minutes.**'))
-            ->line(__('We’re excited to have you on board as a ') . '**' . ucfirst($type) . '**' . __(' and look forward to working with you. If you have any questions, please contact us at ') . '**' . config('mail.from.support') . '**.')
+            ->line(__('We’re excited to have you on board as a ') . '**' . ucwords($type) . '**' . __(' and look forward to working with you. If you have any questions, please contact us at ') . '**' . config('mail.from.support') . '**.')
             ->line(__('No action is required if you did not request an account or are unsure about this email.'))
             ->line('')
             ->line('Best Regards,')

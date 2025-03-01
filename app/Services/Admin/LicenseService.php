@@ -2,8 +2,10 @@
 
 namespace App\Services\Admin;
 
+use App\Enums\InAppNotificationType;
 use App\Http\Requests\Admin\ListBusinessLicenseRequest;
 use App\Models\Business;
+use App\Services\InAppNotificationService;
 use App\Services\Interfaces\ILicenseService;
 use Exception;
 use Illuminate\Pagination\LengthAwarePaginator;
@@ -72,9 +74,17 @@ class LicenseService implements ILicenseService
             if ($validated['license_verification_status'] == 'APPROVED') {
                 //send notification mail to user
 
-                $user->sendLicenseVerificationNotification('Your license verification has been successfully approved. You now have full access.', $user);
+                $user->sendLicenseVerificationNotification('Great news! Your license has been successfully approved, and you now have full access to all features of ' .config('app.name'), $user);
+
+                // Send a license acceptance notification
+                (new InAppNotificationService)
+                ->notify(InAppNotificationType::LICENSE_ACCEPTANCE);
             }else{
-                $user->sendLicenseVerificationNotification("Your license verification request has been denied for the following reason:\n". $validated['license_verification_comment'], $user);
+                $user->sendLicenseVerificationNotification("Thank you for submitting your license for verification. Unfortunately, your request has been rejected due to the following reason(s):\n". $validated['license_verification_comment'], $user);
+
+                // Send a license rejection notification
+                (new InAppNotificationService)
+                ->notify(InAppNotificationType::LICENSE_REJECTION);
             }
 
             return $trans;

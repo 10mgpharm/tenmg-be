@@ -31,8 +31,10 @@ use App\Services\RuleEngineService;
 use App\Services\TransactionHistoryService;
 use Illuminate\Auth\Events\Verified;
 use Illuminate\Support\Facades\Event;
+use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\ServiceProvider;
+use Kreait\Laravel\Firebase\Facades\Firebase;
 use Laravel\Passport\Passport;
 
 class AppServiceProvider extends ServiceProvider
@@ -120,6 +122,20 @@ class AppServiceProvider extends ServiceProvider
 
             // Otherwise, assume it's a slug
             return EcommerceProduct::where('slug', $value)->firstOrFail();
+        });
+
+        Notification::extend('firebase', function ($app) {
+            return new class {
+                public function send($notifiable, $notification)
+                {
+                    $message = $notification->toFirebase($notifiable);
+    
+                     // Only send the message if it is not null
+                    if ($message !== null) {
+                        Firebase::messaging()->send($message);
+                    }
+                }
+            };
         });
     }
 }

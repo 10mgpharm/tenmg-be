@@ -9,7 +9,7 @@ use Illuminate\Notifications\Notification;
 use Kreait\Firebase\Messaging\CloudMessage;
 use Kreait\Firebase\Messaging\Notification as FirebaseMessagingNotification;
 
-class NewMessageNotification extends Notification implements ShouldQueue
+class LicenseAcceptanceNotification extends Notification implements ShouldQueue
 {
     use Queueable;
 
@@ -42,12 +42,9 @@ class NewMessageNotification extends Notification implements ShouldQueue
         ];
     }
 
-    /**
-     * Get the Firebase representation of the notification.
-     */
     public function toFirebase(object $notifiable)
     {
-          // Check if the FCM token is present
+        // Check if the FCM token is present
         if (empty($notifiable->fcm_token)) {
             logs()->warning("FCM token not found for user. User ID: {$notifiable->id}, Name: {$notifiable->name}, Email: {$notifiable->email}");
             return null; // Return null to indicate no message was created

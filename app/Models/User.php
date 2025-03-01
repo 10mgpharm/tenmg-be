@@ -47,6 +47,7 @@ class User extends Authenticatable implements MustVerifyEmail
         'force_password_change',
         'status',
         'status_comment',
+        'fcm_token',
     ];
 
     /**
