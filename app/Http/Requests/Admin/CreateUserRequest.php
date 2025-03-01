@@ -33,7 +33,7 @@ class CreateUserRequest extends FormRequest
     {
         $roleName = $this->input('businessType') == 'pharmacy' ? 'customer' : $this->input('businessType');
         $role = Role::where('name', $roleName)
-        ->whereIn('name', UtilityHelper::getAllowedBusinessTypes())
+        ->whereIn('name',array_merge(UtilityHelper::getAllowedBusinessTypes(), ['customer']))
         ->first();
 
         $this->merge([
@@ -53,7 +53,7 @@ class CreateUserRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'business_type' => ['required', 'string', 'in:vendor,supplier,pharmacy'],
+            'business_type' => ['required', 'string', 'in:vendor,supplier,pharmacy,lender'],
             'email' => [
                 'required', 'string', 'lowercase', 'email',
                 'max:255', 'unique:users,email',
