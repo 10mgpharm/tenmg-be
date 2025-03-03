@@ -9,7 +9,7 @@ use Illuminate\Notifications\Notification;
 use Kreait\Firebase\Messaging\CloudMessage;
 use Kreait\Firebase\Messaging\Notification as FirebaseMessagingNotification;
 
-class NewMessageNotification extends Notification implements ShouldQueue
+class LicenseUploadNotification extends Notification implements ShouldQueue
 {
     use Queueable;
 
@@ -30,7 +30,7 @@ class NewMessageNotification extends Notification implements ShouldQueue
     {
         return ['database', 'firebase'];
     }
-
+    
     /**
      * Get the database representation of the notification.
      */
@@ -42,9 +42,6 @@ class NewMessageNotification extends Notification implements ShouldQueue
         ];
     }
 
-    /**
-     * Get the Firebase representation of the notification.
-     */
     public function toFirebase(object $notifiable)
     {
           // Check if the FCM token is present

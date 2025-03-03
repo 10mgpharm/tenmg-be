@@ -6,6 +6,7 @@ use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
+use Illuminate\Support\Facades\Lang;
 
 class WelcomeUserNotification extends Notification implements ShouldQueue
 {
@@ -37,13 +38,16 @@ class WelcomeUserNotification extends Notification implements ShouldQueue
         $url = config('app.frontend_url');
 
         return (new MailMessage)
-            ->subject('Email Successfully Verified')
-            ->greeting('Hello '.$notifiable->name)
-            ->line('Your email has been verified on '.config('app.name'))
-            ->line('You are a step closer to using all '.config('app.name').' features.')
+            ->subject(Lang::get('Your Email Has Been Verified on '.config('app.name')))
+            ->greeting(Lang::get('Hello ' . $notifiable->name . ','))
+            ->line(Lang::get('Your email has been successfully verified on '.config('app.name') . '! 🎉'))
+            ->line(Lang::get('You\'re one step closer to accessing all the features of ' . config('app.name') . '.'))
             ->action('Proceed to Dashboard', $url)
-            ->salutation(config('app.name'))
-            ->line('If you are not sure about this account, no further action is required.');
+            ->line(__('We’re excited to have you on board!') . __(' If you have any questions, please contact us at ') . '**' . config('mail.from.support') . '**.')
+            ->line(Lang::get('No further action is required if you did not initiate this verification or are unsure about this account.'))
+            ->line('')
+            ->line('Best Regards,')
+            ->salutation(Lang::get('The '.  config('app.name') . ' Team'));
     }
 
     /**

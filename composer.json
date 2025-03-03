@@ -9,7 +9,7 @@
         "bacon/bacon-qr-code": "^3.0",
         "fakerphp/faker": "^1.23",
         "knuckleswtf/scribe": "^4.37",
-        "kreait/laravel-firebase": "^5.10",
+        "kreait/laravel-firebase": "^6.0",
         "laravel/framework": "^11.9",
         "laravel/passport": "^12.0",
         "laravel/telescope": "^5.2",

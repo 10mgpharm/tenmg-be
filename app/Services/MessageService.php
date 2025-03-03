@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Enums\InAppNotificationType;
 use App\Http\Resources\ConversationResource;
 use App\Http\Resources\MessageResource;
 use App\Models\Conversation;
@@ -60,7 +61,9 @@ class MessageService implements IMessageService
                 $message = $conversation->messages()->create($validated);
 
                 if ($message) {
-                    $receiver->notify(new NewMessageNotification('You have received a new message.'));
+                    (new InAppNotificationService)
+                    ->forUser($receiver)
+                    ->notify(InAppNotificationType::NEW_MESSAGE);
                     return $message;
                 }
 
