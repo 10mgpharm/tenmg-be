@@ -357,7 +357,7 @@ class FincraMandateRepository
         $loanDuration = $loanApplication->duration_in_months;
 
         $lendersBusinesses = Business::whereHas('getLenderPreferences', function($query) {
-            $query->where('auto_accept', true);
+            $query->where('auto_accept', false);
         })->where('type', 'LENDER')->whereHas('lendersWallet', function ($query) use ($amount) {
             $query->where('current_balance', '>', $amount);
         })->whereHas('getLenderPreferences', function ($query) use ($customerCategory, $loanDuration) {
@@ -372,9 +372,6 @@ class FincraMandateRepository
             $lendersBusinesses[$i]->owner->sendOrderConfirmationNotification($message, $user);
 
         }
-
-
-
 
     }
 
