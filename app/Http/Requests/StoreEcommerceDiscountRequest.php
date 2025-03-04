@@ -78,16 +78,10 @@ class StoreEcommerceDiscountRequest extends FormRequest
                 'nullable',
                 'sometimes',
                 'array',
-                function ($attribute, $value, $fail) use ($business_id) {
-                    $invalidProducts = collect($value)
-                        ->filter(fn($productId) => !EcommerceProduct::where('id', $productId)->where('business_id', $business_id)->exists());
-
-                    if ($invalidProducts->isNotEmpty()) {
-                        $fail("Some products do not belong to the current business.");
-                    }
-                },
+                'required_unless:all_products,true',
             ],
-            'all_products' => ['sometimes', 'nullable', 'boolean'],
+            'applicable_products.*' => [ 'integer', Rule::exists('ecommerce_products', 'id'),],
+            'all_products' => ['sometimes', 'nullable', 'boolean','required_unless:applicable_products,[]',],
             'customer_limit' => ['required', new Enum(DiscountCustomerLimitEnum::class),],
             'start_date' => ['sometimes', 'nullable', 'date', 'after_or_equal:today'],
             'end_date' => ['sometimes', 'nullable', 'date', 'after_or_equal:start_date',],

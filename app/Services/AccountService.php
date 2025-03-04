@@ -40,7 +40,19 @@ class AccountService implements IAccountService
                 }
 
                 // Update the user profile.
-                $user->update($data);
+                $isUpdate = $user->update($data);
+
+                if ($isUpdate) {
+                    // Log the update event.
+                    AuditLogService::log(
+                        target: $user, // The user is the target (it is being updated)
+                        event: 'update.user', // The event name
+                        action: "{$user->name} updated their profile",
+                        description: "{$user->name} updated their profile information",
+                        crud_type: 'UPDATE',
+                        properties: $data,
+                    );
+                }
 
                 return $user->fresh(); // Return the updated user model.
             });

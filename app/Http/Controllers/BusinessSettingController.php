@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Enums\InAppNotificationType;
 use App\Http\Requests\BusinessSettingAccountSetupRequest;
 use App\Http\Requests\BusinessSettingLicenseWithdrawalRequest;
 use App\Http\Requests\BusinessSettingPersonalInformationRequest;
@@ -10,6 +11,7 @@ use App\Http\Resources\BusinessResource;
 use App\Models\Business;
 use App\Models\User;
 use App\Services\AttachmentService;
+use App\Services\InAppNotificationService;
 use App\Services\Lender\BankAccountService;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
@@ -102,12 +104,22 @@ class BusinessSettingController extends Controller
         $ownerBusiness = $business;
         $licenseFile = $ownerBusiness->cac ?? null;
 
-        $user->sendLicenseVerificationNotification('Your request has been received and is currently under review. You will receive a response from us shortly.', Auth::user());
+        $user->sendLicenseVerificationNotification("We’ve received your license verification request, and it is currently under review. You will receive a response from us shortly.", Auth::user());
+
+        // Send a license upload notification
+        (new InAppNotificationService)
+        ->notify(InAppNotificationType::LICENSE_UPLOAD);
+
+        $role = $user->getRoleNames()->first();
 
         //send mail to all the admins
         foreach ($admins as $admin) {
-            $admin->sendLicenseVerificationNotification('A license verification request has been submitted and is now awaiting your review.', $admin);
+            $admin->sendLicenseVerificationNotification("A **{$role}** has submitted their license for verification, and it is now awaiting review. Kindly proceed with the review and verification of the submitted license.", $admin);
         }
+        // Send a license upload notification to admins
+        (new InAppNotificationService)
+        ->forUsers($admins)
+        ->notify(InAppNotificationType::ADMIN_LICENSE_UPLOAD, ['role' => $role]);
 
         return $this->returnJsonResponse(
             message: 'Business license successfully updated.',

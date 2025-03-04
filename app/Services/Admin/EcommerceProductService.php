@@ -14,6 +14,7 @@ use App\Models\EcommercePresentation;
 use App\Models\EcommerceProduct;
 use App\Models\User;
 use App\Services\AttachmentService;
+use App\Services\AuditLogService;
 use App\Services\Interfaces\IEcommerceProductService;
 use Exception;
 use Illuminate\Http\Request;
@@ -177,6 +178,20 @@ class EcommerceProductService implements IEcommerceProductService
                     $product->update(['thumbnail_file_id' => $created->id]);
                 }
 
+                // Log the update event.
+                AuditLogService::log(
+                    target: $product, // The product is the target (it is being created)
+                    event: 'create.product',
+                    action: "Product created by $user->name",
+                    description: "{$user->name} created a product with the name '$product->name'",
+                    crud_type: 'CREATE', // Use 'CREATE' for creation actions
+                    properties: [
+                        'product_name' => $product->name,
+                        'product_description' => $product->description,
+                        'product_status' => $product->status,
+                        'product_active' => $product->active,
+                    ]
+                );
                 return $product;
             });
         } catch (Exception $e) {
@@ -352,6 +367,20 @@ class EcommerceProductService implements IEcommerceProductService
 
                 $updateProductDetails = $product->productDetails?->update($validated);
 
+                // Log the update event.
+                AuditLogService::log(
+                    target: $product, // The product is the target (it is being updated)
+                    event: 'update.product',
+                    action: "Product updated by $user->name",
+                    description: "{$user->name} updated a product with the name '$product->name'",
+                    crud_type: 'UPDATE', // Use 'UPDATE' for update actions
+                    properties: [
+                        'product_name' => $product->name,
+                        'product_description' => $product->description,
+                        'product_status' => $product->status,
+                        'product_active' => $product->active,
+                    ]
+                );
                 return $updateProduct || $updateProductDetails;
             });
         } catch (Exception $e) {
