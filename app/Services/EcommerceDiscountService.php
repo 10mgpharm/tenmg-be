@@ -22,7 +22,7 @@ class EcommerceDiscountService implements IEcommerceDiscountService
     public function index(Request $request): LengthAwarePaginator
     {
 
-        return EcommerceDiscount::businesses()
+        return EcommerceDiscount::businesses()->latest('id')
             ->when($request->input('search'), fn($query, $search) => $query->where('coupon_code', 'LIKE', "%{$search}%"))
             ->when(
                 $request->input('applicationMethod'),
