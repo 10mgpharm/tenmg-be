@@ -34,16 +34,18 @@ class UpdateEcommerceDiscountRequest extends FormRequest
      */
     protected function prepareForValidation(): void
     {
+        $discount = $this->route('discount');
+
         $this->merge([
             'application_method' => $this->input('applicationMethod'),
             'coupon_code' => $this->input('couponCode'),
             'type' => $this->input('discountType'),
             'amount' => $this->input('discountAmount'),
-            'applicable_products' => $this->input('applicableProducts'),
+            'applicable_products' => $this->input('applicableProducts', $discount->applicable_products),
             'customer_limit' => $this->input('customerLimit'),
             'start_date' => $this->input('startDate'),
             'end_date' => $this->input('endDate'),
-            'all_products' => $this->input('allProducts'),
+            'all_products' => $this->input('allProducts', $discount->all_products),
         ]);
     }
 

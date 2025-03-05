@@ -131,7 +131,7 @@ class EcommerceDiscountService implements IEcommerceDiscountService
         try {
             return DB::transaction(function () use ($validated, $user, $discount) {
                 $validated['updated_by_id'] = $user->id;
-                $validated = array_filter($validated);
+                $validated = array_filter($validated, fn($value) => $value !== null);
 
                 $isUpdated = $discount->update($validated);
                 if ($isUpdated) {

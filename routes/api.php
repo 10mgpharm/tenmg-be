@@ -3,6 +3,7 @@
 use App\Http\Controllers\Admin\AppNotificationController;
 use App\Http\Controllers\API\Account\AccountController;
 use App\Http\Controllers\API\Account\AppNotificationController as AccountAppNotificationController;
+use App\Http\Controllers\API\Account\MarkAllAsReadController;
 use App\Http\Controllers\API\Account\NotificationController;
 use App\Http\Controllers\API\Account\PasswordUpdateController;
 use App\Http\Controllers\API\Account\TwoFactorAuthenticationController;
@@ -135,6 +136,7 @@ Route::prefix('v1')->group(function () {
                     Route::post('verify', 'verify');
                 });
 
+            Route::match(['put', 'patch'],'notifications/mark-all-read', MarkAllAsReadController::class);
             Route::apiResource('notifications', NotificationController::class);
 
             Route::prefix('app-notifications')->group(function () {
