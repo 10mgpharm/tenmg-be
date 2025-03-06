@@ -22,7 +22,7 @@ class EcommerceDiscountService implements IEcommerceDiscountService
     public function index(Request $request): LengthAwarePaginator
     {
 
-        return EcommerceDiscount::businesses()
+        return EcommerceDiscount::businesses()->latest('id')
             ->when($request->input('search'), fn($query, $search) => $query->where('coupon_code', 'LIKE', "%{$search}%"))
             ->when(
                 $request->input('applicationMethod'),
@@ -131,7 +131,7 @@ class EcommerceDiscountService implements IEcommerceDiscountService
         try {
             return DB::transaction(function () use ($validated, $user, $discount) {
                 $validated['updated_by_id'] = $user->id;
-                $validated = array_filter($validated);
+                $validated = array_filter($validated, fn($value) => $value !== null);
 
                 $isUpdated = $discount->update($validated);
                 if ($isUpdated) {
