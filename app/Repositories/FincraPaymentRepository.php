@@ -3,6 +3,7 @@
 namespace App\Repositories;
 
 use App\Helpers\UtilityHelper;
+use App\Models\CreditLenderTxnHistory;
 use App\Models\DebitMandate;
 use App\Models\EcommerceOrder;
 use App\Models\EcommercePayment;
@@ -11,11 +12,12 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Str;
 
 class FincraPaymentRepository
 {
 
-    function __construct(private FincraMandateRepository $fincraMandateRepository)
+    function __construct(private FincraMandateRepository $fincraMandateRepository, private LenderDashboardRepository $lenderDashboardRepository)
     {
 
     }
@@ -160,7 +162,7 @@ class FincraPaymentRepository
             if(!isset($response)){
                 return $this->changePaymentToPending($ref);
             }else{
-                return $this->completeOrder(json_decode($response));
+                return $this->resolveTransaction(json_decode($response));
             }
 
         }
@@ -170,23 +172,39 @@ class FincraPaymentRepository
     public function changePaymentToPending($ref)
     {
 
-        // //get the order payment instance
-        $orderPayment = EcommercePayment::where('reference', $ref)->first();
-        //check if payment record exist
-        if(!$orderPayment){
-            throw new \Exception('Payment not found');
+        if(Str::startsWith($ref, "PAY")){
+
+            // //get the order payment instance
+            $orderPayment = EcommercePayment::where('reference', $ref)->first();
+            //check if payment record exist
+            if(!$orderPayment){
+                throw new \Exception('Payment not found');
+            }
+            // //update external reference
+            $orderPayment->status = 'pending';
+            $orderPayment->save();
+
+            //get order for payment
+            $order = EcommerceOrder::find($orderPayment->order_id);
+            $order->payment_status = "PENDING_PAYMENT_CONFIRMATION";
+            $order->save();
+
+            return $orderPayment;
+
+        }elseif(Str::startsWith($ref, "THL")){
+
+            $transaction = CreditLenderTxnHistory::where('identifier', $ref)->first();
+            if(!$transaction){
+                throw new \Exception('Transaction not found');
+            }
+            $transaction->status = 'pending';
+            $transaction->save();
+
+            return $transaction;
+
+        }else{
+            throw new \Exception('Invalid reference');
         }
-        // //update external reference
-        $orderPayment->status = 'pending';
-        $orderPayment->save();
-
-        //get order for payment
-        $order = EcommerceOrder::find($orderPayment->order_id);
-        $order->payment_status = "PENDING_PAYMENT_CONFIRMATION";
-        $order->save();
-
-        return $orderPayment;
-
     }
 
     public function completeOrder($data)
@@ -284,6 +302,20 @@ class FincraPaymentRepository
 
     }
 
+    public function resolveTransaction($data)
+    {
+
+        $body = $data->data;
+        $merchantReference = $body->merchantReference;
+
+        if(Str::startsWith($merchantReference, "PAY")){
+            $this->completeOrder($data);
+        }elseif(Str::startsWith($merchantReference, "THL")){
+            $this->lenderDashboardRepository->completeWalletDeposit($data);
+        }
+
+    }
+
     public function verifyFincraPaymentWebhook(Request $request)
     {
         $merchantWebhookSecretKey = config('services.fincra.secret');
@@ -304,7 +336,7 @@ class FincraPaymentRepository
 
             switch ($event) {
                 case 'charge.successful':
-                    $this->completeOrder($data);
+                    $this->resolveTransaction($data);
                     break;
                 case 'mandate.approved':
                     $this->completeMandateSetup($data);

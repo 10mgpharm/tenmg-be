@@ -102,4 +102,9 @@ class Business extends Model
     {
         return $this->hasOne(CreditLenderPreference::class, 'lender_id', 'id');
     }
+
+    public function allLendersWallet()
+    {
+        return $this->hasMany(CreditLendersWallet::class, 'lender_id', 'id');
+    }
 }
