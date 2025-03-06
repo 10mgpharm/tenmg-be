@@ -39,6 +39,10 @@ class LenderDashboardController extends Controller
 
     public function initializeDeposit(Request $request)
     {
+        $request->validate([
+            'amount' => 'required|numeric'
+        ]);
+
         $initData = $this->lenderDashboardService->initializeDeposit($request);
         return $this->returnJsonResponse(
             data: $initData,
