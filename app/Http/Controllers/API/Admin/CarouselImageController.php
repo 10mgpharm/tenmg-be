@@ -80,6 +80,12 @@ class CarouselImageController extends Controller
 
     public function destroy(DeleteCarouselImageRequest $request, CarouselImage $storefront_image)
     {
+        if(CarouselImage::count() === 1){
+            return $this->returnJsonResponse(
+                message: 'Oops, can\'t delete all carousel images.'
+            );
+        }
+
         $storefront_image->delete();
 
         return $this->returnJsonResponse(
