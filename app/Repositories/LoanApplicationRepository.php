@@ -3,11 +3,14 @@
 namespace App\Repositories;
 
 use App\Helpers\UtilityHelper;
+use App\Http\Controllers\API\Credit\LoanOfferController;
 use App\Http\Resources\BusinessLimitedRecordResource;
 use App\Http\Resources\CreditCustomerResource;
 use App\Http\Resources\LoadApplicationResource;
 use App\Models\Business;
 use App\Models\CreditCustomerBank;
+use App\Models\CreditLendersWallet;
+use App\Models\CreditOffer;
 use App\Models\DebitMandate;
 use App\Models\LoanApplication;
 use App\Settings\CreditSettings;
@@ -97,6 +100,47 @@ class LoanApplicationRepository
         $query->orderBy('created_at', 'desc');
 
         return $query->paginate($perPage);
+    }
+
+    public function getLoanApplicationStats()
+    {
+        $user = request()->user();
+        $business_id = $user->ownerBusinessType?->id
+            ?: $user->businesses()->firstWhere('user_id', $user->id)?->id;
+
+        $totalApplications = LoanApplication::count();
+        $successfulApplications = LoanApplication::where('status', '!=', 'APPROVED')->count();
+        $pendingApplications = CreditOffer::where('business_id', $business_id)->count();
+
+        return [
+            'totalApplications' => $totalApplications,
+            'successfulApplications' => $successfulApplications,
+            'pendingApplications' => $pendingApplications,
+        ];
+
+
+    }
+
+    public function approveLoanApplicationManually(Request $request)
+    {
+        $user = request()->user();
+        $business_id = $user->ownerBusinessType?->id
+            ?: $user->businesses()->firstWhere('user_id', $user->id)?->id;
+
+        $business = Business::find($business_id);
+        $application = LoanApplication::where('identifier', $request->applicationId)->first();
+        if ($application->status == "APPROVED") {
+            throw new Exception('Loan already approved');
+        }
+        //check if lender has enough in his wallet to confirm the load
+        $depositWallet = CreditLendersWallet::where('lender_id', $business_id)->where('type', 'deposit')->first();;
+        if ((int)$depositWallet->currentBalance < (int)$application->requestedAmount) {
+            throw new Exception('Insufficient funds in lender\'s wallet to approve loan application.');
+        }
+        $offer = $this->fincraMandateRepository->createOffer($application, $business);
+        $loan = $this->fincraMandateRepository->createLoan($offer, $application);
+
+        return $loan;
     }
 
     public function deleteById(int $id)

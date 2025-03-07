@@ -234,7 +234,6 @@ class FincraMandateRepository
     public function createOffer($loanApplication, $lender)
     {
 
-
         $amount = $loanApplication->requested_amount;
 
         //generate repayment breakdown.
@@ -346,6 +345,11 @@ class FincraMandateRepository
             'status' => 'DISBURSED',
             'lender_id' => $lenderId
         ]);
+
+        //approve the loan application
+        $loanApplication = LoanApplication::where('id', $loan->application_id)->first();
+        $loanApplication->status = 'APPROVED';
+        $loanApplication->save();
     }
 
     public function sendMailToLendersManualApproval($loanApplication)

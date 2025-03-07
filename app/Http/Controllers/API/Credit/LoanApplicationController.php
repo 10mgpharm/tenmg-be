@@ -91,6 +91,36 @@ class LoanApplicationController extends Controller
         return $this->returnJsonResponse(data: LoadApplicationResource::collection($applications)->response()->getData(true));
     }
 
+    public function getLoanApplicationLenders(Request $request)
+    {
+        $applications = $this->loanApplicationService->getLoanApplicationLenders($request->all(), $request->perPage ?? 10);
+
+        return $this->returnJsonResponse(data: LoadApplicationResource::collection($applications)->response()->getData(true));
+    }
+
+    public function getLoanApplicationStats()
+    {
+        $stats = $this->loanApplicationService->getLoanApplicationStats();
+
+        return $this->returnJsonResponse(data: $stats);
+    }
+
+    public function approveLoanApplicationManually(Request $request)
+    {
+        $request->validate([
+            'applicationId' => 'required|exists:credit_applications,identifier',
+            'action' => 'required|string|in:approve,decline',
+        ]);
+
+        if($request->action == "decline"){
+            return $this->returnJsonResponse(message: 'Application declined successfully');
+        }
+
+        $application = $this->loanApplicationService->approveLoanApplicationManually($request);
+
+        return $this->returnJsonResponse(data: $application, message: 'Application approved successfully');
+    }
+
     // Filter Loan Applications
     public function filter(Request $request):JsonResponse
     {

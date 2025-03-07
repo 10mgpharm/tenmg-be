@@ -541,6 +541,12 @@ Route::prefix('v1')->group(function () {
                 Route::patch('update-auto-accept-status', [LoanPreferenceController::class, 'updateAutoAcceptStatus']);
             });
 
+            Route::prefix('loan-application')->name('loan-application.')->group(function () {
+                Route::get('/', [LoanApplicationController::class, 'getLoanApplicationLenders']);
+                Route::get('/loan-stats', [LoanApplicationController::class, 'getLoanApplicationStats']);
+                Route::post('/', [LoanApplicationController::class, 'approveLoanApplicationManually']);
+            });
+
         });
 
     });
