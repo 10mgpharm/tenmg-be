@@ -104,6 +104,9 @@ class UserService implements IUserService
             case BusinessType::CUSTOMER_PHARMACY:
                 return Role::where('name', 'customer')->first();
 
+            case BusinessType::LENDER:
+                return Role::where('name', 'lender')->first();
+
             default:
                 return Role::where('name', 'vendor')->first();
         }
