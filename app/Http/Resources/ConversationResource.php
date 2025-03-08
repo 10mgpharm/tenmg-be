@@ -16,8 +16,8 @@ class ConversationResource extends JsonResource
     {
         return [
             'id' => $this->id,
-            'sender' => $this->sender->only(['id', 'name']),
-            'receiver' => $this->receiver->only(['id', 'name']),
+            'sender' => $this->sender->only(['id', 'name', 'avatar']),
+            'receiver' => $this->receiver->only(['id', 'name', 'avatar']),
             'latest' => new MessageResource($this->messages()->latest('id')->first()),
         ];
     }

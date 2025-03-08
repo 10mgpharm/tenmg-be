@@ -40,6 +40,7 @@ class UpdateShippingAddressRequest extends FormRequest
             'state' => $this->input('state'),
             'city' => $this->input('city'),
             'zip_code' => $this->input('zipCode'),
+            'is_default' => $this->input('isDefault'),
         ]);
     }
 
@@ -63,6 +64,7 @@ class UpdateShippingAddressRequest extends FormRequest
             'state' => ['sometimes', 'nullable', 'string', 'max:255'],
             'city' => ['sometimes', 'nullable', 'string', 'max:255'],
             'zip_code' => ['sometimes', 'nullable', 'string', 'max:255', 'min:3'],
+            'is_default' => ['sometimes', 'boolean'],
         ];
     }
 

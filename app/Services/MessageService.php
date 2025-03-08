@@ -75,6 +75,32 @@ class MessageService implements IMessageService
     }
 
     /**
+     * Mark message as read.
+     *
+     *
+     * @param  array  $validated  The validated data for creating the message.
+     * @param  User  $sender  The user sending the message.
+     * @return Message|null  Returns the created message instance or null if creation fails.
+     *
+     * @throws Exception  If the message creation fails.
+     */
+    public function markAsRead(Message $message): ?Message
+    {
+        try {
+            return DB::transaction(function() use($message) {
+                if($message->read_at){
+                    return $message;
+                }
+                
+                $message->update(['read_status' => 'READ', 'read_at' => now()]);
+                return $message->refresh();
+            });
+        } catch (Exception $e) {
+            throw new Exception('Failed to update message: ' . $e->getMessage());
+        }
+    }
+
+    /**
      * Retrieve a paginated list of the latest messages per conversation for the authenticated user.
      *
      * This query groups messages by the sender and receiver to get the latest message in each conversation.

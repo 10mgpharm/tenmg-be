@@ -39,7 +39,7 @@ class Message extends Model
      * @param array<string, string>
      */
     protected $casts = [
-        'read_at' => 'date',
+        'read_at' => 'datetime',
         'attachments' => 'array',
     ];
 
