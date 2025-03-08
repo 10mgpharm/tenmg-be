@@ -226,6 +226,22 @@ class LoanApplicationService
         return $this->getLoanApplicationsByFilter($filter, $perPage);
     }
 
+    public function getLoanApplicationLenders(array $filter, int $perPage): \Illuminate\Contracts\Pagination\LengthAwarePaginator
+    {
+        // $business = $this->authService->getBusiness();
+        return $this->loanApplicationRepository->getAll($filter, $perPage);
+    }
+
+    public function getLoanApplicationStats()
+    {
+        return $this->loanApplicationRepository->getLoanApplicationStats();
+    }
+
+    public function approveLoanApplicationManually(Request $request)
+    {
+        return $this->loanApplicationRepository->approveLoanApplicationManually($request);
+    }
+
     public function getLoanApplicationsByFilter(array $filter, int $perPage): \Illuminate\Contracts\Pagination\LengthAwarePaginator
     {
         $business = $this->authService->getBusiness();

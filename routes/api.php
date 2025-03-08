@@ -33,6 +33,7 @@ use App\Http\Controllers\API\Credit\LoanController;
 use App\Http\Controllers\API\Credit\LoanOfferController;
 use App\Http\Controllers\API\Credit\TransactionHistoryController;
 use App\Http\Controllers\API\EcommerceDiscountController;
+use App\Http\Controllers\API\Lender\LenderDashboardController;
 use App\Http\Controllers\API\Lender\LoanPreferenceController;
 use App\Http\Controllers\API\MessageController;
 use App\Http\Controllers\API\ProfileController;
@@ -512,6 +513,16 @@ Route::prefix('v1')->group(function () {
 
         Route::prefix('lender')->name('lender.')->middleware(['roleCheck:lender'])->group(function () {
 
+            Route::prefix('dashboard')->name('dashboard.')->group(function () {
+                Route::get('/', [LenderDashboardController::class, 'getDashboardStats']);
+                Route::get('chart-stats', [LenderDashboardController::class, 'getChartStats']);
+            });
+
+            Route::prefix('deposit')->name('deposit.')->group(function () {
+                Route::post('/', [LenderDashboardController::class, 'initializeDeposit']);
+                Route::get('/{reference}', [OrdersController::class, 'verifyFincraPayment']);
+            });
+
             Route::prefix('settings')->name('settings.')->group(function () {
                 Route::get('/', [BusinessSettingController::class, 'show']);
                 Route::match(['post', 'patch'], 'business-account', [BusinessSettingController::class, 'businessBankAccount']);
@@ -529,6 +540,12 @@ Route::prefix('v1')->group(function () {
                 Route::get('get-loan-preferences', [LoanPreferenceController::class, 'getLoanPreference']);
                 Route::get('get-loan-preferences-prefill', [LoanPreferenceController::class, 'getLoanPreferencePrefill']);
                 Route::patch('update-auto-accept-status', [LoanPreferenceController::class, 'updateAutoAcceptStatus']);
+            });
+
+            Route::prefix('loan-application')->name('loan-application.')->group(function () {
+                Route::get('/', [LoanApplicationController::class, 'getLoanApplicationLenders']);
+                Route::get('/loan-stats', [LoanApplicationController::class, 'getLoanApplicationStats']);
+                Route::post('/', [LoanApplicationController::class, 'approveLoanApplicationManually']);
             });
 
         });
