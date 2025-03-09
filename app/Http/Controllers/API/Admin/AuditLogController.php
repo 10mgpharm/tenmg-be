@@ -72,7 +72,7 @@ class AuditLogController extends Controller
 
         // Return paginated results with applied filters and transformations
         $logs = $query
-            ->paginate($request->has('perPage') ? $request->perPage : 10)
+            ->paginate($request->has('perPage') ? $request->perPage : 20)
             ->withQueryString()
             ->through(fn(Activity $item) => AuditLogResource::make($item));
 

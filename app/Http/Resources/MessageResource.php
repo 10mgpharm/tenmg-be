@@ -20,9 +20,10 @@ class MessageResource extends JsonResource
             'id' => $this->id,
             'message' => $this->message,
             'readStatus' => $this->read_status,
+            'readAt' => $this->read_at,
             'sentAt' => $this->created_at->diffForHumans(),
-            'sender' => $this->sender->only(['id', 'name']),
-            'receiver' => $this->receiver->only(['id', 'name']),
+            'sender' => $this->sender->only(['id', 'name', 'avatar']),
+            'receiver' => $this->receiver->only(['id', 'name', 'avatar']),
 
         ];
     }

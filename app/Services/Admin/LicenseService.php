@@ -78,13 +78,13 @@ class LicenseService implements ILicenseService
 
                 // Send a license acceptance notification
                 (new InAppNotificationService)
-                ->notify(InAppNotificationType::LICENSE_ACCEPTANCE);
+                ->forUser($user)->notify(InAppNotificationType::LICENSE_ACCEPTANCE);
             }else{
                 $user->sendLicenseVerificationNotification("Thank you for submitting your license for verification. Unfortunately, your request has been rejected due to the following reason(s):\n". $validated['license_verification_comment'], $user);
 
                 // Send a license rejection notification
                 (new InAppNotificationService)
-                ->notify(InAppNotificationType::LICENSE_REJECTION);
+                ->forUser($user)->notify(InAppNotificationType::LICENSE_REJECTION);
             }
 
             return $trans;

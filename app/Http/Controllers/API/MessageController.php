@@ -3,10 +3,12 @@
 namespace App\Http\Controllers\API;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\MarkAsReadMessageRequest;
 use App\Http\Requests\SendMessageRequest;
 use App\Http\Resources\MessageResource;
-use App\Http\Resources\UserResource;
+use App\Http\Resources\MessageUserResource;
 use App\Models\Conversation;
+use App\Models\Message;
 use App\Models\User;
 use App\Services\MessageService;
 use Illuminate\Http\Request;
@@ -70,6 +72,32 @@ class MessageController extends Controller
     }
 
     /**
+     * Receiver Mark message has read.
+     *
+     * Validates the request data, mark the message as read,
+     * and returns the updated message.
+     *
+     * @param  MarkAsReadMessageRequest $request  The validated request instance containing message details.
+     * @return JsonResponse  Returns a JSON response with the sent message details.
+     */
+    public function markAsRead(MarkAsReadMessageRequest $request, Message $message): JsonResponse
+    {
+    
+        $message = $this->messageService->markAsRead($message);
+
+        if (! $message) {
+            return $this->returnJsonResponse(
+                message: 'Oops, can\'t update message at the moment. Please try again later.'
+            );
+        }
+
+        return $this->returnJsonResponse(
+            message: 'Message updated successfully.',
+            data: new MessageResource($message)
+        );
+    }
+
+    /**
      * Retrieve messages in a specific conversation.
      *
      * This method fetches all messages exchanged within a given conversation,
@@ -104,7 +132,7 @@ class MessageController extends Controller
 
         $users = $query->paginate($request->get('perPage', 30))
         ->withQueryString()
-        ->through(fn(User $message) => new UserResource($message));
+        ->through(fn(User $message) => new MessageUserResource($message));
 
         return $this->returnJsonResponse(
             message: 'Conversable users successfully fetched.',

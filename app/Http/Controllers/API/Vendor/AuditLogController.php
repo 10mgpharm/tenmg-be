@@ -22,7 +22,7 @@ class AuditLogController extends Controller
         $user = $request->user();
         $business_id = $user->ownerBusinessType?->id ?? $user->businesses()->firstWhere('user_id', $user->id)?->id;
 
-        $query = Activity::where('properties->actor_business_id', $business_id)
+        $query = Activity::whereJsonContains('properties->actor_business_id', $business_id)
             ->when(
                 $request->input('event'),
                 fn($query, $vent) =>
