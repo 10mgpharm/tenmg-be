@@ -5,9 +5,12 @@ namespace App\Repositories;
 use App\Helpers\UtilityHelper;
 use App\Models\Business;
 use App\Models\CreditLendersWallet;
+use App\Models\CreditLenderTxnHistory;
 use App\Models\CreditOffer;
 use App\Models\DebitMandate;
+use App\Models\Loan;
 use App\Models\LoanApplication;
+use App\Models\RepaymentSchedule;
 use App\Models\User;
 use App\Services\NotificationService;
 use App\Services\OfferService;
@@ -37,7 +40,7 @@ class FincraMandateRepository
                     'email' => $request->customer->email,
                     'phone' => $request->customer->phone
                 ],
-                'amount' => $request->amount,
+                'amount' => $request->amount/$request->duration,
                 'description' => 'debit_mandate',
                 'startDate' => $request->startDate,
                 'endDate' => $request->endDate
@@ -376,6 +379,123 @@ class FincraMandateRepository
             $lendersBusinesses[$i]->owner->sendOrderConfirmationNotification($message, $user);
 
         }
+
+    }
+
+    public function debitCustomerMandate($applicationId)
+    {
+
+        $mandateData = DebitMandate::where('application_id', $applicationId)->first();
+
+        if(!$mandateData){
+            throw new \Exception("Mandate not found");
+        }
+
+        $curl = curl_init();
+
+        curl_setopt_array($curl, [
+        CURLOPT_URL => config('services.fincra.url')."/mandate-mgt/mandates/payment",
+        CURLOPT_RETURNTRANSFER => true,
+        CURLOPT_ENCODING => "",
+        CURLOPT_MAXREDIRS => 10,
+        CURLOPT_TIMEOUT => 30,
+        CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+        CURLOPT_CUSTOMREQUEST => "POST",
+        CURLOPT_POSTFIELDS => json_encode([
+            'currency' => 'NGN',
+            'amount' => $mandateData->amount,
+            'description' => $mandateData->description,
+            'mandateReference' => $mandateData->reference,
+            'reference' => $mandateData->identifier,
+            'bankCode' => $mandateData->customer_bank_code,
+            'accountNumber' => $mandateData->customer_account_number,
+            'initiatorAccountName' => $mandateData->customer_account_name,
+            'beneficiaryNarration' => $mandateData->description
+
+        ]),
+        CURLOPT_HTTPHEADER => [
+            "accept: application/json",
+            "content-type: application/json"
+        ],
+        ]);
+
+        $response = curl_exec($curl);
+        $err = curl_error($curl);
+        $statusCode = curl_getinfo($curl, CURLINFO_HTTP_CODE);
+
+        curl_close($curl);
+
+        if ($err) {
+            throw new \Exception($err);
+        } else {
+            if ($statusCode == 200) {
+                $data = json_decode($response);
+                $this->completeDirectDebitRequest($data);
+            }
+            $data = json_decode($response, true);
+
+            if($data['message'] == "no Route matched with those values"){
+                throw new \Exception("No response from Fincra");
+            }
+
+        }
+
+    }
+
+    public function completeDirectDebitRequest($data)
+    {
+
+        $mandateData = DebitMandate::where('application_id', $data->reference)->first();
+
+        if(!$mandateData){
+            throw new \Exception('Mandate not found');
+        }
+
+        //amount debited
+        $amount = $data->amount;
+        $status = $data->status;
+
+        //get the loan application id from the mandate
+        $applicationId = $mandateData->application_id;
+
+        //get loan id for the application
+        $loanId = Loan::where('application_id', $applicationId)->first()->id;
+
+        //get loan payment schedule
+        $paymentSchedule = RepaymentSchedule::where('loan_id', $loanId)->where('payment_status', 'PENDING')->first();
+
+        //Change the payment status to SUCCESS
+        $paymentSchedule->payment_status = $status;
+        $paymentSchedule->save();
+
+        if($status == "initiated"){
+            return "Debit mandate request is processing.";
+        }
+
+        //get lender business id from the loan offer
+        $lenderBusinessId = CreditOffer::where('application_id', $applicationId)->first()->lender_id;
+
+        //get the lender business for the loan
+        $lenderBusiness = Business::find($lenderBusinessId);
+
+        //get the lender business deposit wallet
+        $lenderBusinessDepositWallet = $lenderBusiness->lendersWallet;
+        $lenderBusinessDepositWallet->current_balance = $lenderBusinessDepositWallet->current_balance + $amount;
+        $lenderBusinessDepositWallet->save();
+
+        //Add to lender transaction history
+        $lenderTxnHistory = CreditLenderTxnHistory::create([
+            'amount' => $amount,
+            'type' => 'Loan Repayment',
+            'status' => 'success',
+            'lender_id' => $lenderBusinessId,
+            'transactionable_id' => $paymentSchedule->id,
+            'transactionable_type' => "App\Models\RepaymentSchedule",
+            'description' => 'Loan Repayment',
+            'payment_schedule_id' => $paymentSchedule->id,
+            'meta' => json_encode($data),
+        ]);
+
 
     }
 

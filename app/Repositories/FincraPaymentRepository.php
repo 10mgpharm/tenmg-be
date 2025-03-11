@@ -3,11 +3,15 @@
 namespace App\Repositories;
 
 use App\Helpers\UtilityHelper;
+use App\Models\Business;
 use App\Models\CreditLenderTxnHistory;
+use App\Models\CreditOffer;
 use App\Models\DebitMandate;
 use App\Models\EcommerceOrder;
 use App\Models\EcommercePayment;
 use App\Models\EcommerceShopingList;
+use App\Models\Loan;
+use App\Models\RepaymentSchedule;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -316,6 +320,8 @@ class FincraPaymentRepository
 
     }
 
+
+
     public function verifyFincraPaymentWebhook(Request $request)
     {
         $merchantWebhookSecretKey = config('services.fincra.secret');
@@ -340,6 +346,9 @@ class FincraPaymentRepository
                     break;
                 case 'mandate.approved':
                     $this->completeMandateSetup($data);
+                    break;
+                case 'direct_debit.success':
+                    $this->fincraMandateRepository->completeDirectDebitRequest($data->data);
                     break;
                 case 'charge.failed':
                     $this->failedPayment($data->data->merchantReference);

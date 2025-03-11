@@ -602,9 +602,9 @@ Route::prefix('v1')->group(function () {
                 ->middleware(['auth:api'])
                 ->name('client.applications.mandate.verify');
 
-            // Route::get('/mandate/verify-test/{applicationId}', [LoanApplicationController::class, 'completeLoadApplication'])
-            //     ->middleware(['auth:api'])
-            //     ->name('client.applications.mandate.verify-test');
+            Route::post('/mandate/debit-mandate-test/{applicationId}', [LoanApplicationController::class, 'debitCustomerMandate'])
+                ->middleware(['auth:api'])
+                ->name('client.applications.mandate.debit-mandate-test');
         });
     });
 });

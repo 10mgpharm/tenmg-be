@@ -289,7 +289,7 @@ class LoanApplicationRepository
                 $reference = 'mr_' . $uuid;
 
                 $mandateResponseInitResponse =  [
-                    'amount' => $totalRepayment,
+                    'amount' => (int)$totalRepayment/(int)$request->duration,
                     'description' => 'debit_mandate.',
                     'responseDescription' => 'Welcome to NIBSS e-mandate authentication service, a seamless and convenient authentication experience. Kindly proceed with a token payment of N50:00 into account number \"0008787867\" with GTBank. This payment will trigger the  authentication of your mandate. Thank You',
                     'startDate' => $loadStartDate,
@@ -323,7 +323,7 @@ class LoanApplicationRepository
                 'customer_id' => $request->customerId
             ],
             [
-                'amount' => $request->amount,
+                'amount' => (int)$request->amount/(int)$request->duration,
                 'application_id' => $request->loanAppId,
                 'description' => 'debit_mandate',
                 'start_date' => $mandate['startDate'],
