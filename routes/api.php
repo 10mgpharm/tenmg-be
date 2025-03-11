@@ -450,6 +450,12 @@ Route::prefix('v1')->group(function () {
                 Route::post('add-shopping-list', [ShoppingListController::class, 'addShoppingList']);
                 Route::delete('remove-item/{id}', [ShoppingListController::class, 'removeItemFromSHoppingList']);
             });
+
+            Route::prefix('loan-application')->name('loan-application.')->group(function () {
+                Route::get('/', [LoanApplicationController::class, 'index'])->name('admin.applications');
+                Route::get('/{reference}', [LoanApplicationController::class, 'getLoanApplicationByReference'])->name('admin.applications.getLoanApplicationByReference');
+
+            });
         });
 
         // STOREFRONTS specific routes
@@ -544,6 +550,7 @@ Route::prefix('v1')->group(function () {
 
             Route::prefix('loan-application')->name('loan-application.')->group(function () {
                 Route::get('/', [LoanApplicationController::class, 'getLoanApplicationLenders']);
+                Route::get('{reference}', [LoanApplicationController::class, 'getLoanApplicationByReference']);
                 Route::get('/loan-stats', [LoanApplicationController::class, 'getLoanApplicationStats']);
                 Route::post('/', [LoanApplicationController::class, 'approveLoanApplicationManually']);
             });
