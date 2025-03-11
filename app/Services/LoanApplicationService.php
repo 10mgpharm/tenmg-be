@@ -26,7 +26,8 @@ class LoanApplicationService
         private AuthService $authService,
         private NotificationService $notificationService,
         private RepaymentScheduleRepository $repaymentScheduleRepository,
-        private LoanRepository $loanRepository
+        private LoanRepository $loanRepository,
+        private ActivityLogService $activityLogService,
     ) {}
 
     // Create Loan Application
@@ -101,12 +102,23 @@ class LoanApplicationService
             $customer?->email => $customer?->name,
         ])->notify(new CustomerLoanApplicationNotification($link));
 
+
+        $this->activityLogService->logActivity(
+            logName: 'Loan application Initiated',
+            model: $customer,
+            causer: $user,
+            action: 'Loan application Initiated',
+            properties: ['description' => $customer->name." of ".$vendor->name." initiated mandate"]
+        );
+
         return $link;
     }
 
     // Submit Loan Application link
     public function generateExternalApplicationLink(Business $vendor, array $data)
     {
+
+
         $requestedAmount = $data['requestedAmount'];
         $customerData = array_key_exists('customer', $data) ? $data['customer'] : [];
 
@@ -185,6 +197,14 @@ class LoanApplicationService
         $link = config('app.frontend_url').'/widgets/applications/'.$application->identifier.'?token='.$token->accessToken;
 
         $customer = $application->customer;
+
+        $this->activityLogService->logActivity(
+            logName: 'Loan application Initiated',
+            model: $application,
+            causer: $user,
+            action: 'Loan application Initiated',
+            properties: ['description' => $customer->name." of ".$vendor->name." initiated mandate"]
+        );
 
         // notifation to customer here
         Notification::route('mail', [

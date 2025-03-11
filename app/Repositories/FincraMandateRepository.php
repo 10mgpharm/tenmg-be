@@ -12,6 +12,7 @@ use App\Models\Loan;
 use App\Models\LoanApplication;
 use App\Models\RepaymentSchedule;
 use App\Models\User;
+use App\Services\ActivityLogService;
 use App\Services\NotificationService;
 use App\Services\OfferService;
 use Carbon\Carbon;
@@ -21,7 +22,7 @@ use Illuminate\Support\Facades\DB;
 class FincraMandateRepository
 {
 
-    function __construct(private OfferRepository $offerRepository, private LoanRepository $loanRepository, private RepaymentScheduleRepository $repaymentScheduleRepository, private NotificationService $notificationService) {
+    function __construct(private OfferRepository $offerRepository, private LoanRepository $loanRepository, private RepaymentScheduleRepository $repaymentScheduleRepository, private NotificationService $notificationService, private ActivityLogService $activityLogService) {
 
     }
 
@@ -329,6 +330,16 @@ class FincraMandateRepository
         $lenderBusiness = Business::where('id', $offer->lender_id)->first();
         $user = User::where('id', $lenderBusiness->owner_id)->first();
         $lenderBusiness->owner->sendOrderConfirmationNotification($message, $user);
+
+        $customer = User::where('id', $loanApplication->customer_id)->first();
+
+        $this->activityLogService->logActivity(
+            logName: 'Loan application Initiated',
+            model: $lenderBusiness,
+            causer: $user,
+            action: 'Loan application Initiated',
+            properties: [$lenderBusiness->name." approved ".$customer->name."  of ".$vendorBusiness->name." loan application."]
+        );
 
         $this->createDisbursementRecord($loan, $offer->lender_id);
 
