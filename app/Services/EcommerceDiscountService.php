@@ -96,7 +96,7 @@ class EcommerceDiscountService implements IEcommerceDiscountService
                     AuditLogService::log(
                         target: $discount, // The discount is the target (it is being created)
                         event: 'create.discountcode',
-                        action: "Discount code created by $user->name",
+                        action: "Discount code created",
                         description: "{$user->name} created a discount code with the code: $discount->coupon_code",
                         crud_type: 'CREATE', // Use 'CREATE' for creation actions
                         properties: [
@@ -138,7 +138,7 @@ class EcommerceDiscountService implements IEcommerceDiscountService
                     AuditLogService::log(
                         target: $discount, // The discount is the target (it is being updated)
                         event: 'update.discountcode',
-                        action: "Discount code was updated by $user->name",
+                        action: "Discount code updated",
                         description: "{$user->name} updated a discount code with the code  $discount->coupon_code",
                         crud_type: 'CREATE', // Use 'CREATE' for creation actions
                         properties: [
