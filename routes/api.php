@@ -147,6 +147,7 @@ Route::prefix('v1')->group(function () {
             });
 
             Route::get('messages/start-conversation', [MessageController::class, 'startConversation']);
+            Route::match(['PUT', 'PATCH'],'messages/mark-as-read/{message}', [MessageController::class, 'markAsRead']);
             Route::apiResource('messages', MessageController::class);
             Route::post('/fcm-token', UpdateFcmTokenController::class);
         });
