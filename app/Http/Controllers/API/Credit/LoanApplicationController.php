@@ -200,4 +200,9 @@ class LoanApplicationController extends Controller
     {
         return $this->fincraMandateRepository->completeLoanApplication($applicationId);
     }
+
+    public function debitCustomerMandate($applicationId)
+    {
+        return $this->fincraMandateRepository->debitCustomerMandate($applicationId);
+    }
 }

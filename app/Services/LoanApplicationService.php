@@ -9,6 +9,7 @@ use App\Models\DebitMandate;
 use App\Models\LoanApplication;
 use App\Models\User;
 use App\Notifications\CustomerLoanApplicationNotification;
+use App\Repositories\FincraMandateRepository;
 use App\Repositories\LoanApplicationRepository;
 use App\Repositories\LoanRepository;
 use App\Repositories\RepaymentScheduleRepository;
@@ -25,7 +26,7 @@ class LoanApplicationService
         private AuthService $authService,
         private NotificationService $notificationService,
         private RepaymentScheduleRepository $repaymentScheduleRepository,
-        private LoanRepository $loanRepository,
+        private LoanRepository $loanRepository
     ) {}
 
     // Create Loan Application
