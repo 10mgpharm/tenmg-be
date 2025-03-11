@@ -182,7 +182,7 @@ class EcommerceProductService implements IEcommerceProductService
                 AuditLogService::log(
                     target: $product, // The product is the target (it is being created)
                     event: 'create.product',
-                    action: "Product created by $user->name",
+                    action: "Product created",
                     description: "{$user->name} created a product with the name '$product->name'",
                     crud_type: 'CREATE', // Use 'CREATE' for creation actions
                     properties: [
@@ -371,7 +371,7 @@ class EcommerceProductService implements IEcommerceProductService
                 AuditLogService::log(
                     target: $product, // The product is the target (it is being updated)
                     event: 'update.product',
-                    action: "Product updated by $user->name",
+                    action: "Product updated",
                     description: "{$user->name} updated a product with the name '$product->name'",
                     crud_type: 'UPDATE', // Use 'UPDATE' for update actions
                     properties: [
