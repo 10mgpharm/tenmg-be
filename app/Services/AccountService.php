@@ -47,7 +47,7 @@ class AccountService implements IAccountService
                     AuditLogService::log(
                         target: $user, // The user is the target (it is being updated)
                         event: 'update.user', // The event name
-                        action: "{$user->name} updated their profile",
+                        action: "Updated profile",
                         description: "{$user->name} updated their profile information",
                         crud_type: 'UPDATE',
                         properties: $data,

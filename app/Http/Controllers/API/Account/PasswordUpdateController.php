@@ -33,19 +33,20 @@ class PasswordUpdateController extends Controller
                     // Delete all tokens except the current one
                     $user->tokens()->where('id', '!=', $currentToken->id)->delete();
                 }
-            });
 
-            AuditLogService::log(
-                target: $$user, // The user is the target (it is being updated)
-                event: 'update.user',
-                action: "{$user->name} updated their password",
-                description: "$user->name updated their password and all other sessions were logged out",
-                crud_type: 'UPDATED', // Use 'UPDATE' for updating actions
-                properties: [
-                    'token_expires_at' => $currentToken->expires_at?->toDateTimeString(),
-                    'token_scope' => 'full',
-                ]
-            );
+                
+                AuditLogService::log(
+                    target: $$user, // The user is the target (it is being updated)
+                    event: 'update.user',
+                    action: "Update password",
+                    description: "$user->name updated their password and all other sessions were logged out",
+                    crud_type: 'UPDATED', // Use 'UPDATE' for updating actions
+                    properties: [
+                        'token_expires_at' => $currentToken->expires_at?->toDateTimeString(),
+                        'token_scope' => 'full',
+                    ]
+                );
+            });
         
 
             return $this->returnJsonResponse(

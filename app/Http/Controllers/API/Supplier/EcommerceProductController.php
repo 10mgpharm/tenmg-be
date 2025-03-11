@@ -133,7 +133,7 @@ class EcommerceProductController extends Controller
         AuditLogService::log(
             target: $product, // The product is the target (it is being deleted)
             event: 'delete.product',
-            action: "Product was deleted by {$request->user()->name}",
+            action: "Product deleted",
             description: "{$request->user()->name} deleted a product with the name $product->name",
             crud_type: 'DELETE', // Use 'DELETE' for deletion actions
             properties: [

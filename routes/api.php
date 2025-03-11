@@ -513,6 +513,7 @@ Route::prefix('v1')->group(function () {
                 Route::get('/cancel/{ref}', [OrdersController::class, 'cancelPayment']);
             });
 
+            Route::get('reviews/unreviewed', [EcommerceProductReviewController::class, 'unreviewed']);
             Route::apiResource('reviews', EcommerceProductReviewController::class);
             Route::apiResource('ratings', EcommerceProductRatingController::class);
         });

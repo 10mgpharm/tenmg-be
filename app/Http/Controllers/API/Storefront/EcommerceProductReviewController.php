@@ -8,6 +8,8 @@ use App\Http\Requests\Storefront\ShowEcommerceProductReviewRequest;
 use App\Http\Requests\Storefront\StoreEcommerceProductReviewRequest;
 use App\Http\Requests\Storefront\UpdateEcommerceProductReviewRequest;
 use App\Http\Resources\Storefront\EcommerceProductReviewResource;
+use App\Http\Resources\Storefront\EcommerceReviewProductResource;
+use App\Models\EcommerceProduct;
 use App\Models\EcommerceProductReview;
 use Illuminate\Http\Request;
 
@@ -32,6 +34,26 @@ class EcommerceProductReviewController extends Controller
         return $this->returnJsonResponse(
             message: 'Reviews successfully fetched.',
             data: $reviewed,
+        );
+    }
+
+    /**
+     * Display a listing of the resource.
+     */
+    public function unreviewed(Request $request)
+    {
+        $user = $request->user();
+
+        $unreviewed = EcommerceProduct::whereHas('orderDetails.order', fn ($query) =>
+            $query->where('customer_id', $user->id))
+        ->whereDoesntHave('reviews', fn ($query) => $query->where('user_id', $user->id))
+        ->paginate($request->has('perPage') ? $request->perPage : 20)
+        ->withQueryString()
+        ->through(fn(EcommerceProduct $item) => EcommerceReviewProductResource::make($item));
+
+        return $this->returnJsonResponse(
+            message: 'Unreviewed products successfully fetched.',
+            data: $unreviewed,
         );
     }
 
