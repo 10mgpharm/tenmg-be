@@ -2,6 +2,7 @@
 
 namespace App\Http\Resources;
 
+use App\Http\Resources\Admin\UserResource;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
@@ -19,9 +20,9 @@ class InviteResource extends JsonResource
             'fullName' => $this->full_name,
             'email' => $this->email,
             'status' => $this->status,
-            'role' => $this->role->name,
+            'role' => strtoupper($this->role->name),
             'createdAt' => $this->created_at->format('Y-m-d H:i:s'),
-            'user' => $this->user,
+            'user' => new UserResource($this->user),
         ];
     }
 }
