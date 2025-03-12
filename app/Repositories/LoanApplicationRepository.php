@@ -11,8 +11,10 @@ use App\Models\Business;
 use App\Models\CreditCustomerBank;
 use App\Models\CreditLendersWallet;
 use App\Models\CreditOffer;
+use App\Models\Customer;
 use App\Models\DebitMandate;
 use App\Models\LoanApplication;
+use App\Services\ActivityLogService;
 use App\Settings\CreditSettings;
 use Carbon\Carbon;
 use Exception;
@@ -22,7 +24,7 @@ use Illuminate\Support\Str;
 class LoanApplicationRepository
 {
 
-    function __construct(private FincraMandateRepository $fincraMandateRepository){
+    function __construct(private FincraMandateRepository $fincraMandateRepository, private ActivityLogService $activityLogService){
 
     }
 
@@ -340,6 +342,18 @@ class LoanApplicationRepository
                 'reference' => $mandate['reference'],
                 'currency' => 'NGN'
             ]
+        );
+
+        $customer = Customer::find($request->customerId);
+        $user = request()->user();
+        $business = Business::find($request->businessId);
+
+        $this->activityLogService->logActivity(
+            logName: 'Mandate Initiated',
+            model: $customer,
+            causer: $user,
+            action: 'Mandate Initiated',
+            properties: ['description' => $customer->name." of ".$business->name." initiated mandate"]
         );
 
     }
