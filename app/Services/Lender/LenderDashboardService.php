@@ -2,6 +2,7 @@
 
 namespace App\Services\Lender;
 
+use App\Models\CreditLenderTxnHistory;
 use App\Repositories\LenderDashboardRepository;
 use Illuminate\Http\Request;
 

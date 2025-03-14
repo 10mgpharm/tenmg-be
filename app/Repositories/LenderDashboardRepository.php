@@ -6,6 +6,7 @@ use App\Models\Business;
 use App\Models\CreditLendersWallet;
 use App\Models\CreditLenderTxnHistory;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 
 class LenderDashboardRepository
 {
@@ -59,6 +60,8 @@ class LenderDashboardRepository
 
         $transaction = CreditLenderTxnHistory::where('identifier', $merchantReference)->first();
 
+        Log::debug('completeWalletDeposit', $transaction);
+
         if ($transaction) {
             $transaction->status = 'success';
             $transaction->reference = $body->reference;
@@ -67,6 +70,7 @@ class LenderDashboardRepository
 
             //update the wallet balance
             $wallet = CreditLendersWallet::where('lender_id', $transaction->lender_id)->where('type', 'deposit')->first();
+            Log::debug('wallet', $wallet);
             $wallet->prev_balance = $wallet->current_balance;
             $wallet->current_balance += $transaction->amount;
             $wallet->last_transaction_ref = $body->reference;

@@ -7,7 +7,10 @@ use App\Models\Customer;
 use App\Models\LoanApplication;
 use App\Models\RepaymentSchedule;
 use App\Models\User;
+use App\Notifications\LoanSubmissionNotification;
 use App\Services\Interfaces\INotificationService;
+use Illuminate\Notifications\Messages\MailMessage;
+use Illuminate\Support\Facades\Lang;
 use Illuminate\Support\Facades\Mail;
 
 class NotificationService implements INotificationService
@@ -115,5 +118,27 @@ class NotificationService implements INotificationService
         // Send email or SMS
         // Mail::to($customer->email)->send(new LoanLiquidationMail($loan));
         // Admin notification logic here
+    }
+
+    public function sendLoanStatusCustomerNotification(int $customerId, string $subject, string $message)
+    {
+        $customer = Customer::findOrFail($customerId);
+        $email = $customer->email;
+
+        // $this->sendEmail([
+        //     'to' => $email,
+        //     'subject' => $subject,
+        //     'message' => $message,
+        // ]);
+
+        $mailMessage = (new MailMessage)
+            ->greeting('Hello '.$customer->name ?? "")
+            ->line(__($message))
+            // ->action('Click to Contnue', $this->link)
+            ->line('')
+            ->line('Best Regards,')
+            ->salutation(Lang::get('The '.  config('app.name') . ' Team'));
+
+        Mail::to($email)->queue(new LoanSubmissionNotification($subject, $mailMessage));
     }
 }

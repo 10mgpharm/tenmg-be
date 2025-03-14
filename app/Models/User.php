@@ -6,6 +6,7 @@ use App\Notifications\AdminVerificationNotification;
 use App\Notifications\Auth\ResetPasswordNotification;
 use App\Notifications\Auth\VerifyEmailNotification;
 use App\Notifications\LicenseVerificationNotification;
+use App\Notifications\LoanSubmissionNotification;
 use App\Notifications\Order\OrderConfirmationNotification;
 use Carbon\Carbon;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
@@ -210,6 +211,11 @@ class User extends Authenticatable implements MustVerifyEmail
     public function sendOrderConfirmationNotification($message, $user = null)
     {
         $this->notify(new OrderConfirmationNotification($message, $user));
+    }
+
+    public function sendLoanSubmissionNotification($message, $user = null)
+    {
+        $this->notify(new LoanSubmissionNotification($message, $user));
     }
 
     protected function getDefaultGuardName(): string
