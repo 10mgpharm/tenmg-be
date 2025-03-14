@@ -353,7 +353,7 @@ class LoanApplicationRepository
             model: $customer,
             causer: $user,
             action: 'Mandate Initiated',
-            properties: ['description' => $customer->name." of ".$business->name." initiated mandate"]
+            properties: [$customer->name." of ".$business->name." initiated mandate"]
         );
 
     }
