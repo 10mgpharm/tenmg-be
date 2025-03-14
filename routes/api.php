@@ -19,6 +19,8 @@ use App\Http\Controllers\API\Admin\EcommercePresentationController as AdminEcomm
 use App\Http\Controllers\API\Admin\EcommerceProductController as AdminEcommerceProductController;
 use App\Http\Controllers\API\Admin\FaqController;
 use App\Http\Controllers\API\Admin\MedicationTypeController as AdminMedicationTypeController;
+use App\Http\Controllers\API\Admin\ProductInsightsController as AdminProductInsightsController;
+use App\Http\Controllers\API\Supplier\ProductInsightsController as SupplierProductInsightsController;
 use App\Http\Controllers\API\Admin\UsersController;
 use App\Http\Controllers\API\Auth\AuthenticatedController;
 use App\Http\Controllers\API\Auth\PasswordController;
@@ -195,6 +197,9 @@ Route::prefix('v1')->group(function () {
                 Route::get('get-order-details/{id}', [SupplierEcommerceOrderController::class, 'getOrderDetailsSuppliers']);
                 Route::get('get-orders-status-count', [EcommerceOrderController::class, 'getOrderByStatusCount']);
             });
+
+            Route::get('insights/filters', [SupplierProductInsightsController::class, 'filters']);
+            Route::get('insights', [SupplierProductInsightsController::class, 'insights']);
         });
 
         // VENDOR specific routes
@@ -456,6 +461,8 @@ Route::prefix('v1')->group(function () {
                 Route::get('/{reference}', [LoanApplicationController::class, 'getLoanApplicationByReference'])->name('admin.applications.getLoanApplicationByReference');
 
             });
+            Route::get('insights/filters', [AdminProductInsightsController::class, 'filters']);
+            Route::get('insights', [AdminProductInsightsController::class, 'insights']);
         });
 
         // STOREFRONTS specific routes
