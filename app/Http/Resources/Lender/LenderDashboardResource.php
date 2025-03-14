@@ -2,6 +2,7 @@
 
 namespace App\Http\Resources\Lender;
 
+use App\Http\Resources\LoadApplicationResource;
 use App\Models\CreditOffer;
 use App\Models\LoanApplication;
 use Carbon\Carbon;
@@ -26,7 +27,7 @@ class LenderDashboardResource extends JsonResource
         $currentYear = Carbon::now()->year;
 
         // Get loan applications with status 'pending'
-        $loanRequests = LoanApplication::where('status', 'pending')->take(5)->get();
+        $loanRequests = LoanApplication::where('status', 'pending')->orderBy("created_at", 'DESC')->take(5)->get();
 
         // Get the total count of all pending loan requests
         $totalCount = LoanApplication::where('status', 'pending')->count();
@@ -40,7 +41,7 @@ class LenderDashboardResource extends JsonResource
             'name' => $this->name,
             'type' => $this->type,
             'wallets' => $this->allLendersWallet,
-            'loanRequest' => $loanRequests,
+            'loanRequest' => LoadApplicationResource::collection($loanRequests),
             'loanApprovalThisMonth' => $records->count(),
             'interestEarned' => 0,
             'pendingRequests' => $totalCount

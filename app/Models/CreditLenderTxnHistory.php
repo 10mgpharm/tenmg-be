@@ -10,6 +10,10 @@ class CreditLenderTxnHistory extends Model
 
     protected $guarded = [];
 
+    protected $casts = [
+        'meta' => 'array', // Cast the JSON column to an array
+    ];
+
     public function transactionable()
     {
         return $this->morphTo();
