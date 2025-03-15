@@ -318,7 +318,7 @@ class FincraMandateRepository
         //send notification to customer
         $subject = 'Loan Application Approved';
         $message = "Your credit has been paid you can proceed to confirm your order from the vendor ".$vendorBusiness->name;
-        $this->notificationService->sendCustomerNotification($loanApplication->customer_id, $subject, $message);
+        $this->notificationService->sendLoanStatusCustomerNotification($loanApplication->customer_id, $subject, $message);
 
         //send notification to vendor
         $user = User::where('id', $vendorBusiness->owner_id)->first();
