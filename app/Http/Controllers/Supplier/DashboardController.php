@@ -5,6 +5,10 @@ namespace App\Http\Controllers\Supplier;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Supplier\DashboardRequest;
 use App\Http\Resources\Supplier\DashboardResource;
+use App\Models\EcommerceOrder;
+use App\Models\EcommerceOrderDetail;
+use App\Models\EcommerceProduct;
+use Exception;
 use Illuminate\Http\JsonResponse;
 
 class DashboardController extends Controller
@@ -18,11 +22,88 @@ class DashboardController extends Controller
      */
     public function __invoke(DashboardRequest $request): JsonResponse
     {
-        $user = $request->user();
+        try {
+            $validated = $request->validated();
 
-        return $this->returnJsonResponse(
-            message: 'Dashboard successfully fetched.',
-            data: new DashboardResource($user),
-        );
+            $user = $request->user();
+            $business_id =  $user->ownerBusinessType?->id ?: $user->businesses()
+                ->firstWhere('user_id', $user->id)?->id;
+
+            // Get the current timestamp
+
+            // Determine the date range based on the filter value
+            $date_range = match ($validated['date_filter']) {
+                'one_week' => [now()->copy()->subWeek(), now()],
+                'two_weeks' => [now()->copy()->subWeeks(2), now()],
+                'one_month' => [now()->copy()->subMonth(), now()],
+                'three_months' => [now()->copy()->subMonths(3), now()],
+                'six_months' => [now()->copy()->subMonths(6), now()],
+                'one_year' => [now()->copy()->subYear(), now()],
+                default => [now()->copy()->startOfDay(), now()->copy()->endOfDay()],
+            };
+
+            $order_query = EcommerceOrder::whereHas('orderDetails', fn($query) => $query->whereHas('product', fn($query) => $query->where('business_id', $business_id)));
+            $product_query = EcommerceProduct::where('business_id', $business_id);
+            $revenue_query = EcommerceOrderDetail::query()->whereHas('product', fn($query) => $query->where('business_id', $business_id))
+                ->whereBetween('created_at', $date_range);
+
+            $analytics = [
+                'total_products' => $product_query->clone()->selectRaw('COUNT(*) as count')->first(),
+                'total_orders' => $order_query->clone()->selectRaw('COUNT(*) as count')->first(),
+                'completed_orders' => $order_query->clone()
+                    ->where('status', 'completed')
+                    ->selectRaw('COUNT(*) as count')->first(),
+                'revenue' => match (strtolower($validated['date_filter'])) {
+                    'today' => $revenue_query->selectRaw('
+                                SUM(CASE WHEN HOUR(created_at) BETWEEN 0 AND 6 THEN COALESCE(discount_price, actual_price) * quantity ELSE 0 END) as midnight_to_six_am,
+                                SUM(CASE WHEN HOUR(created_at) BETWEEN 6 AND 12 THEN COALESCE(discount_price, actual_price) * quantity ELSE 0 END) as six_am_to_twelve_pm,
+                                SUM(CASE WHEN HOUR(created_at) BETWEEN 12 AND 18 THEN COALESCE(discount_price, actual_price) * quantity ELSE 0 END) as twelve_pm_to_six_pm,
+                                SUM(CASE WHEN HOUR(created_at) BETWEEN 18 AND 24 THEN COALESCE(discount_price, actual_price) * quantity ELSE 0 END) as six_pm_to_midnight
+                            ')->first(),
+                    'one_week' => $revenue_query->selectRaw('
+                                SUM(CASE WHEN DAYNAME(created_at) = "Monday" THEN COALESCE(discount_price, actual_price) * quantity ELSE 0 END) as Monday,
+                                SUM(CASE WHEN DAYNAME(created_at) = "Tuesday" THEN COALESCE(discount_price, actual_price) * quantity ELSE 0 END) as Tuesday,
+                                SUM(CASE WHEN DAYNAME(created_at) = "Wednesday" THEN COALESCE(discount_price, actual_price) * quantity ELSE 0 END) as Wednesday,
+                                SUM(CASE WHEN DAYNAME(created_at) = "Thursday" THEN COALESCE(discount_price, actual_price) * quantity ELSE 0 END) as Thursday,
+                                SUM(CASE WHEN DAYNAME(created_at) = "Friday" THEN COALESCE(discount_price, actual_price) * quantity ELSE 0 END) as Friday,
+                                SUM(CASE WHEN DAYNAME(created_at) = "Saturday" THEN COALESCE(discount_price, actual_price) * quantity ELSE 0 END) as Saturday,
+                                SUM(CASE WHEN DAYNAME(created_at) = "Sunday" THEN COALESCE(discount_price, actual_price) * quantity ELSE 0 END) as Sunday
+                            ')->first(),
+                    'one_month' => $revenue_query->selectRaw('
+                                SUM(CASE WHEN WEEK(created_at) = WEEK(NOW()) THEN COALESCE(discount_price, actual_price) * quantity ELSE 0 END) as week_one,
+                                SUM(CASE WHEN WEEK(created_at) = WEEK(NOW()) - 1 THEN COALESCE(discount_price, actual_price) * quantity ELSE 0 END) as week_two,
+                                SUM(CASE WHEN WEEK(created_at) = WEEK(NOW()) - 2 THEN COALESCE(discount_price, actual_price) * quantity ELSE 0 END) as week_three,
+                                SUM(CASE WHEN WEEK(created_at) = WEEK(NOW()) - 3 THEN COALESCE(discount_price, actual_price) * quantity ELSE 0 END) as week_four
+                            ')->first(),
+                    'one_year' => $revenue_query->selectRaw('
+                                SUM(CASE WHEN MONTH(created_at) = 1 THEN COALESCE(discount_price, actual_price) * quantity ELSE 0 END) as January,
+                                SUM(CASE WHEN MONTH(created_at) = 2 THEN COALESCE(discount_price, actual_price) * quantity ELSE 0 END) as February,
+                                SUM(CASE WHEN MONTH(created_at) = 3 THEN COALESCE(discount_price, actual_price) * quantity ELSE 0 END) as March,
+                                SUM(CASE WHEN MONTH(created_at) = 4 THEN COALESCE(discount_price, actual_price) * quantity ELSE 0 END) as April,
+                                SUM(CASE WHEN MONTH(created_at) = 5 THEN COALESCE(discount_price, actual_price) * quantity ELSE 0 END) as May,
+                                SUM(CASE WHEN MONTH(created_at) = 6 THEN COALESCE(discount_price, actual_price) * quantity ELSE 0 END) as June,
+                                SUM(CASE WHEN MONTH(created_at) = 7 THEN COALESCE(discount_price, actual_price) * quantity ELSE 0 END) as July,
+                                SUM(CASE WHEN MONTH(created_at) = 8 THEN COALESCE(discount_price, actual_price) * quantity ELSE 0 END) as August,
+                                SUM(CASE WHEN MONTH(created_at) = 9 THEN COALESCE(discount_price, actual_price) * quantity ELSE 0 END) as September,
+                                SUM(CASE WHEN MONTH(created_at) = 10 THEN COALESCE(discount_price, actual_price) * quantity ELSE 0 END) as October,
+                                SUM(CASE WHEN MONTH(created_at) = 11 THEN COALESCE(discount_price, actual_price) * quantity ELSE 0 END) as November,
+                                SUM(CASE WHEN MONTH(created_at) = 12 THEN COALESCE(discount_price, actual_price) * quantity ELSE 0 END) as December
+                            ')->first(),
+                    default => [],
+                },
+                'stock_status' =>  $product_query->clone()->selectRaw('
+                    SUM(CASE WHEN quantity > 0 THEN 1 ELSE 0 END) as in_stock,
+                    SUM(CASE WHEN quantity <= low_stock_level THEN 1 ELSE 0 END) as low_stock,
+                    SUM(CASE WHEN quantity = 0 THEN 1 ELSE 0 END) as out_of_stock
+                ')->first()
+            ];
+
+            return $this->returnJsonResponse(
+                message: 'Dashboard successfully fetched.',
+                data: new DashboardResource($analytics),
+            );
+        } catch (Exception $e) {
+            throw new Exception('Failed to fetch analytics: ' . $e->getMessage());
+        }
     }
 }
