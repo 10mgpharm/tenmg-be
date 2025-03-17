@@ -320,8 +320,6 @@ class FincraPaymentRepository
 
     }
 
-
-
     public function verifyFincraPaymentWebhook(Request $request)
     {
         $merchantWebhookSecretKey = config('services.fincra.secret');

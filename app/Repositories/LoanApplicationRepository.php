@@ -15,6 +15,7 @@ use App\Models\Customer;
 use App\Models\DebitMandate;
 use App\Models\LoanApplication;
 use App\Services\ActivityLogService;
+use App\Services\AuditLogService;
 use App\Settings\CreditSettings;
 use Carbon\Carbon;
 use Exception;
@@ -348,12 +349,13 @@ class LoanApplicationRepository
         $user = request()->user();
         $business = Business::find($request->businessId);
 
-        $this->activityLogService->logActivity(
-            logName: 'Mandate Initiated',
-            model: $customer,
-            causer: $user,
+        AuditLogService::log(
+            target: $debitMandate,
+            event: 'create.mandate',
             action: 'Mandate Initiated',
-            properties: [$customer->name." of ".$business->name." initiated mandate"]
+            description: $customer->name." of ".$business->name." initiated mandate",
+            crud_type: 'CREATE',
+            properties: []
         );
 
     }

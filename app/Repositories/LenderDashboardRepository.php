@@ -58,6 +58,8 @@ class LenderDashboardRepository
         $body = $data->data;
         $merchantReference = $body->merchantReference;
 
+        Log::debug('fincra response', $body);
+
         $transaction = CreditLenderTxnHistory::where('identifier', $merchantReference)->first();
 
         Log::debug('completeWalletDeposit', $transaction);

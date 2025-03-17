@@ -27,7 +27,6 @@ class LoanApplicationService
         private NotificationService $notificationService,
         private RepaymentScheduleRepository $repaymentScheduleRepository,
         private LoanRepository $loanRepository,
-        private ActivityLogService $activityLogService,
     ) {}
 
     // Create Loan Application
@@ -102,13 +101,13 @@ class LoanApplicationService
             $customer?->email => $customer?->name,
         ])->notify(new CustomerLoanApplicationNotification($link));
 
-
-        $this->activityLogService->logActivity(
-            logName: 'Loan application Initiated',
-            model: $customer,
-            causer: $user,
-            action: 'Loan application Initiated',
-            properties: ['description' => $customer->name." of ".$vendor->name." initiated mandate"]
+        AuditLogService::log(
+            target: $application, // The discount is the target (it is being created)
+            event: 'create.loan-application',
+            action: "Loan link generated",
+            description: "{$vendor->name} generated loan application link for $customer->name",
+            crud_type: 'CREATE', // Use 'CREATE' for creation actions
+            properties: []
         );
 
         return $link;
@@ -198,12 +197,13 @@ class LoanApplicationService
 
         $customer = $application->customer;
 
-        $this->activityLogService->logActivity(
-            logName: 'Loan application Initiated',
-            model: $application,
-            causer: $user,
-            action: 'Loan application Initiated',
-            properties: ['description' => $customer->name." of ".$vendor->name." initiated mandate"]
+        AuditLogService::log(
+            target: $application, // The discount is the target (it is being created)
+            event: 'create.loan-application',
+            action: "Loan link generated",
+            description: "{$vendor->name} generated loan application link for $customer->name",
+            crud_type: 'CREATE', // Use 'CREATE' for creation actions
+            properties: []
         );
 
         // notifation to customer here

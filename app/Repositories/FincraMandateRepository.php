@@ -13,6 +13,7 @@ use App\Models\LoanApplication;
 use App\Models\RepaymentSchedule;
 use App\Models\User;
 use App\Services\ActivityLogService;
+use App\Services\AuditLogService;
 use App\Services\NotificationService;
 use App\Services\OfferService;
 use Carbon\Carbon;
@@ -22,7 +23,7 @@ use Illuminate\Support\Facades\DB;
 class FincraMandateRepository
 {
 
-    function __construct(private OfferRepository $offerRepository, private LoanRepository $loanRepository, private RepaymentScheduleRepository $repaymentScheduleRepository, private NotificationService $notificationService, private ActivityLogService $activityLogService) {
+    function __construct(private OfferRepository $offerRepository, private LoanRepository $loanRepository, private RepaymentScheduleRepository $repaymentScheduleRepository, private NotificationService $notificationService) {
 
     }
 
@@ -333,12 +334,13 @@ class FincraMandateRepository
 
         $customer = User::where('id', $loanApplication->customer_id)->first();
 
-        $this->activityLogService->logActivity(
-            logName: 'Loan application Initiated',
-            model: $lenderBusiness,
-            causer: $user,
+        AuditLogService::log(
+            target: $loanApplication,
+            event: 'Loan.initiated',
             action: 'Loan application Initiated',
-            properties: [$lenderBusiness->name." approved ".$customer->name."  of ".$vendorBusiness->name." loan application."]
+            description: $lenderBusiness->name." approved ".$customer->name."  of ".$vendorBusiness->name." loan application.",
+            crud_type: 'UPDATE',
+            properties: []
         );
 
         $this->createDisbursementRecord($loan, $offer->lender_id);
