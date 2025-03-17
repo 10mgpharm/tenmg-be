@@ -254,7 +254,7 @@ class User extends Authenticatable implements MustVerifyEmail
      */
     public function invited()
     {
-        return $this->belongsTo(Invite::class, 'user_id');
+        return $this->belongsTo(Invite::class, 'id', 'user_id');
     }
 
     /**

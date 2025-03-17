@@ -14,13 +14,15 @@ class DashboardResource extends JsonResource
      */
     public function toArray(Request $request): array
     {
+        $user = $request->user();
         return [
             'completeProfile' => (bool) (
-                $this->ownerBusinessType &&
-                $this->ownerBusinessType?->contact_person &&
-                $this->ownerBusinessType?->contact_phone &&
-                $this->ownerBusinessType?->contact_email
+                $user->ownerBusinessType &&
+                $user->ownerBusinessType?->contact_person &&
+                $user->ownerBusinessType?->contact_phone &&
+                $user->ownerBusinessType?->contact_email
             ),
+            'analytics' => $this->resource,
         ];
     }
 }
