@@ -65,6 +65,15 @@ class EcommerceDiscount extends Model
         'all_products' => false,
     ];
 
+    protected static function booted()
+    {
+        static::retrieved(function ($model) {
+            if ($model->end_date < now() && $model->status === 'ACTIVE') {
+                $model->updateQuietly(['status' => 'INACTIVE']);
+            }
+        });
+    }
+
     /**
      * Get the user that created the resource.
      */
