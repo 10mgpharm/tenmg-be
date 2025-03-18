@@ -556,10 +556,10 @@ Route::prefix('v1')->group(function () {
                 Route::patch('update-auto-accept-status', [LoanPreferenceController::class, 'updateAutoAcceptStatus']);
             });
 
-            Route::prefix('loan-application')->name('loan-application.')->group(function () {
+            Route::prefix('loan-applications')->name('loan-applications.')->group(function () {
                 Route::get('/', [LoanApplicationController::class, 'getLoanApplicationLenders']);
-                Route::get('{reference}', [LoanApplicationController::class, 'getLoanApplicationByReference']);
                 Route::get('/loan-stats', [LoanApplicationController::class, 'getLoanApplicationStats']);
+                Route::get('/view/{reference}', [LoanApplicationController::class, 'getLoanApplicationByReference']);
                 Route::post('/', [LoanApplicationController::class, 'approveLoanApplicationManually']);
             });
 
