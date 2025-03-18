@@ -9,6 +9,8 @@ use App\Notifications\NewMessageNotification;
 use App\Notifications\LicenseUploadNotification;
 use App\Notifications\LicenseRejectNotification;
 use App\Notifications\LicenseAcceptanceNotification;
+use App\Notifications\Loan\LoanApprovedNotification;
+use App\Notifications\Loan\NewLoanRequestNotification;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\Notification;
 
@@ -70,6 +72,8 @@ class InAppNotificationService
             InAppNotificationType::ADMIN_LICENSE_UPLOAD => new LicenseUploadNotification($subject, $message),
             InAppNotificationType::LICENSE_REJECTION => new LicenseRejectNotification($subject, $message),
             InAppNotificationType::LICENSE_ACCEPTANCE => new LicenseAcceptanceNotification($subject, $message),
+            InAppNotificationType::NEW_LOAN_REQUEST => new NewLoanRequestNotification($subject, $message),
+            InAppNotificationType::LOAN_REQUEST_APPROVED => new LoanApprovedNotification($subject, $message),
             default => throw new \InvalidArgumentException("Unsupported notification type: {$type->value}"),
         };
 
