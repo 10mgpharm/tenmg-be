@@ -2,23 +2,30 @@
 
 namespace App\Repositories;
 
+use App\Enums\InAppNotificationType;
 use App\Helpers\UtilityHelper;
 use App\Models\Business;
 use App\Models\CreditLendersWallet;
 use App\Models\CreditLenderTxnHistory;
 use App\Models\CreditOffer;
+use App\Models\Customer;
 use App\Models\DebitMandate;
 use App\Models\Loan;
 use App\Models\LoanApplication;
 use App\Models\RepaymentSchedule;
 use App\Models\User;
+use App\Notifications\Loan\LoanSubmissionNotification;
 use App\Services\ActivityLogService;
 use App\Services\AuditLogService;
+use App\Services\InAppNotificationService;
 use App\Services\NotificationService;
 use App\Services\OfferService;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Notification;
 
 class FincraMandateRepository
 {
@@ -215,6 +222,73 @@ class FincraMandateRepository
             $query->whereRaw('JSON_CONTAINS(credit_score_category, ?)', [json_encode($customerCategory)])->whereRaw('JSON_CONTAINS(loan_tenure, ?)', [$loanDuration]);
         })->get();
 
+        //send notification to customer
+        $subject = 'Your Credit Application Has Been Submitted';
+        $message = "We have received your credit application and are currently reviewing it. You will be notified once a decision has been made.";
+        $mailable = (new MailMessage)
+            ->greeting('Hello '.$loanApplication->customer->name)
+            ->subject($subject)
+            ->line($message)
+            ->line("Application ID: $loanApplication->identifier")
+            ->line("Requested Amount: $amount")
+            ->line("Submission Date: ".Carbon::now()->format('F jS, Y'))
+            ->line("Thank you for choosing 10MG Credit.");
+            $mailable->line('Best Regards,');
+            $mailable->line('The 10MG Health Team');
+
+        // notifation to customer here
+        Notification::route('mail', [
+            $loanApplication->customer->email => $loanApplication->customer->name,
+        ])->notify(new LoanSubmissionNotification($mailable));
+
+        //send notification to vendor
+        $subject = 'Customer Applied for a Loan';
+        $message = "Your customer, ".$loanApplication->customer->name.", has applied for a loan through 10MG Credit. Below are the details:";
+        $vendorBusiness = Business::where('id', $loanApplication->business_id)->first();
+
+        $mailable = (new MailMessage)
+            ->greeting('Hello '.$vendorBusiness->owner->name)
+            ->subject($subject)
+            ->line($message)
+            ->line("Customer Name: ".$loanApplication->customer->name)
+            ->line("Application ID: $loanApplication->identifier")
+            ->line("Requested Amount: $amount")
+            ->line("Submission Date: ".Carbon::now()->format('F jS, Y'))
+            ->line("We will notify you once the application is reviewed.");
+            $mailable->line('Best Regards,');
+            $mailable->line('The 10MG Health Team');
+
+        // notifation to customer here
+        Notification::route('mail', [
+            $vendorBusiness->owner->email => $vendorBusiness->owner->name,
+        ])->notify(new LoanSubmissionNotification($mailable));
+
+        //send notification to admin
+        $admins = User::role('admin')->get();
+        for ($i=0; $i < count($admins); $i++) {
+            $subject = 'New Loan Request Submitted';
+            $message = "A new loan request has been submitted. Below are the details:";
+            $mailable = (new MailMessage)
+                ->greeting('Hello '.$admins[$i]->name)
+                ->subject($subject)
+                ->line($message)
+                ->line("Customer Name: ".$loanApplication->customer->name)
+                ->line("Vendor: ".$vendorBusiness->owner->name)
+                ->line("Application ID: $loanApplication->identifier")
+                ->line("Requested Amount: $amount")
+                ->line("Submission Date: ".Carbon::now()->format('F jS, Y'))
+                ->line('Best Regards,')
+                ->line('The 10MG Health Team');
+
+            Notification::route('mail', [
+                $admins[$i]->email => $admins[$i]->name,
+            ])->notify(new LoanSubmissionNotification($mailable));
+
+            (new InAppNotificationService)
+                ->forUser($admins[$i])->notify(InAppNotificationType::NEW_LOAN_REQUEST);
+        }
+
+
         if ($lendersBusinesses->isEmpty()) {
             $this->sendMailToLendersManualApproval($loanApplication);
             return;
@@ -301,9 +375,12 @@ class FincraMandateRepository
             'application_id' => $loanApplication->id,
         ], $loanData);
 
+        $scheduleForMail = [];
+        $initTerm = 1;
+
         // Generate repayment schedules
         foreach ($repaymentBreakdown as $schedule) {
-            $this->repaymentScheduleRepository->store([
+            $res = $this->repaymentScheduleRepository->store([
                 'loan_id' => $loan->id,
                 'total_amount' => $schedule['totalPayment'],
                 'principal' => $schedule['principal'],
@@ -312,36 +389,13 @@ class FincraMandateRepository
                 'due_date' => Carbon::parse($schedule['month'])->endOfMonth(),
                 'payment_status' => 'PENDING',
             ]);
+            $scheduleForMail[] = "Repayment $initTerm: $res->total_amount - ".Carbon::parse($res->due_date)->format('F jS, Y');
+            $initTerm++;
         }
 
-        $vendorBusiness = Business::where('id', $loan->business_id)->first();
 
-        //send notification to customer
-        $subject = 'Loan Application Approved';
-        $message = "Your credit has been paid you can proceed to confirm your order from the vendor ".$vendorBusiness->name;
-        $this->notificationService->sendLoanStatusCustomerNotification($loanApplication->customer_id, $subject, $message);
+        $this->sendLoanApprovalProcess($loanApplication, $offer, $loan, $scheduleForMail);
 
-        //send notification to vendor
-        $user = User::where('id', $vendorBusiness->owner_id)->first();
-        $message = "Your customer".$loanApplication->customer->name." has been approved you can proceed to confirm the order from the customer";
-        $vendorBusiness->owner->sendOrderConfirmationNotification($message, $user);
-
-        //send notification to lender
-        $message = "A loan request has been approved and disbursed to a customer. You can view the loan details on your dashboard";
-        $lenderBusiness = Business::where('id', $offer->lender_id)->first();
-        $user = User::where('id', $lenderBusiness->owner_id)->first();
-        $lenderBusiness->owner->sendOrderConfirmationNotification($message, $user);
-
-        $customer = User::where('id', $loanApplication->customer_id)->first();
-
-        AuditLogService::log(
-            target: $loanApplication,
-            event: 'Loan.initiated',
-            action: 'Loan application Initiated',
-            description: $lenderBusiness->name." approved ".$customer->name."  of ".$vendorBusiness->name." loan application.",
-            crud_type: 'UPDATE',
-            properties: []
-        );
 
         $this->createDisbursementRecord($loan, $offer->lender_id);
 
@@ -389,7 +443,23 @@ class FincraMandateRepository
 
             $message = "A loan request has been made by a customer. You can proceed to approve the loan request from your dashboard";
             $user = User::where('id', $lendersBusinesses[$i]->owner_id)->first();
-            $lendersBusinesses[$i]->owner->sendOrderConfirmationNotification($message, $user);
+            $subject = 'Customer Applied for a Loan';
+            // $vendorBusiness = Business::where('id', $loanApplication->business_id)->first();
+            $mailable = (new MailMessage)
+                ->greeting('Hello '.$lendersBusinesses[$i]->owner->name)
+                ->subject($subject)
+                ->line($message)
+                ->line("Customer Name: ".$loanApplication->customer->name)
+                ->line("Application ID: $loanApplication->identifier")
+                ->line("Requested Amount: $amount")
+                ->line("Submission Date: ".Carbon::now()->format('F jS, Y'))
+                ->line("We will notify you once the application is reviewed.");
+                $mailable->line('Best Regards,');
+                $mailable->line('The 10MG Health Team');
+
+            Notification::route('mail', [
+                $user->email => $user->name,
+            ])->notify(new LoanSubmissionNotification($mailable));
 
         }
 
@@ -509,6 +579,124 @@ class FincraMandateRepository
             'meta' => json_encode($data),
         ]);
 
+
+    }
+
+    public function sendLoanApprovalProcess($loanApplication, $offer, $loan, $scheduleForMail)
+    {
+
+        $vendorBusiness = Business::where('id', $loan->business_id)->first();
+
+        Log::info("info", $scheduleForMail);
+
+        //send notification to customer
+        $subject = 'Your Loan Has Been Approved!';
+        $message = "Good news! Your loan application has been approved. Below are the details:";
+        $mailable = (new MailMessage)
+            ->greeting('Hello '.$loanApplication->customer->name)
+            ->subject($subject)
+            ->line($message)
+            ->line("Loan ID: $loanApplication->identifier")
+            ->line("Approved Amount: $loan->total_amount")
+            ->line("Below is the repayment Schedule:");
+
+            for ($i = 0; $i < count($scheduleForMail); $i++) {
+                $mailable->line($scheduleForMail[$i]);
+            }
+            $mailable->line('Best Regards,');
+            $mailable->line('The 10MG Health Team');
+
+        // notifation to customer here
+        Notification::route('mail', [
+            $loanApplication->customer->email => $loanApplication->customer->name,
+        ])->notify(new LoanSubmissionNotification($mailable));
+
+        //send notification to vendor
+        $subject = 'Loan Approved for Your Customer';
+        $user = User::where('id', $vendorBusiness->owner_id)->first();
+        $message = "We are pleased to inform you that your customer, ".$loanApplication->customer->name." has been approved for a loan. Below are the details:";
+
+        $mailable = (new MailMessage)
+            ->greeting('Hello '.$user->name)
+            ->subject($subject)
+            ->line($message)
+            ->line("Loan ID: $loanApplication->identifier")
+            ->line("Approved Amount: $loan->total_amount")
+            ->line("Below is the repayment Schedule:");
+
+            for ($i = 0; $i < count($scheduleForMail); $i++) {
+                $mailable->line($scheduleForMail[$i]);
+            }
+            $mailable->line('The customer is now eligible to complete their purchase.');
+            $mailable->line('Best Regards,');
+            $mailable->line('The 10MG Health Team');
+
+        Notification::route('mail', [
+            $user->email => $user->name,
+        ])->notify(new LoanSubmissionNotification($mailable));
+
+        //send notification to lender
+        $subject = 'Loan Request Approved';
+        $message = "A loan request assigned to you has been automatically approved based on the configured settings. Below are the details:";
+        $lenderBusiness = Business::where('id', $offer->lender_id)->first();
+        $user = User::where('id', $lenderBusiness->owner_id)->first();
+        $mailable = (new MailMessage)
+            ->greeting('Hello '.$user->name)
+            ->subject($subject)
+            ->line($message)
+            ->line("Customer Name: ".$loanApplication->customer->name)
+            ->line("Vendor: ".$vendorBusiness->owner->name)
+            ->line("Loan ID: $loanApplication->identifier")
+            ->line("Approved Amount: $loan->total_amount");
+            for ($i = 0; $i < count($scheduleForMail); $i++) {
+                $mailable->line($scheduleForMail[$i]);
+            }
+            $mailable->line("Approval Date: ".Carbon::now()->format('F jS, Y'));
+            $mailable->line('Best Regards,');
+            $mailable->line('The 10MG Health Team');
+
+        Notification::route('mail', [
+            $user->email => $user->name,
+        ])->notify(new LoanSubmissionNotification($mailable));
+
+
+        //send mails to all admins
+        //get users with role admin
+        $admins = User::role('admin')->get();
+        for ($i=0; $i < count($admins); $i++) {
+            $subject = 'Lender Approved Customer Credit';
+            $message = "A loan application has been approved for a customer. Below are the details:";
+            $mailable = (new MailMessage)
+                ->greeting('Hello '.$admins[$i]->name)
+                ->subject($subject)
+                ->line($message)
+                ->line("Customer Name: ".$loanApplication->customer->name)
+                ->line("Vendor: ".$vendorBusiness->owner->name)
+                ->line("Loan ID: $loanApplication->identifier")
+                ->line("Approved Amount: $loan->total_amount")
+                ->line("Lender: ".$lenderBusiness->owner->name)
+                ->line("Approval Date: ".Carbon::now()->format('F jS, Y'))
+                ->line('Best Regards,')
+                ->line('The 10MG Health Team');
+
+            Notification::route('mail', [
+                $admins[$i]->email => $admins[$i]->name,
+            ])->notify(new LoanSubmissionNotification($mailable));
+
+            (new InAppNotificationService)
+                ->forUser($admins[$i])->notify(InAppNotificationType::LOAN_REQUEST_APPROVED);
+        }
+
+        $customer = Customer::where('id', $loanApplication->customer_id)->first();
+
+        AuditLogService::log(
+            target: $loanApplication,
+            event: 'Loan.initiated',
+            action: 'Loan application Initiated',
+            description: $lenderBusiness->name." approved ".$customer->name."  of ".$vendorBusiness->name." loan application.",
+            crud_type: 'UPDATE',
+            properties: []
+        );
 
     }
 

@@ -7,7 +7,7 @@ use App\Models\Customer;
 use App\Models\LoanApplication;
 use App\Models\RepaymentSchedule;
 use App\Models\User;
-use App\Notifications\LoanSubmissionNotification;
+use App\Notifications\Loan\LoanSubmissionNotification;
 use App\Services\Interfaces\INotificationService;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Support\Facades\Lang;
@@ -131,14 +131,15 @@ class NotificationService implements INotificationService
         //     'message' => $message,
         // ]);
 
-        $mailMessage = (new MailMessage)
-            ->greeting('Hello '.$customer->name ?? "")
-            ->line(__($message))
-            // ->action('Click to Contnue', $this->link)
-            ->line('')
-            ->line('Best Regards,')
-            ->salutation(Lang::get('The '.  config('app.name') . ' Team'));
 
-        Mail::to($email)->queue(new LoanSubmissionNotification($subject, $mailMessage));
+        // $mailMessage = (new MailMessage)
+        //     ->greeting('Hello '.$customer->name ?? "")
+        //     ->line($message)
+        //     // ->action('Click to Contnue', $this->link)
+        //     ->line('')
+        //     ->line('Best Regards,')
+        //     ->salutation(Lang::get('The '.  config('app.name') . ' Team'));
+
+        // Mail::to($email)->queue(new LoanSubmissionNotification($subject, $mailMessage));
     }
 }

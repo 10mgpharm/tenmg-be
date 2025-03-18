@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Notifications;
+namespace App\Notifications\Loan;
 
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -10,21 +10,45 @@ use Illuminate\Notifications\Notification;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\Lang;
 
-class LoanSubmissionNotification extends Mailable implements ShouldQueue
+class LoanSubmissionNotification extends Notification implements ShouldQueue
 {
     use Queueable, SerializesModels;
 
     /**
      * Create a new notification instance.
      */
-    public function __construct(public string $subject, public $mailMessage)
+    public function __construct(public MailMessage $mailMessage)
     {
         //
     }
 
-    public function build()
+    /**
+     * Get the notification's delivery channels.
+     *
+     * @return array<int, string>
+     */
+    public function via(object $notifiable): array
     {
-        return $this->subject($this->subject)
-                    ->with(['mailMessage' => $this->mailMessage]);
+        return ['mail'];
+    }
+
+    /**
+     * Get the mail representation of the notification.
+     */
+    public function toMail(object $notifiable): MailMessage
+    {
+        return $this->mailMessage;
+    }
+
+    /**
+     * Get the array representation of the notification.
+     *
+     * @return array<string, mixed>
+     */
+    public function toArray(object $notifiable): array
+    {
+        return [
+            //
+        ];
     }
 }

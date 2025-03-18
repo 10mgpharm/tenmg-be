@@ -9,6 +9,8 @@ enum InAppNotificationType: string
     case ADMIN_LICENSE_UPLOAD = 'admin_license_upload';
     case LICENSE_REJECTION = 'license_rejection';
     case LICENSE_ACCEPTANCE = 'license_acceptance';
+    case NEW_LOAN_REQUEST = 'New_loan_request';
+    case LOAN_REQUEST_APPROVED = 'loan_request_approved';
 
     /**
      * Get the subject for the notification type.
@@ -21,6 +23,8 @@ enum InAppNotificationType: string
             self::ADMIN_LICENSE_UPLOAD => 'License Verification Submitted - Awaiting Review',
             self::LICENSE_REJECTION => 'License Verification Rejected',
             self::LICENSE_ACCEPTANCE => 'License Verification Approved',
+            self::NEW_LOAN_REQUEST => 'New Loan Request',
+            self::LOAN_REQUEST_APPROVED => 'Loan Request Approved',
         };
     }
 
@@ -42,6 +46,8 @@ enum InAppNotificationType: string
             self::ADMIN_LICENSE_UPLOAD => "A $role has submitted their license for verification, and it is now awaiting review.",
             self::LICENSE_REJECTION => "Thank you for submitting your license for verification. Unfortunately, your request has been rejected.",
             self::LICENSE_ACCEPTANCE => "Great news! Your license has been successfully approved, and you now have full access to all features of " . config('app.name'),
+            self::NEW_LOAN_REQUEST => 'A new loan request was submitted.',
+            self::LOAN_REQUEST_APPROVED => 'Customer loan request has been approved.',
         };
     }
 
