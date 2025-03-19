@@ -56,7 +56,10 @@ use App\Http\Controllers\API\Storefront\ShippingAddressController as StorefrontS
 use App\Http\Controllers\API\Storefront\ShoppingListController;
 use App\Http\Controllers\API\Storefront\StorefrontController;
 use App\Http\Controllers\API\Storefront\WishListController;
+use App\Http\Controllers\API\Supplier\AddBankAccountController;
 use App\Http\Controllers\API\Supplier\EcommerceProductController as SupplierEcommerceProductController;
+use App\Http\Controllers\API\Supplier\EcommerceTransactionController;
+use App\Http\Controllers\API\Supplier\EcommerceWalletController;
 use App\Http\Controllers\API\Vendor\AuditLogController as VendorAuditLogController;
 use App\Http\Controllers\API\Vendor\UsersController as VendorUsersController;
 use App\Http\Controllers\API\Webhooks\PaystackWebhookController;
@@ -200,6 +203,10 @@ Route::prefix('v1')->group(function () {
 
             Route::get('insights/filters', [SupplierProductInsightsController::class, 'filters']);
             Route::get('insights', [SupplierProductInsightsController::class, 'insights']);
+
+            Route::get('wallet', EcommerceWalletController::class);
+            Route::get('wallet/transactions', EcommerceTransactionController::class);
+            Route::post('wallet/add-bank-account', AddBankAccountController::class);
         });
 
         // VENDOR specific routes
