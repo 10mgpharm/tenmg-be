@@ -36,7 +36,7 @@ class EcommerceBankAccount extends Model
      * @var array
      */
     protected $attributes = [
-        'active' => 'active',
+        'active' => 1,
     ];
 
     /**
