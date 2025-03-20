@@ -5,7 +5,6 @@ namespace App\Http\Controllers\API\Lender;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\Lender\LenderDashboardResource;
 use App\Models\Business;
-use App\Models\CreditLenderTxnHistory;
 use App\Services\Lender\LenderDashboardService;
 use Illuminate\Http\Request;
 
