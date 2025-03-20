@@ -4,8 +4,8 @@ namespace App\Repositories;
 
 use App\Helpers\UtilityHelper;
 use App\Models\Business;
-use App\Models\CreditLenderTxnHistory;
 use App\Models\CreditOffer;
+use App\Models\CreditTransactionHistory;
 use App\Models\DebitMandate;
 use App\Models\EcommerceOrder;
 use App\Models\EcommercePayment;
@@ -136,10 +136,10 @@ class FincraPaymentRepository
                 throw new \Exception('Payment already processed');
             }
 
-        }elseif(Str::startsWith($ref, "THL")){
+        }elseif(Str::startsWith($ref, "THG")){
 
             //check if we have a payment with this ref
-            $payment = CreditLenderTxnHistory::where('identifier', $ref)->first();;
+            $payment = CreditTransactionHistory::where('identifier', $ref)->first();;
             if (! $payment) {
                 throw new \Exception('Payment not found');
             }
@@ -172,23 +172,31 @@ class FincraPaymentRepository
         $response = curl_exec($curl);
         $err = curl_error($curl);
 
-        Log::info('completeOrder', [
-            'response' => $response,
-            'url' => config('services.fincra.url'),
-            'secret' => config('services.fincra.secret'),
-            'ref' => config('services.fincra.url').'/collections/merchant-reference/'.$ref,
-        ]);
+        // Log::info('completeOrder', [
+        //     'response' => $response,
+        //     'url' => config('services.fincra.url'),
+        //     'secret' => config('services.fincra.secret'),
+        //     'ref' => config('services.fincra.url').'/collections/merchant-reference/'.$ref,
+        // ]);
+        curl_close($curl);
+
+
+        $statusCode = curl_getinfo($curl, CURLINFO_HTTP_CODE);
+
         curl_close($curl);
 
         if ($err) {
-            echo 'cURL Error #:'.$err;
+            throw new \Exception($err);
         } else {
-            if(!isset($response)){
-                return $this->changePaymentToPending($ref);
-            }else{
+            if ($statusCode == 200) {
                 return $this->resolveTransaction(json_decode($response));
             }
+            return $this->changePaymentToPending($ref);
+            $data = json_decode($response, true);
 
+            if($data['message'] == "no Route matched with those values"){
+                throw new \Exception("No response from Fincra");
+            }
         }
 
     }
@@ -215,9 +223,9 @@ class FincraPaymentRepository
 
             return $orderPayment;
 
-        }elseif(Str::startsWith($ref, "THL")){
+        }elseif(Str::startsWith($ref, "THG")){
 
-            $transaction = CreditLenderTxnHistory::where('identifier', $ref)->first();
+            $transaction = CreditTransactionHistory::where('identifier', $ref)->first();
             if(!$transaction){
                 throw new \Exception('Transaction not found');
             }
@@ -334,7 +342,7 @@ class FincraPaymentRepository
 
         if(Str::startsWith($merchantReference, "PAY")){
             $this->completeOrder($data);
-        }elseif(Str::startsWith($merchantReference, "THL")){
+        }elseif(Str::startsWith($merchantReference, "THG")){
             $this->lenderDashboardRepository->completeWalletDeposit($data);
         }
 

@@ -6,8 +6,8 @@ use App\Enums\InAppNotificationType;
 use App\Helpers\UtilityHelper;
 use App\Models\Business;
 use App\Models\CreditLendersWallet;
-use App\Models\CreditLenderTxnHistory;
 use App\Models\CreditOffer;
+use App\Models\CreditTransactionHistory;
 use App\Models\Customer;
 use App\Models\DebitMandate;
 use App\Models\Loan;
@@ -567,15 +567,14 @@ class FincraMandateRepository
         $lenderBusinessDepositWallet->save();
 
         //Add to lender transaction history
-        $lenderTxnHistory = CreditLenderTxnHistory::create([
+        $lenderTxnHistory = CreditTransactionHistory::create([
             'amount' => $amount,
-            'type' => 'Loan Repayment',
+            'type' => 'CREDIT',
             'status' => 'success',
-            'lender_id' => $lenderBusinessId,
-            'transactionable_id' => $paymentSchedule->id,
-            'transactionable_type' => "App\Models\RepaymentSchedule",
-            'description' => 'Loan Repayment',
-            'payment_schedule_id' => $paymentSchedule->id,
+            'business_id' => $lenderBusinessId,
+            'description' => 'Loan Repayment from '.$mandateData->customer->name,
+            'loan_application_id' => $applicationId,
+            'transaction_group' => 'deposit',
             'meta' => json_encode($data),
         ]);
 

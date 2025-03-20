@@ -4,7 +4,7 @@ namespace App\Repositories;
 
 use App\Models\Business;
 use App\Models\CreditLendersWallet;
-use App\Models\CreditLenderTxnHistory;
+use App\Models\CreditTransactionHistory;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 
@@ -38,14 +38,16 @@ class LenderDashboardRepository
         $user = $request->user();
         $business_id = $user->ownerBusinessType?->id
             ?: $user->businesses()->firstWhere('user_id', $user->id)?->id;
-
+        $lenderDepositWallet = Business::find($business_id)->lendersWallet;
         //create a pending transaction
-        $transaction = CreditLenderTxnHistory::create([
-            'lender_id' => $business_id,
+        $transaction = CreditTransactionHistory::create([
+            'business_id' => $business_id,
             'amount' => $request->amount,
             'status' => 'initiated',
-            'type' => 'deposit',
-            'description' => 'Deposit to wallet',
+            'type' => 'CREDIT',
+            'transaction_group' => 'deposit',
+            'wallet_id' => $lenderDepositWallet->id,
+            'description' => 'Deposit to lender wallet',
             'payment_method' => 'fincra'
         ]);
 
@@ -60,7 +62,7 @@ class LenderDashboardRepository
 
         Log::debug('fincra response', $body);
 
-        $transaction = CreditLenderTxnHistory::where('identifier', $merchantReference)->first();
+        $transaction = CreditTransactionHistory::where('identifier', $merchantReference)->where('type', 'DEPOSIT')->first();
 
         Log::debug('completeWalletDeposit', $transaction);
 
@@ -71,7 +73,7 @@ class LenderDashboardRepository
             $transaction->save();
 
             //update the wallet balance
-            $wallet = CreditLendersWallet::where('lender_id', $transaction->lender_id)->where('type', 'deposit')->first();
+            $wallet = CreditLendersWallet::where('lender_id', $transaction->business_id)->where('type', 'deposit')->first();
             Log::debug('wallet', $wallet);
             $wallet->prev_balance = $wallet->current_balance;
             $wallet->current_balance += $transaction->amount;
