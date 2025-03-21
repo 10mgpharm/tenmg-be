@@ -27,10 +27,10 @@ class LenderDashboardResource extends JsonResource
         $currentYear = Carbon::now()->year;
 
         // Get loan applications with status 'pending'
-        $loanRequests = LoanApplication::where('status', 'pending')->orderBy("created_at", 'DESC')->take(5)->get();
+        $loanRequests = LoanApplication::where('status', 'INITIATED')->orderBy("created_at", 'DESC')->take(5)->get();
 
         // Get the total count of all pending loan requests
-        $totalCount = LoanApplication::where('status', 'pending')->count();
+        $totalCount = LoanApplication::where('status', 'INITIATED')->count();
 
         $records = CreditOffer::whereMonth('created_at', $currentMonth)
                          ->whereYear('created_at', $currentYear)->where('lender_id', $business_id)
