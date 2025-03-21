@@ -77,6 +77,13 @@ class LoanApplicationController extends Controller
         return $this->returnJsonResponse(data: $application);
     }
 
+    public function getLoanApplicationByReferenceResourced(string $reference)
+    {
+        $application = $this->loanApplicationService->getLoanApplicationByReference($reference);
+
+        return $this->returnJsonResponse(data: new LoadApplicationResource($application));
+    }
+
     public function destroy($id)
     {
         $this->loanApplicationService->deleteApplication($id);
