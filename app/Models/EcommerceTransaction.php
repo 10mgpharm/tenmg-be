@@ -22,7 +22,7 @@ class EcommerceTransaction extends Model
      * @var array<int, string>
      */
     protected $fillable = [
-        'wallet_id',
+        'ecommerce_wallet_id',
         'supplier_id',
         'ecommerce_order_id',
         'txn_type',

@@ -23,7 +23,6 @@ class EcommerceWallet extends Model
      */
     protected $fillable = [
         'business_id',
-        'wallet_id',
         'previous_balance',
         'current_balance',
     ];

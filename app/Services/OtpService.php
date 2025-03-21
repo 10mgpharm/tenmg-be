@@ -2,12 +2,15 @@
 
 namespace App\Services;
 
+use App\Enums\MailType;
 use App\Enums\OtpType;
 use App\Helpers\UtilityHelper;
+use App\Mail\Mailer;
 use App\Models\Otp;
 use App\Models\User;
 use App\Services\Interfaces\IOtpService;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Validation\ValidationException;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 
@@ -140,6 +143,9 @@ class OtpService implements IOtpService
                 break;
             case 'SIGNUP_EMAIL_VERIFICATION':
                 $user->sendEmailVerification($this->otp->code);
+                break;
+            case 'SUPPLIER_ADD_BANK_ACCOUNT':
+                Mail::to($user->email)->send(new Mailer(MailType::SUPPLIER_ADD_BANK_ACCOUNT, ['otp' => $this->otp->code]));
                 break;
         }
 
