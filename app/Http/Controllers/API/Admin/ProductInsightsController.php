@@ -24,8 +24,9 @@ class ProductInsightsController extends Controller
     public function insights(ProductInsightsRequest $request, ProductInsightsService $productInsightsService): JsonResponse
     {
         $validated = $request->validated();
+        $user = $request->user();
 
-        $insights = $productInsightsService->insights($validated);
+        $insights = $productInsightsService->insights($validated, $user);
 
         return $this->returnJsonResponse(
             message: "Product insights successfully fetched.",

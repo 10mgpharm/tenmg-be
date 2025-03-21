@@ -34,7 +34,7 @@ class EcommerceProductReview extends Model
      */
     public function product()
     {
-        return $this->belongsTo(EcommerceProduct::class);
+        return $this->belongsTo(EcommerceProduct::class, 'ecommerce_product_id');
     }
 
     /**
