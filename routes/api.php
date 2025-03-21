@@ -566,7 +566,7 @@ Route::prefix('v1')->group(function () {
             Route::prefix('loan-applications')->name('loan-applications.')->group(function () {
                 Route::get('/', [LoanApplicationController::class, 'getLoanApplicationLenders']);
                 Route::get('/loan-stats', [LoanApplicationController::class, 'getLoanApplicationStats']);
-                Route::get('/view/{reference}', [LoanApplicationController::class, 'getLoanApplicationByReference']);
+                Route::get('/view/{reference}', [LoanApplicationController::class, 'getLoanApplicationByReferenceResourced']);
                 Route::post('/', [LoanApplicationController::class, 'approveLoanApplicationManually']);
             });
 
