@@ -3,18 +3,20 @@
 namespace App\Http\Controllers\API\Account;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Account\StoreFcmTokenRequest;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Request;
 
 class UpdateFcmTokenController extends Controller
 {
     /**
      * Regenerate OTP and send it to the user's email.
      */
-    public function __invoke(Request $request): JsonResponse
+    public function __invoke(StoreFcmTokenRequest $request): JsonResponse
     {
         try {
             $user = $request->user();
+            $validated = $request->validated();
+
 
             if (!$user) {
                 return $this->returnJsonResponse(
@@ -22,13 +24,13 @@ class UpdateFcmTokenController extends Controller
                 );
             }
 
-            $user->update(['fcm_token' => $request->fcm_token]);
+            $user->deviceTokens()->updateOrCreate($validated);
                 
             return $this->returnJsonResponse(
                 message: 'FCM token saved successfully.',
             );
-        } catch (\Throwable $th) {
-            return $this->handleErrorResponse($th);
+        } catch (\Exception $e) {
+            return $this->handleErrorResponse($e);
         }
     }
 }

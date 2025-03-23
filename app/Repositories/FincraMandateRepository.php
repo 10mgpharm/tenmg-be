@@ -284,9 +284,9 @@ class FincraMandateRepository
                 $admins[$i]->email => $admins[$i]->name,
             ])->notify(new LoanSubmissionNotification($mailable));
 
-            (new InAppNotificationService)
-                ->forUser($admins[$i])->notify(InAppNotificationType::NEW_LOAN_REQUEST);
         }
+        (new InAppNotificationService)
+            ->forUsers($admins)->notify(InAppNotificationType::NEW_LOAN_REQUEST);
 
 
         if ($lendersBusinesses->isEmpty()) {
@@ -681,10 +681,9 @@ class FincraMandateRepository
             Notification::route('mail', [
                 $admins[$i]->email => $admins[$i]->name,
             ])->notify(new LoanSubmissionNotification($mailable));
-
-            (new InAppNotificationService)
-                ->forUser($admins[$i])->notify(InAppNotificationType::LOAN_REQUEST_APPROVED);
         }
+        (new InAppNotificationService)
+            ->forUsers($admins)->notify(InAppNotificationType::LOAN_REQUEST_APPROVED);
 
         $customer = Customer::where('id', $loanApplication->customer_id)->first();
 

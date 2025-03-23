@@ -52,9 +52,8 @@ class InAppNotificationService
     public function notify(InAppNotificationType $type, array $data = []): self
     {
         // Determine the recipient(s)
-        $recipients = $this->recipients ?? request()->user();
-
-        // If no recipients are set, use the currently logged-in user
+        $recipients = $this->recipients ?? request()->user(); // If no recipients are set, use the currently logged-in user
+        
         if (!$recipients) {
             throw new \RuntimeException('No recipients found.');
         }
