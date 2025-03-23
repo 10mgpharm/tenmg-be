@@ -23,6 +23,7 @@ class CreditCustomerResource extends JsonResource
             'email' => $this->email,
             'phone' => $this->phone,
             'identifier' => $this->identifier,
+            'lastEvaluationHistory' => new TxnHistoryResource($this->lastEvaluationHistory),
             'active' => $this->active,
             'reference' => $this->reference,
             'category' => $this->creditScore->category ?? "N/A",
