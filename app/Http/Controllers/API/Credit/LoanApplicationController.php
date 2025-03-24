@@ -119,10 +119,6 @@ class LoanApplicationController extends Controller
             'action' => 'required|string|in:approve,decline',
         ]);
 
-        if($request->action == "decline"){
-            return $this->returnJsonResponse(message: 'Application declined successfully');
-        }
-
         $application = $this->loanApplicationService->approveLoanApplicationManually($request);
 
         return $this->returnJsonResponse(data: $application, message: 'Application approved successfully');

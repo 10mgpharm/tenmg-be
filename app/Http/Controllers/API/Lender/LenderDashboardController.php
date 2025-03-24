@@ -49,4 +49,13 @@ class LenderDashboardController extends Controller
         );
     }
 
+    public function cancelDepositPayment(Request $request, $ref)
+    {
+        $this->lenderDashboardService->cancelDepositPayment($ref);
+        return $this->returnJsonResponse(
+            message: 'Successful'
+        );
+
+    }
+
 }
