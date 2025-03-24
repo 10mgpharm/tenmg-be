@@ -3,6 +3,7 @@
 namespace App\Repositories;
 
 use App\Helpers\UtilityHelper;
+use App\Http\Resources\BusinessResource;
 use App\Models\Business;
 use App\Models\CreditOffer;
 use App\Models\CreditTransactionHistory;
@@ -13,6 +14,7 @@ use App\Models\EcommerceShopingList;
 use App\Models\Loan;
 use App\Models\RepaymentSchedule;
 use App\Models\User;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
@@ -124,6 +126,9 @@ class FincraPaymentRepository
     public function verifyFincraPayment($ref)
     {
 
+        $customer = null;
+        $amount = 0;
+
         if(Str::startsWith($ref, "PAY")){
 
             //check if we have a payment with this ref
@@ -136,23 +141,52 @@ class FincraPaymentRepository
                 throw new \Exception('Payment already processed');
             }
 
+            $customerData = User::find($payment->customer_id);
+            $customer = [
+                'name' => $customerData->name,
+                'email' => $customerData->email,
+                'phone' => $customerData->phone,
+                "bank_code"=> null,
+                "card_scheme"=> "mastercard"
+            ];
+
+            $amount = $payment->total_amount;
+
+
         }elseif(Str::startsWith($ref, "THG")){
 
             //check if we have a payment with this ref
-            $payment = CreditTransactionHistory::where('identifier', $ref)->first();;
+            $payment = CreditTransactionHistory::where('identifier', $ref)->where('transaction_group', 'deposit')->first();
             if (! $payment) {
                 throw new \Exception('Payment not found');
             }
 
-            if ($payment->status != 'initiated') {
+            if ($payment->status == 'success') {
                 throw new \Exception('Payment already processed');
             }
+
+            $business = Business::find($payment->business_id)->owner;
+
+            $customer = [
+                'name' => $business->name,
+                'email' => $business->email,
+                'phone' => $business->phone,
+                "bank_code"=> null,
+                "card_scheme"=> "mastercard"
+            ];
+
+            $amount = $payment->amount;
 
         }else{
             throw new \Exception('Invalid reference');
         }
 
+        //check if it is development environment
+        if (config('app.env') != 'production') {
+            $data = $this->mockFincraSuccessResponse($customer, $amount, $ref);
 
+            return $this->resolveTransaction($data);
+        }
 
         $curl = curl_init();
         curl_setopt_array($curl, [
@@ -341,9 +375,9 @@ class FincraPaymentRepository
         $merchantReference = $body->merchantReference;
 
         if(Str::startsWith($merchantReference, "PAY")){
-            $this->completeOrder($data);
+            return $this->completeOrder($data);
         }elseif(Str::startsWith($merchantReference, "THG")){
-            $this->lenderDashboardRepository->completeWalletDeposit($data);
+            return $this->lenderDashboardRepository->completeWalletDeposit($data);
         }
 
     }
@@ -388,5 +422,56 @@ class FincraPaymentRepository
 
 
         }
+    }
+
+    public function mockFincraSuccessResponse($customer, $amount, $reference)
+    {
+
+        //generate random transaction id
+        $transactionId = rand(10000, 99999);
+
+        $sampleResponse = ["event"=> "charge.successful", "data" => [
+            "id"=> $transactionId,
+            "_id"=> "$transactionId",
+            "vat"=> 9,
+            "payer"=> $customer,
+            "status"=> "successful",
+            "message"=> null,
+            "traceId"=> "",
+            "metadata"=> null,
+            "createdAt"=> Carbon::now(),
+            "payeeName"=> "",
+            "reference"=> "fcr-c-$transactionId",
+            "settledAt"=> null,
+            "sourceFee"=> 127.32,
+            "updatedAt"=> Carbon::now(),
+            "businessId"=> 7219,
+            "isReversed"=> 0,
+            "refundInfo"=> null,
+            "description"=> null,
+            "initiatedAt"=> Carbon::now(),
+            "merchant_id"=> 5051,
+            "isSubAccount"=> 0,
+            "sourceAmount"=> $amount,
+            "paymentMethod"=> "card",
+            "approvalStatus"=> "approved",
+            "destinationFee"=> 127.32,
+            "sourceCurrency"=> "NGN",
+            "mongoBusinessId"=> null,
+            "payout_reference"=> null,
+            "requiresApproval"=> 0,
+            "virtualAccountId"=> null,
+            "destinationAmount"=> $amount,
+            "merchantReference"=> "$reference",
+            "payeeAccountNumber"=> "",
+            "destinationCurrency"=> "NGN",
+            "sourceAmountSettled"=> $amount-127.32,
+            "reversal_retry_count"=> 0,
+            "settlementDestination"=> "wallet",
+            "destinationAmountSettled"=> $amount-127.32,
+            "electronicMoneyTransferLevy"=> 0
+        ]];
+
+        return json_decode(json_encode($sampleResponse));
     }
 }

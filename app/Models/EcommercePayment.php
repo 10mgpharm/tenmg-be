@@ -10,4 +10,8 @@ class EcommercePayment extends Model
     use HasFactory;
 
     protected $guarded = [];
+
+    function customer(){
+        return $this->belongsTo(User::class, 'customer_id');
+    }
 }

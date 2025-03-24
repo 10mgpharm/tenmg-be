@@ -60,11 +60,8 @@ class LenderDashboardRepository
         $body = $data->data;
         $merchantReference = $body->merchantReference;
 
-        Log::debug('fincra response', $body);
+        $transaction = CreditTransactionHistory::where('identifier', $merchantReference)->where('transaction_group', 'deposit')->first();
 
-        $transaction = CreditTransactionHistory::where('identifier', $merchantReference)->where('type', 'DEPOSIT')->first();
-
-        Log::debug('completeWalletDeposit', $transaction);
 
         if ($transaction) {
             $transaction->status = 'success';
@@ -74,7 +71,6 @@ class LenderDashboardRepository
 
             //update the wallet balance
             $wallet = CreditLendersWallet::where('lender_id', $transaction->business_id)->where('type', 'deposit')->first();
-            Log::debug('wallet', $wallet);
             $wallet->prev_balance = $wallet->current_balance;
             $wallet->current_balance += $transaction->amount;
             $wallet->last_transaction_ref = $body->reference;
