@@ -542,6 +542,7 @@ Route::prefix('v1')->group(function () {
             Route::prefix('deposit')->name('deposit.')->group(function () {
                 Route::post('/', [LenderDashboardController::class, 'initializeDeposit']);
                 Route::get('/{reference}', [OrdersController::class, 'verifyFincraPayment']);
+                Route::post('/cancel/{reference}', [LenderDashboardController::class, 'cancelDepositPayment']);
             });
 
             Route::prefix('settings')->name('settings.')->group(function () {

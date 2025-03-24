@@ -9,6 +9,7 @@ use App\Http\Resources\CreditCustomerResource;
 use App\Http\Resources\LoadApplicationResource;
 use App\Models\Business;
 use App\Models\CreditCustomerBank;
+use App\Models\CreditLenderPreference;
 use App\Models\CreditLendersWallet;
 use App\Models\CreditOffer;
 use App\Models\Customer;
@@ -79,6 +80,12 @@ class LoanApplicationRepository
 
     public function getAll(array $criteria, int $perPage = 15): \Illuminate\Contracts\Pagination\LengthAwarePaginator
     {
+
+        //get the business type
+        $user = request()->user();
+        $business = $user->ownerBusinessType
+            ?: $user->businesses()->firstWhere('user_id', $user->id);
+
         $query = LoanApplication::query();
 
         if (isset($criteria['search'])) {
@@ -97,6 +104,16 @@ class LoanApplicationRepository
         if (isset($criteria['status'])) {
             $query->where('status', $criteria['status']);
         }
+
+        if($business->type == "LENDER"){
+
+            $ignoredIds = CreditLenderPreference::where('lender_id', $business->id)->first()->ignored_applications_id;
+            $query->when(!empty($ignoredIds ?? []), function ($querySub) use ($ignoredIds) {
+                $querySub->whereNotIn('id', $ignoredIds);
+            });
+
+        }
+
         // if (isset($criteria['businessId'])) {
         //     $query->where('business_id', $criteria['businessId']);
         // }
@@ -127,6 +144,11 @@ class LoanApplicationRepository
 
     public function approveLoanApplicationManually(Request $request)
     {
+
+        if($request->action == 'decline'){
+            return $this->declineLoanApplicationByLender($request);
+        }
+
         $user = request()->user();
         $business_id = $user->ownerBusinessType?->id
             ?: $user->businesses()->firstWhere('user_id', $user->id)?->id;
@@ -145,6 +167,26 @@ class LoanApplicationRepository
         $loan = $this->fincraMandateRepository->createLoan($offer, $application);
 
         return $loan;
+    }
+
+    public function declineLoanApplicationByLender(Request $request)
+    {
+        $user = request()->user();
+        $business_id = $user->ownerBusinessType?->id
+            ?: $user->businesses()->firstWhere('user_id', $user->id)?->id;
+
+        $application = LoanApplication::where('identifier', $request->applicationId)->first();
+        if ($application->status == "APPROVED") {
+            throw new Exception('Loan already approved');
+        }
+
+        //add the loan application id to the loan preferences table ignored_applications_id
+        $loanPreferences = CreditLenderPreference::where('lender_id', $business_id)->first();
+        $loanPreferences->ignored_applications_id = array_merge($loanPreferences->ignored_applications_id ?? [], [$application->id]);
+        $loanPreferences->save();
+
+        return $application;
+
     }
 
     public function deleteById(int $id)

@@ -29,4 +29,9 @@ class LenderDashboardService
         return $this->lenderDashboardRepository->initializeDeposit($request);
     }
 
+    public function cancelDepositPayment($ref)
+    {
+        return $this->lenderDashboardRepository->cancelDepositPayment($ref);
+    }
+
 }

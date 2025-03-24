@@ -17,11 +17,13 @@ class CreditLenderPreference extends Model
         'loan_interest',
         'credit_score_category',
         'auto_accept',
+        'ignored_applications_id'
     ];
 
     protected $casts = [
         'loan_tenure' => 'array',
         'credit_score_category' => 'array',
         'auto_accept' => 'boolean',
+        'ignored_applications_id' => 'array'
     ];
 }

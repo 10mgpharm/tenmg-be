@@ -158,7 +158,11 @@ class FincraPaymentRepository
             //check if we have a payment with this ref
             $payment = CreditTransactionHistory::where('identifier', $ref)->where('transaction_group', 'deposit')->first();
             if (! $payment) {
-                throw new \Exception('Payment not found');
+                throw new \Exception('No payment exist with this reference');
+            }
+
+            if ($payment->status == 'cancelled') {
+                throw new \Exception('Payment has been cancelled');
             }
 
             if ($payment->status == 'success') {

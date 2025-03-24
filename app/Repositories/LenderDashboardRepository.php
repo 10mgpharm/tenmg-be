@@ -55,12 +55,30 @@ class LenderDashboardRepository
 
     }
 
+    public function cancelDepositPayment($ref)
+    {
+        $transaction = CreditTransactionHistory::where('identifier', $ref)->where('transaction_group', 'deposit')->first();
+
+        if ($transaction) {
+            $transaction->status = 'cancelled';
+            $transaction->save();
+        }else{
+            throw new \Exception('Transaction not found');
+        }
+
+        return $transaction;
+    }
+
     public function completeWalletDeposit($data)
     {
         $body = $data->data;
         $merchantReference = $body->merchantReference;
 
         $transaction = CreditTransactionHistory::where('identifier', $merchantReference)->where('transaction_group', 'deposit')->first();
+
+        if($transaction->status == 'success'){
+            return;
+        }
 
 
         if ($transaction) {
