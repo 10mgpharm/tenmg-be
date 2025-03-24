@@ -48,7 +48,6 @@ class User extends Authenticatable implements MustVerifyEmail
         'force_password_change',
         'status',
         'status_comment',
-        'fcm_token',
     ];
 
     /**
@@ -304,5 +303,14 @@ class User extends Authenticatable implements MustVerifyEmail
 
         return $query->whereIn('id', $userIds);
     }
+
+    /**
+     * Get the user device tokens.
+     */
+    public function deviceTokens()
+    {
+        return $this->hasMany(DeviceToken::class, 'user_id', 'id')->latest('id');
+    }
+
 
 }
