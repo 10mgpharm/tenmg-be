@@ -27,6 +27,11 @@ class AuditLogController extends Controller
                 $query->where('event', 'like', "%{$vent}%")
             )
             ->when(
+                $request->input('action'),
+                fn($query, $action) =>
+                $query->where('properties->action', 'like', "%{$action}%")
+            )
+            ->when(
                 $request->input('crudType'),
                 fn($query, $crud_type) => $query->whereIn(
                     'properties->crud_type',

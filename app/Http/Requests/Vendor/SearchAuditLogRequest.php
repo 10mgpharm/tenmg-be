@@ -42,7 +42,7 @@ class SearchAuditLogRequest extends FormRequest
             'event' => ['nullable', 'string'],
             'ip' => ['nullable', 'ip'],
             'ip_address' => ['nullable', 'ip'],
-            'from_date' => ['nullable', 'date', 'before_or_equal:to_date', 'before_or_equal:today'],
+            'from_date' => ['nullable', 'date', 'before_or_equal:today'],
             'to_date' => ['nullable', 'date', 'after_or_equal:from_date', 'before_or_equal:today'],
         ];
     }
