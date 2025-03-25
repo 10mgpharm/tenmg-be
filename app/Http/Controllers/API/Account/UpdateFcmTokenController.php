@@ -4,6 +4,7 @@ namespace App\Http\Controllers\API\Account;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Account\StoreFcmTokenRequest;
+use App\Models\DeviceToken;
 use Illuminate\Http\JsonResponse;
 
 class UpdateFcmTokenController extends Controller
@@ -24,6 +25,10 @@ class UpdateFcmTokenController extends Controller
                 );
             }
 
+            // Delete any existing token if it belongs to a different user
+            DeviceToken::where('fcm_token', $validated['fcm_token'])->where('user_id', '!=', $user->id)->delete();
+
+            // Add or update the token for the correct user
             $user->deviceTokens()->updateOrCreate($validated);
                 
             return $this->returnJsonResponse(

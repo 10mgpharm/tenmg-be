@@ -38,9 +38,10 @@ class StoreFcmTokenRequest extends FormRequest
      */
     public function rules(): array
     {
+        $user = $this->user();
 
         return [
-            'fcm_token' => ['required', 'string', Rule::unique('device_tokens', 'fcm_token')],
+            'fcm_token' => ['required', 'string'],
         ];
     }
 }
