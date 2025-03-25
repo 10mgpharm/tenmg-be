@@ -1,8 +1,10 @@
 <?php
 
+use App\Enums\InAppNotificationType;
 use App\Http\Controllers\Admin\AppNotificationController;
 use App\Http\Controllers\API\Account\AccountController;
 use App\Http\Controllers\API\Account\AppNotificationController as AccountAppNotificationController;
+use App\Http\Controllers\API\Account\CountUnreadNotificationController;
 use App\Http\Controllers\API\Account\MarkAllAsReadController;
 use App\Http\Controllers\API\Account\NotificationController;
 use App\Http\Controllers\API\Account\PasswordUpdateController;
@@ -72,6 +74,8 @@ use App\Http\Controllers\Supplier\EcommerceMeasurementController as SupplierEcom
 use App\Http\Controllers\Supplier\EcommerceMedicationTypeController as SupplierEcommerceMedicationTypeController;
 use App\Http\Controllers\Supplier\EcommerceOrderController as SupplierEcommerceOrderController;
 use App\Http\Controllers\Supplier\EcommercePresentationController as SupplierEcommercePresentationController;
+use App\Services\InAppNotificationService;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
 Route::prefix('v1')->group(function () {
@@ -143,6 +147,7 @@ Route::prefix('v1')->group(function () {
                 });
 
             Route::match(['put', 'patch'],'notifications/mark-all-read', MarkAllAsReadController::class);
+            Route::get('count-unread-notifications', CountUnreadNotificationController::class);
             Route::apiResource('notifications', NotificationController::class);
 
             Route::prefix('app-notifications')->group(function () {
@@ -155,6 +160,11 @@ Route::prefix('v1')->group(function () {
             Route::match(['PUT', 'PATCH'],'messages/mark-as-read/{message}', [MessageController::class, 'markAsRead']);
             Route::apiResource('messages', MessageController::class);
             Route::post('/fcm-token', UpdateFcmTokenController::class);
+            Route::post('/test-notification', function(Request $request){
+                (new InAppNotificationService)
+                ->forUser($request->user())
+                ->notify(InAppNotificationType::NEW_MESSAGE);
+            });
         });
 
         Route::prefix('bank')->group(function () {
