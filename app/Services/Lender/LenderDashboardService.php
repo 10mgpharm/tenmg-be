@@ -38,4 +38,9 @@ class LenderDashboardService
         return $this->lenderDashboardRepository->generateStatement($request);
     }
 
+    public function withdrawFunds(Request $request)
+    {
+        return $this->lenderDashboardRepository->withdrawFunds($request);
+    }
+
 }

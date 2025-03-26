@@ -107,4 +107,9 @@ class Business extends Model
     {
         return $this->hasMany(CreditLendersWallet::class, 'lender_id', 'id');
     }
+
+    public function lendersInvestmentWallet()
+    {
+        return $this->hasOne(CreditLendersWallet::class, 'lender_id', 'id')->where('type', 'investment');
+    }
 }
