@@ -165,4 +165,16 @@ class EcommerceProduct extends Model
     {
         return $this->hasMany(EcommerceOrderDetail::class, 'ecommerce_product_id');
     }
+
+    public function ratings()
+    {
+        return $this->hasMany(EcommerceProductRating::class, 'ecommerce_product_id', 'id');
+    }
+
+    public function rating()
+    {
+        return $this->hasOne(EcommerceProductRating::class, 'ecommerce_product_id', 'id')
+            ->selectRaw('ecommerce_product_id, AVG(rating) as avg_rating')
+            ->groupBy('ecommerce_product_id');
+    }
 }

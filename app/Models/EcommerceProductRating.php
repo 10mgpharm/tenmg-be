@@ -43,4 +43,17 @@ class EcommerceProductRating extends Model
         return $this->belongsTo(User::class);
     }
 
+    /**
+     * Get the review associated with this rating.
+     *
+     * Ensures that the review belongs to the same product and user as the rating.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasOne
+     */
+    public function review()
+    {
+        return $this->hasOne(EcommerceProductReview::class, 'ecommerce_product_id', 'ecommerce_product_id')
+            ->whereColumn('ecommerce_product_reviews.user_id', 'ecommerce_product_ratings.user_id');
+    }
+
 }

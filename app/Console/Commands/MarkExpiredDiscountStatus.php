@@ -26,7 +26,7 @@ class MarkExpiredDiscountStatus extends Command
      */
     public function handle()
     {
-        $query = EcommerceDiscount::where('end_date', '<', now());
+        $query = EcommerceDiscount::query()->where('end_date', '<', now())->whereIn('status', ['ACTIVE', 'INACTIVE']);
 
         $beforeCount = (clone $query)->count();
 
@@ -35,9 +35,9 @@ class MarkExpiredDiscountStatus extends Command
             return;
         }
 
-        $updatedCount = (clone $query)->update(['status' => 'INACTIVE']);
+        $updatedCount = (clone $query)->update(['status' => 'EXPIRED']);
 
-        $afterCount = EcommerceDiscount::where('status', 'INACTIVE')->where('end_date', '<', now())->count();
+        $afterCount = EcommerceDiscount::where('status', 'EXPIRED')->where('end_date', '<', now())->count();
 
         $this->info("$beforeCount discounts were expired before the update.");
         $this->info("$updatedCount discounts marked as expired.");
