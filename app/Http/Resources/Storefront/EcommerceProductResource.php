@@ -73,7 +73,8 @@ class EcommerceProductResource extends JsonResource
             'reviews' => $this->whenLoaded('reviews', fn() => $this->reviews()
                 ->paginate($request->has('perPage') ? $request->perPage : 20)
                 ->withQueryString()
-                ->through(fn(EcommerceProductReview $item) => EcommerceProductReviewResource::make($item)))
+                ->through(fn(EcommerceProductReview $item) => EcommerceProductReviewOnlyResource::make($item))),
+            'rating' => $this->whenLoaded('rating', fn() => $this->rating ? )
         ];
 
 

@@ -68,8 +68,8 @@ class EcommerceDiscount extends Model
     protected static function booted()
     {
         static::retrieved(function ($model) {
-            if ($model->end_date < now() && $model->status === 'ACTIVE') {
-                $model->updateQuietly(['status' => 'INACTIVE']);
+            if ($model->end_date < now() && ($model->status === 'ACTIVE' || $model->status === 'INACTIVE')) {
+                $model->updateQuietly(['status' => 'EXPIRED']);
             }
         });
     }

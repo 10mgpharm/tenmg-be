@@ -43,7 +43,7 @@ class AuditLogController extends Controller
             ->when(
                 $request->input('ip'),
                 fn($query, $ip) => $query->whereIn(
-                    'properties->ip',
+                    'properties->ip_address',
                     array_unique(
                         array_map(fn($s) => trim($s), is_array($ip) ? $ip : explode(",", $ip))
                     )

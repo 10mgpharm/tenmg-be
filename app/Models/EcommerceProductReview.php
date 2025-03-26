@@ -56,4 +56,21 @@ class EcommerceProductReview extends Model
             ->firstWhere('user_id', $user->id);
         return $query->where('business_id', $business?->id);
     }
+
+    /**
+     * Get the rating associated with the review.
+     *
+     * This ensures that the rating belongs to the same product and user as the review.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasOne
+     */
+    public function rating()
+    {
+        return $this->hasOne(EcommerceProductRating::class, 'ecommerce_product_id', 'ecommerce_product_id')
+            ->where('user_id', fn($query) => $query->select('user_id')
+                    ->from('ecommerce_product_reviews')
+                    ->whereColumn('ecommerce_product_reviews.ecommerce_product_id', 'ecommerce_product_ratings.ecommerce_product_id')
+            );
+    }
+    
 }
