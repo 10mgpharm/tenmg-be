@@ -25,6 +25,7 @@ class EcommerceShoppingListResource extends JsonResource
             'productId' => $this->product_id,
             'description' => $this->description,
             'image' => $productImage != null ?  $productImage?->thumbnailFile?->url ?? "N/A":$this->attachment ?? "N/A",
+            'customer' => new UserResource($this->user),
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
         ];
