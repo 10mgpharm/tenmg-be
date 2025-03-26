@@ -5,7 +5,7 @@ namespace App\Http\Resources\Storefront;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
-class EcommerceProductReviewResource extends JsonResource
+class EcommerceProductReviewOnlyResource extends JsonResource
 {
     /**
      * Transform the resource into an array.
@@ -20,8 +20,6 @@ class EcommerceProductReviewResource extends JsonResource
             'email' => $this->email ?? $this->user?->email ?? 'Anonymous',
             'comment' => $this->comment,
             'createdAt' => $this->created_at,
-            'product' => $this->product ? new EcommerceReviewProductResource($this->product) : null,
-            'rating' => $this->rating ? new EcommerceProductRatingResource($this->rating) : null,
         ];
     }
 }
