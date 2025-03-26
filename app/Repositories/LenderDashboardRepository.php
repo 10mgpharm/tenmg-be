@@ -97,4 +97,23 @@ class LenderDashboardRepository
 
         return $transaction;
     }
+
+    public function generateStatement(Request $request): \Illuminate\Database\Eloquent\Builder
+    {
+        $user = $request->user();
+        $business_id = $user->ownerBusinessType?->id
+            ?: $user->businesses()->firstWhere('user_id', $user->id)?->id;
+
+        $query = CreditTransactionHistory::query();
+
+        $dateFrom = $request->input('dateFrom');
+        $dateTo = $request->input('dateTo');
+
+        $query->when(isset($dateFrom) && isset($dateTo), function ($query) use ($dateFrom, $dateTo) {
+            return $query->whereBetween('credit_transaction_histories.created_at', [$dateFrom, $dateTo]);
+        });
+
+        return $query->where('business_id', $business_id)->orderBy('created_at', 'desc');
+
+    }
 }

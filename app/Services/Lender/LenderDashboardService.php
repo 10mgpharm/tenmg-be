@@ -34,4 +34,8 @@ class LenderDashboardService
         return $this->lenderDashboardRepository->cancelDepositPayment($ref);
     }
 
+    public function generateStatement(Request $request): \Illuminate\Database\Eloquent\Builder{
+        return $this->lenderDashboardRepository->generateStatement($request);
+    }
+
 }
