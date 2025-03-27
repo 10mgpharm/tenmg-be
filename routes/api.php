@@ -548,6 +548,7 @@ Route::prefix('v1')->group(function () {
                 Route::get('/', [LenderDashboardController::class, 'getDashboardStats']);
                 Route::get('chart-stats', [LenderDashboardController::class, 'getChartStats']);
                 Route::get('/generate-statement', [LenderDashboardController::class, 'generateStatement']);
+                Route::post('/withdraw-funds', [LenderDashboardController::class, 'withdrawFunds']);
             });
 
             Route::prefix('deposit')->name('deposit.')->group(function () {

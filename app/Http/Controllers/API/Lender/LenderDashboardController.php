@@ -90,4 +90,21 @@ class LenderDashboardController extends Controller
 
     }
 
+    public function withdrawFunds(Request $request)
+    {
+        $request->validate([
+            'amount' => 'required|numeric',
+            'bankName' => 'required',
+            'accountNumber' => 'required',
+            'accountName' => 'required',
+            'bankCode' => 'required'
+        ]);
+
+        $withdraw = $this->lenderDashboardService->withdrawFunds($request);
+        return $this->returnJsonResponse(
+            data: $withdraw,
+            message: 'Successful'
+        );
+    }
+
 }

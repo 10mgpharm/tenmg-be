@@ -414,6 +414,12 @@ class FincraPaymentRepository
                 case 'direct_debit.success':
                     $this->fincraMandateRepository->completeDirectDebitRequest($data->data);
                     break;
+                case 'payout.successful':
+                    $this->fincraMandateRepository->completeDirectDebitRequest($data->data);
+                    break;
+                case 'payout.failed':
+                    $this->fincraMandateRepository->completeDirectDebitRequest($data->data);
+                    break;
                 case 'charge.failed':
                     $this->failedPayment($data->data->merchantReference);
                     break;
