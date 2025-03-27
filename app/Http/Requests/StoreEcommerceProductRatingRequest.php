@@ -48,6 +48,20 @@ class StoreEcommerceProductRatingRequest extends FormRequest
         ];
     }
 
+        /**
+     * Custom error messages for validation failures.
+     *
+     * @return array
+     */
+    public function messages()
+    {
+        return [
+            'ecommerce_product_id.required' => 'The product ID is required.',
+            'ecommerce_product_id.exists' => 'The selected product does not exist.',
+            'ecommerce_product_id.unique' => 'You have already rated this product.',
+        ];
+    }
+
     /**
      * Custom response for failed authorization.
      *
