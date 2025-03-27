@@ -480,6 +480,18 @@ Route::prefix('v1')->group(function () {
             });
             Route::get('insights/filters', [AdminProductInsightsController::class, 'filters']);
             Route::get('insights', [AdminProductInsightsController::class, 'insights']);
+
+            Route::prefix('txn_history')->group(function () {
+
+                //download uploaded transaction history file
+                Route::post('/download/{txnEvaluationId}', [TransactionHistoryController::class, 'downloadTransactionHistory'])
+                    ->name('admin.txn_history.download');
+
+                Route::get('creditscore-breakdown/{txnEvaluationId}', [TransactionHistoryController::class, 'creditScoreBreakDown'])->name('admin.txn_history.creditScoreBreakDown');
+
+                Route::get('/{customerId}', [TransactionHistoryController::class, 'index'])->name('admin.txn_history');
+
+            });
         });
 
         // STOREFRONTS specific routes
