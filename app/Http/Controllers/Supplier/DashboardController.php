@@ -55,42 +55,47 @@ class DashboardController extends Controller
                     ->selectRaw('COUNT(*) as count')->first(),
                 'revenue' => match (strtolower($validated['date_filter'])) {
                     'today' => $revenue_query->selectRaw('
-                                SUM(CASE WHEN HOUR(created_at) BETWEEN 0 AND 6 THEN COALESCE(discount_price, actual_price) * quantity ELSE 0 END) as midnight_to_six_am,
-                                SUM(CASE WHEN HOUR(created_at) BETWEEN 6 AND 12 THEN COALESCE(discount_price, actual_price) * quantity ELSE 0 END) as six_am_to_twelve_pm,
-                                SUM(CASE WHEN HOUR(created_at) BETWEEN 12 AND 18 THEN COALESCE(discount_price, actual_price) * quantity ELSE 0 END) as twelve_pm_to_six_pm,
-                                SUM(CASE WHEN HOUR(created_at) BETWEEN 18 AND 24 THEN COALESCE(discount_price, actual_price) * quantity ELSE 0 END) as six_pm_to_midnight
-                            ')->first(),
+                        COALESCE(SUM(CASE WHEN HOUR(created_at) BETWEEN 0 AND 6 THEN COALESCE(discount_price, actual_price) * quantity ELSE 0 END), 0) as midnight_to_six_am,
+                        COALESCE(SUM(CASE WHEN HOUR(created_at) BETWEEN 6 AND 12 THEN COALESCE(discount_price, actual_price) * quantity ELSE 0 END), 0) as six_am_to_twelve_pm,
+                        COALESCE(SUM(CASE WHEN HOUR(created_at) BETWEEN 12 AND 18 THEN COALESCE(discount_price, actual_price) * quantity ELSE 0 END), 0) as twelve_pm_to_six_pm,
+                        COALESCE(SUM(CASE WHEN HOUR(created_at) BETWEEN 18 AND 24 THEN COALESCE(discount_price, actual_price) * quantity ELSE 0 END), 0) as six_pm_to_midnight
+                    ')->first(),
+
                     'one_week' => $revenue_query->selectRaw('
-                                SUM(CASE WHEN DAYNAME(created_at) = "Monday" THEN COALESCE(discount_price, actual_price) * quantity ELSE 0 END) as Monday,
-                                SUM(CASE WHEN DAYNAME(created_at) = "Tuesday" THEN COALESCE(discount_price, actual_price) * quantity ELSE 0 END) as Tuesday,
-                                SUM(CASE WHEN DAYNAME(created_at) = "Wednesday" THEN COALESCE(discount_price, actual_price) * quantity ELSE 0 END) as Wednesday,
-                                SUM(CASE WHEN DAYNAME(created_at) = "Thursday" THEN COALESCE(discount_price, actual_price) * quantity ELSE 0 END) as Thursday,
-                                SUM(CASE WHEN DAYNAME(created_at) = "Friday" THEN COALESCE(discount_price, actual_price) * quantity ELSE 0 END) as Friday,
-                                SUM(CASE WHEN DAYNAME(created_at) = "Saturday" THEN COALESCE(discount_price, actual_price) * quantity ELSE 0 END) as Saturday,
-                                SUM(CASE WHEN DAYNAME(created_at) = "Sunday" THEN COALESCE(discount_price, actual_price) * quantity ELSE 0 END) as Sunday
-                            ')->first(),
+                        COALESCE(SUM(CASE WHEN DAYNAME(created_at) = "Monday" THEN COALESCE(discount_price, actual_price) * quantity ELSE 0 END), 0) as Monday,
+                        COALESCE(SUM(CASE WHEN DAYNAME(created_at) = "Tuesday" THEN COALESCE(discount_price, actual_price) * quantity ELSE 0 END), 0) as Tuesday,
+                        COALESCE(SUM(CASE WHEN DAYNAME(created_at) = "Wednesday" THEN COALESCE(discount_price, actual_price) * quantity ELSE 0 END), 0) as Wednesday,
+                        COALESCE(SUM(CASE WHEN DAYNAME(created_at) = "Thursday" THEN COALESCE(discount_price, actual_price) * quantity ELSE 0 END), 0) as Thursday,
+                        COALESCE(SUM(CASE WHEN DAYNAME(created_at) = "Friday" THEN COALESCE(discount_price, actual_price) * quantity ELSE 0 END), 0) as Friday,
+                        COALESCE(SUM(CASE WHEN DAYNAME(created_at) = "Saturday" THEN COALESCE(discount_price, actual_price) * quantity ELSE 0 END), 0) as Saturday,
+                        COALESCE(SUM(CASE WHEN DAYNAME(created_at) = "Sunday" THEN COALESCE(discount_price, actual_price) * quantity ELSE 0 END), 0) as Sunday
+                    ')->first(),
+
                     'one_month' => $revenue_query->selectRaw('
-                                SUM(CASE WHEN WEEK(created_at) = WEEK(NOW()) THEN COALESCE(discount_price, actual_price) * quantity ELSE 0 END) as week_one,
-                                SUM(CASE WHEN WEEK(created_at) = WEEK(NOW()) - 1 THEN COALESCE(discount_price, actual_price) * quantity ELSE 0 END) as week_two,
-                                SUM(CASE WHEN WEEK(created_at) = WEEK(NOW()) - 2 THEN COALESCE(discount_price, actual_price) * quantity ELSE 0 END) as week_three,
-                                SUM(CASE WHEN WEEK(created_at) = WEEK(NOW()) - 3 THEN COALESCE(discount_price, actual_price) * quantity ELSE 0 END) as week_four
-                            ')->first(),
+                        COALESCE(SUM(CASE WHEN WEEK(created_at) = WEEK(NOW()) THEN COALESCE(discount_price, actual_price) * quantity ELSE 0 END), 0) as week_one,
+                        COALESCE(SUM(CASE WHEN WEEK(created_at) = WEEK(NOW()) - 1 THEN COALESCE(discount_price, actual_price) * quantity ELSE 0 END), 0) as week_two,
+                        COALESCE(SUM(CASE WHEN WEEK(created_at) = WEEK(NOW()) - 2 THEN COALESCE(discount_price, actual_price) * quantity ELSE 0 END), 0) as week_three,
+                        COALESCE(SUM(CASE WHEN WEEK(created_at) = WEEK(NOW()) - 3 THEN COALESCE(discount_price, actual_price) * quantity ELSE 0 END), 0) as week_four
+                    ')->first(),
+
                     'one_year' => $revenue_query->selectRaw('
-                                SUM(CASE WHEN MONTH(created_at) = 1 THEN COALESCE(discount_price, actual_price) * quantity ELSE 0 END) as January,
-                                SUM(CASE WHEN MONTH(created_at) = 2 THEN COALESCE(discount_price, actual_price) * quantity ELSE 0 END) as February,
-                                SUM(CASE WHEN MONTH(created_at) = 3 THEN COALESCE(discount_price, actual_price) * quantity ELSE 0 END) as March,
-                                SUM(CASE WHEN MONTH(created_at) = 4 THEN COALESCE(discount_price, actual_price) * quantity ELSE 0 END) as April,
-                                SUM(CASE WHEN MONTH(created_at) = 5 THEN COALESCE(discount_price, actual_price) * quantity ELSE 0 END) as May,
-                                SUM(CASE WHEN MONTH(created_at) = 6 THEN COALESCE(discount_price, actual_price) * quantity ELSE 0 END) as June,
-                                SUM(CASE WHEN MONTH(created_at) = 7 THEN COALESCE(discount_price, actual_price) * quantity ELSE 0 END) as July,
-                                SUM(CASE WHEN MONTH(created_at) = 8 THEN COALESCE(discount_price, actual_price) * quantity ELSE 0 END) as August,
-                                SUM(CASE WHEN MONTH(created_at) = 9 THEN COALESCE(discount_price, actual_price) * quantity ELSE 0 END) as September,
-                                SUM(CASE WHEN MONTH(created_at) = 10 THEN COALESCE(discount_price, actual_price) * quantity ELSE 0 END) as October,
-                                SUM(CASE WHEN MONTH(created_at) = 11 THEN COALESCE(discount_price, actual_price) * quantity ELSE 0 END) as November,
-                                SUM(CASE WHEN MONTH(created_at) = 12 THEN COALESCE(discount_price, actual_price) * quantity ELSE 0 END) as December
-                            ')->first(),
+                        COALESCE(SUM(CASE WHEN MONTH(created_at) = 1 THEN COALESCE(discount_price, actual_price) * quantity ELSE 0 END), 0) as January,
+                        COALESCE(SUM(CASE WHEN MONTH(created_at) = 2 THEN COALESCE(discount_price, actual_price) * quantity ELSE 0 END), 0) as February,
+                        COALESCE(SUM(CASE WHEN MONTH(created_at) = 3 THEN COALESCE(discount_price, actual_price) * quantity ELSE 0 END), 0) as March,
+                        COALESCE(SUM(CASE WHEN MONTH(created_at) = 4 THEN COALESCE(discount_price, actual_price) * quantity ELSE 0 END), 0) as April,
+                        COALESCE(SUM(CASE WHEN MONTH(created_at) = 5 THEN COALESCE(discount_price, actual_price) * quantity ELSE 0 END), 0) as May,
+                        COALESCE(SUM(CASE WHEN MONTH(created_at) = 6 THEN COALESCE(discount_price, actual_price) * quantity ELSE 0 END), 0) as June,
+                        COALESCE(SUM(CASE WHEN MONTH(created_at) = 7 THEN COALESCE(discount_price, actual_price) * quantity ELSE 0 END), 0) as July,
+                        COALESCE(SUM(CASE WHEN MONTH(created_at) = 8 THEN COALESCE(discount_price, actual_price) * quantity ELSE 0 END), 0) as August,
+                        COALESCE(SUM(CASE WHEN MONTH(created_at) = 9 THEN COALESCE(discount_price, actual_price) * quantity ELSE 0 END), 0) as September,
+                        COALESCE(SUM(CASE WHEN MONTH(created_at) = 10 THEN COALESCE(discount_price, actual_price) * quantity ELSE 0 END), 0) as October,
+                        COALESCE(SUM(CASE WHEN MONTH(created_at) = 11 THEN COALESCE(discount_price, actual_price) * quantity ELSE 0 END), 0) as November,
+                        COALESCE(SUM(CASE WHEN MONTH(created_at) = 12 THEN COALESCE(discount_price, actual_price) * quantity ELSE 0 END), 0) as December
+                    ')->first(),
+
                     default => [],
                 },
+
                 'stock_status' =>  $product_query->clone()->selectRaw('
                     SUM(CASE WHEN quantity > 0 THEN 1 ELSE 0 END) as in_stock,
                     SUM(CASE WHEN quantity <= low_stock_level THEN 1 ELSE 0 END) as low_stock,

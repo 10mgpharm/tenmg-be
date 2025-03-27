@@ -7,6 +7,7 @@ use App\Http\Resources\EcommerceMeasurementResource;
 use App\Http\Resources\EcommerceMedicationTypeResource;
 use App\Http\Resources\EcommerceMedicationVariationResource;
 use App\Http\Resources\EcommercePresentationResource;
+use App\Models\EcommerceProductRating;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
@@ -19,6 +20,8 @@ class EcommerceReviewProductResource extends JsonResource
      */
     public function toArray(Request $request): array
     {
+        $rating = EcommerceProductRating::query()->where('ecommerce_product_id', $this->id)->first();
+        
         return [
             'id' => $this->id,
             'name' => $this->name,
@@ -31,6 +34,7 @@ class EcommerceReviewProductResource extends JsonResource
             'variation' => new EcommerceMedicationVariationResource($this->variation),
             'measurement' => new EcommerceMeasurementResource($this->measurement),
             'thumbnailFile' => $this->thumbnailFile?->url,
+            'rating' => $rating ? new EcommerceProductRatingResource($rating) : null,
         ];
     }
 }

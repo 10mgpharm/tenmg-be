@@ -171,6 +171,9 @@ class EcommerceProduct extends Model
         return $this->hasMany(EcommerceProductRating::class, 'ecommerce_product_id', 'id');
     }
 
+    /**
+     * Get the average rating for the product.
+     */
     public function rating()
     {
         return $this->hasOne(EcommerceProductRating::class, 'ecommerce_product_id', 'id')
