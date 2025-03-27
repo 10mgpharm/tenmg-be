@@ -583,6 +583,18 @@ Route::prefix('v1')->group(function () {
                 Route::post('/', [LoanApplicationController::class, 'approveLoanApplicationManually']);
             });
 
+            Route::prefix('txn_history')->group(function () {
+
+                //download uploaded transaction history file
+                Route::post('/download/{txnEvaluationId}', [TransactionHistoryController::class, 'downloadTransactionHistory'])
+                    ->name('lender.txn_history.download');
+
+                Route::get('creditscore-breakdown/{txnEvaluationId}', [TransactionHistoryController::class, 'creditScoreBreakDown'])->name('lender.txn_history.creditScoreBreakDown');
+
+                Route::get('/{customerId}', [TransactionHistoryController::class, 'index'])->name('lender.txn_history');
+
+            });
+
         });
 
     });
