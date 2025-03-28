@@ -57,12 +57,13 @@ class ProductInsightsService implements IProductInsightsService
             // Fetch total revenue, calculated from price * quantity, grouped by time ranges
             $revenues = $query
                 ->selectRaw('
-                    SUM(CASE WHEN HOUR(created_at) BETWEEN 0 AND 6 THEN actual_price * quantity ELSE 0 END) as midnight_to_six_am,
-                    SUM(CASE WHEN HOUR(created_at) BETWEEN 6 AND 12 THEN actual_price * quantity ELSE 0 END) as six_am_to_twelve_pm,
-                    SUM(CASE WHEN HOUR(created_at) BETWEEN 12 AND 18 THEN actual_price * quantity ELSE 0 END) as twelve_pm_to_six_pm,
-                    SUM(CASE WHEN HOUR(created_at) BETWEEN 18 AND 24 THEN actual_price * quantity ELSE 0 END) as six_pm_to_midnight
-                ')
-                ->first();
+                SUM(CASE WHEN HOUR(created_at) BETWEEN 0 AND 6 THEN COALESCE(discount_price, actual_price) * quantity ELSE 0 END) as midnight_to_six_am,
+                SUM(CASE WHEN HOUR(created_at) BETWEEN 6 AND 12 THEN COALESCE(discount_price, actual_price) * quantity ELSE 0 END) as six_am_to_twelve_pm,
+                SUM(CASE WHEN HOUR(created_at) BETWEEN 12 AND 18 THEN COALESCE(discount_price, actual_price) * quantity ELSE 0 END) as twelve_pm_to_six_pm,
+                SUM(CASE WHEN HOUR(created_at) BETWEEN 18 AND 24 THEN COALESCE(discount_price, actual_price) * quantity ELSE 0 END) as six_pm_to_midnight
+            ')
+            ->first();
+        
 
             // Fetch the top 3 best-selling products based on total quantity sold
             $best_selling_products = $query
