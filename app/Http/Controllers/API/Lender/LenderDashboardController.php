@@ -82,7 +82,7 @@ class LenderDashboardController extends Controller
         $user = $request->user();
 
         // Send email with attachment
-        Mail::to("uhweka@gmail.com") // or use a specific email address
+        Mail::to($user->email) // or use a specific email address
             ->send(new StatementEmail($excelFile, $fileName));
 
 
