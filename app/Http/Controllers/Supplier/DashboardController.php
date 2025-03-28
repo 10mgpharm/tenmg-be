@@ -33,16 +33,16 @@ class DashboardController extends Controller
 
             // Determine the date range based on the filter value
             $date_range = match ($validated['date_filter']) {
-                'one_week' => [now()->copy()->subWeek(), now()],
-                'two_weeks' => [now()->copy()->subWeeks(2), now()],
-                'one_month' => [now()->copy()->subMonth(), now()],
-                'three_months' => [now()->copy()->subMonths(3), now()],
-                'six_months' => [now()->copy()->subMonths(6), now()],
-                'one_year' => [now()->copy()->subYear(), now()],
+                'ONE_WEEK' => [now()->copy()->subWeek(), now()],
+                'TWO_WEEKS' => [now()->copy()->subWeeks(2), now()],
+                'ONE_MONTH' => [now()->copy()->subMonth(), now()],
+                'THREE_MONTHS' => [now()->copy()->subMonths(3), now()],
+                'SIX_MONTHS' => [now()->copy()->subMonths(6), now()],
+                'ONE_YEAR' => [now()->copy()->subYear(), now()],
                 default => [now()->copy()->startOfDay(), now()->copy()->endOfDay()],
             };
 
-            $order_query = EcommerceOrder::whereHas('orderDetails', fn($query) => $query->whereHas('product', fn($query) => $query->where('business_id', $business_id)));
+            $order_query = EcommerceOrder::query()->where("status", '!=', 'cart')->whereHas('orderDetails', fn($query) => $query->whereHas('product', fn($query) => $query->where('business_id', $business_id)));
             $product_query = EcommerceProduct::where('business_id', $business_id);
             $revenue_query = EcommerceOrderDetail::query()->whereHas('product', fn($query) => $query->where('business_id', $business_id))
                 ->whereBetween('created_at', $date_range);

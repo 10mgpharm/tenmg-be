@@ -21,7 +21,7 @@ class ProductInsightsService implements IProductInsightsService
     public function insights(array $validated, User $user): ProductInsightsResource
     {
         try {
-            $filter = $validated['filter'];
+            $filter = $validated['date_filter'];
             $business_id =  $user->ownerBusinessType?->id ?: $user->businesses()
             ->firstWhere('user_id', $user->id)?->id;
 
@@ -30,18 +30,18 @@ class ProductInsightsService implements IProductInsightsService
 
             // Determine the date range based on the filter value
             $date_range = match ($filter) {
-                'one_week' => [$now->copy()->subWeek(), $now],
-                'two_weeks' => [$now->copy()->subWeeks(2), $now],
-                'one_month' => [$now->copy()->subMonth(), $now],
-                'three_months' => [$now->copy()->subMonths(3), $now],
-                'six_months' => [$now->copy()->subMonths(6), $now],
-                'one_year' => [$now->copy()->subYear(), $now],
+                'ONE_WEEK' => [$now->copy()->subWeek(), $now],
+                'TWO_WEEKS' => [$now->copy()->subWeeks(2), $now],
+                'ONE_MONTH' => [$now->copy()->subMonth(), $now],
+                'THREE_MONTHS' => [$now->copy()->subMonths(3), $now],
+                'SIX_MONTHS' => [$now->copy()->subMonths(6), $now],
+                'ONE_YEAR' => [$now->copy()->subYear(), $now],
                 default => [$now->copy()->startOfDay(), $now->copy()->endOfDay()],
             };
 
 
             // Initialize the query for EcommerceOrderDetail
-            $query = EcommerceOrderDetail::whereHas('order', fn($query) => $query->whereBetween('created_at', $date_range))->whereHas('product', fn($query) => $query->where('business_id', $business_id));
+            $query = EcommerceOrderDetail::query()->whereHas('order', fn($query) => $query->where("status", '=', 'completed')->whereBetween('created_at', $date_range))->whereHas('product', fn($query) => $query->where('business_id', $business_id));
         
 
             // Fetch total quantity of products sold, grouped by time ranges
