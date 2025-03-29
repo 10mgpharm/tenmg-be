@@ -21,7 +21,7 @@ class ProductInsightsService implements IProductInsightsService
     public function insights(array $validated, User $user): ProductInsightsResource
     {
         try {
-            $filter = $validated['filter'];
+            $filter = $validated['date_filter'];
 
             // Get the current timestamp
             $now = now();

@@ -38,7 +38,7 @@ class ProductInsightsController extends Controller
     {
 
         return $this->returnJsonResponse(
-            message: "Product insights successfully fetched.",
+            message: "Product insight filters successfully fetched.",
             data: array_map(fn($case) => strtolower($case->name), ProductInsightsFilterEnum::cases()),
         );
     }
