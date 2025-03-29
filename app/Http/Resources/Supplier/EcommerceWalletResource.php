@@ -15,12 +15,11 @@ class EcommerceWalletResource extends JsonResource
      */
     public function toArray(Request $request): array
     {
-        $bank_account = EcommerceBankAccount::whereNotNull('supplier_id')->where('supplier_id', $this->business_id ?? null)->latest()->first();
 
         return [
             'previousBalance' => $this->previous_balance ?? 0.0,
             'currentBalance' => $this->current_balance ?? 0.0,
-            'bankAccount' => $bank_account ? new EcommerceBankAccountResource($bank_account) : null,
+            'bankAccount' => $this->whenLoaded('bankAccount', fn ($bank_account) => new EcommerceBankAccountResource($bank_account)),
         ];;
     }
 }

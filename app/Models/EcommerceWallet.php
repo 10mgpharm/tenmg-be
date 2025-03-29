@@ -34,4 +34,12 @@ class EcommerceWallet extends Model
     {
         return $this->belongsTo(Business::class, 'business_id');
     }
+
+    /**
+     * Get the bank account associated with the wallet.
+     */
+    public function bankAccount()
+    {
+        return $this->hasOne(EcommerceBankAccount::class, 'supplier_id', 'business_id');
+    }
 }
