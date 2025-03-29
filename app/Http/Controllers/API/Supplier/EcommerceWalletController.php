@@ -21,7 +21,7 @@ class EcommerceWalletController extends Controller
             ?: $user->businesses()->firstWhere('user_id', $user->id)?->id;
 
 
-        $wallet = EcommerceWallet::where('business_id', $business_id)->first();
+        $wallet = EcommerceWallet::with('bankAccount')->where('business_id', $business_id)->first();
 
         return $this->returnJsonResponse(
             message: 'Wallet fetched successfully.',

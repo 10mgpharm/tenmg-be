@@ -21,7 +21,7 @@ class ProductInsightsService implements IProductInsightsService
     public function insights(array $validated, User $user): ProductInsightsResource
     {
         try {
-            $filter = $validated['filter'];
+            $filter = $validated['date_filter'];
 
             // Get the current timestamp
             $now = now();
@@ -43,22 +43,21 @@ class ProductInsightsService implements IProductInsightsService
             // Fetch total quantity of products sold, grouped by time ranges
             $sales = $query
                 ->selectRaw('
-                    SUM(CASE WHEN HOUR(created_at) BETWEEN 0 AND 6 THEN quantity ELSE 0 END) as midnight_to_six_am,
-                    SUM(CASE WHEN HOUR(created_at) BETWEEN 6 AND 12 THEN quantity ELSE 0 END) as six_am_to_twelve_pm,
-                    SUM(CASE WHEN HOUR(created_at) BETWEEN 12 AND 18 THEN quantity ELSE 0 END) as twelve_pm_to_six_pm,
-                    SUM(CASE WHEN HOUR(created_at) BETWEEN 18 AND 24 THEN quantity ELSE 0 END) as six_pm_to_midnight
+                    COALESCE(SUM(CASE WHEN HOUR(created_at) BETWEEN 0 AND 6 THEN quantity ELSE 0 END), 0) as midnight_to_six_am,
+                    COALESCE(SUM(CASE WHEN HOUR(created_at) BETWEEN 6 AND 12 THEN quantity ELSE 0 END), 0) as six_am_to_twelve_pm,
+                    COALESCE(SUM(CASE WHEN HOUR(created_at) BETWEEN 12 AND 18 THEN quantity ELSE 0 END), 0) as twelve_pm_to_six_pm,
+                    COALESCE(SUM(CASE WHEN HOUR(created_at) BETWEEN 18 AND 24 THEN quantity ELSE 0 END), 0)as six_pm_to_midnight
                 ')
                 ->first();
 
             // Fetch total revenue, calculated from price * quantity, grouped by time ranges
             $revenues = $query
                 ->selectRaw('
-                SUM(CASE WHEN HOUR(created_at) BETWEEN 0 AND 6 THEN COALESCE(discount_price, actual_price) * quantity ELSE 0 END) as midnight_to_six_am,
-                SUM(CASE WHEN HOUR(created_at) BETWEEN 6 AND 12 THEN COALESCE(discount_price, actual_price) * quantity ELSE 0 END) as six_am_to_twelve_pm,
-                SUM(CASE WHEN HOUR(created_at) BETWEEN 12 AND 18 THEN COALESCE(discount_price, actual_price) * quantity ELSE 0 END) as twelve_pm_to_six_pm,
-                SUM(CASE WHEN HOUR(created_at) BETWEEN 18 AND 24 THEN COALESCE(discount_price, actual_price) * quantity ELSE 0 END) as six_pm_to_midnight
-            ')
-            ->first();
+                COALESCE(SUM(CASE WHEN HOUR(created_at) BETWEEN 0 AND 6 THEN COALESCE(discount_price, actual_price) * quantity ELSE 0 END), 0) as midnight_to_six_am,
+                COALESCE(SUM(CASE WHEN HOUR(created_at) BETWEEN 6 AND 12 THEN COALESCE(discount_price, actual_price) * quantity ELSE 0 END), 0) as six_am_to_twelve_pm,
+                COALESCE(SUM(CASE WHEN HOUR(created_at) BETWEEN 12 AND 18 THEN COALESCE(discount_price, actual_price) * quantity ELSE 0 END), 0) as twelve_pm_to_six_pm,
+                COALESCE(SUM(CASE WHEN HOUR(created_at) BETWEEN 18 AND 24 THEN COALESCE(discount_price, actual_price) * quantity ELSE 0 END), 0) as six_pm_to_midnight
+            ')->first();
         
 
             // Fetch the top 3 best-selling products based on total quantity sold
