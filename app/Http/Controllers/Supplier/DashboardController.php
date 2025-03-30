@@ -44,7 +44,9 @@ class DashboardController extends Controller
 
             $order_query = EcommerceOrder::query()->where("status", '!=', 'cart')->whereHas('orderDetails', fn($query) => $query->whereHas('product', fn($query) => $query->where('business_id', $business_id)));
             $product_query = EcommerceProduct::where('business_id', $business_id);
-            $revenue_query = EcommerceOrderDetail::query()->whereHas('product', fn($query) => $query->where('business_id', $business_id))
+            $revenue_query = EcommerceOrderDetail::query()->where('supplier_id', $business_id)
+            ->whereHas('product', fn($query) => $query->where('business_id', $business_id))
+            ->whereHas('order', fn($query) => $query->where('status', 'completed'))
                 ->whereBetween('created_at', $date_range);
 
             $analytics = [
@@ -54,14 +56,14 @@ class DashboardController extends Controller
                     ->where('status', 'completed')
                     ->selectRaw('COUNT(*) as count')->first(),
                 'revenue' => match (strtolower($validated['date_filter'])) {
-                    'today' => $revenue_query->selectRaw('
+                    'today' => $revenue_query->clone()->selectRaw('
                         COALESCE(SUM(CASE WHEN HOUR(created_at) BETWEEN 0 AND 6 THEN COALESCE(discount_price, actual_price) * quantity ELSE 0 END), 0) as midnight_to_six_am,
                         COALESCE(SUM(CASE WHEN HOUR(created_at) BETWEEN 6 AND 12 THEN COALESCE(discount_price, actual_price) * quantity ELSE 0 END), 0) as six_am_to_twelve_pm,
                         COALESCE(SUM(CASE WHEN HOUR(created_at) BETWEEN 12 AND 18 THEN COALESCE(discount_price, actual_price) * quantity ELSE 0 END), 0) as twelve_pm_to_six_pm,
                         COALESCE(SUM(CASE WHEN HOUR(created_at) BETWEEN 18 AND 24 THEN COALESCE(discount_price, actual_price) * quantity ELSE 0 END), 0) as six_pm_to_midnight
                     ')->first(),
 
-                    'one_week' => $revenue_query->selectRaw('
+                    'one_week' => $revenue_query->clone()->selectRaw('
                         COALESCE(SUM(CASE WHEN DAYNAME(created_at) = "Monday" THEN COALESCE(discount_price, actual_price) * quantity ELSE 0 END), 0) as Monday,
                         COALESCE(SUM(CASE WHEN DAYNAME(created_at) = "Tuesday" THEN COALESCE(discount_price, actual_price) * quantity ELSE 0 END), 0) as Tuesday,
                         COALESCE(SUM(CASE WHEN DAYNAME(created_at) = "Wednesday" THEN COALESCE(discount_price, actual_price) * quantity ELSE 0 END), 0) as Wednesday,
@@ -71,14 +73,45 @@ class DashboardController extends Controller
                         COALESCE(SUM(CASE WHEN DAYNAME(created_at) = "Sunday" THEN COALESCE(discount_price, actual_price) * quantity ELSE 0 END), 0) as Sunday
                     ')->first(),
 
-                    'one_month' => $revenue_query->selectRaw('
+                    'one_month' => $revenue_query->clone()->selectRaw('
                         COALESCE(SUM(CASE WHEN WEEK(created_at) = WEEK(NOW()) THEN COALESCE(discount_price, actual_price) * quantity ELSE 0 END), 0) as week_one,
                         COALESCE(SUM(CASE WHEN WEEK(created_at) = WEEK(NOW()) - 1 THEN COALESCE(discount_price, actual_price) * quantity ELSE 0 END), 0) as week_two,
                         COALESCE(SUM(CASE WHEN WEEK(created_at) = WEEK(NOW()) - 2 THEN COALESCE(discount_price, actual_price) * quantity ELSE 0 END), 0) as week_three,
                         COALESCE(SUM(CASE WHEN WEEK(created_at) = WEEK(NOW()) - 3 THEN COALESCE(discount_price, actual_price) * quantity ELSE 0 END), 0) as week_four
                     ')->first(),
 
-                    'one_year' => $revenue_query->selectRaw('
+                    'three_months' => $revenue_query->clone()->selectRaw('
+                        COALESCE(SUM(CASE WHEN MONTH(created_at) = MONTH(NOW()) AND YEAR(created_at) = YEAR(NOW()) 
+                            THEN COALESCE(discount_price, actual_price) * quantity ELSE 0 END), 0) as current_month,
+                        COALESCE(SUM(CASE WHEN MONTH(created_at) = MONTH(DATE_SUB(NOW(), INTERVAL 1 MONTH)) 
+                            AND YEAR(created_at) = YEAR(DATE_SUB(NOW(), INTERVAL 1 MONTH)) 
+                            THEN COALESCE(discount_price, actual_price) * quantity ELSE 0 END), 0) as last_month,
+                        COALESCE(SUM(CASE WHEN MONTH(created_at) = MONTH(DATE_SUB(NOW(), INTERVAL 2 MONTH)) 
+                            AND YEAR(created_at) = YEAR(DATE_SUB(NOW(), INTERVAL 2 MONTH)) 
+                            THEN COALESCE(discount_price, actual_price) * quantity ELSE 0 END), 0) as two_months_ago
+                    ')->first(),
+
+                    'six_months' => $revenue_query->clone()->selectRaw('
+                        COALESCE(SUM(CASE WHEN MONTH(created_at) = MONTH(NOW()) AND YEAR(created_at) = YEAR(NOW()) 
+                            THEN COALESCE(discount_price, actual_price) * quantity ELSE 0 END), 0) as current_month,
+                        COALESCE(SUM(CASE WHEN MONTH(created_at) = MONTH(DATE_SUB(NOW(), INTERVAL 1 MONTH)) 
+                            AND YEAR(created_at) = YEAR(DATE_SUB(NOW(), INTERVAL 1 MONTH)) 
+                            THEN COALESCE(discount_price, actual_price) * quantity ELSE 0 END), 0) as last_month,
+                        COALESCE(SUM(CASE WHEN MONTH(created_at) = MONTH(DATE_SUB(NOW(), INTERVAL 2 MONTH)) 
+                            AND YEAR(created_at) = YEAR(DATE_SUB(NOW(), INTERVAL 2 MONTH)) 
+                            THEN COALESCE(discount_price, actual_price) * quantity ELSE 0 END), 0) as two_months_ago,
+                        COALESCE(SUM(CASE WHEN MONTH(created_at) = MONTH(DATE_SUB(NOW(), INTERVAL 3 MONTH)) 
+                            AND YEAR(created_at) = YEAR(DATE_SUB(NOW(), INTERVAL 3 MONTH)) 
+                            THEN COALESCE(discount_price, actual_price) * quantity ELSE 0 END), 0) as three_months_ago,
+                        COALESCE(SUM(CASE WHEN MONTH(created_at) = MONTH(DATE_SUB(NOW(), INTERVAL 4 MONTH)) 
+                            AND YEAR(created_at) = YEAR(DATE_SUB(NOW(), INTERVAL 4 MONTH)) 
+                            THEN COALESCE(discount_price, actual_price) * quantity ELSE 0 END), 0) as four_months_ago,
+                        COALESCE(SUM(CASE WHEN MONTH(created_at) = MONTH(DATE_SUB(NOW(), INTERVAL 5 MONTH)) 
+                            AND YEAR(created_at) = YEAR(DATE_SUB(NOW(), INTERVAL 5 MONTH)) 
+                            THEN COALESCE(discount_price, actual_price) * quantity ELSE 0 END), 0) as five_months_ago
+                    ')->first(),
+
+                    'one_year' => $revenue_query->clone()->selectRaw('
                         COALESCE(SUM(CASE WHEN MONTH(created_at) = 1 THEN COALESCE(discount_price, actual_price) * quantity ELSE 0 END), 0) as January,
                         COALESCE(SUM(CASE WHEN MONTH(created_at) = 2 THEN COALESCE(discount_price, actual_price) * quantity ELSE 0 END), 0) as February,
                         COALESCE(SUM(CASE WHEN MONTH(created_at) = 3 THEN COALESCE(discount_price, actual_price) * quantity ELSE 0 END), 0) as March,
@@ -100,7 +133,24 @@ class DashboardController extends Controller
                     SUM(CASE WHEN quantity > 0 THEN 1 ELSE 0 END) as in_stock,
                     SUM(CASE WHEN quantity <= low_stock_level THEN 1 ELSE 0 END) as low_stock,
                     SUM(CASE WHEN quantity = 0 THEN 1 ELSE 0 END) as out_of_stock
-                ')->first()
+                ')->first(),
+
+                'revenue_per_product' => $product_query->clone()
+                ->leftJoin('ecommerce_order_details', 'ecommerce_products.id', '=', 'ecommerce_order_details.ecommerce_product_id')
+                ->leftJoin('ecommerce_orders', 'ecommerce_order_details.ecommerce_order_id', '=', 'ecommerce_orders.id')
+                ->selectRaw('
+                    ecommerce_products.id,
+                    ecommerce_products.name,
+                    ecommerce_products.slug,
+                    SUM(CASE 
+                        WHEN ecommerce_orders.status = "completed" 
+                        THEN ecommerce_order_details.quantity * COALESCE(ecommerce_order_details.discount_price, ecommerce_order_details.actual_price) 
+                        ELSE 0 
+                    END) as revenue
+                ')
+                ->groupBy('ecommerce_products.id')
+                ->get()
+            
             ];
 
             return $this->returnJsonResponse(
