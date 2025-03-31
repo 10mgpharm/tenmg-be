@@ -92,7 +92,7 @@ class LoanService
 
         if ($repaymentSchedule->payment_status === 'PAID') {
             throw new Exception('Repayment schedule has already been paid');
-        }    
+        }
 
         $paymentResponse = $this->paystackService->debitCustomer(repayment: $repaymentSchedule, isLiquidation: $isLiquidation);
 
@@ -127,6 +127,11 @@ class LoanService
     public function getAllLoans(): \Illuminate\Support\Collection
     {
         return $this->loanRepository->fetchAllLoans();
+    }
+
+    public function getLoanList(array $filter, int $perPage)
+    {
+        return $this->loanRepository->getLoanList($filter, $perPage);
     }
 
 }

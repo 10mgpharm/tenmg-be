@@ -478,6 +478,13 @@ Route::prefix('v1')->group(function () {
                 Route::get('/{reference}', [LoanApplicationController::class, 'getLoanApplicationByReference'])->name('admin.applications.getLoanApplicationByReference');
 
             });
+
+            Route::prefix('loan')->name('loan.')->group(function () {
+                Route::get('/', [LoanController::class, 'getLoanList'])->name('admin.loan.getAllLoans');
+                Route::get('/{id}', [LoanController::class, 'getLoanDetails'])->name('admin.loan.getLoanDetails');
+
+            });
+
             Route::get('insights/filters', [AdminProductInsightsController::class, 'filters']);
             Route::get('insights', [AdminProductInsightsController::class, 'insights']);
 
@@ -593,6 +600,12 @@ Route::prefix('v1')->group(function () {
                 Route::get('/loan-stats', [LoanApplicationController::class, 'getLoanApplicationStats']);
                 Route::get('/view/{reference}', [LoanApplicationController::class, 'getLoanApplicationByReferenceResourced']);
                 Route::post('/', [LoanApplicationController::class, 'approveLoanApplicationManually']);
+            });
+
+            Route::prefix('loan')->name('loan.')->group(function () {
+                Route::get('/', [LoanController::class, 'getLoanList'])->name('lender.loan.getAllLoans');
+                Route::get('/{id}', [LoanController::class, 'getLoanDetails'])->name('lender.loan.getLoanDetails');
+
             });
 
             Route::prefix('txn_history')->group(function () {

@@ -39,6 +39,42 @@ class LoanRepository
         return Loan::all();
     }
 
+    public function getLoanList(array $criteria, $perPage = 15)
+    {
+        //get the business type
+        $user = request()->user();
+        $business = $user->ownerBusinessType
+            ?: $user->businesses()->firstWhere('user_id', $user->id);
+
+        $query = Loan::query();
+
+        if (isset($criteria['search'])) {
+            $query->whereHas('customer', function ($q) use ($criteria) {
+                $q->where('name', 'like', '%'.$criteria['search'].'%');
+            });
+        }
+
+        if (isset($criteria['dateFrom']) && isset($criteria['dateTo'])) {
+            $query->whereBetween('created_at', [$criteria['dateFrom'], $criteria['dateTo']]);
+        }
+
+        if (isset($criteria['status'])) {
+            $query->where('status', $criteria['status']);
+        }
+
+        if($business->type != "ADMIN" && $business->type != "LENDER"){
+            $query->where('customer_id', $user->id);
+        }elseif($business->type == "LENDER"){
+            $query->whereHas('offer', function ($q) use ($business) {
+                $q->where('lender_id', $business->id);
+            });
+        }
+
+        $query->orderBy('created_at', 'desc');
+
+        return $query->paginate($perPage);
+    }
+
     public function getLoanWithRepaymentSchedules(int $loanId): Loan
     {
         return Loan::with('repaymentSchedule')->findOrFail($loanId);
