@@ -1,0 +1,56 @@
+<?php
+
+namespace App\Http\Requests\Supplier;
+
+use Illuminate\Foundation\Http\FormRequest;
+
+class StoreEcommerceStoreAddressRequest extends FormRequest
+{
+    /**
+     * Determine if the user is authorized to make this request.
+     */
+    public function authorize(): bool
+    {
+        $user = $this->user();
+        return $user && $user->hasRole('supplier');
+    }
+
+    /**
+     * Prepare the data for validation.
+     */
+    protected function prepareForValidation(): void
+    {
+        $this->merge([
+            'closest_landmark' => $this->input('closestLandmark'),
+            'street_address' => $this->input('streetAddress'),
+        ]);
+    }
+
+    /**
+     * Get the validation rules that apply to the request.
+     *
+     * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
+     */
+    public function rules(): array
+    {
+        return [
+            'country' => ['required', 'string', 'max:255', 'min:3'],
+            'state' => ['required', 'string', 'max:255', 'min:3'],
+            'city' => ['required', 'string', 'max:255', 'min:3'],
+            'closest_landmark' => ['sometimes', 'nullable', 'string', 'max:255', 'min:3'],
+            'street_address' => ['required', 'string', 'max:255', 'min:3'],
+        ];
+    }
+
+    /**
+     * Custom response for failed authorization.
+     *
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function failedAuthorization()
+    {
+        abort(response()->json([
+            'message' => 'You are not authorized to create this resource.',
+        ], 403));
+    }
+}
