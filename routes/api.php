@@ -2,6 +2,7 @@
 
 use App\Enums\InAppNotificationType;
 use App\Http\Controllers\Admin\AppNotificationController;
+use App\Http\Controllers\API\Admin\DashboardController as AdminDashboardController;
 use App\Http\Controllers\API\Account\AccountController;
 use App\Http\Controllers\API\Account\AppNotificationController as AccountAppNotificationController;
 use App\Http\Controllers\API\Account\CountUnreadNotificationController;
@@ -492,6 +493,8 @@ Route::prefix('v1')->group(function () {
                 Route::get('/{customerId}', [TransactionHistoryController::class, 'index'])->name('admin.txn_history');
 
             });
+
+            Route::get('dashboard', AdminDashboardController::class);
         });
 
         // STOREFRONTS specific routes
