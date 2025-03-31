@@ -31,7 +31,7 @@ class ProductInsightsRequest extends FormRequest
     {
 
         $this->merge([
-            'filter' => strtoupper($this->input('filter', 'today')),
+            'date_filter' => strtoupper($this->input('dateFilter', 'today')),
         ]);
     }
 
@@ -44,7 +44,7 @@ class ProductInsightsRequest extends FormRequest
     {
 
         return [
-            'filter' => ['required', 'string', new Enum(ProductInsightsFilterEnum::class)],
+            'date_filter' => ['required', 'string', new Enum(ProductInsightsFilterEnum::class)],
         ];
     }
 }
