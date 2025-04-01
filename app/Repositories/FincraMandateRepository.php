@@ -368,6 +368,17 @@ class FincraMandateRepository
         $lenderWallet->current_balance -= $offer->offer_amount;
         $lenderWallet->save();
 
+        //add the debited amount to the ledger wallet
+        $ledgerWallet = CreditLendersWallet::firstOrNew([
+            'lender_id' => $offer->lender_id,
+            'type' => 'ledger'
+        ]);
+
+        $prevBalance = $ledgerWallet->exists ? $ledgerWallet->current_balance : 0;
+        $ledgerWallet->prev_balance = $prevBalance;
+        $ledgerWallet->current_balance = $prevBalance + $offer->offer_amount;
+        $ledgerWallet->save();
+
         // Create the loan record
         $loan = $this->loanRepository->updateOrCreate([
             'business_id' => $loanApplication->business_id,

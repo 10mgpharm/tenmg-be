@@ -16,6 +16,23 @@ class LenderDashboardRepository
         $business_id = $user->ownerBusinessType?->id
             ?: $user->businesses()->firstWhere('user_id', $user->id)?->id;
 
+        //check if lender has three wallets temporary fix
+        $lenderDepositWallet = Business::find($business_id)->allLendersWallet;
+        if ($lenderDepositWallet->count() < 3) {
+            $walletTypes = ['investment', 'deposit', 'ledger'];
+        foreach ($walletTypes as $type) {
+            CreditLendersWallet::firstOrCreate([
+                'lender_id' => $business_id,
+                'type' => $type,
+            ],[
+                'lender_id' => $business_id,
+                'type' => $type,
+                'prev_balance' => 0,
+                'current_balance' => 0,
+            ]);
+        }
+        }
+
         $business = Business::find($business_id);
 
         return $business;

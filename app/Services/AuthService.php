@@ -367,9 +367,12 @@ class AuthService implements IAuthService
 
     public function createLendersWallet($business)
     {
-        $walletTypes = ['investment', 'deposit'];
+        $walletTypes = ['investment', 'deposit', 'ledger'];
         foreach ($walletTypes as $type) {
-            CreditLendersWallet::create([
+            CreditLendersWallet::firstOrCreate([
+                'lender_id' => $business->id,
+                'type' => $type,
+            ],[
                 'lender_id' => $business->id,
                 'type' => $type,
                 'prev_balance' => 0,
