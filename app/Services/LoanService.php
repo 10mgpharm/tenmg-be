@@ -134,4 +134,9 @@ class LoanService
         return $this->loanRepository->getLoanList($filter, $perPage);
     }
 
+    public function getLoanStats()
+    {
+        return $this->loanRepository->getLoanStats();
+    }
+
 }

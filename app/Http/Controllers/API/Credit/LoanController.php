@@ -83,4 +83,12 @@ class LoanController extends Controller
         return $this->returnJsonResponse(message: 'Loan repayment is being process', data: $response);
     }
 
+    public function getLoanStats()
+    {
+        $stats = $this->loanService->getLoanStats();
+
+        return $this->returnJsonResponse(data: $stats);
+
+    }
+
 }

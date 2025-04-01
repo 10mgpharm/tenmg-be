@@ -481,7 +481,8 @@ Route::prefix('v1')->group(function () {
 
             Route::prefix('loan')->name('loan.')->group(function () {
                 Route::get('/', [LoanController::class, 'getLoanList'])->name('admin.loan.getAllLoans');
-                Route::get('/{id}', [LoanController::class, 'getLoanDetails'])->name('admin.loan.getLoanDetails');
+                Route::get('/detail/{id}', [LoanController::class, 'getLoanDetails'])->name('admin.loan.getLoanDetails');
+                Route::get('/stats', [LoanController::class, 'getLoanStats'])->name('admin.loan.getLoanStats');
 
             });
 

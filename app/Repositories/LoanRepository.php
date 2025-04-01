@@ -3,6 +3,7 @@
 namespace App\Repositories;
 
 use App\Models\Loan;
+use App\Models\RepaymentSchedule;
 use Illuminate\Database\Eloquent\Collection;
 
 class LoanRepository
@@ -93,5 +94,23 @@ class LoanRepository
         return $loan->update([
             'status' => 'ONGOING_REPAYMENT'
         ]);
+    }
+
+    public function getLoanStats()
+    {
+
+        $totalCapital = Loan::sum('capital_amount');
+        $activeLoan = Loan::where('status', 'DISBURSED')->sum('capital_amount');
+        $totalInterest  = Loan::sum('interest_amount');
+
+
+        return [
+            "totalLoans" => $totalCapital,
+            "totalAmountDisbursed" => $activeLoan,
+            "totalInterest" => $totalInterest,
+            "totalProduct" => 0
+
+        ];
+
     }
 }
