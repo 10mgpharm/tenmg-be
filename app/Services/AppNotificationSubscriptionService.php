@@ -39,6 +39,9 @@ class AppNotificationSubscriptionService implements IAppNotificationSubscription
                 $query->where('is_vendor', true);
                 $hasRole = true;
 
+            } elseif ($user->hasRole('lender')) {
+                $query->where('is_lender', true);
+                $hasRole = true;
             }
 
             if (!$hasRole) {
