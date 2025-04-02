@@ -46,7 +46,7 @@ class LicenseService implements ILicenseService
             }
         }
 
-        $query->where('license_verification_status', 'PENDING');
+        $query->where('license_verification_status', 'PENDING')->orderBy('created_at', 'desc');
 
         return $query->latest('id')->paginate();
     }
