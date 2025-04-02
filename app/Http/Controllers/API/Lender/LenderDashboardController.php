@@ -107,4 +107,18 @@ class LenderDashboardController extends Controller
         );
     }
 
+    public function transferToDepositWallet(Request $request)
+    {
+        $request->validate([
+            'amount' => 'required|numeric'
+        ]);
+
+        $transfer = $this->lenderDashboardService->transferToDepositWallet($request);
+        return $this->returnJsonResponse(
+            data: $transfer,
+            message: 'Successful'
+        );
+
+    }
+
 }

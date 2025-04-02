@@ -43,4 +43,9 @@ class LenderDashboardService
         return $this->lenderDashboardRepository->withdrawFunds($request);
     }
 
+    public function transferToDepositWallet(Request $request)
+    {
+        return $this->lenderDashboardRepository->transferToDepositWallet($request);
+    }
+
 }

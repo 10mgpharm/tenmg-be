@@ -5,6 +5,7 @@ namespace App\Repositories;
 use App\Models\Business;
 use App\Models\CreditLendersWallet;
 use App\Models\CreditTransactionHistory;
+use App\Services\AuditLogService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 
@@ -254,5 +255,68 @@ class LenderDashboardRepository
             }
         }
 
+    }
+
+    public function transferToDepositWallet(Request $request)
+    {
+        $user = $request->user();
+        $business = $user->ownerBusinessType
+            ?: $user->businesses()->firstWhere('user_id', $user->id);
+
+        //check if the amount is available
+        $amount = $request->amount;
+        $wallet = CreditLendersWallet::where('lender_id', $business->id)->where('type', 'investment')->first();
+        if ($wallet->current_balance < $amount) {
+            throw new \Exception('Insufficient funds');
+        }
+
+        //create a pending transaction
+        $transaction = CreditTransactionHistory::create([
+            'business_id' => $business->id,
+            'amount' => $amount,
+            'status' => 'success',
+            'type' => 'DEBIT',
+            'transaction_group' => 'transfer',
+            'wallet_id' => $wallet->id,
+            'description' => 'Transfer to deposit wallet',
+            'payment_method' => 'fincra'
+        ]);
+
+        //update the wallet balance
+        $wallet->prev_balance = $wallet->current_balance;
+        $wallet->current_balance -= $amount;
+        $wallet->last_transaction_ref = "transfer-".$transaction->identifier;
+        $wallet->save();
+
+        //add the funds to deposit wallet
+        $depositWallet = CreditLendersWallet::where('lender_id', $business->id)->where('type', 'deposit')->first();
+        $depositWallet->prev_balance = $depositWallet->current_balance;
+        $depositWallet->current_balance += $amount;
+        $depositWallet->last_transaction_ref = "transfer-".$transaction->identifier;
+        $depositWallet->save();
+
+        //create a transaction for the deposit wallet
+        CreditTransactionHistory::create([
+            'business_id' => $business->id,
+            'amount' => $amount,
+            'status' => 'success',
+            'type' => 'CREDIT',
+            'transaction_group' => 'transfer',
+            'wallet_id' => $depositWallet->id,
+            'description' => 'Transfer from investment wallet',
+            'payment_method' => 'fincra'
+        ]);
+
+        AuditLogService::log(
+            target: $depositWallet,
+            event: 'Loan.initiated',
+            action: 'Funds transfer',
+            description: $business->name." transferred ".$request->amount." from Investment to Deposit wallet",
+            crud_type: 'UPDATE',
+            properties: []
+        );
+
+
+        return $transaction;
     }
 }
