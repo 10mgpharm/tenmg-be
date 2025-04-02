@@ -165,7 +165,7 @@ class EcommerceDiscountController extends Controller
 
         $result = EcommerceDiscount::businesses()
             ->selectRaw('
-                COUNT(*) as total,
+                COUNT(CASE WHEN status != "EXPIRED" THEN 1 END) as total,
                 SUM(CASE WHEN status = "ACTIVE" THEN 1 ELSE 0 END) as active,
                 SUM(CASE WHEN status = "INACTIVE" THEN 1 ELSE 0 END) as inactive
             ')

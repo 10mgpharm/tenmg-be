@@ -28,6 +28,7 @@ class AppNotification extends Model
         'is_supplier',
         'is_pharmacy',
         'is_vendor',
+        'is_lender',
         'active',
     ];
 
@@ -42,6 +43,7 @@ class AppNotification extends Model
         'is_supplier' => 'boolean',
         'is_pharmacy' => 'boolean',
         'is_vendor' => 'boolean',
+        'is_lender' => 'boolean',
     ];
 
     /**
@@ -55,6 +57,7 @@ class AppNotification extends Model
         'is_supplier' => false,
         'is_pharmacy' => false,
         'is_vendor' => false,
+        'is_lender' => false,
     ];
 
     /**

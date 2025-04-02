@@ -100,6 +100,53 @@ class EcommerceProductService implements IEcommerceProductService
                         }
                     })
                 );
+            })
+            // Filter by presentation names (case-insensitive partial match)
+            ->when($request->input('presentations'), function ($query, $presentations) {
+                $presentations = is_array($presentations) ? $presentations : explode(',', $presentations);
+                $presentations = array_unique(array_map('trim', $presentations));
+
+                $query->whereHas(
+                    'presentation',
+                    fn($q) =>
+                    $q->where(function ($query) use ($presentations) {
+                        foreach ($presentations as $presentation) {
+                            $query->orWhere('name', 'like', '%' . $presentation . '%');
+                        }
+                    })
+                );
+            })
+
+            // Filter by measurement names (case-insensitive partial match)
+            ->when($request->input('measurements'), function ($query, $measurements) {
+                $measurements = is_array($measurements) ? $measurements : explode(',', $measurements);
+                $measurements = array_unique(array_map('trim', $measurements));
+
+                $query->whereHas(
+                    'measurement',
+                    fn($q) =>
+                    $q->where(function ($query) use ($measurements) {
+                        foreach ($measurements as $measurement) {
+                            $query->orWhere('name', 'like', '%' . $measurement . '%');
+                        }
+                    })
+                );
+            })
+
+            // Filter by medicationType names (case-insensitive partial match)
+            ->when($request->input('medicationTypes'), function ($query, $medicationTypes) {
+                $medicationTypes = is_array($medicationTypes) ? $medicationTypes : explode(',', $medicationTypes);
+                $medicationTypes = array_unique(array_map('trim', $medicationTypes));
+
+                $query->whereHas(
+                    'medicationType',
+                    fn($q) =>
+                    $q->where(function ($query) use ($medicationTypes) {
+                        foreach ($medicationTypes as $medicationType) {
+                            $query->orWhere('name', 'like', '%' . $medicationType . '%');
+                        }
+                    })
+                );
             });
 
         // Filter by "minAmount" if provided
