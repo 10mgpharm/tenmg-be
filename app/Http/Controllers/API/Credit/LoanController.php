@@ -3,9 +3,11 @@
 namespace App\Http\Controllers\API\Credit;
 
 use App\Http\Controllers\Controller;
+use App\Http\Resources\LoanResource;
 use App\Services\LoanService;
 use Exception;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 
 class LoanController extends Controller
 {
@@ -21,6 +23,26 @@ class LoanController extends Controller
         $loans = $this->loanService->getAllLoans();
 
         return $this->returnJsonResponse(data: $loans);
+    }
+
+    /**
+     * Get all loans resourced.
+     */
+    public function getLoanList(Request $request): JsonResponse
+    {
+        $loans = $this->loanService->getLoanList($request->all(), $request->perPage ?? 10);
+
+        return $this->returnJsonResponse(data: LoanResource::collection($loans)->response()->getData(true));
+    }
+
+    public function getLoanDetails(int $id): JsonResponse
+    {
+        $loan = $this->loanService->getLoanById($id);
+        if (!$loan) {
+            throw new Exception('Loan not found', 404);
+        }
+
+        return $this->returnJsonResponse(data: new LoanResource($loan));
     }
 
     /**
@@ -59,6 +81,14 @@ class LoanController extends Controller
     {
         $response = $this->loanService->processLoanRepayment(repaymentScheduleId: $repaymentScheduleId);
         return $this->returnJsonResponse(message: 'Loan repayment is being process', data: $response);
+    }
+
+    public function getLoanStats()
+    {
+        $stats = $this->loanService->getLoanStats();
+
+        return $this->returnJsonResponse(data: $stats);
+
     }
 
 }
