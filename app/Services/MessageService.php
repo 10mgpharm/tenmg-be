@@ -168,4 +168,11 @@ class MessageService implements IMessageService
             ->withQueryString()
             ->through(fn(Message $message) => new MessageResource($message));
     }
+
+    public function unreadCount(Request $request, User $user): int
+    {
+        return Message::query()->where('receiver_id', $user->id)
+        ->where(fn ($query) => $query->where('read_at', null)->orWhere('read_status', '!=', 'READ'))
+            ->count();
+    }
 }

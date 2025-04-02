@@ -140,5 +140,17 @@ class MessageController extends Controller
         );
     }
 
+    
+    public function unreadCount(Request $request): JsonResponse
+    {
+        $user = $request->user();
+        $count = $this->messageService->unreadCount($request, $user);
+
+        return $this->returnJsonResponse(
+            message: 'Unread message(s) successfully counted.',
+            data: $count
+        );
+    }
+
 
 }

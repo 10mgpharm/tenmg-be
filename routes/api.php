@@ -2,6 +2,7 @@
 
 use App\Enums\InAppNotificationType;
 use App\Http\Controllers\Admin\AppNotificationController;
+use App\Http\Controllers\API\Admin\DashboardController as AdminDashboardController;
 use App\Http\Controllers\API\Account\AccountController;
 use App\Http\Controllers\API\Account\AppNotificationController as AccountAppNotificationController;
 use App\Http\Controllers\API\Account\CountUnreadNotificationController;
@@ -60,6 +61,7 @@ use App\Http\Controllers\API\Storefront\StorefrontController;
 use App\Http\Controllers\API\Storefront\WishListController;
 use App\Http\Controllers\API\Supplier\AddBankAccountController;
 use App\Http\Controllers\API\Supplier\EcommerceProductController as SupplierEcommerceProductController;
+use App\Http\Controllers\API\Supplier\EcommerceStoreAddressController;
 use App\Http\Controllers\API\Supplier\EcommerceTransactionController;
 use App\Http\Controllers\API\Supplier\EcommerceWalletController;
 use App\Http\Controllers\API\Vendor\AuditLogController as VendorAuditLogController;
@@ -157,6 +159,7 @@ Route::prefix('v1')->group(function () {
             });
 
             Route::get('messages/start-conversation', [MessageController::class, 'startConversation']);
+            Route::get('messages/unread-count', [MessageController::class, 'unreadCount']);
             Route::match(['PUT', 'PATCH'],'messages/mark-as-read/{message}', [MessageController::class, 'markAsRead']);
             Route::apiResource('messages', MessageController::class);
             Route::post('/fcm-token', UpdateFcmTokenController::class);
@@ -217,6 +220,8 @@ Route::prefix('v1')->group(function () {
             Route::get('wallet', EcommerceWalletController::class);
             Route::get('wallet/transactions', EcommerceTransactionController::class);
             Route::post('wallet/add-bank-account', AddBankAccountController::class);
+
+            Route::apiResource('store-addresses', EcommerceStoreAddressController::class);
         });
 
         // VENDOR specific routes
@@ -501,6 +506,8 @@ Route::prefix('v1')->group(function () {
                 Route::get('/{customerId}', [TransactionHistoryController::class, 'index'])->name('admin.txn_history');
 
             });
+
+            Route::get('dashboard', AdminDashboardController::class);
         });
 
         // STOREFRONTS specific routes
