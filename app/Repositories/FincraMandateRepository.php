@@ -490,9 +490,7 @@ class FincraMandateRepository
 
         $lendersBusinesses = Business::whereHas('getLenderPreferences', function($query) {
             $query->where('auto_accept', false);
-        })->where('type', 'LENDER')->whereHas('lendersWallet', function ($query) use ($amount) {
-            $query->where('current_balance', '>', $amount);
-        })->whereHas('getLenderPreferences', function ($query) use ($customerCategory, $loanDuration) {
+        })->where('type', 'LENDER')->whereHas('getLenderPreferences', function ($query) use ($customerCategory, $loanDuration) {
             $query->whereRaw('JSON_CONTAINS(credit_score_category, ?)', [json_encode($customerCategory)])->whereRaw('JSON_CONTAINS(loan_tenure, ?)', [$loanDuration]);
         })->get();
 
@@ -518,6 +516,9 @@ class FincraMandateRepository
             Notification::route('mail', [
                 $user->email => $user->name,
             ])->notify(new LoanSubmissionNotification($mailable));
+
+            (new InAppNotificationService)
+            ->forUser($user)->notify(InAppNotificationType::NEW_LOAN_REQUEST);
 
         }
 
@@ -692,6 +693,9 @@ class FincraMandateRepository
             $user->email => $user->name,
         ])->notify(new LoanSubmissionNotification($mailable));
 
+        (new InAppNotificationService)
+            ->forUser($user)->notify(InAppNotificationType::NEW_LOAN_REQUEST);
+
         //send notification to lender
         $subject = 'Loan Request Approved';
         $message = "A loan request assigned to you has been automatically approved based on the configured settings. Below are the details:";
@@ -715,6 +719,9 @@ class FincraMandateRepository
         Notification::route('mail', [
             $user->email => $user->name,
         ])->notify(new LoanSubmissionNotification($mailable));
+
+        (new InAppNotificationService)
+            ->forUser($user)->notify(InAppNotificationType::NEW_LOAN_REQUEST);
 
 
         //send mails to all admins
