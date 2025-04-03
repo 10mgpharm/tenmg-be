@@ -8,6 +8,7 @@ use App\Models\Business;
 use App\Models\CreditLendersWallet;
 use App\Models\CreditOffer;
 use App\Models\CreditTransactionHistory;
+use App\Models\CreditVendorWallets;
 use App\Models\Customer;
 use App\Models\DebitMandate;
 use App\Models\Loan;
@@ -368,6 +369,19 @@ class FincraMandateRepository
         $lenderWallet->current_balance -= $offer->offer_amount;
         $lenderWallet->save();
 
+        //add to lender transaction history
+        CreditTransactionHistory::create([
+            'amount' => $offer->offer_amount,
+            'type' => 'DEBIT',
+            'status' => 'success',
+            'business_id' => $offer->lender_id,
+            'description' => 'Loan disbursement to '.$offer->customer->name,
+            'loan_application_id' => $offer->application_id,
+            'transaction_group' => 'withdrawal',
+            'wallet_id' => $lenderWallet->id,
+            'meta' => json_encode($loanData),
+        ]);
+
         //add the debited amount to the ledger wallet
         $ledgerWallet = CreditLendersWallet::firstOrNew([
             'lender_id' => $offer->lender_id,
@@ -378,6 +392,39 @@ class FincraMandateRepository
         $ledgerWallet->prev_balance = $prevBalance;
         $ledgerWallet->current_balance = $prevBalance + $offer->offer_amount;
         $ledgerWallet->save();
+
+        //add to ledger transaction history
+        CreditTransactionHistory::create([
+            'amount' => $offer->offer_amount,
+            'type' => 'CREDIT',
+            'status' => 'success',
+            'business_id' => $offer->lender_id,
+            'description' => 'Loan disbursement to '.$offer->customer->name,
+            'loan_application_id' => $offer->application_id,
+            'transaction_group' => 'deposit',
+            'wallet_id' => $ledgerWallet->id,
+            'meta' => json_encode($loanData),
+        ]);
+
+        //add amount to vendor voucherwallet
+        $vendorWallet = CreditVendorWallets::where('vendor_id', $loanApplication->business_id)->where('type', 'credit_voucher')->first();
+        $vendorWallet->prev_balance = $vendorWallet->current_balance;
+        $vendorWallet->current_balance += $offer->offer_amount;
+        $vendorWallet->save();
+
+        //add to vendor transaction history
+        CreditTransactionHistory::create([
+            'amount' => $offer->offer_amount,
+            'type' => 'CREDIT',
+            'status' => 'success',
+            'business_id' => $loanApplication->business_id,
+            'description' => 'Loan voucher for '.$loanApplication->customer->name,
+            'loan_application_id' => $loanApplication->id,
+            'transaction_group' => 'deposit',
+            'wallet_id' => $vendorWallet->id,
+            'meta' => json_encode($loanData),
+        ]);
+
 
         // Create the loan record
         $loan = $this->loanRepository->updateOrCreate([
