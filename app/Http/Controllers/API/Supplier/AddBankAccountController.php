@@ -33,12 +33,8 @@ class AddBankAccountController extends Controller
 
         
         return DB::transaction(function () use ($validated) {
-            $otp = (new OtpService)->validate(OtpType::SUPPLIER_ADD_BANK_ACCOUNT, $validated['otp']);
-            
             $wallet = EcommerceWallet::firstOrCreate(['business_id' => $validated['supplier_id']], ['previous_balance' => 0, 'current_balance' => 0]);
             $bank_account = EcommerceBankAccount::create($validated);
-            
-            $otp->delete();
 
             return $this->returnJsonResponse(
                 message: 'Bank account added successfully.',
