@@ -13,7 +13,7 @@ class ShowBusinessSettingRequest extends FormRequest
     {
         $user = $this->user();
         
-        if($user->hasRole('admin')){
+        if($user->hasRole('admin') || $user->hasRole('operation') || $user->hasRole('support')){
             return true;
         }
 

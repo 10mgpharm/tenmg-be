@@ -20,7 +20,7 @@ class EcommerceProductService implements IEcommerceProductService
      */
     public function show(Request $request, EcommerceProduct $product): EcommerceProductResource
     {
-        $product->load(['reviews', 'rating']);
+        $product->load(['reviews', 'rating', 'brand', 'medicationType', 'presentation', 'variation', 'measurement', 'category']);
         return new EcommerceProductResource($product);
     }
 
@@ -97,6 +97,53 @@ class EcommerceProductService implements IEcommerceProductService
                         foreach ($brands as $brand) {
                             $query->orWhere('name', 'like', '%' . $brand . '%')
                                 ->orWhere('slug', 'like', '%' . $brand . '%');
+                        }
+                    })
+                );
+            })
+            // Filter by presentation names (case-insensitive partial match)
+            ->when($request->input('presentations'), function ($query, $presentations) {
+                $presentations = is_array($presentations) ? $presentations : explode(',', $presentations);
+                $presentations = array_unique(array_map('trim', $presentations));
+
+                $query->whereHas(
+                    'presentation',
+                    fn($q) =>
+                    $q->where(function ($query) use ($presentations) {
+                        foreach ($presentations as $presentation) {
+                            $query->orWhere('name', 'like', '%' . $presentation . '%');
+                        }
+                    })
+                );
+            })
+
+            // Filter by measurement names (case-insensitive partial match)
+            ->when($request->input('measurements'), function ($query, $measurements) {
+                $measurements = is_array($measurements) ? $measurements : explode(',', $measurements);
+                $measurements = array_unique(array_map('trim', $measurements));
+
+                $query->whereHas(
+                    'measurement',
+                    fn($q) =>
+                    $q->where(function ($query) use ($measurements) {
+                        foreach ($measurements as $measurement) {
+                            $query->orWhere('name', 'like', '%' . $measurement . '%');
+                        }
+                    })
+                );
+            })
+
+            // Filter by medicationType names (case-insensitive partial match)
+            ->when($request->input('medicationTypes'), function ($query, $medicationTypes) {
+                $medicationTypes = is_array($medicationTypes) ? $medicationTypes : explode(',', $medicationTypes);
+                $medicationTypes = array_unique(array_map('trim', $medicationTypes));
+
+                $query->whereHas(
+                    'medicationType',
+                    fn($q) =>
+                    $q->where(function ($query) use ($medicationTypes) {
+                        foreach ($medicationTypes as $medicationType) {
+                            $query->orWhere('name', 'like', '%' . $medicationType . '%');
                         }
                     })
                 );
