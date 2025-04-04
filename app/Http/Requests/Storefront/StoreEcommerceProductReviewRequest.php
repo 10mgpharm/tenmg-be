@@ -51,6 +51,21 @@ class StoreEcommerceProductReviewRequest extends FormRequest
         ];
     }
 
+
+    /**
+     * Custom error messages for validation failures.
+     *
+     * @return array
+     */
+    public function messages()
+    {
+        return [
+            'ecommerce_product_id.required' => 'The product ID is required.',
+            'ecommerce_product_id.exist' => 'The product ID does not exist.',
+            'ecommerce_product_id.unique' => 'You have previously reviewed this product.',
+        ];
+    }
+
     /**
      * Custom response for failed authorization.
      *

@@ -20,7 +20,7 @@ class EcommerceProductService implements IEcommerceProductService
      */
     public function show(Request $request, EcommerceProduct $product): EcommerceProductResource
     {
-        $product->load(['reviews', 'rating']);
+        $product->load(['reviews', 'rating', 'brand', 'medicationType', 'presentation', 'variation', 'measurement', 'category']);
         return new EcommerceProductResource($product);
     }
 
