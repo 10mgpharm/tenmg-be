@@ -20,7 +20,6 @@ class EcommerceReviewProductResource extends JsonResource
      */
     public function toArray(Request $request): array
     {
-        $rating = EcommerceProductRating::query()->where('ecommerce_product_id', $this->id)->first();
         
         return [
             'id' => $this->id,
@@ -28,13 +27,13 @@ class EcommerceReviewProductResource extends JsonResource
             'slug' => $this->slug,
             'description' => $this->description,
             'active' => $this->active,
-            'brand' => new EcommerceBrandResource($this->brand),
-            'medicationType' => new EcommerceMedicationTypeResource($this->medicationType),
-            'presentation' => new EcommercePresentationResource($this->presentation),
-            'variation' => new EcommerceMedicationVariationResource($this->variation),
-            'measurement' => new EcommerceMeasurementResource($this->measurement),
+            'brand' => $this->whenLoaded('brand', fn ($brand) => new EcommerceBrandResource($brand)),
+            'medicationType' => $this->whenLoaded('medicationType', fn ($medicationType) => new EcommerceMedicationTypeResource($medicationType)),
+            'presentation' => $this->whenLoaded('presentation', fn ($presentation) => new EcommercePresentationResource($presentation)),
+            'variation' => $this->whenLoaded('variation', fn ($variation) => new EcommerceMedicationVariationResource($variation)),
+            'measurement' => $this->whenLoaded('measurement', fn ($measurement) => new EcommerceMeasurementResource($measurement)),
             'thumbnailFile' => $this->thumbnailFile?->url,
-            'rating' => $rating ? new EcommerceProductRatingResource($rating) : null,
+            'rating' =>  $this->whenLoaded('rating', fn ($rating) => new EcommerceProductRatingResource($rating)),
         ];
     }
 }

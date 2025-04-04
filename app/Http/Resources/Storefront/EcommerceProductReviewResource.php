@@ -20,8 +20,8 @@ class EcommerceProductReviewResource extends JsonResource
             'email' => $this->email ?? $this->user?->email ?? 'Anonymous',
             'comment' => $this->comment,
             'createdAt' => $this->created_at,
-            'product' => $this->product ? new EcommerceReviewProductResource($this->product) : null,
-            'rating' => $this->rating ? new EcommerceProductRatingResource($this->rating) : null,
+            'product' => $this->whenLoaded('product', fn ($product) => new EcommerceReviewProductResource($product)),
+            'rating' => $this->whenLoaded('rating', fn ($rating) => new EcommerceProductRatingResource($rating)),
         ];
     }
 }
