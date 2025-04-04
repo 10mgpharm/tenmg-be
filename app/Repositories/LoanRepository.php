@@ -64,7 +64,7 @@ class LoanRepository
         }
 
         if($business->type != "ADMIN" && $business->type != "LENDER"){
-            $query->where('customer_id', $user->id);
+            $query->where('business_id', $business->id);
         }elseif($business->type == "LENDER"){
             $query->whereHas('offer', function ($q) use ($business) {
                 $q->where('lender_id', $business->id);

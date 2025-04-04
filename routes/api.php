@@ -383,7 +383,7 @@ Route::prefix('v1')->group(function () {
 
             // Loan
             Route::prefix('loans')->group(function () {
-                Route::get('/', [LoanController::class, 'getAllLoans'])->name('loans.getAll')->middleware('admin');
+                Route::get('/', [LoanController::class, 'getLoanList'])->name('loans.getAll');
                 Route::get('/{id}', [LoanController::class, 'getLoanById'])->name('loans.getById');
                 Route::post('/{id}/disbursed', [LoanController::class, 'disbursed'])->name('loans.disbursed');
                 Route::get('/view/stats', [LoanController::class, 'getLoanStats'])->name('vendor.loan.getLoanStats');
