@@ -156,4 +156,49 @@ class LoanRepository
         ];
 
     }
+
+    public function getLoanStatusCount()
+    {
+        $user = request()->user();
+        $business = $user->ownerBusinessType
+            ?: $user->businesses()->firstWhere('user_id', $user->id);
+
+        if($business->type != "ADMIN" && $business->type != "LENDER"){
+            $ongoingLoan = Loan::where('status', 'Ongoing')->where('business_id', $business->id)->count();
+            $completedLoan = Loan::where('status', 'Completed')->where('business_id', $business->id)->count();
+            $lateRepayment = Loan::where('status', 'Late Repayment')->where('business_id', $business->id)->count();
+
+            return [
+                "Ongoing" => $ongoingLoan,
+                "Completed" => $completedLoan,
+                "LateRepayment" => $lateRepayment,
+            ];
+        }elseif($business->type == "LENDER"){
+            $ongoingLoan = Loan::where('status', 'Ongoing')->whereHas('offer', function ($q) use ($business) {
+                $q->where('lender_id', $business->id);
+            })->count();
+            $completedLoan = Loan::where('status', 'Completed')->whereHas('offer', function ($q) use ($business) {
+                $q->where('lender_id', $business->id);
+            })->count();
+            $lateRepayment = Loan::where('status', 'Late Repayment')->whereHas('offer', function ($q) use ($business) {
+                $q->where('lender_id', $business->id);
+            })->count();
+
+            return [
+                "Ongoing" => $ongoingLoan,
+                "Completed" => $completedLoan,
+                "LateRepayment" => $lateRepayment,
+            ];
+        }
+
+        $ongoingLoan = Loan::where('status', 'Ongoing')->count();
+        $completedLoan = Loan::where('status', 'Completed')->count();
+        $lateRepayment = Loan::where('status', 'Late Repayment')->count();
+
+        return [
+            "Ongoing" => $ongoingLoan,
+            "Completed" => $completedLoan,
+            "LateRepayment" => $lateRepayment,
+        ];
+    }
 }

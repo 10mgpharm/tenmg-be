@@ -91,4 +91,12 @@ class LoanController extends Controller
 
     }
 
+    public function getLoanStatusCount()
+    {
+        $statusCount = $this->loanService->getLoanStatusCount();
+
+        return $this->returnJsonResponse(data: $statusCount);
+
+    }
+
 }
