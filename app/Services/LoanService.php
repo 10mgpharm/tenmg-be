@@ -139,4 +139,9 @@ class LoanService
         return $this->loanRepository->getLoanStats();
     }
 
+    public function getLoanStatusCount()
+    {
+        return $this->loanRepository->getLoanStatusCount();
+    }
+
 }

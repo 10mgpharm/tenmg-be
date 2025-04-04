@@ -360,7 +360,7 @@ class FincraMandateRepository
             'capital_amount' => $offer->offer_amount,
             'interest_amount' => $interestAmount,
             'total_amount' => $offer->offer_amount + $interestAmount,
-            'status' => 'DISBURSED',
+            'status' => 'Ongoing',
         ];
 
         //debit lender deposit wallet
