@@ -8,6 +8,7 @@ use App\Models\Business;
 use App\Models\CreditLendersWallet;
 use App\Models\CreditOffer;
 use App\Models\CreditTransactionHistory;
+use App\Models\CreditVendorWallets;
 use App\Models\Customer;
 use App\Models\DebitMandate;
 use App\Models\Loan;
@@ -368,6 +369,19 @@ class FincraMandateRepository
         $lenderWallet->current_balance -= $offer->offer_amount;
         $lenderWallet->save();
 
+        //add to lender transaction history
+        CreditTransactionHistory::create([
+            'amount' => $offer->offer_amount,
+            'type' => 'DEBIT',
+            'status' => 'success',
+            'business_id' => $offer->lender_id,
+            'description' => 'Loan disbursement to '.$offer->customer->name,
+            'loan_application_id' => $offer->application_id,
+            'transaction_group' => 'withdrawal',
+            'wallet_id' => $lenderWallet->id,
+            'meta' => json_encode($loanData),
+        ]);
+
         //add the debited amount to the ledger wallet
         $ledgerWallet = CreditLendersWallet::firstOrNew([
             'lender_id' => $offer->lender_id,
@@ -378,6 +392,39 @@ class FincraMandateRepository
         $ledgerWallet->prev_balance = $prevBalance;
         $ledgerWallet->current_balance = $prevBalance + $offer->offer_amount;
         $ledgerWallet->save();
+
+        //add to ledger transaction history
+        CreditTransactionHistory::create([
+            'amount' => $offer->offer_amount,
+            'type' => 'CREDIT',
+            'status' => 'success',
+            'business_id' => $offer->lender_id,
+            'description' => 'Loan disbursement to '.$offer->customer->name,
+            'loan_application_id' => $offer->application_id,
+            'transaction_group' => 'deposit',
+            'wallet_id' => $ledgerWallet->id,
+            'meta' => json_encode($loanData),
+        ]);
+
+        //add amount to vendor voucherwallet
+        $vendorWallet = CreditVendorWallets::where('vendor_id', $loanApplication->business_id)->where('type', 'credit_voucher')->first();
+        $vendorWallet->prev_balance = $vendorWallet->current_balance;
+        $vendorWallet->current_balance += $offer->offer_amount;
+        $vendorWallet->save();
+
+        //add to vendor transaction history
+        CreditTransactionHistory::create([
+            'amount' => $offer->offer_amount,
+            'type' => 'CREDIT',
+            'status' => 'success',
+            'business_id' => $loanApplication->business_id,
+            'description' => 'Loan voucher for '.$loanApplication->customer->name,
+            'loan_application_id' => $loanApplication->id,
+            'transaction_group' => 'deposit',
+            'wallet_id' => $vendorWallet->id,
+            'meta' => json_encode($loanData),
+        ]);
+
 
         // Create the loan record
         $loan = $this->loanRepository->updateOrCreate([
@@ -443,9 +490,7 @@ class FincraMandateRepository
 
         $lendersBusinesses = Business::whereHas('getLenderPreferences', function($query) {
             $query->where('auto_accept', false);
-        })->where('type', 'LENDER')->whereHas('lendersWallet', function ($query) use ($amount) {
-            $query->where('current_balance', '>', $amount);
-        })->whereHas('getLenderPreferences', function ($query) use ($customerCategory, $loanDuration) {
+        })->where('type', 'LENDER')->whereHas('getLenderPreferences', function ($query) use ($customerCategory, $loanDuration) {
             $query->whereRaw('JSON_CONTAINS(credit_score_category, ?)', [json_encode($customerCategory)])->whereRaw('JSON_CONTAINS(loan_tenure, ?)', [$loanDuration]);
         })->get();
 
@@ -471,6 +516,9 @@ class FincraMandateRepository
             Notification::route('mail', [
                 $user->email => $user->name,
             ])->notify(new LoanSubmissionNotification($mailable));
+
+            (new InAppNotificationService)
+            ->forUser($user)->notify(InAppNotificationType::NEW_LOAN_REQUEST);
 
         }
 
@@ -645,6 +693,9 @@ class FincraMandateRepository
             $user->email => $user->name,
         ])->notify(new LoanSubmissionNotification($mailable));
 
+        (new InAppNotificationService)
+            ->forUser($user)->notify(InAppNotificationType::NEW_LOAN_REQUEST);
+
         //send notification to lender
         $subject = 'Loan Request Approved';
         $message = "A loan request assigned to you has been automatically approved based on the configured settings. Below are the details:";
@@ -668,6 +719,9 @@ class FincraMandateRepository
         Notification::route('mail', [
             $user->email => $user->name,
         ])->notify(new LoanSubmissionNotification($mailable));
+
+        (new InAppNotificationService)
+            ->forUser($user)->notify(InAppNotificationType::NEW_LOAN_REQUEST);
 
 
         //send mails to all admins
