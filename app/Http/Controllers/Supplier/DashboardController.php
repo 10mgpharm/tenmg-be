@@ -42,14 +42,15 @@ class DashboardController extends Controller
                 default => [now()->copy()->startOfDay(), now()->copy()->endOfDay()],
             };
 
-            $order_query = EcommerceOrder::query()->where("status", '!=', 'cart')->whereHas('orderDetails', fn($query) => $query->whereHas('product', fn($query) => $query->where('business_id', $business_id)));
-            $product_query = EcommerceProduct::where('business_id', $business_id);
+            $order_query = EcommerceOrder::query()->where("status", '!=', 'cart')->whereHas('orderDetails', fn($query) => $query->whereHas('product', fn($query) => $query->where('business_id', $business_id)))->whereBetween('ecommerce_orders.created_at', $date_range);
+            $product_query = EcommerceProduct::where('business_id', $business_id)->whereBetween('ecommerce_products.created_at', $date_range);
             $revenue_query = EcommerceOrderDetail::query()->where('supplier_id', $business_id)
             ->whereHas('product', fn($query) => $query->where('business_id', $business_id))
             ->whereHas('order', fn($query) => $query->where('status', 'completed'))
                 ->whereBetween('created_at', $date_range);
 
             $analytics = [
+                'total_income' => $revenue_query->clone()->selectRaw('SUM(quantity * COALESCE(discount_price, actual_price)) as total')->value('total'),
                 'total_products' => $product_query->clone()->selectRaw('COUNT(*) as count')->first(),
                 'total_orders' => $order_query->clone()->selectRaw('COUNT(*) as count')->first(),
                 'completed_orders' => $order_query->clone()
