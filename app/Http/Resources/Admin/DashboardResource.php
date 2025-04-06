@@ -16,7 +16,9 @@ class DashboardResource extends JsonResource
     {
 
         return [
-            'revenue' => $this['revenue'],
+            'todaySales' => $this['today_sales'],
+            'todayRevenue' => $this['today_revenue'],
+            'todayOrder' => $this['today_order'],
             'revenuePerProduct' => $this['revenue_per_product'],
             'users' => $this['users'],
             'loans' => $this['loans'],
