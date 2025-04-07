@@ -22,6 +22,7 @@ class AppNotificationResource extends JsonResource
             'isSupplier' => $this->is_supplier,
             'isPharmacy' => $this->is_pharmacy,
             'isVendor' => $this->is_vendor,
+            'isLender' => $this->is_lender,
             'active' => $this->active,
             'isSubscribed' => $this->whenLoaded('subscribers', fn () => $this->subscribers->isNotEmpty()),
         ];
