@@ -36,7 +36,7 @@ class DashboardRequest extends FormRequest
     {
 
         $this->merge([
-            'date_filter' => strtoupper($this->input('dateFilter', 'today')),
+            'date_filter' => strtoupper($this->input('dateFilter', 'one_year')),
             'from_date' => $this->input('fromDate'),
             'to_date' => $this->input('toDate'),
         ]);

@@ -57,12 +57,6 @@ class AddBankAccountRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'otp' => [
-                'required',
-                'string',
-                Rule::exists('otps', 'code')
-                    ->where('type', OtpType::SUPPLIER_ADD_BANK_ACCOUNT->value),
-            ],
             'bank_name' => ['required', 'string', 'max:255'],
             'account_number' => ['required', 'digits:10', Rule::unique(EcommerceBankAccount::class, 'account_number')],
             'account_name' => ['required', 'string', 'max:255'],
