@@ -670,7 +670,7 @@ class FincraMandateRepository
 
         $adminWallet->update([
             'current_balance' => $currentBalance + $tenmgInterestAmount,
-            'prev_balance' => $currentBalance
+            'previous_balance' => $currentBalance
         ]);
 
         //get 10mg admin business
@@ -713,6 +713,13 @@ class FincraMandateRepository
             // 'wallet_id' => $vendorPayoutWallet->id,
             'meta' => json_encode($data),
         ]);//
+
+        if(count($paymentSchedules) == 1){
+            //update loan status to completed
+            $loan = Loan::where('application_id', $applicationId)->first();
+            $loan->status = 'Completed';
+            $loan->save();
+        }
 
     }
 
