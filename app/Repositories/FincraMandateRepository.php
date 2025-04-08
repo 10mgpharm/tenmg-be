@@ -614,7 +614,14 @@ class FincraMandateRepository
         $loanId = Loan::where('application_id', $applicationId)->first()->id;
 
         //get loan payment schedule
-        $paymentSchedule = RepaymentSchedule::where('loan_id', $loanId)->where('payment_status', 'PENDING')->first();
+        $paymentSchedules = RepaymentSchedule::where('loan_id', $loanId)->where('payment_status', 'PENDING')->get();
+
+        //if we have pending payment schedules
+        if($paymentSchedules->isEmpty()){
+            throw new \Exception('No pending payment schedule found');
+        }
+
+        $paymentSchedule = $paymentSchedules->first();
 
         //Change the payment status to SUCCESS
         $paymentSchedule->payment_status = $status;
