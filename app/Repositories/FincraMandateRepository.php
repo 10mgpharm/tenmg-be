@@ -404,7 +404,7 @@ class FincraMandateRepository
             'description' => 'Loan disbursement to '.$offer->customer->name,
             'loan_application_id' => $offer->application_id,
             'transaction_group' => 'deposit',
-            'wallet_id' => $ledgerWallet->id,
+            // 'wallet_id' => $ledgerWallet->id,
             'meta' => json_encode($loanData),
         ]);
 
@@ -423,7 +423,7 @@ class FincraMandateRepository
             'description' => 'Loan voucher for '.$loanApplication->customer->name,
             'loan_application_id' => $loanApplication->id,
             'transaction_group' => 'deposit',
-            'wallet_id' => $vendorWallet->id,
+            // 'wallet_id' => $vendorWallet->id,
             'meta' => json_encode($loanData),
         ]);
 
@@ -703,7 +703,7 @@ class FincraMandateRepository
             'description' => 'Loan repayment from '.$mandateData->customer->name,
             'loan_application_id' => $applicationId,
             'transaction_group' => 'deposit',
-            'wallet_id' => $vendorPayoutWallet->id,
+            // 'wallet_id' => $vendorPayoutWallet->id,
             'meta' => json_encode($data),
         ]);//
 
