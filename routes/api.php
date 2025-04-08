@@ -176,6 +176,10 @@ Route::prefix('v1')->group(function () {
 
         });
 
+        Route::prefix('test')->group(function () {
+            Route::post('/mandate/debit-mandate-test/{applicationId}', [LoanApplicationController::class, 'debitCustomerMandate']);
+        });
+
         // SUPPLIER specific routes
         Route::prefix('supplier')->middleware(['roleCheck:supplier'])->group(function () {
             Route::get('dashboard', SupplierDashboardController::class);
@@ -689,9 +693,7 @@ Route::prefix('v1')->group(function () {
                 ->middleware(['auth:api'])
                 ->name('client.applications.mandate.verify');
 
-            Route::post('/mandate/debit-mandate-test/{applicationId}', [LoanApplicationController::class, 'debitCustomerMandate'])
-                ->middleware(['auth:api'])
-                ->name('client.applications.mandate.debit-mandate-test');
+
         });
     });
 });

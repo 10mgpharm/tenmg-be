@@ -143,7 +143,6 @@ class LoanRepository
                 "activeLoan" => $activeLoan,
                 "pendingRepayment" => $pendingRepayment,
                 'completedRepayment' => $completedRepayment
-
             ];
         }
 
@@ -175,6 +174,7 @@ class LoanRepository
                 "Completed" => $completedLoan,
                 "LateRepayment" => $lateRepayment,
             ];
+
         }elseif($business->type == "LENDER"){
             $allLoan = Loan::whereHas('offer', function ($q) use ($business) {
                 $q->where('lender_id', $business->id);
