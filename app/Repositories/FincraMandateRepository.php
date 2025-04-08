@@ -702,7 +702,7 @@ class FincraMandateRepository
             'transaction_group' => 'deposit',
             'wallet_id' => $vendorPayoutWallet->id,
             'meta' => json_encode($data),
-        ]);
+        ]);//
 
     }
 
