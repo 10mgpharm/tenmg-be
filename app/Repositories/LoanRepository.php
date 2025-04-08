@@ -64,7 +64,7 @@ class LoanRepository
         }
 
         if($business->type != "ADMIN" && $business->type != "LENDER"){
-            $query->where('customer_id', $user->id);
+            $query->where('business_id', $business->id);
         }elseif($business->type == "LENDER"){
             $query->whereHas('offer', function ($q) use ($business) {
                 $q->where('lender_id', $business->id);
@@ -143,7 +143,6 @@ class LoanRepository
                 "activeLoan" => $activeLoan,
                 "pendingRepayment" => $pendingRepayment,
                 'completedRepayment' => $completedRepayment
-
             ];
         }
 
@@ -155,5 +154,59 @@ class LoanRepository
 
         ];
 
+    }
+
+    public function getLoanStatusCount()
+    {
+        $user = request()->user();
+        $business = $user->ownerBusinessType
+            ?: $user->businesses()->firstWhere('user_id', $user->id);
+
+        if($business->type != "ADMIN" && $business->type != "LENDER"){
+            $allLoan = Loan::where('business_id', $business->id)->count();
+            $ongoingLoan = Loan::where('status', 'Ongoing')->where('business_id', $business->id)->count();
+            $completedLoan = Loan::where('status', 'Completed')->where('business_id', $business->id)->count();
+            $lateRepayment = Loan::where('status', 'Late Repayment')->where('business_id', $business->id)->count();
+
+            return [
+                "All" => $allLoan,
+                "Ongoing" => $ongoingLoan,
+                "Completed" => $completedLoan,
+                "LateRepayment" => $lateRepayment,
+            ];
+
+        }elseif($business->type == "LENDER"){
+            $allLoan = Loan::whereHas('offer', function ($q) use ($business) {
+                $q->where('lender_id', $business->id);
+            })->count();
+            $ongoingLoan = Loan::where('status', 'Ongoing')->whereHas('offer', function ($q) use ($business) {
+                $q->where('lender_id', $business->id);
+            })->count();
+            $completedLoan = Loan::where('status', 'Completed')->whereHas('offer', function ($q) use ($business) {
+                $q->where('lender_id', $business->id);
+            })->count();
+            $lateRepayment = Loan::where('status', 'Late Repayment')->whereHas('offer', function ($q) use ($business) {
+                $q->where('lender_id', $business->id);
+            })->count();
+
+            return [
+                "All" => $allLoan,
+                "Ongoing" => $ongoingLoan,
+                "Completed" => $completedLoan,
+                "LateRepayment" => $lateRepayment,
+            ];
+        }
+
+        $allLoan = Loan::all()->count();
+        $ongoingLoan = Loan::where('status', 'Ongoing')->count();
+        $completedLoan = Loan::where('status', 'Completed')->count();
+        $lateRepayment = Loan::where('status', 'Late Repayment')->count();
+
+        return [
+            "All" => $allLoan,
+            "Ongoing" => $ongoingLoan,
+            "Completed" => $completedLoan,
+            "LateRepayment" => $lateRepayment,
+        ];
     }
 }

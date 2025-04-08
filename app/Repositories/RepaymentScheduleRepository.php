@@ -75,4 +75,24 @@ class RepaymentScheduleRepository
             ->orWhere('payment_status', 'PROCESSING')
             ->update(['payment_status' => 'CANCELLED']);
     }
+
+    public function processRepaymentForLoan(int $loanId)
+    {
+        $latestRepayment = RepaymentSchedule::where('loan_id', $loanId)
+            ->where('payment_status', 'PENDING')
+            ->orderBy('id', 'asc')
+            ->first();
+
+        //check if we are on production or test
+        if (config('app.env') != 'production') {
+
+            $latestRepayment->payment_status = 'PAID';
+            $latestRepayment->save();
+
+
+
+        }
+    }
+
+
 }

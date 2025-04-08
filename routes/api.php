@@ -176,6 +176,10 @@ Route::prefix('v1')->group(function () {
 
         });
 
+        Route::prefix('test')->group(function () {
+            Route::post('/mandate/debit-mandate-test/{applicationId}', [LoanApplicationController::class, 'debitCustomerMandate']);
+        });
+
         // SUPPLIER specific routes
         Route::prefix('supplier')->middleware(['roleCheck:supplier'])->group(function () {
             Route::get('dashboard', SupplierDashboardController::class);
@@ -388,10 +392,11 @@ Route::prefix('v1')->group(function () {
 
             // Loan
             Route::prefix('loans')->group(function () {
-                Route::get('/', [LoanController::class, 'getAllLoans'])->name('loans.getAll')->middleware('admin');
+                Route::get('/', [LoanController::class, 'getLoanList'])->name('loans.getAll');
                 Route::get('/{id}', [LoanController::class, 'getLoanById'])->name('loans.getById');
                 Route::post('/{id}/disbursed', [LoanController::class, 'disbursed'])->name('loans.disbursed');
                 Route::get('/view/stats', [LoanController::class, 'getLoanStats'])->name('vendor.loan.getLoanStats');
+                Route::get('/stats/loan-status-count', [LoanController::class, 'getLoanStatusCount'])->name('vendor.loan.getLoanStatusCount');
 
                 Route::prefix('repayments')->group(function () {
                     Route::post('/{id}/repay', [LoanController::class, 'repayLoan'])->name('loans.repay');
@@ -489,6 +494,7 @@ Route::prefix('v1')->group(function () {
                 Route::get('/', [LoanController::class, 'getLoanList'])->name('admin.loan.getAllLoans');
                 Route::get('/detail/{id}', [LoanController::class, 'getLoanDetails'])->name('admin.loan.getLoanDetails');
                 Route::get('/stats', [LoanController::class, 'getLoanStats'])->name('admin.loan.getLoanStats');
+                Route::get('/loan-status-count', [LoanController::class, 'getLoanStatusCount'])->name('admin.loan.getLoanStatusCount');
 
             });
 
@@ -616,6 +622,7 @@ Route::prefix('v1')->group(function () {
                 Route::get('/', [LoanController::class, 'getLoanList'])->name('lender.loan.getAllLoans');
                 Route::get('/detail/{id}', [LoanController::class, 'getLoanDetails'])->name('lender.loan.getLoanDetails');
                 Route::get('/stats', [LoanController::class, 'getLoanStats'])->name('lender.loan.getLoanStats');
+                Route::get('/loan-status-count', [LoanController::class, 'getLoanStatusCount'])->name('lender.loan.getLoanStatusCount');
 
             });
 
@@ -686,9 +693,7 @@ Route::prefix('v1')->group(function () {
                 ->middleware(['auth:api'])
                 ->name('client.applications.mandate.verify');
 
-            Route::post('/mandate/debit-mandate-test/{applicationId}', [LoanApplicationController::class, 'debitCustomerMandate'])
-                ->middleware(['auth:api'])
-                ->name('client.applications.mandate.debit-mandate-test');
+
         });
     });
 });

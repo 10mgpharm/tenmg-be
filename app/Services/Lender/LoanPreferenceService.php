@@ -5,6 +5,7 @@ namespace App\Services\Lender;
 use App\Models\Affordability;
 use App\Models\CreditLenderPreference;
 use App\Settings\CreditSettings;
+use App\Settings\LoanSettings;
 use Illuminate\Http\Request;
 
 class LoanPreferenceService
@@ -59,8 +60,8 @@ class LoanPreferenceService
             ];
         }, $loanTenure);
 
-        $creditSettings = new CreditSettings;
-        $loanInterest = $creditSettings->interest_config;
+        $loanSettings = new LoanSettings();
+        $loanInterest = $loanSettings->lenders_interest;
 
         $data = [
             'categories' => $categories,

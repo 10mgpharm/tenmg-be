@@ -14,6 +14,7 @@ use App\Models\DebitMandate;
 use App\Models\Loan;
 use App\Models\LoanApplication;
 use App\Models\RepaymentSchedule;
+use App\Models\TenMgWallet;
 use App\Models\User;
 use App\Notifications\Loan\LoanSubmissionNotification;
 use App\Services\ActivityLogService;
@@ -21,6 +22,7 @@ use App\Services\AuditLogService;
 use App\Services\InAppNotificationService;
 use App\Services\NotificationService;
 use App\Services\OfferService;
+use App\Settings\LoanSettings;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Notifications\Messages\MailMessage;
@@ -360,7 +362,7 @@ class FincraMandateRepository
             'capital_amount' => $offer->offer_amount,
             'interest_amount' => $interestAmount,
             'total_amount' => $offer->offer_amount + $interestAmount,
-            'status' => 'DISBURSED',
+            'status' => 'Ongoing',
         ];
 
         //debit lender deposit wallet
@@ -377,7 +379,7 @@ class FincraMandateRepository
             'business_id' => $offer->lender_id,
             'description' => 'Loan disbursement to '.$offer->customer->name,
             'loan_application_id' => $offer->application_id,
-            'transaction_group' => 'withdrawal',
+            'transaction_group' => 'loan_disbursement',
             'wallet_id' => $lenderWallet->id,
             'meta' => json_encode($loanData),
         ]);
@@ -401,8 +403,8 @@ class FincraMandateRepository
             'business_id' => $offer->lender_id,
             'description' => 'Loan disbursement to '.$offer->customer->name,
             'loan_application_id' => $offer->application_id,
-            'transaction_group' => 'deposit',
-            'wallet_id' => $ledgerWallet->id,
+            'transaction_group' => 'loan_disbursement',
+            // 'wallet_id' => $ledgerWallet->id,
             'meta' => json_encode($loanData),
         ]);
 
@@ -420,8 +422,8 @@ class FincraMandateRepository
             'business_id' => $loanApplication->business_id,
             'description' => 'Loan voucher for '.$loanApplication->customer->name,
             'loan_application_id' => $loanApplication->id,
-            'transaction_group' => 'deposit',
-            'wallet_id' => $vendorWallet->id,
+            'transaction_group' => 'loan_disbursement',
+            // 'wallet_id' => $vendorWallet->id,
             'meta' => json_encode($loanData),
         ]);
 
@@ -533,6 +535,14 @@ class FincraMandateRepository
             throw new \Exception("Mandate not found");
         }
 
+        if(config('app.env') != 'production'){
+
+            $data = $this->mockChargeMandate($mandateData);
+            $this->completeDirectDebitRequest($data->data);
+            return;
+
+        }
+
         $curl = curl_init();
 
         curl_setopt_array($curl, [
@@ -587,7 +597,7 @@ class FincraMandateRepository
     public function completeDirectDebitRequest($data)
     {
 
-        $mandateData = DebitMandate::where('application_id', $data->reference)->first();
+        $mandateData = DebitMandate::where('reference', $data->reference)->first();
 
         if(!$mandateData){
             throw new \Exception('Mandate not found');
@@ -604,7 +614,14 @@ class FincraMandateRepository
         $loanId = Loan::where('application_id', $applicationId)->first()->id;
 
         //get loan payment schedule
-        $paymentSchedule = RepaymentSchedule::where('loan_id', $loanId)->where('payment_status', 'PENDING')->first();
+        $paymentSchedules = RepaymentSchedule::where('loan_id', $loanId)->where('payment_status', 'PENDING')->get();
+
+        //if we have pending payment schedules
+        if($paymentSchedules->isEmpty()){
+            throw new \Exception('No pending payment schedule found');
+        }
+
+        $paymentSchedule = $paymentSchedules->first();
 
         //Change the payment status to SUCCESS
         $paymentSchedule->payment_status = $status;
@@ -620,23 +637,82 @@ class FincraMandateRepository
         //get the lender business for the loan
         $lenderBusiness = Business::find($lenderBusinessId);
 
-        //get the lender business deposit wallet
-        $lenderBusinessDepositWallet = $lenderBusiness->lendersWallet;
-        $lenderBusinessDepositWallet->current_balance = $lenderBusinessDepositWallet->current_balance + $amount;
-        $lenderBusinessDepositWallet->save();
+        $totalInterest = $paymentSchedule->interest;
+        $loanSettings = new LoanSettings();
+        $lenderInterest = $loanSettings->lenders_interest;
+        $tenmgInterest = $loanSettings->tenmg_interest;
 
-        //Add to lender transaction history
-        $lenderTxnHistory = CreditTransactionHistory::create([
-            'amount' => $amount,
+        $tenmgInterestAmount = ($totalInterest * $tenmgInterest) / 100;
+        $lenderInterestAmount = $totalInterest - $tenmgInterestAmount;
+        $lenderTotalExcludingTenmgPercent = $paymentSchedule->principal + $lenderInterestAmount;
+
+        //get the lender business investment wallet
+        $lenderBusinessInvWallet = $lenderBusiness->lendersInvestmentWallet;
+        $lenderBusinessInvWallet->current_balance = $lenderBusinessInvWallet->current_balance + $lenderTotalExcludingTenmgPercent;
+        $lenderBusinessInvWallet->prev_balance = $lenderBusinessInvWallet->current_balance;
+        $lenderBusinessInvWallet->save();
+
+        //add to lender transaction history
+        CreditTransactionHistory::create([
+            'amount' => $lenderTotalExcludingTenmgPercent,
             'type' => 'CREDIT',
             'status' => 'success',
             'business_id' => $lenderBusinessId,
             'description' => 'Loan Repayment from '.$mandateData->customer->name,
             'loan_application_id' => $applicationId,
-            'transaction_group' => 'deposit',
+            'transaction_group' => 'repayment',
             'meta' => json_encode($data),
         ]);
 
+        //add admin interest to admin wallet
+        $adminWallet = TenMgWallet::firstOrCreate();
+        $currentBalance = $adminWallet->current_balance ?? 0; // Handle NULL case
+
+        $adminWallet->update([
+            'current_balance' => $currentBalance + $tenmgInterestAmount,
+            'prev_balance' => $currentBalance
+        ]);
+
+        //get 10mg admin business
+        $adminBusiness = Business::where('type', 'ADMIN')->first();
+
+        //add to admin transaction history
+        CreditTransactionHistory::create([
+            'amount' => $tenmgInterestAmount,
+            'type' => 'CREDIT',
+            'status' => 'success',
+            'business_id' => $adminBusiness->id,
+            'description' => 'Loan Repayment from '.$mandateData->customer->name,
+            'loan_application_id' => $applicationId,
+            'transaction_group' => 'repayment_commission',
+            'meta' => json_encode($data),
+        ]);
+
+        //get the vendor for the loan
+        $vendorBusiness = Business::where('id', $loanId->business_id)->first();
+        $vendorCreditVoucherWallet = CreditVendorWallets::where('vendor_id', $vendorBusiness->id)->where('type', 'credit_voucher')->first();
+        $vendorCreditVoucherWallet->prev_balance = $vendorCreditVoucherWallet->current_balance;
+        $vendorCreditVoucherWallet->current_balance = $vendorCreditVoucherWallet->current_balance - $paymentSchedule->principal;
+        $vendorCreditVoucherWallet->save();
+
+        //add to vendor payout wallet
+        $vendorPayoutWallet = CreditVendorWallets::where('vendor_id', $vendorBusiness->id)->where('type', 'payout')->first();
+        $vendorPayoutWallet->prev_balance = $vendorPayoutWallet->current_balance;
+        $vendorPayoutWallet->current_balance = $vendorPayoutWallet->current_balance + $paymentSchedule->principal;
+        $vendorPayoutWallet->save();
+
+        //add to vendor transaction history
+        CreditTransactionHistory::create([
+            'amount' => $paymentSchedule->principal,
+            'type' => 'CREDIT',
+            'status' => 'success',
+            'business_id' => $vendorBusiness->id,
+            'description' => 'Loan repayment from '.$mandateData->customer->name,
+            'loan_application_id' => $applicationId,
+            'transaction_group' => 'repayment',
+            // 'wallet_id' => $vendorPayoutWallet->id,
+            'meta' => json_encode($data),
+        ]);//
 
     }
 
@@ -761,6 +837,64 @@ class FincraMandateRepository
             properties: []
         );
 
+    }
+
+    public function mockChargeMandate($mandate)
+    {
+        $transactionId = rand(10000, 99999);
+
+        $mandateSample = [
+            "event"=> "charge.successful",
+            "data"=> [
+              "chargeReference"=> "fcr-bt-$transactionId",
+              "amountToSettle"=> $mandate->amount,
+              "id"=> $transactionId,
+              "authorization"=> [
+                "mode"=> null,
+                "redirect"=> null,
+                "metadata"=> null
+              ],
+              "auth_model"=> null,
+              "amount"=> $mandate->amount,
+              "amountExpected"=> $mandate->amount,
+              "amountReceived"=> $mandate->amount,
+              "varianceType"=> null,
+              "currency"=> "NGN",
+              "fee"=> 1.51,
+              "vat"=> 0.11,
+              "message"=> "",
+              "actionRequired"=> null,
+              "status"=> "success",
+              "reference"=> $mandate->reference,
+              "description"=> "checkout",
+              "type"=> "bank_transfer",
+              "customer"=> [
+                "name"=> $mandate->customer_account_name,
+                "email"=> $mandate->customer_email,
+                "phoneNumber"=> $mandate->customer_phone
+            ],
+              "metadata"=> [],
+              "settlementDestination"=> "wallet",
+              "settlementTime"=> "instant",
+              "virtualAccount"=> [
+                "bankName"=> $mandate->amount,
+                "id"=> "6645e0h8s783h8s0ee8f673",
+                "bankCode"=> "103",
+                "accountName"=> "Fincra DevRel",
+                "accountNumber"=> "39973787851",
+                "sessionId"=> "ETZ-09F87348787388OHT",
+                "channelName"=> "globus",
+                "payerAccountNumber"=> "1228939338",
+                "payerAccountName"=> " Fincra DevRel",
+                "payerBankName"=> "Access Bank PLC",
+                "payerBankCode"=> "044",
+                "expiresAt"=> "2024-05-16T10:51:36.000Z",
+                "business"=> "64f1c939hhsu993sf4a710"
+            ]
+            ]
+              ];
+
+              return json_decode(json_encode($mandateSample));
     }
 
 }
