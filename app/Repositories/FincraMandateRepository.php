@@ -658,10 +658,13 @@ class FincraMandateRepository
         ]);
 
         //add admin interest to admin wallet
-        $adminWallet = TenMgWallet::first();
-        $adminWallet->current_balance = $adminWallet->current_balance + $tenmgInterestAmount;
-        $adminWallet->prev_balance = $adminWallet->current_balance;
-        $adminWallet->save();
+        $adminWallet = TenMgWallet::firstOrCreate();
+        $currentBalance = $adminWallet->current_balance ?? 0; // Handle NULL case
+
+        $adminWallet->update([
+            'current_balance' => $currentBalance + $tenmgInterestAmount,
+            'prev_balance' => $currentBalance
+        ]);
 
         //get 10mg admin business
         $adminBusiness = Business::where('type', 'ADMIN')->first();
