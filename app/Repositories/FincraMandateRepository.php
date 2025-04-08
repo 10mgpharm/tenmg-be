@@ -379,7 +379,7 @@ class FincraMandateRepository
             'business_id' => $offer->lender_id,
             'description' => 'Loan disbursement to '.$offer->customer->name,
             'loan_application_id' => $offer->application_id,
-            'transaction_group' => 'withdrawal',
+            'transaction_group' => 'loan_disbursement',
             'wallet_id' => $lenderWallet->id,
             'meta' => json_encode($loanData),
         ]);
@@ -403,7 +403,7 @@ class FincraMandateRepository
             'business_id' => $offer->lender_id,
             'description' => 'Loan disbursement to '.$offer->customer->name,
             'loan_application_id' => $offer->application_id,
-            'transaction_group' => 'deposit',
+            'transaction_group' => 'loan_disbursement',
             // 'wallet_id' => $ledgerWallet->id,
             'meta' => json_encode($loanData),
         ]);
@@ -422,7 +422,7 @@ class FincraMandateRepository
             'business_id' => $loanApplication->business_id,
             'description' => 'Loan voucher for '.$loanApplication->customer->name,
             'loan_application_id' => $loanApplication->id,
-            'transaction_group' => 'deposit',
+            'transaction_group' => 'loan_disbursement',
             // 'wallet_id' => $vendorWallet->id,
             'meta' => json_encode($loanData),
         ]);
@@ -653,7 +653,7 @@ class FincraMandateRepository
             'business_id' => $lenderBusinessId,
             'description' => 'Loan Repayment from '.$mandateData->customer->name,
             'loan_application_id' => $applicationId,
-            'transaction_group' => 'deposit',
+            'transaction_group' => 'repayment',
             'meta' => json_encode($data),
         ]);
 
@@ -677,7 +677,7 @@ class FincraMandateRepository
             'business_id' => $adminBusiness->id,
             'description' => 'Loan Repayment from '.$mandateData->customer->name,
             'loan_application_id' => $applicationId,
-            'transaction_group' => 'deposit',
+            'transaction_group' => 'repayment_commission',
             'meta' => json_encode($data),
         ]);
 
@@ -702,7 +702,7 @@ class FincraMandateRepository
             'business_id' => $vendorBusiness->id,
             'description' => 'Loan repayment from '.$mandateData->customer->name,
             'loan_application_id' => $applicationId,
-            'transaction_group' => 'deposit',
+            'transaction_group' => 'repayment',
             // 'wallet_id' => $vendorPayoutWallet->id,
             'meta' => json_encode($data),
         ]);//
