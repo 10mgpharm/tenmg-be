@@ -20,4 +20,10 @@ class CreditTransactionHistory extends Model
             $model->identifier = UtilityHelper::generateSlug('THG');
         });
     }
+
+    public function business()
+    {
+        return $this->belongsTo(Business::class, 'business_id');
+
+    }
 }

@@ -66,6 +66,7 @@ use App\Http\Controllers\API\Supplier\EcommerceTransactionController;
 use App\Http\Controllers\API\Supplier\EcommerceWalletController;
 use App\Http\Controllers\API\Vendor\AuditLogController as VendorAuditLogController;
 use App\Http\Controllers\API\Vendor\UsersController as VendorUsersController;
+use App\Http\Controllers\API\Vendor\VendorWalletController;
 use App\Http\Controllers\API\Webhooks\PaystackWebhookController;
 use App\Http\Controllers\BusinessSettingController;
 use App\Http\Controllers\InviteController;
@@ -413,6 +414,11 @@ Route::prefix('v1')->group(function () {
 
                 // Generate api keys
                 Route::post('generate', [ApiKeyController::class, 'regenerateKey'])->name('apikeys.generate');
+            });
+
+            Route::prefix('wallet')->group(function () {
+                Route::get('/', [VendorWalletController::class, 'getWalletStats']);
+                Route::get('/transactions', [VendorWalletController::class, 'getTransactions']);
             });
 
             Route::get('audit-logs', [VendorAuditLogController::class, 'index']);
