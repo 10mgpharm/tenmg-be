@@ -36,11 +36,13 @@ class LoanApplicationController extends Controller
     {
         $request->validate([
             'customerId' => 'required|exists:credit_customers,id',
+            'requestedAmount' => 'required|numeric|min:1',
         ]);
 
         // Call service to generate the application link
         $referenceLink = $this->loanApplicationService->sendApplicationLink([
             'customerId' => $request->customerId,
+            'requestedAmount' => $request->requestedAmount,
         ]);
 
         return $this->returnJsonResponse('Application link generated', ['link' => $referenceLink]);

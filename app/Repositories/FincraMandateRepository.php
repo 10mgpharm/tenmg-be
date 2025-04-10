@@ -352,7 +352,7 @@ class FincraMandateRepository
             durationInMonths: $offer?->application?->duration_in_months
         );
 
-        $interestAmount = $offer->offer_amount * $interestData['monthlyInterestRate'] * $offer?->application?->duration_in_months;
+        $interestAmount = $interestData['totalAmount'];
 
         $loanData = [
             'business_id' => $offer->business_id,
