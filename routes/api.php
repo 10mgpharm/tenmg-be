@@ -522,7 +522,7 @@ Route::prefix('v1')->group(function () {
 
             Route::prefix('wallet')->group(function () {
                 Route::get('/', [AdminWalletController::class, 'getWalletStats']);
-                Route::get('/transactions', [VendorWalletController::class, 'getTransactions']);
+                Route::get('/transactions', [AdminWalletController::class, 'getTransactions']);
             });
 
             Route::get('dashboard', AdminDashboardController::class);

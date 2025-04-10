@@ -45,16 +45,9 @@ class AdminWalletRepository
 
     public function getTransactions():\Illuminate\Contracts\Pagination\LengthAwarePaginator
     {
-        $user = request()->user();
-        $business_id = $user->ownerBusinessType?->id
-            ?: $user->businesses()->firstWhere('user_id', $user->id)?->id;
-
-
         $perPage = request()->query('perPage') ?? 15;
-        $query = CreditTransactionHistory::query();
+        $query = CreditTransactionHistory::orderBy('created_at', 'desc')->paginate($perPage);
 
-        $query->where('business_id', $business_id)->orderBy('created_at', 'desc');
-
-        return $query->paginate($perPage);
+        return $query;
     }
 }
