@@ -42,7 +42,7 @@ class LoanApplicationRepository
             'requested_amount' => $data['requestedAmount'] ?? null,
             'interest_amount' => $data['interestAmount'] ?? 0,
             'total_amount' => $data['totalAmount'] ?? 0,
-            'interest_rate' => $creditSettings->interest_config,
+            'interest_rate' => $creditSettings->lenders_interest,
             'duration_in_months' => $data['durationInMonths'] ?? null,
             'source' => $data['source'] ?? 'DASHBOARD',
             'status' => 'INITIATED',
@@ -111,6 +111,8 @@ class LoanApplicationRepository
             $query->when(!empty($ignoredIds ?? []), function ($querySub) use ($ignoredIds) {
                 $querySub->whereNotIn('id', $ignoredIds);
             });
+
+            $query->where('duration_in_months', '!=', null);
 
         }
 
