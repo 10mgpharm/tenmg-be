@@ -11,6 +11,7 @@ use App\Http\Controllers\API\Account\NotificationController;
 use App\Http\Controllers\API\Account\PasswordUpdateController;
 use App\Http\Controllers\API\Account\TwoFactorAuthenticationController;
 use App\Http\Controllers\API\Account\UpdateFcmTokenController;
+use App\Http\Controllers\API\Admin\AdminWalletController;
 use App\Http\Controllers\API\Admin\AuditLogController;
 use App\Http\Controllers\API\Admin\BusinessLicenseController;
 use App\Http\Controllers\API\Admin\CarouselImageController;
@@ -517,6 +518,11 @@ Route::prefix('v1')->group(function () {
 
                 Route::get('/{customerId}', [TransactionHistoryController::class, 'index'])->name('admin.txn_history');
 
+            });
+
+            Route::prefix('wallet')->group(function () {
+                Route::get('/', [AdminWalletController::class, 'getWalletStats']);
+                Route::get('/transactions', [AdminWalletController::class, 'getTransactions']);
             });
 
             Route::get('dashboard', AdminDashboardController::class);
