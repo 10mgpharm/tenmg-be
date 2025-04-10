@@ -6,5 +6,5 @@ use Illuminate\Database\Eloquent\Model;
 
 class TenMgWallet extends Model
 {
-    //
+    protected $guarded = [];
 }
