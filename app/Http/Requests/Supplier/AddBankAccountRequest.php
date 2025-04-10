@@ -26,7 +26,7 @@ class AddBankAccountRequest extends FormRequest
 
         // Then, check if the user is a supplier.
         $entityType = $business?->type;
-        if ($entityType !== 'SUPPLIER') {
+        if ($entityType !== 'SUPPLIER' || $entityType !== 'VENDOR') {
             return false;
         }
 
@@ -82,7 +82,7 @@ class AddBankAccountRequest extends FormRequest
         }
 
         $entityType = $business?->type;
-        if ($entityType !== 'SUPPLIER') {
+        if ($entityType !== 'SUPPLIER' || $entityType !== 'VENDOR') {
             abort(response()->json([
                 'message' => 'You are not authorized to add bank accounts.',
             ], 403));
