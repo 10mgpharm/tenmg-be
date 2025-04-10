@@ -611,7 +611,8 @@ class FincraMandateRepository
         $applicationId = $mandateData->application_id;
 
         //get loan id for the application
-        $loanId = Loan::where('application_id', $applicationId)->first()->id;
+        $loan = Loan::where('application_id', $applicationId)->first()->id;
+        $loanId = $loan->id;
 
         //get loan payment schedule
         $paymentSchedules = RepaymentSchedule::where('loan_id', $loanId)->where('payment_status', 'PENDING')->get();
@@ -689,7 +690,7 @@ class FincraMandateRepository
         ]);
 
         //get the vendor for the loan
-        $vendorBusiness = Business::where('id', $loanId->business_id)->first();
+        $vendorBusiness = Business::where('id', $loan->business_id)->first();
         $vendorCreditVoucherWallet = CreditVendorWallets::where('vendor_id', $vendorBusiness->id)->where('type', 'credit_voucher')->first();
         $vendorCreditVoucherWallet->prev_balance = $vendorCreditVoucherWallet->current_balance;
         $vendorCreditVoucherWallet->current_balance = $vendorCreditVoucherWallet->current_balance - $paymentSchedule->principal;
