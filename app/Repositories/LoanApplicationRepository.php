@@ -45,7 +45,7 @@ class LoanApplicationRepository
             'interest_rate' => $creditSettings->lenders_interest,
             'duration_in_months' => $data['durationInMonths'] ?? null,
             'source' => $data['source'] ?? 'DASHBOARD',
-            'status' => 'INITIATED',
+            'status' => 'PENDING_MANDATE',
         ]);
     }
 
@@ -287,7 +287,7 @@ class LoanApplicationRepository
             'customer' => new CreditCustomerResource($customer),
             'business' => new BusinessLimitedRecordResource($vendor),
             'interestConfig' => [
-                'rate' => $creditSettings->interest_config,
+                'rate' => $creditSettings->lenders_interest,
             ],
             'application' => new LoadApplicationResource($application),
             'defaultBank' => $defaultBank, //default bank for mandate authorisation
