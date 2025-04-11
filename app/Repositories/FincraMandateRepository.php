@@ -839,7 +839,7 @@ class FincraMandateRepository
         AuditLogService::log(
             target: $loanApplication,
             event: 'Loan.initiated',
-            action: 'Loan application Initiated',
+            action: 'Loan approved',
             description: $lenderBusiness->name." approved ".$customer->name."  of ".$vendorBusiness->name." loan application.",
             crud_type: 'UPDATE',
             properties: []
