@@ -14,7 +14,7 @@ class LoanPreferenceService
     {
 
         $creditSettings = new CreditSettings;
-        $loanInterest = $creditSettings->interest_config;
+        $loanInterest = $creditSettings->lenders_interest;
 
         $tenure = $request->loanTenure ?? [3];
         $credit_score = $request->creditScoreCategory ?? ['A'];

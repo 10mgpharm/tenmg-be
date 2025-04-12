@@ -46,7 +46,7 @@ class LicenseService implements ILicenseService
             }
         }
 
-        $query->where('license_verification_status', 'PENDING')->orderBy('created_at', 'desc');
+        $query->where('license_verification_status', 'PENDING')->orderBy('license_submission_date', 'desc');
 
         return $query->latest('id')->paginate();
     }
@@ -66,6 +66,7 @@ class LicenseService implements ILicenseService
                 fn() => $business->update([
                     'license_verification_status' => $validated['license_verification_status'],
                     'license_verification_comment' => $validated['license_verification_comment'],
+                    'license_submission_date' => now(),
                 ])
             );
 
