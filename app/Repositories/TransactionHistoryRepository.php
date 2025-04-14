@@ -55,7 +55,9 @@ class TransactionHistoryRepository
         });
 
         $query->when(isset($filters['dateFrom']) && isset($filters['dateTo']), function ($query) use ($filters) {
-            return $query->whereBetween('credit_txn_history_evaluations.created_at', [$filters['dateFrom'], $filters['dateTo']]);
+            $dateFrom = \Carbon\Carbon::parse($filters['dateFrom'])->startOfDay();
+            $dateTo = \Carbon\Carbon::parse($filters['dateTo'])->endOfDay();
+            return $query->whereBetween('credit_txn_history_evaluations.created_at', [$dateFrom, $dateTo]);
         });
 
         $query->orderBy('credit_txn_history_evaluations.created_at', 'desc');

@@ -120,6 +120,7 @@ class LoanApplicationService
 
         $requestedAmount = $data['requestedAmount'];
         $customerData = array_key_exists('customer', $data) ? $data['customer'] : [];
+        $customer = null;
 
         if (array_key_exists('reference', $customerData) && isset($customerData['reference'])) {
             $customer = Customer::firstOrCreate(
