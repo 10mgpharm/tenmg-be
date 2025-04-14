@@ -17,6 +17,7 @@ class CreditScoreResource extends JsonResource
         return [
             'id' => $this->id,
             'identifier'=>$this->identifier,
+            'evaluationId'=>$this->txn_evaluation_id,
             'creditScoreResult'=> json_decode($this->credit_score_result),
             'affordability' => json_decode($this->affordability),
             'evaluation' => json_decode($this->creditEvaluation->evaluation_result),

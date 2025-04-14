@@ -68,7 +68,9 @@ class CustomerRepository
         });
 
         $query->when(isset($filters['createdAtStart']) && isset($filters['createdAtEnd']), function ($query) use ($filters) {
-            return $query->whereBetween('created_at', [$filters['createdAtStart'], $filters['createdAtEnd']]);
+            $createdAtStart = \Carbon\Carbon::parse($filters['createdAtStart'])->startOfDay();
+            $createdAtEnd = \Carbon\Carbon::parse($filters['createdAtEnd'])->endOfDay();
+            return $query->whereBetween('created_at', [$createdAtStart, $createdAtEnd]);
         });
 
         $query->when(isset($filters['vendorId']), function ($query) use ($filters) {

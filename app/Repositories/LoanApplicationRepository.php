@@ -255,7 +255,7 @@ class LoanApplicationRepository
             ->get();
     }
 
-    const LINK_EXPIRED = 24;
+    const LINK_EXPIRED = 24*7; // 7 days
 
     public function verifyApplicationLink($reference)
     {
@@ -264,6 +264,10 @@ class LoanApplicationRepository
         if (! $application) {
             throw new Exception('Provided application link does not exist');
         }
+
+        //check if application is approved, rejected or cancelled
+
+        //check if mandate has been created for this loan
 
         if ($application->created_at->diffInHours(now()) > $this::LINK_EXPIRED) {
             $application->status = 'EXPIRED';
