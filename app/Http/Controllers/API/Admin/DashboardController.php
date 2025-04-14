@@ -44,7 +44,7 @@ class DashboardController extends Controller
             $revenue_query = EcommerceOrderDetail::query()->whereHas('product')
             ->whereHas('order', fn($query) => $query->where('status', 'completed'))
             ->whereDate('created_at', today());
-    
+
             $order_query = EcommerceOrder::query()->whereDate('created_at', today());
 
             $analytics = [
@@ -58,16 +58,17 @@ class DashboardController extends Controller
                         ecommerce_products.id,
                         ecommerce_products.name,
                         ecommerce_products.slug,
-                        SUM(CASE 
-                            WHEN ecommerce_orders.status = "completed" 
-                            THEN ecommerce_order_details.quantity * COALESCE(ecommerce_order_details.discount_price, ecommerce_order_details.actual_price) 
-                            ELSE 0 
+                        SUM(CASE
+                            WHEN ecommerce_orders.status = "completed"
+                            THEN ecommerce_order_details.quantity * COALESCE(ecommerce_order_details.discount_price, ecommerce_order_details.actual_price)
+                            ELSE 0
                         END) as revenue
                     ')
                     ->groupBy('ecommerce_products.id')
                 ->get(),
                 'users' => Role::query()->withCount('users')->pluck('users_count', 'name')->toArray(),
-                'loans' => Loan::query()->with(['customer', 'business'])->paginate($request->has('perPage') ? $request->perPage : 10)
+                'onGoingLoans' => Loan::where('status', 'Ongoing')->count(),
+                'loans' => Loan::query()->with(['customer', 'business'])->where('status', 'Ongoing')->paginate($request->has('perPage') ? $request->perPage : 10)
                 ->withQueryString()
                 ->through(fn (Loan $item) => LoadApplicationForDashboardResource::make($item))
             ];

@@ -63,6 +63,10 @@ class LoanRepository
             $query->where('status', $criteria['status']);
         }
 
+        if (isset($criteria['identifier'])) {
+            $query->where('identifier', $criteria['identifier']);
+        }
+
         if($business->type != "ADMIN" && $business->type != "LENDER"){
             $query->where('business_id', $business->id);
         }elseif($business->type == "LENDER"){
