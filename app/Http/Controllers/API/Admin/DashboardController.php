@@ -81,4 +81,4 @@ class DashboardController extends Controller
             throw new Exception('Failed to fetch admin dashboard: ' . $e->getMessage());
         }
     }
-}
+}//
