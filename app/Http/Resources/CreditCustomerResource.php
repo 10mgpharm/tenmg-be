@@ -27,7 +27,8 @@ class CreditCustomerResource extends JsonResource
             'active' => $this->active,
             'reference' => $this->reference,
             'category' => $this->creditScore->category ?? "N/A",
-            'score' => $this->creditScore->score_value ?? "N/A"
+            'score' => $this->creditScore->score_value ?? "N/A",
+            'scoreTotal' => $this->creditScore->score_total ?? "N/A"
         ];
     }
 }

@@ -13,8 +13,8 @@ class LoanPreferenceService
     public function createUpdateLoanPreference(Request $request)
     {
 
-        $creditSettings = new CreditSettings;
-        $loanInterest = $creditSettings->lenders_interest;
+        $loanSettings = new LoanSettings;
+        $loanInterest = $loanSettings->lenders_interest;
 
         $tenure = $request->loanTenure ?? [3];
         $credit_score = $request->creditScoreCategory ?? ['A'];
