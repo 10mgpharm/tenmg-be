@@ -89,13 +89,11 @@ class LoanApplicationRepository
         $query = LoanApplication::query();
 
         if (isset($criteria['search'])) {
-            $query->whereHas('customer', function ($q) use ($criteria) {
-                $q->where('email', 'like', '%'.$criteria['search'].'%');
+            $searchTerm = $criteria['search'];
+            $query->where('credit_applications.identifier', 'like', $searchTerm)
+                    ->orWhereHas('customer', function ($q) use ($searchTerm) {
+                $q->where('email', 'like', '%'.$searchTerm.'%');
             });
-        }
-
-        if (isset($criteria['search'])) {
-            $query->where('identifier', 'like', '%'.$criteria['search'].'%');
         }
 
         if (isset($criteria['dateFrom']) && isset($criteria['dateTo'])) {
