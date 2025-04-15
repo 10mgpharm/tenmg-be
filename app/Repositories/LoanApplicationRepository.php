@@ -18,6 +18,7 @@ use App\Models\LoanApplication;
 use App\Services\ActivityLogService;
 use App\Services\AuditLogService;
 use App\Settings\CreditSettings;
+use App\Settings\LoanSettings;
 use Carbon\Carbon;
 use Exception;
 use Illuminate\Http\Request;
@@ -33,7 +34,7 @@ class LoanApplicationRepository
 
     public function create(array $data)
     {
-        $creditSettings = new CreditSettings;
+        $loanSettings = new LoanSettings();
 
         return LoanApplication::create([
             'business_id' => $data['businessId'],
@@ -42,7 +43,7 @@ class LoanApplicationRepository
             'requested_amount' => $data['requestedAmount'] ?? null,
             'interest_amount' => $data['interestAmount'] ?? 0,
             'total_amount' => $data['totalAmount'] ?? 0,
-            'interest_rate' => $creditSettings->lenders_interest,
+            'interest_rate' => $loanSettings->lenders_interest,
             'duration_in_months' => $data['durationInMonths'] ?? null,
             'source' => $data['source'] ?? 'DASHBOARD',
             'status' => 'PENDING_MANDATE',
@@ -277,7 +278,7 @@ class LoanApplicationRepository
         $vendor = $application->business;
         $customer = $application->customer;
 
-        $creditSettings = new CreditSettings;
+        $loanSettings = new LoanSettings();
 
         $defaultBank = CreditCustomerBank::where('customer_id', $customer->id)
             ->where('business_id', $vendor->id)
@@ -289,7 +290,7 @@ class LoanApplicationRepository
             'customer' => new CreditCustomerResource($customer),
             'business' => new BusinessLimitedRecordResource($vendor),
             'interestConfig' => [
-                'rate' => $creditSettings->lenders_interest,
+                'rate' => $loanSettings->lenders_interest,
             ],
             'application' => new LoadApplicationResource($application),
             'defaultBank' => $defaultBank, //default bank for mandate authorisation
