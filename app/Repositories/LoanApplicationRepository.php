@@ -93,7 +93,7 @@ class LoanApplicationRepository
             $searchTerm = $criteria['search'];
             $query->where('credit_applications.identifier', 'like', $searchTerm)
                     ->orWhereHas('customer', function ($q) use ($searchTerm) {
-                $q->where('email', 'like', '%'.$searchTerm.'%');
+                $q->where('email', 'like', '%'.$searchTerm.'%')->orWhere('name', 'like', '%'.$searchTerm.'%');
             });
         }
 
