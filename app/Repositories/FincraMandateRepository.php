@@ -201,6 +201,9 @@ class FincraMandateRepository
             throw new \Exception("Loan application not found");
         }
 
+        $loanApplication->status = 'INITIATED';
+        $loanApplication->save();
+
         //check if user has an approved mandate
         $mandate = DebitMandate::where('status', 'approved')->where('application_id', $applicationId)->first();
         if(!$mandate){
