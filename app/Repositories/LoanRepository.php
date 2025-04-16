@@ -25,7 +25,7 @@ class LoanRepository
 
     public function findById(int $id): ?Loan
     {
-        return Loan::whereId($id)->with('repaymentSchedule')->first();
+        return Loan::whereId($id)->with('repaymentSchedule', 'application', 'customer')->first();
     }
 
     public function update(int $id, array $data): bool

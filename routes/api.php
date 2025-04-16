@@ -657,6 +657,9 @@ Route::prefix('v1')->group(function () {
 
                 Route::get('/{customerId}', [TransactionHistoryController::class, 'index'])->name('lender.txn_history');
 
+                Route::post('/view', [TransactionHistoryController::class, 'viewTransactionHistory'])
+                    ->name('lender.txn_history.view');
+
             });
 
         });
