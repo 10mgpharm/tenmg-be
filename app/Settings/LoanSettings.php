@@ -11,6 +11,6 @@ class LoanSettings extends Settings
 
     public static function group(): string
     {
-        return 'general';
+        return 'loan';
     }
 }

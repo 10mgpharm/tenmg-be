@@ -24,6 +24,7 @@ use App\Http\Controllers\API\Admin\EcommerceProductController as AdminEcommerceP
 use App\Http\Controllers\API\Admin\FaqController;
 use App\Http\Controllers\API\Admin\MedicationTypeController as AdminMedicationTypeController;
 use App\Http\Controllers\API\Admin\ProductInsightsController as AdminProductInsightsController;
+use App\Http\Controllers\API\Admin\SettingConfigController;
 use App\Http\Controllers\API\Supplier\ProductInsightsController as SupplierProductInsightsController;
 use App\Http\Controllers\API\Admin\UsersController;
 use App\Http\Controllers\API\Auth\AuthenticatedController;
@@ -462,6 +463,14 @@ Route::prefix('v1')->group(function () {
                 Route::get('/', [BusinessSettingController::class, 'show']);
                 // Update business information
                 Route::match(['post', 'patch'], 'business-information', [BusinessSettingController::class, 'businessInformation']);
+
+                Route::prefix('config')->group(function () {
+                    Route::get('/', [SettingConfigController::class, 'getAllSettings']);
+                    Route::post('/', [SettingConfigController::class, 'updateSettingsConfig']);
+
+                });
+
+
             });
 
             Route::get('discounts/count', [EcommerceDiscountController::class, 'count']);
