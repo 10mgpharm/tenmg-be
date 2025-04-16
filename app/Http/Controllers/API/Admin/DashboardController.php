@@ -6,10 +6,12 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\DashboardRequest;
 use App\Http\Resources\Admin\DashboardResource;
 use App\Http\Resources\Admin\LoadApplicationForDashboardResource;
+use App\Http\Resources\LoadApplicationResource;
 use App\Models\EcommerceOrder;
 use App\Models\EcommerceOrderDetail;
 use App\Models\EcommerceProduct;
 use App\Models\Loan;
+use App\Models\LoanApplication;
 use App\Models\Role;
 use Exception;
 use Illuminate\Http\JsonResponse;
@@ -46,6 +48,7 @@ class DashboardController extends Controller
             ->whereDate('created_at', today());
 
             $order_query = EcommerceOrder::query()->whereDate('created_at', today());
+            $loanRequests = LoanApplication::where('status', 'INITIATED')->orderBy("created_at", 'DESC')->take(5)->get();
 
             $analytics = [
                 "today_sales" => $revenue_query->count(),
@@ -68,6 +71,7 @@ class DashboardController extends Controller
                 ->get(),
                 'users' => Role::query()->withCount('users')->pluck('users_count', 'name')->toArray(),
                 'onGoingLoans' => Loan::where('status', 'Ongoing')->count(),
+                'loanRequests' => LoadApplicationResource::collection($loanRequests),
                 'loans' => Loan::query()->with(['customer', 'business'])->where('status', 'Ongoing')->paginate($request->has('perPage') ? $request->perPage : 10)
                 ->withQueryString()
                 ->through(fn (Loan $item) => LoadApplicationForDashboardResource::make($item))
