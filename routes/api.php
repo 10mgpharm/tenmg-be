@@ -527,6 +527,9 @@ Route::prefix('v1')->group(function () {
 
                 Route::get('/{customerId}', [TransactionHistoryController::class, 'index'])->name('admin.txn_history');
 
+                Route::post('/view', [TransactionHistoryController::class, 'viewTransactionHistory'])
+                    ->name('admin.txn_history.view');
+
             });
 
             Route::prefix('wallet')->group(function () {
