@@ -24,6 +24,12 @@ class AuditLogController extends Controller
 
         $query = Activity::whereJsonContains('properties->actor_business_id', $business_id)
             ->when(
+                $request->input('search'),
+                fn($query, $search) =>
+                $query->where('event', 'like', "%{$search}%")
+                ->orWhere('properties->action', 'like', "%{$search}%")
+            )
+            ->when(
                 $request->input('event'),
                 fn($query, $vent) =>
                 $query->where('event', 'like', "%{$vent}%")
