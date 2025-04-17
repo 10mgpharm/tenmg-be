@@ -713,7 +713,7 @@ class FincraMandateRepository
             'business_id' => $vendorBusiness->id,
             'description' => 'Loan repayment from '.$mandateData->customer->name,
             'loan_application_id' => $applicationId,
-            'transaction_group' => 'repayment',
+            'transaction_group' => 'payout',
             // 'wallet_id' => $vendorPayoutWallet->id,
             'meta' => json_encode($data),
         ]);//

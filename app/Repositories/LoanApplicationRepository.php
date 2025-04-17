@@ -275,9 +275,12 @@ class LoanApplicationRepository
         //check if mandate has been created for this loan
         //check if the application has a mandate
         $mandate = DebitMandate::where('application_id', $application->id)->first();
-        if ($mandate->status == "pending") {
-            throw new Exception('Mandate has already been created for this application but is pending');
+        if($mandate){
+            if ($mandate->status == "pending") {
+                throw new Exception('Mandate has already been created for this application but is pending');
+            }
         }
+
 
         if ($application->created_at->diffInHours(now()) > $this::LINK_EXPIRED) {
             $application->status = 'EXPIRED';
