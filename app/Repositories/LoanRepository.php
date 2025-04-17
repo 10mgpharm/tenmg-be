@@ -50,7 +50,7 @@ class LoanRepository
         $query = Loan::query();
 
         if (isset($criteria['search'])) {
-            $query->$query->where('identifier', 'like', $criteria['search'])->orWhereHas('customer', function ($q) use ($criteria) {
+            $query->where('identifier', 'like', $criteria['search'])->orWhereHas('customer', function ($q) use ($criteria) {
                 $q->where('name', 'like', '%'.$criteria['search'].'%');
             });
         }
