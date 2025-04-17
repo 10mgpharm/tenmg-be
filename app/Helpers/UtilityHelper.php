@@ -48,6 +48,10 @@ class UtilityHelper
         // calculate interest amount based on loan amount based on amount and duration
         $loanSettings = new LoanSettings();
 
+        $interestRate = $loanSettings->lenders_interest;
+        $totalInterest = ($interestRate / 100) * $amount;
+        $monthlyInterestRate = $totalInterest/$durationInMonths;
+
         $ANNUAL_INTEREST_RATE = $loanSettings->lenders_interest;
         $DAYS_IN_YEAR = 365; // 360
         $DAYS_IN_MONTH = 30;
@@ -64,8 +68,8 @@ class UtilityHelper
         return [
             'interestRate' => $ANNUAL_INTEREST_RATE,
             'monthlyInterestRate' => $MONTHLY_INTEREST_RATE,
-            'interestAmount' => $INTEREST_AMOUNT,
-            'totalAmount' => $INTEREST_AMOUNT + $amount,
+            'interestAmount' => $totalInterest,
+            'totalAmount' => $totalInterest + $amount,
         ];
     }
 
