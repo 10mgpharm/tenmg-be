@@ -4,6 +4,7 @@ namespace App\Helpers;
 
 use App\Common\ResponseMessages;
 use App\Enums\BusinessType;
+use App\Settings\LoanSettings;
 use Carbon\Carbon;
 use Exception;
 use Illuminate\Http\Response;
@@ -45,7 +46,9 @@ class UtilityHelper
     public static function calculateInterestAmount(float $amount, int $durationInMonths): array
     {
         // calculate interest amount based on loan amount based on amount and duration
-        $ANNUAL_INTEREST_RATE = config('app.interest_rate');
+        $loanSettings = new LoanSettings();
+
+        $ANNUAL_INTEREST_RATE = $loanSettings->lenders_interest;
         $DAYS_IN_YEAR = 365; // 360
         $DAYS_IN_MONTH = 30;
 
