@@ -38,6 +38,7 @@ use App\Http\Controllers\API\Credit\CustomerController;
 use App\Http\Controllers\API\Credit\LoanApplicationController;
 use App\Http\Controllers\API\Credit\LoanController;
 use App\Http\Controllers\API\Credit\LoanOfferController;
+use App\Http\Controllers\API\Credit\LoanRepaymentController;
 use App\Http\Controllers\API\Credit\TransactionHistoryController;
 use App\Http\Controllers\API\EcommerceDiscountController;
 use App\Http\Controllers\API\Lender\LenderDashboardController;
@@ -719,7 +720,16 @@ Route::prefix('v1')->group(function () {
             Route::get('/mandate/verify/{reference}', [LoanApplicationController::class, 'verifyMandateStatus'])
                 ->middleware(['auth:api'])
                 ->name('client.applications.mandate.verify');
+        });
 
+        Route::prefix('repayment')->group(function () {
+            Route::get('/verify/{reference}', [LoanRepaymentController::class, 'verifyRepaymentLink'])
+                ->middleware(['auth:api'])
+                ->name('client.repayment.config');
+
+            Route::post('/', [LoanRepaymentController::class, 'makeRepayment'])
+                ->middleware(['auth:api'])
+                ->name('client.repayment');
 
         });
     });

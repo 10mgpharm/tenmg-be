@@ -7,11 +7,13 @@ use App\Models\Customer;
 use App\Models\LoanApplication;
 use App\Models\RepaymentSchedule;
 use App\Models\User;
+use App\Notifications\CustomerLoanRepaymentNotification;
 use App\Notifications\Loan\LoanSubmissionNotification;
 use App\Services\Interfaces\INotificationService;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Support\Facades\Lang;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Notification;
 
 class NotificationService implements INotificationService
 {
@@ -95,15 +97,20 @@ class NotificationService implements INotificationService
     {
         // Get customer and loan information
         $customer = $repayment->loan->customer;
+        $business = $repayment->loan->business;
+        $user = User::where("id", $business->owner_id)->first();
+        $token = $user->createToken('Full Access Token', ['full']);
 
-        $link = config('app.frontend_url') . '/widgets/repayment/shedule/' . $repayment->id;
+        $link = config('app.frontend_url') . '/widgets/repayment/shedule/' . $repayment?->loan?->identifier.'?token='.$token->accessToken;
+
+        $message = "Hi {$repayment?->loan?->customer?->name}, you have a loan repayment of {$repayment?->total_amount} coming up on {$repayment?->due_date}. Kindly Click the button to make payment.";
 
 
-        $subject = 'Loan Repayment Reminder';
-        $message = "Hi {$repayment?->loan?->customer?->name}, Kindly use the below link to make your upcoming repayment. \n\nClick {$link} to make payment.";
+        // $this->sendCustomerNotification($customer->id, $subject, $message);
 
-
-        $this->sendCustomerNotification($customer->id, $subject, $message);
+        Notification::route('mail', [
+            $customer?->email => $customer?->name,
+        ])->notify(new CustomerLoanRepaymentNotification($link, $message));
 
         // Mail::to($customer->email)->send(new RepaymentReminderMail($repayment));
     }
