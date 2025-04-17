@@ -355,7 +355,7 @@ class FincraMandateRepository
             durationInMonths: $offer?->application?->duration_in_months
         );
 
-        $interestAmount = $interestData['totalAmount'];
+        $totalAmount = $interestData['totalAmount'];
 
         $loanData = [
             'business_id' => $offer->business_id,
@@ -363,8 +363,8 @@ class FincraMandateRepository
             'application_id' => $offer->application_id,
             'offer_id' => $offer->id,
             'capital_amount' => $offer->offer_amount,
-            'interest_amount' => $interestAmount,
-            'total_amount' => $offer->offer_amount + $interestAmount,
+            'interest_amount' => $interestData['interestAmount'],
+            'total_amount' => $totalAmount,
             'status' => 'Ongoing',
         ];
 
