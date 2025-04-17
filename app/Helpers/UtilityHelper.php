@@ -77,7 +77,7 @@ class UtilityHelper
     public static function generateRepaymentBreakdown(float $principal, float $annualInterestRate, int $months)
     {
         // Convert annual interest rate to a monthly rate (decimal form)
-        $monthlyInterestRate = $annualInterestRate / 100 / 12;
+        $monthlyInterestRate = $annualInterestRate / 100;
 
         // Calculate EMI (monthly payment)
         $emi = UtilityHelper::calculateEmi($principal, $monthlyInterestRate, $months);
