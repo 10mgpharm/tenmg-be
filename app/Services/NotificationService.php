@@ -101,7 +101,7 @@ class NotificationService implements INotificationService
         $user = User::where("id", $business->owner_id)->first();
         $token = $user->createToken('Full Access Token', ['full']);
 
-        $link = config('app.frontend_url') . '/widgets/repayment/shedule/' . $repayment?->loan?->identifier.'?token='.$token->accessToken;
+        $link = config('app.frontend_url') . '/widgets/repayment/schedule/' . $repayment?->loan?->identifier.'?token='.$token->accessToken;
 
         $message = "Hi {$repayment?->loan?->customer?->name}, you have a loan repayment of {$repayment?->total_amount} coming up on {$repayment?->due_date}. Kindly Click the button to make payment.";
 
