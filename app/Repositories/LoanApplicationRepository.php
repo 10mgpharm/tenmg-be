@@ -272,13 +272,8 @@ class LoanApplicationRepository
             throw new Exception('Application has been cancelled');
         }
 
-        //check if mandate has been created for this loan
-        //check if the application has a mandate
-        $mandate = DebitMandate::where('application_id', $application->id)->first();
-        if($mandate){
-            if ($mandate->status == "pending") {
-                throw new Exception('Mandate has already been created for this application but is pending');
-            }
+        if ($application->status == 'INITIATED') {
+            throw new Exception('Your Application is still being processed. Please wait');
         }
 
 
