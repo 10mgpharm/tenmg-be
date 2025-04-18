@@ -17,6 +17,10 @@ class ShowBusinessSettingRequest extends FormRequest
             return true;
         }
 
+        if($user->hasRole('vendor') && $user->businesses()->firstWhere('user_id', $user->id)){
+            return true;
+        }
+
         return (bool) $this->user()->ownerBusinessType;
     }
 
