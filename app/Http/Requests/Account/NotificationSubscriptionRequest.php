@@ -35,6 +35,10 @@ class NotificationSubscriptionRequest extends FormRequest
             return true;
         }
 
+        if ($notification->is_lender && $user->hasRole('lender')) {
+            return true;
+        }
+
         return false;
     }
 
