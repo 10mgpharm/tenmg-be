@@ -71,7 +71,7 @@ class EcommerceProductController extends Controller
         return $product
             ? $this->returnJsonResponse(
                 message: 'Product successfully fetched.',
-                data: new EcommerceProductResource($product)
+                data: new EcommerceProductResource($product->load(['reviews', 'rating',]))
             )
             : $this->returnJsonResponse(
                 message: 'Oops, can\'t view product at the moment. Please try again later.'

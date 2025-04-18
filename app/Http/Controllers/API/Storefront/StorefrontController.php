@@ -28,6 +28,7 @@ class StorefrontController extends Controller
                 ->whereIn('status', StatusEnum::actives())
                 ->latest('id')
                 ->limit(15)
+                ->with(['rating','reviews'])
         ])->where('active', 1)
             ->whereIn('status', StatusEnum::actives())
             ->paginate($request->has('perPage') ? $request->perPage : 10)
