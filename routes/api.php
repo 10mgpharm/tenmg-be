@@ -420,6 +420,7 @@ Route::prefix('v1')->group(function () {
             });
 
             Route::prefix('wallet')->group(function () {
+            Route::post('add-bank-account', AddBankAccountController::class);
                 Route::get('/', [VendorWalletController::class, 'getWalletStats']);
                 Route::get('/transactions', [VendorWalletController::class, 'getTransactions']);
             });
@@ -534,6 +535,7 @@ Route::prefix('v1')->group(function () {
             });
 
             Route::prefix('wallet')->group(function () {
+                Route::post('add-bank-account', AddBankAccountController::class);
                 Route::get('/', [AdminWalletController::class, 'getWalletStats']);
                 Route::get('/transactions', [AdminWalletController::class, 'getTransactions']);
             });
