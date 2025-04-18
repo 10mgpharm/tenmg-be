@@ -24,6 +24,7 @@ use App\Http\Controllers\API\Admin\EcommerceProductController as AdminEcommerceP
 use App\Http\Controllers\API\Admin\FaqController;
 use App\Http\Controllers\API\Admin\MedicationTypeController as AdminMedicationTypeController;
 use App\Http\Controllers\API\Admin\ProductInsightsController as AdminProductInsightsController;
+use App\Http\Controllers\API\Admin\SettingConfigController;
 use App\Http\Controllers\API\Supplier\ProductInsightsController as SupplierProductInsightsController;
 use App\Http\Controllers\API\Admin\UsersController;
 use App\Http\Controllers\API\Auth\AuthenticatedController;
@@ -37,6 +38,7 @@ use App\Http\Controllers\API\Credit\CustomerController;
 use App\Http\Controllers\API\Credit\LoanApplicationController;
 use App\Http\Controllers\API\Credit\LoanController;
 use App\Http\Controllers\API\Credit\LoanOfferController;
+use App\Http\Controllers\API\Credit\LoanRepaymentController;
 use App\Http\Controllers\API\Credit\TransactionHistoryController;
 use App\Http\Controllers\API\EcommerceDiscountController;
 use App\Http\Controllers\API\Lender\LenderDashboardController;
@@ -462,6 +464,14 @@ Route::prefix('v1')->group(function () {
                 Route::get('/', [BusinessSettingController::class, 'show']);
                 // Update business information
                 Route::match(['post', 'patch'], 'business-information', [BusinessSettingController::class, 'businessInformation']);
+
+                Route::prefix('config')->group(function () {
+                    Route::get('/', [SettingConfigController::class, 'getAllSettings']);
+                    Route::post('/', [SettingConfigController::class, 'updateSettingsConfig']);
+
+                });
+
+
             });
 
             Route::get('discounts/count', [EcommerceDiscountController::class, 'count']);
@@ -517,6 +527,9 @@ Route::prefix('v1')->group(function () {
                 Route::get('creditscore-breakdown/{txnEvaluationId}', [TransactionHistoryController::class, 'creditScoreBreakDown'])->name('admin.txn_history.creditScoreBreakDown');
 
                 Route::get('/{customerId}', [TransactionHistoryController::class, 'index'])->name('admin.txn_history');
+
+                Route::post('/view', [TransactionHistoryController::class, 'viewTransactionHistory'])
+                    ->name('admin.txn_history.view');
 
             });
 
@@ -648,6 +661,9 @@ Route::prefix('v1')->group(function () {
 
                 Route::get('/{customerId}', [TransactionHistoryController::class, 'index'])->name('lender.txn_history');
 
+                Route::post('/view', [TransactionHistoryController::class, 'viewTransactionHistory'])
+                    ->name('lender.txn_history.view');
+
             });
 
         });
@@ -704,7 +720,16 @@ Route::prefix('v1')->group(function () {
             Route::get('/mandate/verify/{reference}', [LoanApplicationController::class, 'verifyMandateStatus'])
                 ->middleware(['auth:api'])
                 ->name('client.applications.mandate.verify');
+        });
 
+        Route::prefix('repayment')->group(function () {
+            Route::get('/verify/{reference}', [LoanRepaymentController::class, 'verifyRepaymentLink'])
+                ->middleware(['auth:api'])
+                ->name('client.repayment.config');
+
+            Route::post('/', [LoanRepaymentController::class, 'makeRepayment'])
+                ->middleware(['auth:api'])
+                ->name('client.repayment');
 
         });
     });

@@ -201,6 +201,9 @@ class FincraMandateRepository
             throw new \Exception("Loan application not found");
         }
 
+        $loanApplication->status = 'INITIATED';
+        $loanApplication->save();
+
         //check if user has an approved mandate
         $mandate = DebitMandate::where('status', 'approved')->where('application_id', $applicationId)->first();
         if(!$mandate){
@@ -352,7 +355,7 @@ class FincraMandateRepository
             durationInMonths: $offer?->application?->duration_in_months
         );
 
-        $interestAmount = $interestData['totalAmount'];
+        $totalAmount = $interestData['totalAmount'];
 
         $loanData = [
             'business_id' => $offer->business_id,
@@ -360,8 +363,8 @@ class FincraMandateRepository
             'application_id' => $offer->application_id,
             'offer_id' => $offer->id,
             'capital_amount' => $offer->offer_amount,
-            'interest_amount' => $interestAmount,
-            'total_amount' => $offer->offer_amount + $interestAmount,
+            'interest_amount' => $interestData['interestAmount'],
+            'total_amount' => $totalAmount,
             'status' => 'Ongoing',
         ];
 
@@ -710,7 +713,7 @@ class FincraMandateRepository
             'business_id' => $vendorBusiness->id,
             'description' => 'Loan repayment from '.$mandateData->customer->name,
             'loan_application_id' => $applicationId,
-            'transaction_group' => 'repayment',
+            'transaction_group' => 'payout',
             // 'wallet_id' => $vendorPayoutWallet->id,
             'meta' => json_encode($data),
         ]);//

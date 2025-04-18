@@ -2,6 +2,7 @@
 
 namespace App\Repositories;
 
+use App\Models\Loan;
 use App\Models\RepaymentSchedule;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Collection;
@@ -92,6 +93,21 @@ class RepaymentScheduleRepository
 
 
         }
+    }
+
+    public function getLoanByReference($reference)
+    {
+        $loan = Loan::where('identifier', $reference)->first();
+        if (!$loan) {
+            throw new \Exception('Loan not found');
+        }
+
+        // Check if the loan is already paid
+        if ($loan->status === 'Completed') {
+            throw new \Exception('Loan is already paid');
+        }
+
+        return $loan;
     }
 
 

@@ -93,7 +93,7 @@ class LoanApplicationRepository
             $searchTerm = $criteria['search'];
             $query->where('credit_applications.identifier', 'like', $searchTerm)
                     ->orWhereHas('customer', function ($q) use ($searchTerm) {
-                $q->where('email', 'like', '%'.$searchTerm.'%');
+                $q->where('email', 'like', '%'.$searchTerm.'%')->orWhere('name', 'like', '%'.$searchTerm.'%');
             });
         }
 
@@ -265,8 +265,17 @@ class LoanApplicationRepository
         }
 
         //check if application is approved, rejected or cancelled
+        if ($application->status == 'APPROVED') {
+            throw new Exception('Application has been approved');
+        }
+        if ($application->status == 'CANCELLED') {
+            throw new Exception('Application has been cancelled');
+        }
 
-        //check if mandate has been created for this loan
+        if ($application->status == 'INITIATED') {
+            throw new Exception('Your Application is still being processed. Please wait');
+        }
+
 
         if ($application->created_at->diffInHours(now()) > $this::LINK_EXPIRED) {
             $application->status = 'EXPIRED';

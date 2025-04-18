@@ -4,6 +4,7 @@ namespace App\Helpers;
 
 use App\Common\ResponseMessages;
 use App\Enums\BusinessType;
+use App\Settings\LoanSettings;
 use Carbon\Carbon;
 use Exception;
 use Illuminate\Http\Response;
@@ -45,7 +46,13 @@ class UtilityHelper
     public static function calculateInterestAmount(float $amount, int $durationInMonths): array
     {
         // calculate interest amount based on loan amount based on amount and duration
-        $ANNUAL_INTEREST_RATE = config('app.interest_rate');
+        $loanSettings = new LoanSettings();
+
+        $interestRate = $loanSettings->lenders_interest;
+        $totalInterest = ($interestRate / 100) * $amount;
+        $monthlyInterestRate = $totalInterest/$durationInMonths;
+
+        $ANNUAL_INTEREST_RATE = $loanSettings->lenders_interest;
         $DAYS_IN_YEAR = 365; // 360
         $DAYS_IN_MONTH = 30;
 
@@ -61,8 +68,8 @@ class UtilityHelper
         return [
             'interestRate' => $ANNUAL_INTEREST_RATE,
             'monthlyInterestRate' => $MONTHLY_INTEREST_RATE,
-            'interestAmount' => $INTEREST_AMOUNT,
-            'totalAmount' => $INTEREST_AMOUNT + $amount,
+            'interestAmount' => $totalInterest,
+            'totalAmount' => $totalInterest + $amount,
         ];
     }
 
@@ -70,7 +77,7 @@ class UtilityHelper
     public static function generateRepaymentBreakdown(float $principal, float $annualInterestRate, int $months)
     {
         // Convert annual interest rate to a monthly rate (decimal form)
-        $monthlyInterestRate = $annualInterestRate / 100 / 12;
+        $monthlyInterestRate = $annualInterestRate / 100;
 
         // Calculate EMI (monthly payment)
         $emi = UtilityHelper::calculateEmi($principal, $monthlyInterestRate, $months);
