@@ -49,25 +49,13 @@ class UtilityHelper
         $loanSettings = new LoanSettings();
 
         $interestRate = $loanSettings->lenders_interest;
-        $totalInterest = ($interestRate / 100) * $amount;
-        $monthlyInterestRate = $totalInterest/$durationInMonths;
 
-        $ANNUAL_INTEREST_RATE = $loanSettings->lenders_interest;
-        $DAYS_IN_YEAR = 365; // 360
-        $DAYS_IN_MONTH = 30;
-
-        $MONTHLY_INTEREST_RATE = $ANNUAL_INTEREST_RATE / 100 / 12;
-
-        $DAILY_INTEREST_PER_ANNUM = $ANNUAL_INTEREST_RATE / 100 / $DAYS_IN_YEAR;
-
-        $DURATION_INTEREST = $DAILY_INTEREST_PER_ANNUM * ($DAYS_IN_MONTH * $durationInMonths);
-
-        $DURATION_INTEREST = $DAILY_INTEREST_PER_ANNUM * ($DAYS_IN_MONTH * $durationInMonths);
-        $INTEREST_AMOUNT = $DURATION_INTEREST * $amount;
+        $totalInterest = $amount * ($interestRate / 100);
+        $monthlyInterestRate = ($interestRate / 100) * $durationInMonths;
 
         return [
-            'interestRate' => $ANNUAL_INTEREST_RATE,
-            'monthlyInterestRate' => $MONTHLY_INTEREST_RATE,
+            'interestRate' => $interestRate,
+            'monthlyInterestRate' => $monthlyInterestRate,
             'interestAmount' => $totalInterest,
             'totalAmount' => $totalInterest + $amount,
         ];
@@ -76,33 +64,28 @@ class UtilityHelper
     // Generate the repayment breakdown using the amortization formula
     public static function generateRepaymentBreakdown(float $principal, float $annualInterestRate, int $months)
     {
-        // Convert annual interest rate to a monthly rate (decimal form)
-        $monthlyInterestRate = $annualInterestRate / 100;
 
-        // Calculate EMI (monthly payment)
-        $emi = UtilityHelper::calculateEmi($principal, $monthlyInterestRate, $months);
+        $loanSettings = new LoanSettings();
+        $interestRate = $loanSettings->lenders_interest;
+
+        $totalInterest = $principal * ($interestRate / 100);
+        $totalRepayment = $principal + $totalInterest;
+        $monthlyPayment = $totalRepayment / $months;
 
         $repaymentBreakdown = [];
-        $remainingPrincipal = $principal;
+        $remainingBalance = $principal;
 
-        // Generate repayment schedule
         for ($i = 1; $i <= $months; $i++) {
-            // Calculate interest for the current month
-            $interest = $remainingPrincipal * $monthlyInterestRate;
+            $principalPortion = $principal / $months;
+            $interestPortion = $totalInterest / $months;
+            $remainingBalance -= $principalPortion;
 
-            // Calculate principal payment for the current month
-            $principalPayment = $emi - $interest;
-
-            // Reduce remaining principal
-            $remainingPrincipal -= $principalPayment;
-
-            // Add breakdown for this month
             $repaymentBreakdown[] = [
                 'month' => Carbon::now()->addMonths($i)->format('F Y'),
-                'totalPayment' => round($emi, 2),
-                'principal' => round($principalPayment, 2),
-                'interest' => round($interest, 2),
-                'balance' => max(round($remainingPrincipal, 2), 0),
+                'totalPayment' => round($monthlyPayment, 2),
+                'principal' => round($principalPortion, 2),
+                'interest' => round($interestPortion, 2),
+                'balance' => round(max($remainingBalance, 0), 2)
             ];
         }
 
