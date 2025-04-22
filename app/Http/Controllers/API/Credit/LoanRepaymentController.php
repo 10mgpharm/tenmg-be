@@ -38,5 +38,16 @@ class LoanRepaymentController extends Controller
 
     }
 
+    public function sentTestRepayPaymentMail($loanRef)
+    {
+
+        $response = $this->repaymentProcessingService->sendRemindersTest($loanRef);
+
+        return $this->returnJsonResponse(
+            message: 'Repayment mail sent',
+            data: $response
+        );
+    }
+
 
 }

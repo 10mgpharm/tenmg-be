@@ -2,6 +2,8 @@
 
 namespace App\Services;
 
+use App\Models\Loan;
+use App\Models\RepaymentSchedule;
 use App\Repositories\RepaymentScheduleRepository;
 use App\Services\NotificationService;
 use Carbon\Carbon;
