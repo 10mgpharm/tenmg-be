@@ -60,7 +60,7 @@ class EcommerceProductResource extends JsonResource
             'related_products' => $this->when(
                 $this->related_products,
                 EcommerceProductResource::collection(
-                    EcommerceProduct::where('id', '!=', $this->id)
+                    EcommerceProduct::with(['reviews', 'rating',])->where('id', '!=', $this->id)
                         ->where(function ($query) {
                             $query->where('ecommerce_category_id', $this->ecommerce_category_id)
                                 ->orWhere('ecommerce_medication_type_id', $this->ecommerce_medication_type_id);
