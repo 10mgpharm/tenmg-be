@@ -733,6 +733,10 @@ Route::prefix('v1')->group(function () {
                 ->middleware(['auth:api'])
                 ->name('client.repayment');
 
+            Route::get('/test-repayment-mail/{loanRef}', [LoanRepaymentController::class, 'sentTestRepayPaymentMail'])
+            ->middleware(['auth:api'])
+            ->name('client.repayment.test-repayment-mail');
+
         });
     });
 });
