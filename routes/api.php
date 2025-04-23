@@ -67,6 +67,7 @@ use App\Http\Controllers\API\Supplier\EcommerceProductController as SupplierEcom
 use App\Http\Controllers\API\Supplier\EcommerceStoreAddressController;
 use App\Http\Controllers\API\Supplier\EcommerceTransactionController;
 use App\Http\Controllers\API\Supplier\EcommerceWalletController;
+use App\Http\Controllers\API\Supplier\UpdateBankAccountController;
 use App\Http\Controllers\API\Vendor\AuditLogController as VendorAuditLogController;
 use App\Http\Controllers\API\Vendor\UsersController as VendorUsersController;
 use App\Http\Controllers\API\Vendor\VendorWalletController;
@@ -227,6 +228,7 @@ Route::prefix('v1')->group(function () {
 
             Route::get('wallet', EcommerceWalletController::class);
             Route::get('wallet/transactions', EcommerceTransactionController::class);
+            Route::patch('wallet/add-bank-account/{bank_account}', UpdateBankAccountController::class);
             Route::post('wallet/add-bank-account', AddBankAccountController::class);
 
             Route::apiResource('store-addresses', EcommerceStoreAddressController::class);
@@ -420,6 +422,7 @@ Route::prefix('v1')->group(function () {
             });
 
             Route::prefix('wallet')->group(function () {
+                Route::patch('add-bank-account/{bank_account}', UpdateBankAccountController::class);
             Route::post('add-bank-account', AddBankAccountController::class);
                 Route::get('/', [VendorWalletController::class, 'getWalletStats']);
                 Route::get('/transactions', [VendorWalletController::class, 'getTransactions']);
@@ -535,6 +538,7 @@ Route::prefix('v1')->group(function () {
             });
 
             Route::prefix('wallet')->group(function () {
+                Route::patch('add-bank-account/{bank_account}', UpdateBankAccountController::class);
                 Route::post('add-bank-account', AddBankAccountController::class);
                 Route::get('/', [AdminWalletController::class, 'getWalletStats']);
                 Route::get('/transactions', [AdminWalletController::class, 'getTransactions']);
