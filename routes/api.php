@@ -729,13 +729,21 @@ Route::prefix('v1')->group(function () {
                 ->middleware(['auth:api'])
                 ->name('client.repayment.config');
 
-            Route::post('/', [LoanRepaymentController::class, 'makeRepayment'])
+            Route::post('/', [LoanRepaymentController::class, 'initiateRepayment'])
                 ->middleware(['auth:api'])
                 ->name('client.repayment');
 
+            Route::get('/cancel-payment/{paymentRef}', [LoanRepaymentController::class, 'cancelPayment'])
+                ->middleware(['auth:api'])
+                ->name('client.repayment.cancel-payment');
+
+            Route::get('/verify-payment/{reference}', [OrdersController::class, 'verifyFincraPayment'])
+                ->middleware(['auth:api'])
+                ->name('client.repayment.verify-payment');
+
             Route::get('/test-repayment-mail/{loanRef}', [LoanRepaymentController::class, 'sentTestRepayPaymentMail'])
-            ->middleware(['auth:api'])
-            ->name('client.repayment.test-repayment-mail');
+                ->middleware(['auth:api'])
+                ->name('client.repayment.test-repayment-mail');
 
         });
     });

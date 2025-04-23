@@ -23,13 +23,15 @@ class LoanRepaymentController extends Controller
         );
     }
 
-    public function makeRepayment(Request $request)
+    public function initiateRepayment(Request $request)
     {
         $request->validate([
-            'reference' => 'required|string|exists:credit_loans,identifier'
+            'reference' => 'required|string|exists:credit_loans,identifier',
+            'paymentType' => 'required|string|in:fullPayment,partPayment',
+            'noOfMonths' => 'required|numeric|min:0',
         ]);
 
-        $response = $this->repaymentProcessingService->makeRepayment($request);
+        $response = $this->repaymentProcessingService->initiateRepayment($request);
 
         return $this->returnJsonResponse(
             message: 'Repayment processed successfully',
@@ -47,6 +49,21 @@ class LoanRepaymentController extends Controller
             message: 'Repayment mail sent',
             data: $response
         );
+    }
+
+    public function cancelPayment($paymentRef)
+    {
+        $response = $this->repaymentProcessingService->cancelPayment($paymentRef);
+
+        return $this->returnJsonResponse(
+            message: 'Payment cancelled successfully',
+            data: $response
+        );
+    }
+
+    public function verifyPayment()
+    {
+
     }
 
 

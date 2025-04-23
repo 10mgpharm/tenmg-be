@@ -6,6 +6,7 @@ use App\Helpers\UtilityHelper;
 use App\Http\Resources\BusinessResource;
 use App\Models\Business;
 use App\Models\CreditOffer;
+use App\Models\CreditRepaymentPayments;
 use App\Models\CreditTransactionHistory;
 use App\Models\DebitMandate;
 use App\Models\EcommerceOrder;
@@ -23,7 +24,7 @@ use Illuminate\Support\Str;
 class FincraPaymentRepository
 {
 
-    function __construct(private FincraMandateRepository $fincraMandateRepository, private LenderDashboardRepository $lenderDashboardRepository)
+    function __construct(private FincraMandateRepository $fincraMandateRepository, private LenderDashboardRepository $lenderDashboardRepository, private RepaymentScheduleRepository $repaymentScheduleRepository)
     {
 
     }
@@ -157,6 +158,34 @@ class FincraPaymentRepository
 
             //check if we have a payment with this ref
             $payment = CreditTransactionHistory::where('identifier', $ref)->where('transaction_group', 'deposit')->first();
+            if (! $payment) {
+                throw new \Exception('No payment exist with this reference');
+            }
+
+            if ($payment->status == 'cancelled') {
+                throw new \Exception('Payment has been cancelled');
+            }
+
+            if ($payment->status == 'success') {
+                throw new \Exception('Payment already processed');
+            }
+
+            $business = Business::find($payment->business_id)->owner;
+
+            $customer = [
+                'name' => $business->name,
+                'email' => $business->email,
+                'phone' => $business->phone,
+                "bank_code"=> null,
+                "card_scheme"=> "mastercard"
+            ];
+
+            $amount = $payment->amount;
+
+        }elseif(Str::startsWith($ref, "LNR")){
+
+            //check if we have a payment with this ref
+            $payment = CreditRepaymentPayments::where('reference', $ref)->first();
             if (! $payment) {
                 throw new \Exception('No payment exist with this reference');
             }
@@ -382,6 +411,8 @@ class FincraPaymentRepository
             return $this->completeOrder($data);
         }elseif(Str::startsWith($merchantReference, "THG")){
             return $this->lenderDashboardRepository->completeWalletDeposit($data);
+        }elseif(Str::startsWith($merchantReference, "LNR")){
+            return $this->repaymentScheduleRepository->verifyRepaymentPayment($data);
         }
 
     }
