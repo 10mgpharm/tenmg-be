@@ -34,14 +34,16 @@ class RepaymentProcessingService
 
     }
 
-    public function makeRepayment($request)
+    public function initiateRepayment($request)
     {
         $reference = $request->input('reference');
         $loan = Loan::where('identifier', $reference)->first();
 
-        $payment = $this->fincraMandateRepository->debitCustomerMandate($loan->application_id);
+        // $payment = $this->fincraMandateRepository->debitCustomerMandate($loan->application_id);
 
-        return $payment;
+        $initPaymentData = $this->repaymentScheduleRepository->initiateRepayment($request);
+
+        return $initPaymentData;
 
 
     }
@@ -72,6 +74,12 @@ class RepaymentProcessingService
 
 
         return $loan;
+
+    }
+
+    public function cancelPayment($paymentRef)
+    {
+        return $this->repaymentScheduleRepository->cancelPayment($paymentRef);
 
     }
 }
