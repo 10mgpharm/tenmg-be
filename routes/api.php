@@ -21,6 +21,7 @@ use App\Http\Controllers\API\Admin\EcommerceMeasurementController as AdminEcomme
 use App\Http\Controllers\API\Admin\EcommerceOrderController;
 use App\Http\Controllers\API\Admin\EcommercePresentationController as AdminEcommercePresentationController;
 use App\Http\Controllers\API\Admin\EcommerceProductController as AdminEcommerceProductController;
+use App\Http\Controllers\API\Admin\EcommerceWalletController as AdminEcommerceWalletController;
 use App\Http\Controllers\API\Admin\FaqController;
 use App\Http\Controllers\API\Admin\MedicationTypeController as AdminMedicationTypeController;
 use App\Http\Controllers\API\Admin\ProductInsightsController as AdminProductInsightsController;
@@ -534,6 +535,7 @@ Route::prefix('v1')->group(function () {
 
             });
 
+            Route::get('/wallet-product', AdminEcommerceWalletController::class);
             Route::prefix('wallet')->group(function () {
                 Route::post('add-bank-account', AddBankAccountController::class);
                 Route::get('/', [AdminWalletController::class, 'getWalletStats']);
