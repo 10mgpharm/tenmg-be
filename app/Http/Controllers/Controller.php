@@ -57,6 +57,10 @@ abstract class Controller
         } else {
             // Default to internal server error (500) if no specific exception type matches
             $status = $status ?? $th->getCode() ?? Response::HTTP_INTERNAL_SERVER_ERROR;
+
+            $status = is_int($status) && $status >= 100 && $status < 600 
+                ? $status 
+                : Response::HTTP_INTERNAL_SERVER_ERROR;
         }
 
         return response()->json([
