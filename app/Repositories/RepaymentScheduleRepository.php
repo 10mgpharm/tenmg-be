@@ -293,21 +293,24 @@ class RepaymentScheduleRepository
     public function completeDirectDebitRequest($data, $paymentSchedule)
     {
 
-        $mandateData = DebitMandate::where('reference', $data->reference)->first();
+        // $mandateData = DebitMandate::where('reference', $data->reference)->first();
 
-        if(!$mandateData){
-            throw new \Exception('Mandate not found');
-        }
+        // if(!$mandateData){
+        //     throw new \Exception('Mandate not found');
+        // }
+
+        //get loan id for the application
+        $loanRequest = Loan::where('loan_id', $paymentSchedule->loan_id)->first();
+        $loan = $loanRequest->id;
 
         //amount debited
         $amount = $data->amount;
         $status = $data->status;
 
-        //get the loan application id from the mandate
-        $applicationId = $mandateData->application_id;
+        //get the loan application id from loan
+        $applicationId = $loanRequest->application_id;
 
-        //get loan id for the application
-        $loan = Loan::where('application_id', $applicationId)->first()->id;
+
 
         //Change the payment status to SUCCESS
         $paymentSchedule->payment_status = $status;
@@ -344,7 +347,7 @@ class RepaymentScheduleRepository
             'type' => 'CREDIT',
             'status' => 'success',
             'business_id' => $lenderBusinessId,
-            'description' => 'Loan Repayment from '.$mandateData->customer->name,
+            'description' => 'Loan Repayment from '.$loanRequest->customer->name,
             'loan_application_id' => $applicationId,
             'transaction_group' => 'repayment',
             'meta' => json_encode($data),
@@ -368,7 +371,7 @@ class RepaymentScheduleRepository
             'type' => 'CREDIT',
             'status' => 'success',
             'business_id' => $adminBusiness->id,
-            'description' => 'Loan Repayment from '.$mandateData->customer->name,
+            'description' => 'Loan Repayment from '.$loanRequest->customer->name,
             'loan_application_id' => $applicationId,
             'transaction_group' => 'repayment_commission',
             'meta' => json_encode($data),
@@ -393,7 +396,7 @@ class RepaymentScheduleRepository
             'type' => 'CREDIT',
             'status' => 'success',
             'business_id' => $vendorBusiness->id,
-            'description' => 'Loan repayment from '.$mandateData->customer->name,
+            'description' => 'Loan repayment from '.$loanRequest->customer->name,
             'loan_application_id' => $applicationId,
             'transaction_group' => 'payout',
             // 'wallet_id' => $vendorPayoutWallet->id,
