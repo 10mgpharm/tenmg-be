@@ -8,7 +8,7 @@ use App\Enums\OtpType;
 use App\Models\EcommerceBankAccount;
 use Illuminate\Validation\Rule;
 
-class AddBankAccountRequest extends FormRequest
+class UpdateBankAccountRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -24,12 +24,14 @@ class AddBankAccountRequest extends FormRequest
             return false;
         }
 
-        if(EcommerceBankAccount::where('supplier_id', $business->id)->exists()){
+        $bank_account = $this->route('bank_account');
+
+        if (!$bank_account) {
             return false;
         }
 
         // Then, check the user role
-        if ($user->hasRole('supplier') || $user->hasRole('vendor') || $user->hasRole('admin')) {
+        if (($user->hasRole('supplier') || $user->hasRole('vendor') || $user->hasRole('admin')) && $bank_account->supplier_id === $business?->id) {
             return true;
         }
 
@@ -55,11 +57,13 @@ class AddBankAccountRequest extends FormRequest
      */
     public function rules(): array
     {
+        $bank_account = $this->route('bank_account');
+
         return [
-            'bank_name' => ['required', 'string', 'max:255'],
-            'account_number' => ['required', 'digits:10', Rule::unique(EcommerceBankAccount::class, 'account_number')],
-            'account_name' => ['required', 'string', 'max:255'],
-            'bank_code' => ['required', 'string', 'max:255'],
+            'bank_name' => ['sometimes', 'nullable', 'string', 'max:255'],
+            'account_number' => ['sometimes', 'nullable', 'digits:10', Rule::unique(EcommerceBankAccount::class, 'account_number')->ignore($bank_account->id)],
+            'account_name' => ['sometimes', 'nullable', 'string', 'max:255'],
+            'bank_code' => ['sometimes', 'nullable', 'string', 'max:255'],
         ];
     }
 
@@ -74,18 +78,21 @@ class AddBankAccountRequest extends FormRequest
         $business = $user->ownerBusinessType
         ?: $user->businesses()->firstWhere('user_id', $user->id);
 
+        $bank_account = $this->route('bank_account');
+
         if (!$user) {
             abort(response()->json([
                 'message' => 'Unauthenticated.',
             ], 403));
         }
 
-        if(EcommerceBankAccount::where('supplier_id', $business->id)->exists()){
+        if ($bank_account->supplier_id != $business?->id) {
             abort(response()->json([
-                'message' => 'Ops, you can only add one bank account.',
+                'message' => 'You are not authorized to update this resource.',
             ], 403));
         }
 
+        
         if ($user->hasRole('supplier') || $user->hasRole('vendor') || $user->hasRole('admin')) {
             abort(response()->json([
                 'message' => 'You are not authorized to add bank accounts.',
