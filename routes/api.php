@@ -737,7 +737,7 @@ Route::prefix('v1')->group(function () {
                 ->middleware(['auth:api'])
                 ->name('client.repayment.cancel-payment');
 
-            Route::get('/verify-payment/{reference}', [OrdersController::class, 'verifyFincraPayment'])
+            Route::get('/verify-payment/{reference}', [LoanRepaymentController::class, 'verifyFincraPayment'])
                 ->middleware(['auth:api'])
                 ->name('client.repayment.verify-payment');
 

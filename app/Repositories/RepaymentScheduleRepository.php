@@ -273,11 +273,14 @@ class RepaymentScheduleRepository
         $applicationId = null;
         for ($i=0; $i < count($repayments); $i++) {
             $applicationId = $repayments[$i]->loan->application_id;
-            $this->completeDirectDebitRequest($data, $repayments[$i]);
+            $this->completeDirectDebitRequest($body, $repayments[$i]);
         }
 
         $allPaidRepayments = RepaymentSchedule::where('payment_status', "PAID")->get();
         $allRepayments = RepaymentSchedule::all();
+
+        $repaymentPayment->status = 'success';
+        $repaymentPayment->save();
 
         if(count($allPaidRepayments) == count($allRepayments)){
             //update loan status to completed
@@ -300,11 +303,11 @@ class RepaymentScheduleRepository
         // }
 
         //get loan id for the application
-        $loanRequest = Loan::where('loan_id', $paymentSchedule->loan_id)->first();
+        $loanRequest = Loan::where('id', $paymentSchedule->loan_id)->first();
         $loan = $loanRequest->id;
 
         //amount debited
-        $amount = $data->amount;
+        // $amount = $data->amount;
         $status = $data->status;
 
         //get the loan application id from loan
@@ -313,7 +316,7 @@ class RepaymentScheduleRepository
 
 
         //Change the payment status to SUCCESS
-        $paymentSchedule->payment_status = $status;
+        $paymentSchedule->payment_status = "PAID";
         $paymentSchedule->save();
 
         if($status == "initiated"){
@@ -378,14 +381,14 @@ class RepaymentScheduleRepository
         ]);
 
         //get the vendor for the loan
-        $vendorBusiness = Business::where('id', $loan->business_id)->first();
-        $vendorCreditVoucherWallet = CreditVendorWallets::where('vendor_id', $vendorBusiness->id)->where('type', 'credit_voucher')->first();
+        $vendorBusiness = Business::where('id', $loanRequest->business_id)->lockForUpdate()->first();
+        $vendorCreditVoucherWallet = CreditVendorWallets::where('vendor_id', $vendorBusiness->id)->where('type', 'credit_voucher')->lockForUpdate()->first();
         $vendorCreditVoucherWallet->prev_balance = $vendorCreditVoucherWallet->current_balance;
         $vendorCreditVoucherWallet->current_balance = $vendorCreditVoucherWallet->current_balance - $paymentSchedule->principal;
         $vendorCreditVoucherWallet->save();
 
         //add to vendor payout wallet
-        $vendorPayoutWallet = CreditVendorWallets::where('vendor_id', $vendorBusiness->id)->where('type', 'payout')->first();
+        $vendorPayoutWallet = CreditVendorWallets::where('vendor_id', $vendorBusiness->id)->where('type', 'payout')->lockForUpdate()->first();
         $vendorPayoutWallet->prev_balance = $vendorPayoutWallet->current_balance;
         $vendorPayoutWallet->current_balance = $vendorPayoutWallet->current_balance + $paymentSchedule->principal;
         $vendorPayoutWallet->save();

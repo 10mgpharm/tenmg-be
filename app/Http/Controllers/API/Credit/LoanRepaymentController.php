@@ -61,9 +61,9 @@ class LoanRepaymentController extends Controller
         );
     }
 
-    public function verifyPayment()
+    function verifyFincraPayment($ref)
     {
-
+        return $this->repaymentProcessingService->verifyFincraPayment($ref);
     }
 
 
