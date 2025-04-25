@@ -67,6 +67,7 @@ use App\Http\Controllers\API\Supplier\EcommerceProductController as SupplierEcom
 use App\Http\Controllers\API\Supplier\EcommerceStoreAddressController;
 use App\Http\Controllers\API\Supplier\EcommerceTransactionController;
 use App\Http\Controllers\API\Supplier\EcommerceWalletController;
+use App\Http\Controllers\API\Supplier\GetBankAccountController;
 use App\Http\Controllers\API\Supplier\UpdateBankAccountController;
 use App\Http\Controllers\API\Vendor\AuditLogController as VendorAuditLogController;
 use App\Http\Controllers\API\Vendor\UsersController as VendorUsersController;
@@ -228,6 +229,7 @@ Route::prefix('v1')->group(function () {
 
             Route::get('wallet', EcommerceWalletController::class);
             Route::get('wallet/transactions', EcommerceTransactionController::class);
+            Route::get('wallet/bank-account', GetBankAccountController::class);
             Route::patch('wallet/add-bank-account/{bank_account}', UpdateBankAccountController::class);
             Route::post('wallet/add-bank-account', AddBankAccountController::class);
 
@@ -422,6 +424,7 @@ Route::prefix('v1')->group(function () {
             });
 
             Route::prefix('wallet')->group(function () {
+                Route::get('bank-account', GetBankAccountController::class);
                 Route::patch('add-bank-account/{bank_account}', UpdateBankAccountController::class);
             Route::post('add-bank-account', AddBankAccountController::class);
                 Route::get('/', [VendorWalletController::class, 'getWalletStats']);
@@ -538,6 +541,7 @@ Route::prefix('v1')->group(function () {
             });
 
             Route::prefix('wallet')->group(function () {
+                Route::get('bank-account', GetBankAccountController::class);
                 Route::patch('add-bank-account/{bank_account}', UpdateBankAccountController::class);
                 Route::post('add-bank-account', AddBankAccountController::class);
                 Route::get('/', [AdminWalletController::class, 'getWalletStats']);
