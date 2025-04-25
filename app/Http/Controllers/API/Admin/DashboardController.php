@@ -69,7 +69,13 @@ class DashboardController extends Controller
                     ')
                     ->groupBy('ecommerce_products.id')
                 ->get(),
-                'users' => Role::query()->withCount('users')->pluck('users_count', 'name')->toArray(),
+                'users' => Role::query()->get()->mapWithKeys(function ($role) {
+                    $count = $role->users()
+                        ->when($role->name === 'vendor', fn($q) => $q->whereHas('ownerBusinessType'))
+                        ->count();
+                    return [$role->name => $count];
+                })
+                ->toArray(),
                 'onGoingLoans' => Loan::where('status', 'Ongoing')->count(),
                 'loanRequests' => LoadApplicationResource::collection($loanRequests),
                 'loans' => Loan::query()->with(['customer', 'business'])->where('status', 'Ongoing')->paginate($request->has('perPage') ? $request->perPage : 10)
