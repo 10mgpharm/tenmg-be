@@ -369,7 +369,7 @@ class FincraMandateRepository
         ];
 
         //debit lender deposit wallet
-        $lenderWallet = CreditLendersWallet::where('lender_id', $offer->lender_id)->where('type', 'deposit')->first();
+        $lenderWallet = CreditLendersWallet::where('lender_id', $offer->lender_id)->where('type', 'deposit')->lockForUpdate()->first();
         $lenderWallet->prev_balance = $lenderWallet->current_balance;
         $lenderWallet->current_balance -= $offer->offer_amount;
         $lenderWallet->save();
@@ -412,7 +412,7 @@ class FincraMandateRepository
         ]);
 
         //add amount to vendor voucherwallet
-        $vendorWallet = CreditVendorWallets::where('vendor_id', $loanApplication->business_id)->where('type', 'credit_voucher')->first();
+        $vendorWallet = CreditVendorWallets::where('vendor_id', $loanApplication->business_id)->where('type', 'credit_voucher')->lockForUpdate()->first();
         $vendorWallet->prev_balance = $vendorWallet->current_balance;
         $vendorWallet->current_balance += $offer->offer_amount;
         $vendorWallet->save();
