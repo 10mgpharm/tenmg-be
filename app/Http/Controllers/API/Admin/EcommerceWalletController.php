@@ -73,6 +73,16 @@ class EcommerceWalletController extends Controller
             ->value('net_commission');
 
         // Fetch transactions with pagination
+        $payouts = EcommerceTransaction::query()
+            ->where('txn_group', EcommerceWalletConstants::SUPPLIER_TXN_GROUP_ORDER_PAYMENT)
+            ->where('txn_type', EcommerceWalletConstants::TXN_TYPE_CREDIT)
+            ->whereBetween('created_at', $date_range)
+            ->latest()
+            ->paginate($request->get('perPage', 30))
+            ->withQueryString()
+            ->through(fn(EcommerceTransaction $message) => new EcommerceTransactionResource($message));
+
+
         $transactions = EcommerceTransaction::query()
             ->whereBetween('created_at', $date_range)
             ->latest()
@@ -87,7 +97,8 @@ class EcommerceWalletController extends Controller
                 'wallet' => $wallet,
                 'total_commissions_earned' => $total_commissions_earned,
                 'total_supplier_payout' => $total_supplier_payout,
-                'transactions' => $transactions
+                'transactions' => $transactions,
+                'payouts' => $payouts,
             ]
         );
     }
