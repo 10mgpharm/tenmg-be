@@ -16,7 +16,6 @@ class EcommerceTransactionResource extends JsonResource
     {
         return [
             'id' => $this->id,
-            'walletId' => $this->ecommerce_wallet_id,
             'orderId' => $this->ecommerce_order_id,
             'txnType' => $this->txn_type,
             'txnGroup' => $this->txn_group,
