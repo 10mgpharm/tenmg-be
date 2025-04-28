@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\API\Credit;
 
 use App\Http\Controllers\Controller;
+use App\Http\Resources\CreditRepaymentResource;
 use App\Http\Resources\LoanResource;
 use App\Services\RepaymentProcessingService;
 use Illuminate\Http\Request;
@@ -64,6 +65,15 @@ class LoanRepaymentController extends Controller
     function verifyFincraPayment($ref)
     {
         return $this->repaymentProcessingService->verifyFincraPayment($ref);
+    }
+
+    public function getListOfLoanRepayments(Request $request)
+    {
+        $repayment = $this->repaymentProcessingService->getListOfLoanRepayments($request->all(), $request->perPage ?? 10);
+
+        return $this->returnJsonResponse(
+            data: CreditRepaymentResource::collection($repayment)->response()->getData(true)
+        );
     }
 
 

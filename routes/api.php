@@ -413,6 +413,11 @@ Route::prefix('v1')->group(function () {
                 });
             });
 
+            Route::prefix('loan-repayment')->name('loan-repayment.')->group(function () {
+                Route::get('/', [LoanRepaymentController::class, 'getListOfLoanRepayments'])->name('vendor.loan-repayment.getListOfLoanRepayments');
+
+            });
+
             Route::prefix('api_keys')->group(function () {
                 // Get api key
                 Route::get('/', [ApiKeyController::class, 'index'])->name('apikeys.index');
@@ -520,6 +525,11 @@ Route::prefix('v1')->group(function () {
                 Route::get('/detail/{id}', [LoanController::class, 'getLoanDetails'])->name('admin.loan.getLoanDetails');
                 Route::get('/stats', [LoanController::class, 'getLoanStats'])->name('admin.loan.getLoanStats');
                 Route::get('/loan-status-count', [LoanController::class, 'getLoanStatusCount'])->name('admin.loan.getLoanStatusCount');
+
+            });
+
+            Route::prefix('loan-repayment')->name('loan-repayment.')->group(function () {
+                Route::get('/', [LoanRepaymentController::class, 'getListOfLoanRepayments'])->name('admin.loan-repayment.getListOfLoanRepayments');
 
             });
 

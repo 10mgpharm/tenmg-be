@@ -410,4 +410,51 @@ class RepaymentScheduleRepository
 
     }
 
+    public function getListOfLoanRepayments(array $filters, int $perPage = 15):\Illuminate\Contracts\Pagination\LengthAwarePaginator
+    {
+        //get the business type
+        $user = request()->user();
+        $business = $user->ownerBusinessType
+            ?: $user->businesses()->firstWhere('user_id', $user->id);
+
+        if($business->type != "ADMIN"){
+            $filters['businessId'] = $business->id;
+        }
+
+        $query = RepaymentSchedule::query();
+
+        $query->when(isset($filters['search']), function ($query) use ($filters) {
+            $searchTerm = "%{$filters['search']}%";
+            return $query->whereHas('loan.customer', function ($query) use ($searchTerm) {
+                $query->where('name', 'like', $searchTerm);
+            });
+        });
+
+        $query->when(isset($filters['status']), function ($query) use ($filters) {
+            return $query->where('payment_status', $filters['status']);
+        });
+
+        $query->when(
+            isset($filters['dateFrom']) && isset($filters['dateTo']),
+            function ($query) use ($filters) {
+                // Parse dates with Carbon to ensure proper format
+                $dateFrom = \Carbon\Carbon::parse($filters['dateFrom'])->startOfDay();
+                $dateTo = \Carbon\Carbon::parse($filters['dateTo'])->endOfDay();
+
+                return $query->whereBetween('due_date', [$dateFrom, $dateTo]);
+            }
+        );
+
+        $query->when(isset($filters['businessId']), function ($query) use ($filters) {
+            return $query->whereHas('loan.business', function ($query) use ($filters) {
+                $query->where('business_id', $filters['businessId']);
+            });
+        });
+
+        $query->orderBy('due_date', 'desc');
+
+        return $query->paginate($perPage);
+
+    }
+
 }
