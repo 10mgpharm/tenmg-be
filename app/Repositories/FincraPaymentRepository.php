@@ -245,6 +245,7 @@ class FincraPaymentRepository
         //     'secret' => config('services.fincra.secret'),
         //     'ref' => config('services.fincra.url').'/collections/merchant-reference/'.$ref,
         // ]);
+
         curl_close($curl);
 
 

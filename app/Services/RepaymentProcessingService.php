@@ -88,4 +88,9 @@ class RepaymentProcessingService
     {
         return $this->fincraPaymentRepository->verifyFincraPayment($ref);
     }
+
+    public function getListOfLoanRepayments(array $filters, $perPage)
+    {
+        return $this->repaymentScheduleRepository->getListOfLoanRepayments($filters, $perPage);
+    }
 }

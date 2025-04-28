@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\API\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Http\Resources\CreditTransactionsResource;
 use App\Services\Admin\AdminWalletService;
 use Illuminate\Http\Request;
 
@@ -20,6 +21,10 @@ class AdminWalletController extends Controller
 
     public function getTransactions(Request $request)
     {
-        return $this->adminWalletService->getTransactions();
+        $transactions = $this->adminWalletService->getTransactions();
+
+        return $this->returnJsonResponse(
+            data: CreditTransactionsResource::collection($transactions)->response()->getData(true)
+        );
     }
 }
