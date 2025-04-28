@@ -15,7 +15,7 @@ class AdminWalletService
         return $this->adminWalletRepository->getWalletStats();
     }
 
-    public function getTransactions()
+    public function getTransactions():\Illuminate\Contracts\Pagination\LengthAwarePaginator
     {
         return $this->adminWalletRepository->getTransactions();
     }

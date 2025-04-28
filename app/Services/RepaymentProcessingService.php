@@ -5,13 +5,14 @@ namespace App\Services;
 use App\Models\Loan;
 use App\Models\RepaymentSchedule;
 use App\Repositories\FincraMandateRepository;
+use App\Repositories\FincraPaymentRepository;
 use App\Repositories\RepaymentScheduleRepository;
 use App\Services\PaystackService;
 use Carbon\Carbon;
 
 class RepaymentProcessingService
 {
-    public function __construct(private RepaymentScheduleRepository $repaymentScheduleRepository, private PaystackService $paystackService, private FincraMandateRepository $fincraMandateRepository, private NotificationService $notificationService) {}
+    public function __construct(private RepaymentScheduleRepository $repaymentScheduleRepository, private PaystackService $paystackService, private FincraMandateRepository $fincraMandateRepository, private NotificationService $notificationService, private FincraPaymentRepository $fincraPaymentRepository) {}
 
     /**
      * Process repayments due today.
@@ -81,5 +82,15 @@ class RepaymentProcessingService
     {
         return $this->repaymentScheduleRepository->cancelPayment($paymentRef);
 
+    }
+
+    public function verifyFincraPayment($ref)
+    {
+        return $this->fincraPaymentRepository->verifyFincraPayment($ref);
+    }
+
+    public function getListOfLoanRepayments(array $filters, $perPage)
+    {
+        return $this->repaymentScheduleRepository->getListOfLoanRepayments($filters, $perPage);
     }
 }

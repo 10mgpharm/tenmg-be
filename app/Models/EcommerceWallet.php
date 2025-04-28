@@ -42,4 +42,12 @@ class EcommerceWallet extends Model
     {
         return $this->hasOne(EcommerceBankAccount::class, 'supplier_id', 'business_id');
     }
+
+    /**
+     * Get the transactions associated with the wallet.
+     */
+    public function transactions()
+    {
+        return $this->morphMany(EcommerceTransaction::class, 'walletable');
+    }
 }

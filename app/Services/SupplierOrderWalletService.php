@@ -13,6 +13,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use App\Constants\EcommerceWalletConstants;
+use App\Models\TenMgWallet;
 
 /**
  * SupplierOrderWalletService handles credit and debit operations for supplier wallets
@@ -85,29 +86,46 @@ class SupplierOrderWalletService implements ISupplierOrderWalletService
                 foreach ($payouts as $row) {
                     $last_transaction = $this->last($row->supplier_id, $order->id);
 
-                    // Prevent double-crediting
+                    // Prevent double-crediting for supplier this also prevents double-crediting for tenmg
                     if ($last_transaction && $last_transaction->txn_type === EcommerceWalletConstants::TXN_TYPE_CREDIT) {
                         $name = $row->supplier->name ?? 'Unknown';
                         $this->failOrLog("Can't credit supplier {$name} ({$row->supplier_id}) twice for this order.");
                         continue;
                     }
 
-                    $wallet = $this->lockOrCreateWalletForSupplier($row->supplier_id);
+                    $supplier_wallet = $this->lockOrCreateWalletForSupplier($row->supplier_id);
 
-                    $wallet->previous_balance = $wallet->current_balance;
-                    $wallet->current_balance += $row->payout;
-                    $wallet->save();
+                    $supplier_wallet->previous_balance = $supplier_wallet->current_balance;
+                    $supplier_wallet->current_balance += $row->payout;
+                    $supplier_wallet->save();
 
-                    // Record credit transaction
-                    EcommerceTransaction::create([
-                        'ecommerce_wallet_id' => $wallet->id,
-                        'supplier_id' => $wallet->business_id,
+                    // Record supplier credit transaction
+                    $supplier_wallet->transactions()->create([
+                        'supplier_id' => $supplier_wallet->business_id,
                         'ecommerce_order_id' => $order->id,
                         'txn_type' => EcommerceWalletConstants::TXN_TYPE_CREDIT,
-                        'txn_group' => EcommerceWalletConstants::TXN_GROUP_ORDER_PAYMENT,
+                        'txn_group' => EcommerceWalletConstants::SUPPLIER_TXN_GROUP_ORDER_PAYMENT,
                         'amount' => $row->payout,
-                        'balance_before' => $wallet->previous_balance,
-                        'balance_after' => $wallet->current_balance,
+                        'balance_before' => $supplier_wallet->previous_balance,
+                        'balance_after' => $supplier_wallet->current_balance,
+                        'status' => 'CREDIT',
+                    ]);
+
+                    // lock or create the tenmg's wallet for commission processing and update current and previous balance
+                    $tenmg_wallet = $this->lockOrCreateWalletForTenMg();
+
+                    $tenmg_wallet->previous_balance = $tenmg_wallet->current_balance;
+                    $tenmg_wallet->current_balance += $row->tenmg_commission;;
+                    $tenmg_wallet->save();
+
+                    // Record tenmg commission credit transaction
+                    $tenmg_wallet->ecommerceTransactions()->create([
+                        'ecommerce_order_id' => $order->id,
+                        'txn_type' => EcommerceWalletConstants::TXN_TYPE_CREDIT,
+                        'txn_group' => EcommerceWalletConstants::TENMG_TXN_GROUP_ORDER_PAYMENT,
+                        'amount' => $row->tenmg_commission,
+                        'balance_before' => $tenmg_wallet->previous_balance,
+                        'balance_after' => $tenmg_wallet->current_balance,
                         'status' => 'CREDIT',
                     ]);
                 }
@@ -164,22 +182,42 @@ class SupplierOrderWalletService implements ISupplierOrderWalletService
                     continue;
                 } 
 
-                $wallet = $this->lockOrCreateWalletForSupplier($row->supplier_id);
+                // lock or create the supplier's wallet and update current and previous balance
+                $supplier_wallet = $this->lockOrCreateWalletForSupplier($row->supplier_id);
 
-                $wallet->previous_balance = $wallet->current_balance;
-                $wallet->current_balance -= $row->payout;
-                $wallet->save();
+                $supplier_wallet->previous_balance = $supplier_wallet->current_balance;
+                $supplier_wallet->current_balance -= $row->payout;
+                $supplier_wallet->save();
 
-                // Record debit transaction
-                EcommerceTransaction::create([
-                    'ecommerce_wallet_id' => $wallet->id,
-                    'supplier_id' => $wallet->business_id,
+                // Record supplier debit transaction
+                $supplier_wallet->transactions()->create([
+                    'supplier_id' => $supplier_wallet->business_id,
                     'ecommerce_order_id' => $order->id,
                     'txn_type' => EcommerceWalletConstants::TXN_TYPE_DEBIT,
-                    'txn_group' => EcommerceWalletConstants::TXN_GROUP_ORDER_CANCELLATION,
+                    'txn_group' => EcommerceWalletConstants::SUPPLIER_TXN_GROUP_ORDER_CANCELLATION,
                     'amount' => $row->payout,
-                    'balance_before' => $wallet->previous_balance,
-                    'balance_after' => $wallet->current_balance,
+                    'balance_before' => $supplier_wallet->previous_balance,
+                    'balance_after' => $supplier_wallet->current_balance,
+                    'status' => 'DEBIT',
+                ]);
+
+
+                // lock or create the tenmg's wallet for commission processing and update current and previous balance
+                $tenmg_wallet = $this->lockOrCreateWalletForTenMg();
+
+                $tenmg_wallet->previous_balance = $tenmg_wallet->current_balance;
+                $tenmg_wallet->current_balance -= $row->tenmg_commission;;
+                $tenmg_wallet->save();
+
+
+                // Record tenmg commission debit transaction
+                $tenmg_wallet->ecommerceTransactions()->create([
+                    'ecommerce_order_id' => $order->id,
+                    'txn_type' => EcommerceWalletConstants::TXN_TYPE_DEBIT,
+                    'txn_group' => EcommerceWalletConstants::TENMG_TXN_GROUP_ORDER_CANCELLATION,
+                    'amount' => $row->tenmg_commission,
+                    'balance_before' => $tenmg_wallet->previous_balance,
+                    'balance_after' => $tenmg_wallet->current_balance,
                     'status' => 'DEBIT',
                 ]);
             }
@@ -202,7 +240,7 @@ class SupplierOrderWalletService implements ISupplierOrderWalletService
             'supplier_id' => $supplier_id,
             'ecommerce_order_id' => $order_id,
             'txn_type' => strtoupper($type) === 'DEBIT' ? EcommerceWalletConstants::TXN_TYPE_DEBIT : EcommerceWalletConstants::TXN_TYPE_CREDIT,
-            'txn_group' => strtoupper($type) === 'DEBIT' ? EcommerceWalletConstants::TXN_GROUP_ORDER_CANCELLATION : EcommerceWalletConstants::TXN_GROUP_ORDER_PAYMENT,
+            'txn_group' => strtoupper($type) === 'DEBIT' ? EcommerceWalletConstants::SUPPLIER_TXN_GROUP_ORDER_CANCELLATION : EcommerceWalletConstants::SUPPLIER_TXN_GROUP_ORDER_PAYMENT,
         ])->exists();
     }
 
@@ -216,16 +254,14 @@ class SupplierOrderWalletService implements ISupplierOrderWalletService
     {
         return EcommerceOrderDetail::select(
             'supplier_id',
-            DB::raw('SUM(
-                COALESCE(discount_price, actual_price) * quantity - COALESCE(tenmg_commission, 0)
-            ) as payout')
+            'tenmg_commission',
+            DB::raw('(COALESCE(discount_price, actual_price) * quantity - COALESCE(tenmg_commission, 0)) as payout')
         )
             ->whereHas('order', fn($query) => $query->where('id', $order->id))
             ->when(
                 $this->businesses?->count(),
                 fn($query) => $query->whereIn('supplier_id', $this->businesses->pluck('id'))
             )
-            ->groupBy('supplier_id')
             ->get();
     }
 
@@ -243,6 +279,25 @@ class SupplierOrderWalletService implements ISupplierOrderWalletService
                 ['business_id' => $supplier_id],
                 ['previous_balance' => 0, 'current_balance' => 0]
             );
+    }
+
+    /**
+     * Lock or create a wallet for the tenmg.
+     *
+     * @return TenMgWallet The locked or newly created wallet.
+     */
+    protected function lockOrCreateWalletForTenMg(): TenMgWallet
+    {
+        $wallet = TenMgWallet::lockForUpdate()->latest('id')->first();
+
+        if (!$wallet) {
+            $wallet = TenMgWallet::create([
+                'previous_balance' => 0,
+                'current_balance' => 0,
+            ]);
+        }
+        
+        return $wallet;        
     }
 
     /**

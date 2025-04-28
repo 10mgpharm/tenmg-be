@@ -21,6 +21,7 @@ use App\Http\Controllers\API\Admin\EcommerceMeasurementController as AdminEcomme
 use App\Http\Controllers\API\Admin\EcommerceOrderController;
 use App\Http\Controllers\API\Admin\EcommercePresentationController as AdminEcommercePresentationController;
 use App\Http\Controllers\API\Admin\EcommerceProductController as AdminEcommerceProductController;
+use App\Http\Controllers\API\Admin\EcommerceWalletController as AdminEcommerceWalletController;
 use App\Http\Controllers\API\Admin\FaqController;
 use App\Http\Controllers\API\Admin\MedicationTypeController as AdminMedicationTypeController;
 use App\Http\Controllers\API\Admin\ProductInsightsController as AdminProductInsightsController;
@@ -412,6 +413,11 @@ Route::prefix('v1')->group(function () {
                 });
             });
 
+            Route::prefix('loan-repayment')->name('loan-repayment.')->group(function () {
+                Route::get('/', [LoanRepaymentController::class, 'getListOfLoanRepayments'])->name('vendor.loan-repayment.getListOfLoanRepayments');
+
+            });
+
             Route::prefix('api_keys')->group(function () {
                 // Get api key
                 Route::get('/', [ApiKeyController::class, 'index'])->name('apikeys.index');
@@ -522,6 +528,11 @@ Route::prefix('v1')->group(function () {
 
             });
 
+            Route::prefix('loan-repayment')->name('loan-repayment.')->group(function () {
+                Route::get('/', [LoanRepaymentController::class, 'getListOfLoanRepayments'])->name('admin.loan-repayment.getListOfLoanRepayments');
+
+            });
+
             Route::get('insights/filters', [AdminProductInsightsController::class, 'filters']);
             Route::get('insights', [AdminProductInsightsController::class, 'insights']);
 
@@ -540,6 +551,7 @@ Route::prefix('v1')->group(function () {
 
             });
 
+            Route::get('/wallet-product', AdminEcommerceWalletController::class);
             Route::prefix('wallet')->group(function () {
                 Route::get('bank-account', GetBankAccountController::class);
                 Route::patch('add-bank-account/{bank_account}', UpdateBankAccountController::class);
@@ -745,7 +757,7 @@ Route::prefix('v1')->group(function () {
                 ->middleware(['auth:api'])
                 ->name('client.repayment.cancel-payment');
 
-            Route::get('/verify-payment/{reference}', [OrdersController::class, 'verifyFincraPayment'])
+            Route::get('/verify-payment/{reference}', [LoanRepaymentController::class, 'verifyFincraPayment'])
                 ->middleware(['auth:api'])
                 ->name('client.repayment.verify-payment');
 
