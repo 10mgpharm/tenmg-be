@@ -3,6 +3,8 @@
 namespace App\Http\Resources;
 
 use App\Enums\StatusEnum;
+use App\Http\Resources\Storefront\EcommerceProductRatingResource;
+use App\Http\Resources\Storefront\EcommerceProductReviewResource;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
@@ -49,6 +51,8 @@ class EcommerceProductResource extends JsonResource
             'variation' => new EcommerceMedicationVariationResource($this->variation),
             'measurement' => new EcommerceMeasurementResource($this->measurement),
             'productDetails' => $this->productDetails == null ? null : $this->productDetails->only('essential', 'starting_stock', 'current_stock', 'id', 'ecommerce_product_id'),
+            'rating' => $this->whenLoaded('rating', fn ($rating) => $rating),
+            'reviews' => $this->whenLoaded('reviews', fn($reviews) => new EcommerceProductReviewResource($reviews))
         ];
     }
 }
