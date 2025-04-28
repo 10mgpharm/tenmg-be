@@ -5,6 +5,8 @@ namespace App\Http\Resources;
 use App\Enums\StatusEnum;
 use App\Http\Resources\Storefront\EcommerceProductRatingResource;
 use App\Http\Resources\Storefront\EcommerceProductReviewResource;
+use App\Http\Resources\Storefront\EcommerceReviewProductResource;
+use App\Models\EcommerceProduct;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
@@ -52,7 +54,10 @@ class EcommerceProductResource extends JsonResource
             'measurement' => new EcommerceMeasurementResource($this->measurement),
             'productDetails' => $this->productDetails == null ? null : $this->productDetails->only('essential', 'starting_stock', 'current_stock', 'id', 'ecommerce_product_id'),
             'rating' => $this->whenLoaded('rating', fn ($rating) => $rating),
-            'reviews' => $this->whenLoaded('reviews', fn($reviews) => new EcommerceProductReviewResource($reviews))
+            'reviews' => $this->whenLoaded('reviews', fn() => $this->reviews()
+                ->paginate($request->has('perPage') ? $request->perPage : 20)
+                ->withQueryString()
+                ->through(fn(EcommerceProductReview $item) => EcommerceProductReviewOnlyResource::make($item))),
         ];
     }
 }
