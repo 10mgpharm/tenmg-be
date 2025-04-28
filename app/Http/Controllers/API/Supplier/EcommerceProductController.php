@@ -26,7 +26,7 @@ class EcommerceProductController extends Controller
      */
     public function index(ListEcommerceProductRequest $request): JsonResponse
     {
-        $products = EcommerceProduct::businesses()->latest('id')
+        $products = EcommerceProduct::with('rating')->businesses()->latest('id')
         ->paginate($request->has('perPage') ? $request->perPage : 10)
         ->withQueryString()
         ->through(fn(EcommerceProduct $item) => EcommerceProductResource::make($item));
@@ -73,7 +73,7 @@ class EcommerceProductController extends Controller
         return $product
             ? $this->returnJsonResponse(
                 message: 'Product successfully fetched.',
-                data: new EcommerceProductResource($product)
+                data: new EcommerceProductResource($product->load('rating', 'reviews'))
             )
             : $this->returnJsonResponse(
                 message: 'Oops, can\'t view product at the moment. Please try again later.'
