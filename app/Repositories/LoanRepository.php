@@ -113,7 +113,7 @@ class LoanRepository
             $totalInterestQuery->where('payment_status', 'PAID')->whereHas('loan', function($query) use ($business) {
                 $query->where('business_id', $business->id);
             });
-            $pendingRepaymentQuery->where('payment_status', 'PENDING')->whereHas('loan', function($query) use ($business) {
+            $pendingRepaymentQuery->whereHas('loan', function($query) use ($business) {
                 $query->where('business_id', $business->id);
             });
 
@@ -132,7 +132,7 @@ class LoanRepository
         $totalCapital = $totalCapitalQuery->sum('capital_amount');
         $activeLoan = $activeLoanQuery->count();
         $totalInterest = $totalInterestQuery->sum('interest');
-        $pendingRepayment = $pendingRepaymentQuery->sum('total_amount');
+        $pendingRepayment = $pendingRepaymentQuery->where('payment_status', 'PENDING')->sum('total_amount');
         $completedRepayment = Loan::whereDoesntHave('repaymentSchedule', function($query) {
             $query->where('payment_status', '!=', 'PAID');
         })->count();
@@ -208,5 +208,43 @@ class LoanRepository
             "Completed" => $completedLoan,
             "LateRepayment" => $lateRepayment,
         ];
+    }
+
+    public function getEarnings()
+    {
+
+        $user = request()->user();
+        $business_id = $user->ownerBusinessType?->id
+            ?: $user->businesses()->firstWhere('user_id', $user->id)?->id;
+
+        $totalProjectedInterest = Loan::whereHas('offer', function ($query) use ($business_id) {
+            $query->where('lender_id', $business_id);
+        })->sum('interest_amount');
+
+        $repaidInterest = Loan::withSum('paidRepaymentSchedules as total_interest', 'interest')->get();
+        $totalBalanceInterest = Loan::withSum('pendingRepaymentSchedules as total_interest', 'interest')->get();
+
+        return [
+                'totalProjectedInterest' => $totalProjectedInterest,
+                'totalRepaidInterest' => $repaidInterest->sum('total_interest'),
+                'totalBalanceInterest' => $totalBalanceInterest->sum('total_interest')
+            ];
+    }
+
+    public function getEarningHistory(array $filters, int $perPage = 15):\Illuminate\Contracts\Pagination\LengthAwarePaginator
+    {
+
+        $user = request()->user();
+        $business_id = $user->ownerBusinessType?->id
+            ?: $user->businesses()->firstWhere('user_id', $user->id)?->id;
+
+        $query = Loan::query();
+
+        $query->whereHas('offer', function ($query) use ($business_id) {
+            $query->where('lender_id', $business_id);
+        })->get();
+
+        return $query->paginate($perPage);
+
     }
 }

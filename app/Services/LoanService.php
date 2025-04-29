@@ -144,4 +144,14 @@ class LoanService
         return $this->loanRepository->getLoanStatusCount();
     }
 
+    public function getEarnings()
+    {
+        return $this->loanRepository->getEarnings();
+    }
+
+    public function getEarningHistory(array $filters, int $perPage = 15)
+    {
+        return $this->loanRepository->getEarningHistory($filters, $perPage);
+    }
+
 }

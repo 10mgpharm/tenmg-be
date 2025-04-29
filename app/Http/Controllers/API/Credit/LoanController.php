@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\API\Credit;
 
 use App\Http\Controllers\Controller;
+use App\Http\Resources\EarningsResource;
 use App\Http\Resources\LoanResource;
 use App\Services\LoanService;
 use Exception;
@@ -97,6 +98,18 @@ class LoanController extends Controller
 
         return $this->returnJsonResponse(data: $statusCount);
 
+    }
+
+    public function getEarnings()
+    {
+        $stats = $this->loanService->getEarnings();
+        return $this->returnJsonResponse(data: $stats);
+    }
+
+    public function getEarningHistory(Request $request)
+    {
+        $history = $this->loanService->getEarningHistory($request->all(), $request->perPage ?? 15);
+        return $this->returnJsonResponse(data: EarningsResource::collection($history)->response()->getData(true));
     }
 
 }
