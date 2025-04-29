@@ -42,6 +42,11 @@ class CreditOffer extends Model
         return $this->belongsTo(Customer::class, 'customer_id');
     }
 
+    public function loans()
+    {
+        return $this->belongsTo(Loan::class, 'offer_id');
+    }
+
     public static function boot()
     {
         parent::boot();

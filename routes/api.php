@@ -517,7 +517,6 @@ Route::prefix('v1')->group(function () {
             Route::prefix('loan-application')->name('loan-application.')->group(function () {
                 Route::get('/', [LoanApplicationController::class, 'index'])->name('admin.applications');
                 Route::get('/{reference}', [LoanApplicationController::class, 'getLoanApplicationByReference'])->name('admin.applications.getLoanApplicationByReference');
-
             });
 
             Route::prefix('loan')->name('loan.')->group(function () {
@@ -685,6 +684,13 @@ Route::prefix('v1')->group(function () {
 
                 Route::post('/view', [TransactionHistoryController::class, 'viewTransactionHistory'])
                     ->name('lender.txn_history.view');
+
+            });
+
+            Route::prefix('earnings')->name('earnings.')->group(function () {
+
+                Route::get('/', [LoanController::class, 'getEarningHistory']);
+                Route::get('/stats', [LoanController::class, 'getEarnings']);
 
             });
 

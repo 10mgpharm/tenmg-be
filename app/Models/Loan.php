@@ -33,6 +33,18 @@ class Loan extends Model
         return $this->hasMany(RepaymentSchedule::class);
     }
 
+    public function paidRepaymentSchedules()
+    {
+        return $this->hasMany(RepaymentSchedule::class)
+                    ->where('payment_status', 'PAID');
+    }
+
+    public function pendingRepaymentSchedules()
+    {
+        return $this->hasMany(RepaymentSchedule::class)
+                    ->where('payment_status', 'PENDING');
+    }
+
     public function application()
     {
         return $this->belongsTo(LoanApplication::class, 'application_id');
