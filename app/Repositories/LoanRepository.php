@@ -244,6 +244,15 @@ class LoanRepository
             $query->where('lender_id', $business_id);
         })->get();
 
+        $query->when(isset($filters['search']), function ($query) use ($filters) {
+            $searchTerm = "%{$filters['search']}%";
+            return $query->where(function ($query) use ($searchTerm) {
+                $query->orWhereHas('customer', function ($q) use ($searchTerm) {
+                        $q->where('name', 'like', $searchTerm);
+                    });
+            });
+        });
+
         return $query->paginate($perPage);
 
     }
