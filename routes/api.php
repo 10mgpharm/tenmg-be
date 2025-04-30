@@ -64,6 +64,7 @@ use App\Http\Controllers\API\Storefront\ShoppingListController;
 use App\Http\Controllers\API\Storefront\StorefrontController;
 use App\Http\Controllers\API\Storefront\WishListController;
 use App\Http\Controllers\API\Supplier\AddBankAccountController;
+use App\Http\Controllers\API\Supplier\EcommercePendingPayoutController;
 use App\Http\Controllers\API\Supplier\EcommerceProductController as SupplierEcommerceProductController;
 use App\Http\Controllers\API\Supplier\EcommerceStoreAddressController;
 use App\Http\Controllers\API\Supplier\EcommerceTransactionController;
@@ -230,6 +231,7 @@ Route::prefix('v1')->group(function () {
 
             Route::get('wallet', EcommerceWalletController::class);
             Route::get('wallet/transactions', EcommerceTransactionController::class);
+            Route::get('wallet/pending-payout', EcommercePendingPayoutController::class);
             Route::get('wallet/bank-account', GetBankAccountController::class);
             Route::patch('wallet/add-bank-account/{bank_account}', UpdateBankAccountController::class);
             Route::post('wallet/add-bank-account', AddBankAccountController::class);
