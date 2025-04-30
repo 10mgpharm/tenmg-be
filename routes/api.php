@@ -557,6 +557,7 @@ Route::prefix('v1')->group(function () {
                 Route::post('add-bank-account', AddBankAccountController::class);
                 Route::get('/', [AdminWalletController::class, 'getWalletStats']);
                 Route::get('/transactions', [AdminWalletController::class, 'getTransactions']);
+                Route::get('/payouts', [AdminWalletController::class, 'getPayOutTransactions']);
             });
 
             Route::get('dashboard', AdminDashboardController::class);
