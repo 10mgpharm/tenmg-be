@@ -67,10 +67,10 @@ class EcommerceProductReview extends Model
     public function rating()
     {
         return $this->hasOne(EcommerceProductRating::class, 'ecommerce_product_id', 'ecommerce_product_id')
-            ->where('user_id', fn($query) => $query->select('user_id')
-                    ->from('ecommerce_product_reviews')
-                    ->whereColumn('ecommerce_product_reviews.ecommerce_product_id', 'ecommerce_product_ratings.ecommerce_product_id')
-            );
+        ->whereIn('user_id', fn ($query) =>
+            $query->select('user_id')->from('ecommerce_product_reviews')
+                ->whereColumn('ecommerce_product_reviews.ecommerce_product_id', 'ecommerce_product_ratings.ecommerce_product_id')
+        );
     }
     
 }
