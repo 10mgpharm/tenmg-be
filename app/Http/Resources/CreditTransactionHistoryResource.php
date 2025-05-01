@@ -23,7 +23,8 @@ class CreditTransactionHistoryResource extends JsonResource
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
             'description' => $this->description,
-            'business_id' => $this->business
+            'business_id' => $this->business,
+            'customer' => $this->loanApplication->customer
         ];
     }
 }

@@ -26,4 +26,9 @@ class CreditTransactionHistory extends Model
         return $this->belongsTo(Business::class, 'business_id');
 
     }
+
+    public function loanApplication()
+    {
+        return $this->belongsTo(LoanApplication::class, 'loan_application_id');
+    }
 }
