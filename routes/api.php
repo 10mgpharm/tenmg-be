@@ -531,6 +531,7 @@ Route::prefix('v1')->group(function () {
 
             Route::prefix('loan-repayment')->name('loan-repayment.')->group(function () {
                 Route::get('/', [LoanRepaymentController::class, 'getListOfLoanRepayments'])->name('admin.loan-repayment.getListOfLoanRepayments');
+                Route::get('/test-repayment-mail/{loanRef}', [LoanRepaymentController::class, 'sentTestRepayPaymentMail'])->name('admin.repayment.test-repayment-mail');
 
             });
 
@@ -769,10 +770,6 @@ Route::prefix('v1')->group(function () {
             Route::get('/verify-payment/{reference}', [LoanRepaymentController::class, 'verifyFincraPayment'])
                 ->middleware(['auth:api'])
                 ->name('client.repayment.verify-payment');
-
-            Route::get('/test-repayment-mail/{loanRef}', [LoanRepaymentController::class, 'sentTestRepayPaymentMail'])
-                ->middleware(['auth:api'])
-                ->name('client.repayment.test-repayment-mail');
 
         });
     });
