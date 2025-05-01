@@ -23,6 +23,7 @@ class EcommerceTransaction extends Model
      */
     protected $fillable = [
         'ecommerce_wallet_id',
+        'ecommerce_order_detail_id',
         'supplier_id',
         'ecommerce_order_id',
         'txn_type',
