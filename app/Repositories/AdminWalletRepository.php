@@ -50,4 +50,13 @@ class AdminWalletRepository
 
         return $query;
     }
+
+    public function getPayOutTransactions():\Illuminate\Contracts\Pagination\LengthAwarePaginator
+    {
+        $perPage = request()->query('perPage') ?? 15;
+        $query = CreditTransactionHistory::where('transaction_group', 'payout')
+            ->orderBy('created_at', 'desc')->paginate($perPage);
+
+        return $query;
+    }
 }
