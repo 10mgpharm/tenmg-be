@@ -44,6 +44,7 @@ class LoanApplicationRepository
             'interest_amount' => $data['interestAmount'] ?? 0,
             'total_amount' => $data['totalAmount'] ?? 0,
             'interest_rate' => $loanSettings->lenders_interest,
+            'tenmg_interest' => $loanSettings->tenmg_interest,
             'duration_in_months' => $data['durationInMonths'] ?? null,
             'source' => $data['source'] ?? 'DASHBOARD',
             'status' => 'PENDING_MANDATE',

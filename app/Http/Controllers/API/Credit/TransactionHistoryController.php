@@ -4,6 +4,7 @@ namespace App\Http\Controllers\API\Credit;
 
 use App\Http\Controllers\Controller;
 use App\Http\Resources\CreditScoreResource;
+use App\Http\Resources\CreditTransactionsResource;
 use App\Http\Resources\TxnHistoryResource;
 use App\Models\CreditTxnHistoryEvaluation;
 use App\Models\FileUpload;
@@ -155,5 +156,18 @@ class TransactionHistoryController extends Controller
 
         // Return a success response with file and evaluation details
         return $this->returnJsonResponse(message: 'Transaction history uploaded and evaluated successfully', data: $result);
+    }
+
+    public function getTransactionStats()
+    {
+        $stats = $this->txnHistoryService->getTransactionStats();
+
+        return $this->returnJsonResponse(message: 'Transaction stats fetched', data: $stats);
+    }
+
+    public function getCreditTransactionHistories(Request $request)
+    {
+        $histories = $this->txnHistoryService->getCreditTransactionHistories($request->all(), $request->perPage ?? 10);
+        return $this->returnJsonResponse(message: 'Transaction histories fetched', data: CreditTransactionsResource::collection($histories)->response()->getData(true));
     }
 }

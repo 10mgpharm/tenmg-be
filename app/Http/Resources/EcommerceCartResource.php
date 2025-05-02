@@ -16,6 +16,7 @@ class EcommerceCartResource extends JsonResource
     {
         return [
             'id' => $this->id,
+            'identifier' => $this->identifier ?? "NA",
             'customer' => $this->customer,
             'qtyTotal' => $this->qty_total,
             'orderTotal' => $this->order_total,

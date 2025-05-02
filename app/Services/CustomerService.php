@@ -94,7 +94,11 @@ class CustomerService implements ICustomerService
 
     public function listCustomers(array $filters, int $perPage): \Illuminate\Contracts\Pagination\LengthAwarePaginator
     {
-        $filters['vendorId'] = $this->authService->getBusiness()?->id;
+        $user = request()->user();
+        $business_id = $user->ownerBusinessType?->id
+            ?: $user->businesses()->firstWhere('user_id', $user->id)?->id;
+
+        $filters['vendorId'] = $business_id;
 
         return $this->customerRepository->paginate($filters, $perPage);
     }

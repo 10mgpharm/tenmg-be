@@ -9,6 +9,7 @@ use App\Models\CreditTransactionHistory;
 use App\Models\CreditVendorWallets;
 use App\Models\DebitMandate;
 use App\Models\Loan;
+use App\Models\LoanApplication;
 use App\Models\RepaymentPayments;
 use App\Models\RepaymentSchedule;
 use App\Models\TenMgWallet;
@@ -313,7 +314,7 @@ class RepaymentScheduleRepository
         //get the loan application id from loan
         $applicationId = $loanRequest->application_id;
 
-
+        $loanApplication = LoanApplication::find($applicationId);
 
         //Change the payment status to SUCCESS
         $paymentSchedule->payment_status = "PAID";
@@ -328,13 +329,13 @@ class RepaymentScheduleRepository
 
         //get the lender business for the loan
         $lenderBusiness = Business::find($lenderBusinessId);
-
         $totalInterest = $paymentSchedule->interest;
-        $loanSettings = new LoanSettings();
-        $lenderInterest = $loanSettings->lenders_interest;
-        $tenmgInterest = $loanSettings->tenmg_interest;
+        $tenmgInterest = $loanApplication->tenmg_interest;
 
-        $tenmgInterestAmount = ($totalInterest * $tenmgInterest) / 100;
+        //get 10mg interest for one repayment in percent
+        $oneMonthTenMgPercent = $tenmgInterest/$loanApplication->duration_in_months;
+
+        $tenmgInterestAmount = ($totalInterest * $oneMonthTenMgPercent) / 100;
         $lenderInterestAmount = $totalInterest - $tenmgInterestAmount;
         $lenderTotalExcludingTenmgPercent = $paymentSchedule->principal + $lenderInterestAmount;
 
