@@ -244,4 +244,14 @@ class TransactionHistoryService implements ITxnHistoryService
 
         return $this->evaluateTransactionHistory(transactionHistoryId: $evaluationData['txn_history_evaluation']?->id, user: $user);
     }
+
+    public function getTransactionStats()
+    {
+        return $this->transactionHistoryRepository->getTransactionStats();
+    }
+
+    public function getCreditTransactionHistories(array $filters, $perPage = 10): \Illuminate\Contracts\Pagination\LengthAwarePaginator
+    {
+        return $this->transactionHistoryRepository->getCreditTransactionHistories($filters, $perPage);
+    }
 }

@@ -2,7 +2,9 @@
 
 namespace App\Repositories;
 
+use App\Models\CreditLendersWallet;
 use App\Models\CreditScore;
+use App\Models\CreditTransactionHistory;
 use App\Models\CreditTxnHistoryEvaluation;
 use App\Models\FileUpload;
 use Illuminate\Http\JsonResponse;
@@ -187,6 +189,71 @@ class TransactionHistoryRepository
         }else{
             return [];
         }
+
+    }
+
+    public function getTransactionStats()
+    {
+
+        $user = request()->user();
+        $business_id = $user->ownerBusinessType?->id
+            ?: $user->businesses()->firstWhere('user_id', $user->id)?->id;
+
+        $totalDeposit = CreditTransactionHistory::where('transaction_group', 'deposit')->where('business_id', $business_id)->sum('amount');
+        $totalWithdrawal = CreditTransactionHistory::where('transaction_group', 'withdrawal')->where('business_id', $business_id)->sum('amount');
+        $netWalletBalance = CreditLendersWallet::where('type', '!=', 'ledger')->where('lender_id', $business_id)->sum('current_balance');
+        $lastTransactionDate = CreditTransactionHistory::orderBy('created_at', 'desc')->where('business_id', $business_id)->first();
+
+        return [
+            'totalDeposit' => $totalDeposit,
+            'totalWithdrawal' => $totalWithdrawal,
+            'netWalletBalance' => $netWalletBalance,
+            'lastTransactionDate' => $lastTransactionDate ? $lastTransactionDate->created_at : null
+        ];
+
+    }
+
+    public function getCreditTransactionHistories(array $filters, int $perPage = 15):\Illuminate\Contracts\Pagination\LengthAwarePaginator
+    {
+        $user = request()->user();
+        $business_id = $user->ownerBusinessType?->id
+            ?: $user->businesses()->firstWhere('user_id', $user->id)?->id;
+
+        $query = CreditTransactionHistory::query();
+
+        // Search logic
+        $query->when(isset($filters['search']), function ($query) use ($filters) {
+            $searchTerm = "%{$filters['search']}%";
+            return $query->where(function ($query) use ($searchTerm) {
+                $query->where('identifier', 'like', $searchTerm);
+            });
+        });
+
+        // Filter by status
+        $query->when(isset($filters['status']), function ($query) use ($filters) {
+            return $query->where('status', $filters['status']);
+        });
+
+        // Filter by transaction type
+        $query->when(isset($filters['type']), function ($query) use ($filters) {
+            return $query->where('type', $filters['type']);
+        });
+
+        $query->when(
+            isset($criteria['dateFrom']) && isset($criteria['dateTo']),
+            function ($query) use ($filters) {
+                // Parse dates with Carbon to ensure proper format
+                $dateFrom = \Carbon\Carbon::parse($filters['dateFrom'])->startOfDay();
+                $dateTo = \Carbon\Carbon::parse($filters['dateTo'])->endOfDay();
+
+                return $query->whereBetween('created_at', [$dateFrom, $dateTo]);
+            }
+        );
+
+        $query->where('business_id', $business_id)->orderBy('created_at', 'desc');
+
+        // Paginate results
+        return $query->paginate($perPage);
 
     }
 }

@@ -698,6 +698,13 @@ Route::prefix('v1')->group(function () {
 
             });
 
+            Route::prefix('transactions')->name('transactions.')->group(function () {
+                Route::get('/stats', [TransactionHistoryController::class, 'getTransactionStats']);
+                Route::get('/', [TransactionHistoryController::class, 'getCreditTransactionHistories']);
+            });
+
+
+
         });
 
     });

@@ -25,4 +25,8 @@ interface ITxnHistoryService
     public function creditScoreBreakDown(int $txnEvaluationId): ?CreditScore;
 
     public function evaluateTransactionHistory(int $transactionHistoryId, User $user): array;
+
+    public function getTransactionStats();
+
+    public function getCreditTransactionHistories(array $filters, $perPage): \Illuminate\Contracts\Pagination\LengthAwarePaginator;
 }
