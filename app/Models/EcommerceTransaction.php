@@ -47,7 +47,7 @@ class EcommerceTransaction extends Model
      */
     public function supplier()
     {
-        return $this->belongsTo(User::class, 'supplier_id');
+        return $this->belongsTo(Business::class, 'supplier_id');
     }
 
     /**

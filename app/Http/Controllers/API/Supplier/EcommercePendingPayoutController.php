@@ -25,6 +25,7 @@ class EcommercePendingPayoutController extends Controller
 
         $wallets = EcommerceOrderDetail::where('supplier_id', $business_id)
         ->whereHas('order', fn($query) => $query->where('status', 'PROCESSING'))
+            ->latest('id')
             ->paginate($request->input('perPage', 20))
             ->withQueryString()
             ->through(fn(EcommerceOrderDetail $item) => EcommerceOrderDetailResource::make($item));

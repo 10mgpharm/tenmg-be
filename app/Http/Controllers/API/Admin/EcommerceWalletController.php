@@ -90,7 +90,7 @@ class EcommerceWalletController extends Controller
             ->where('txn_group', EcommerceWalletConstants::SUPPLIER_TXN_GROUP_ORDER_PAYMENT)
             ->where('txn_type', EcommerceWalletConstants::TXN_TYPE_CREDIT)
             ->whereBetween('created_at', $date_range)
-            ->latest()
+            ->latest('id')
             ->paginate($request->get('perPage', 30))
             ->withQueryString()
             ->through(fn(EcommerceTransaction $message) => new EcommerceTransactionResource($message));
@@ -98,7 +98,7 @@ class EcommerceWalletController extends Controller
 
         $transactions = EcommerceTransaction::query()
             ->whereBetween('created_at', $date_range)
-            ->latest()
+            ->latest('id')
             ->paginate($request->get('perPage', 30))
             ->withQueryString()
             ->through(fn(EcommerceTransaction $message) => new EcommerceTransactionResource($message));
