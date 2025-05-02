@@ -22,6 +22,7 @@ class EcommerceTransactionController extends Controller
 
 
         $wallets = EcommerceTransaction::where('supplier_id', $business_id)
+            ->latest('id')
             ->paginate($request->input('perPage', 20))
             ->withQueryString()
             ->through(fn(EcommerceTransaction $item) => EcommerceTransactionResource::make($item));

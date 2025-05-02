@@ -101,6 +101,7 @@ class SupplierOrderWalletService implements ISupplierOrderWalletService
 
                     // Record supplier credit transaction
                     $supplier_wallet->transactions()->create([
+                        'ecommerce_order_detail_id' => $row->id,
                         'supplier_id' => $supplier_wallet->business_id,
                         'ecommerce_order_id' => $order->id,
                         'txn_type' => EcommerceWalletConstants::TXN_TYPE_CREDIT,
@@ -120,6 +121,7 @@ class SupplierOrderWalletService implements ISupplierOrderWalletService
 
                     // Record tenmg commission credit transaction
                     $tenmg_wallet->ecommerceTransactions()->create([
+                        'ecommerce_order_detail_id' => $row->id,
                         'ecommerce_order_id' => $order->id,
                         'txn_type' => EcommerceWalletConstants::TXN_TYPE_CREDIT,
                         'txn_group' => EcommerceWalletConstants::TENMG_TXN_GROUP_ORDER_PAYMENT,
@@ -191,6 +193,7 @@ class SupplierOrderWalletService implements ISupplierOrderWalletService
 
                 // Record supplier debit transaction
                 $supplier_wallet->transactions()->create([
+                    'ecommerce_order_detail_id' => $row->id,
                     'supplier_id' => $supplier_wallet->business_id,
                     'ecommerce_order_id' => $order->id,
                     'txn_type' => EcommerceWalletConstants::TXN_TYPE_DEBIT,
@@ -212,6 +215,7 @@ class SupplierOrderWalletService implements ISupplierOrderWalletService
 
                 // Record tenmg commission debit transaction
                 $tenmg_wallet->ecommerceTransactions()->create([
+                    'ecommerce_order_detail_id' => $row->id,
                     'ecommerce_order_id' => $order->id,
                     'txn_type' => EcommerceWalletConstants::TXN_TYPE_DEBIT,
                     'txn_group' => EcommerceWalletConstants::TENMG_TXN_GROUP_ORDER_CANCELLATION,
@@ -253,6 +257,7 @@ class SupplierOrderWalletService implements ISupplierOrderWalletService
     protected function payouts(EcommerceOrder $order): Collection
     {
         return EcommerceOrderDetail::select(
+            'id',
             'supplier_id',
             'tenmg_commission',
             DB::raw('(COALESCE(discount_price, actual_price) * quantity - COALESCE(tenmg_commission, 0)) as payout')

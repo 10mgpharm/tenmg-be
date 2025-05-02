@@ -23,6 +23,7 @@ class EcommerceTransaction extends Model
      */
     protected $fillable = [
         'ecommerce_wallet_id',
+        'ecommerce_order_detail_id',
         'supplier_id',
         'ecommerce_order_id',
         'txn_type',
@@ -46,7 +47,7 @@ class EcommerceTransaction extends Model
      */
     public function supplier()
     {
-        return $this->belongsTo(User::class, 'supplier_id');
+        return $this->belongsTo(Business::class, 'supplier_id');
     }
 
     /**

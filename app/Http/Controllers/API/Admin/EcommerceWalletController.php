@@ -5,6 +5,7 @@ namespace App\Http\Controllers\API\Admin;
 use App\Constants\EcommerceWalletConstants;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\Supplier\EcommerceTransactionResource;
+use App\Models\EcommerceOrderDetail;
 use App\Models\EcommerceTransaction;
 use App\Models\TenMgWallet;
 use Illuminate\Http\JsonResponse;
@@ -36,7 +37,7 @@ class EcommerceWalletController extends Controller
 
         // Get tenmg wallet
         $wallet = TenMgWallet::query()
-            ->select('id', 'previous_balance', 'current_balance')
+            ->select('id', 'previous_balance as previousBalance', 'current_balance as currentBalance')
             ->latest()
             ->first();
 
@@ -72,12 +73,24 @@ class EcommerceWalletController extends Controller
             )
             ->value('net_commission');
 
+        // Calculate the total pending commissions
+        $total_pending_commissions =  EcommerceOrderDetail::query()
+            ->where('tenmg_commission', '>', 0)
+            ->whereHas('order', fn($query) => $query->where('status', 'PROCESSING'))
+            ->sum('tenmg_commission');
+
+        // Calculate the total pending supplier payout (Credit - Debit)
+        $total_pending_supplier_payouts = EcommerceOrderDetail::query()
+        ->whereHas('order', fn ($query) => $query->where('status', 'PROCESSING'))
+        ->sum(DB::raw('(COALESCE(discount_price, actual_price) * quantity) - COALESCE(tenmg_commission, 0)'));
+    
+
         // Fetch transactions with pagination
         $payouts = EcommerceTransaction::query()
             ->where('txn_group', EcommerceWalletConstants::SUPPLIER_TXN_GROUP_ORDER_PAYMENT)
             ->where('txn_type', EcommerceWalletConstants::TXN_TYPE_CREDIT)
             ->whereBetween('created_at', $date_range)
-            ->latest()
+            ->latest('id')
             ->paginate($request->get('perPage', 30))
             ->withQueryString()
             ->through(fn(EcommerceTransaction $message) => new EcommerceTransactionResource($message));
@@ -85,7 +98,7 @@ class EcommerceWalletController extends Controller
 
         $transactions = EcommerceTransaction::query()
             ->whereBetween('created_at', $date_range)
-            ->latest()
+            ->latest('id')
             ->paginate($request->get('perPage', 30))
             ->withQueryString()
             ->through(fn(EcommerceTransaction $message) => new EcommerceTransactionResource($message));
@@ -95,8 +108,10 @@ class EcommerceWalletController extends Controller
             message: 'Wallet and transaction data fetched successfully.',
             data: [
                 'wallet' => $wallet,
-                'total_commissions_earned' => $total_commissions_earned,
-                'total_supplier_payout' => $total_supplier_payout,
+                'totalCommissionsEarned' => $total_commissions_earned,
+                'totalPendingCommissions' => $total_pending_commissions,
+                'totalPendingSupplierPayout' => $total_pending_supplier_payouts,
+                'totalSupplierPayout' => $total_supplier_payout,
                 'transactions' => $transactions,
                 'payouts' => $payouts,
             ]
