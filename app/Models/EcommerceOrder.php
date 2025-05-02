@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Helpers\UtilityHelper;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
@@ -65,5 +66,13 @@ class EcommerceOrder extends Model
     public function orderDetails()
     {
         return $this->hasMany(EcommerceOrderDetail::class);
+    }
+
+    public static function boot()
+    {
+        parent::boot();
+        self::creating(function ($model) {
+            $model->identifier = UtilityHelper::generateSlug('ORD');
+        });
     }
 }
