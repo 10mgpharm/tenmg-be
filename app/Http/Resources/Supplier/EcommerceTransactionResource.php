@@ -2,6 +2,7 @@
 
 namespace App\Http\Resources\Supplier;
 
+use App\Models\EcommerceOrderDetail;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
@@ -17,12 +18,14 @@ class EcommerceTransactionResource extends JsonResource
         return [
             'id' => $this->id,
             'orderId' => $this->ecommerce_order_id,
+            'tenmg_commission' => $this->ecommerce_order_detail_id ? EcommerceOrderDetail::find($this->ecommerce_order_detail_id)->tenmg_commission : null,
             'txnType' => $this->txn_type,
             'txnGroup' => $this->txn_group,
             'amount' => $this->amount,
             'balanceBefore' => $this->balance_before,
             'balanceAfter' => $this->balance_after,
             'status' => $this->status,
+            'created_at' => $this->created_at->format('M d, y h:i A'),
         ];
     }
 }
