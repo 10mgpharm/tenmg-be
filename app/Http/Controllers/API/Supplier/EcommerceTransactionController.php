@@ -22,6 +22,20 @@ class EcommerceTransactionController extends Controller
 
 
         $wallets = EcommerceTransaction::where('supplier_id', $business_id)
+            ->when(
+                $request->input('search'),
+                fn($query, $search) => $query->where(
+                    fn($query) => $query->where('txn_type', 'like', "%{$search}%")
+                        ->orWhere('txn_group', 'like', "%{$search}%")
+                        ->orWhere('amount', 'like', "%{$search}%")
+                        ->orWhere('balance_before', 'like', "%{$search}%")
+                        ->orWhere('balance_after', 'like', "%{$search}%")
+                        ->orWhereHas('supplier', fn($query) => $query->where('name', 'like', "%{$search}%")->orWhere('short_name', 'like', "%{$search}%"))
+                    // ->orWhereHas('order', fn($query) => $query->where('order_number', 'like', "%{$search}%"))
+                )
+            )
+            ->when($request->input('fromDate'), fn($query, $from) => $query->whereDate('created_at', '>=', $from))
+            ->when($request->input('toDate'), fn($query, $to) => $query->whereDate('created_at', '<=', $to))
             ->latest('id')
             ->paginate($request->input('perPage', 20))
             ->withQueryString()

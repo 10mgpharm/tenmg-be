@@ -90,6 +90,18 @@ class EcommerceWalletController extends Controller
             ->where('txn_group', EcommerceWalletConstants::SUPPLIER_TXN_GROUP_ORDER_PAYMENT)
             ->where('txn_type', EcommerceWalletConstants::TXN_TYPE_CREDIT)
             ->whereBetween('created_at', $date_range)
+            ->when(
+                $request->input('search'),
+                fn($query, $search) => $query->where(
+                    fn($query) => $query->where('txn_type', 'like', "%{$search}%")
+                        ->orWhere('txn_group', 'like', "%{$search}%")
+                        ->orWhere('amount', 'like', "%{$search}%")
+                        ->orWhere('balance_before', 'like', "%{$search}%")
+                        ->orWhere('balance_after', 'like', "%{$search}%")
+                        ->orWhereHas('supplier', fn($query) => $query->where('name', 'like', "%{$search}%")->orWhere('short_name', 'like', "%{$search}%"))
+                    // ->orWhereHas('order', fn($query) => $query->where('order_number', 'like', "%{$search}%"))
+                )
+            )
             ->latest('id')
             ->paginate($request->get('perPage', 30))
             ->withQueryString()
@@ -98,6 +110,18 @@ class EcommerceWalletController extends Controller
 
         $transactions = EcommerceTransaction::query()
             ->whereBetween('created_at', $date_range)
+            ->when(
+                $request->input('search'),
+                fn($query, $search) => $query->where(
+                    fn($query) => $query->where('txn_type', 'like', "%{$search}%")
+                        ->orWhere('txn_group', 'like', "%{$search}%")
+                        ->orWhere('amount', 'like', "%{$search}%")
+                        ->orWhere('balance_before', 'like', "%{$search}%")
+                        ->orWhere('balance_after', 'like', "%{$search}%")
+                        ->orWhereHas('supplier', fn($query) => $query->where('name', 'like', "%{$search}%")->orWhere('short_name', 'like', "%{$search}%"))
+                    // ->orWhereHas('order', fn($query) => $query->where('order_number', 'like', "%{$search}%"))
+                )
+            )
             ->latest('id')
             ->paginate($request->get('perPage', 30))
             ->withQueryString()
