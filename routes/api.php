@@ -75,6 +75,7 @@ use App\Http\Controllers\API\Vendor\AuditLogController as VendorAuditLogControll
 use App\Http\Controllers\API\Vendor\UsersController as VendorUsersController;
 use App\Http\Controllers\API\Vendor\VendorWalletController;
 use App\Http\Controllers\API\Webhooks\PaystackWebhookController;
+use App\Http\Controllers\API\WithdrawFundController;
 use App\Http\Controllers\BusinessSettingController;
 use App\Http\Controllers\InviteController;
 use App\Http\Controllers\Supplier\DashboardController as SupplierDashboardController;
@@ -235,6 +236,7 @@ Route::prefix('v1')->group(function () {
             Route::get('wallet/bank-account', GetBankAccountController::class);
             Route::patch('wallet/add-bank-account/{bank_account}', UpdateBankAccountController::class);
             Route::post('wallet/add-bank-account', AddBankAccountController::class);
+            Route::post('withdraw-funds', WithdrawFundController::class);
 
             Route::apiResource('store-addresses', EcommerceStoreAddressController::class);
         });
@@ -441,6 +443,7 @@ Route::prefix('v1')->group(function () {
 
             Route::get('audit-logs', [VendorAuditLogController::class, 'index']);
             Route::get('audit-logs/search', [VendorAuditLogController::class, 'search']);
+            Route::post('withdraw-funds', WithdrawFundController::class);
         });
 
         // ADMIN specific routes
@@ -564,6 +567,7 @@ Route::prefix('v1')->group(function () {
             });
 
             Route::get('dashboard', AdminDashboardController::class);
+            Route::post('withdraw-funds', WithdrawFundController::class);
         });
 
         // STOREFRONTS specific routes
