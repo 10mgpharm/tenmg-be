@@ -272,13 +272,15 @@ class RepaymentScheduleRepository
 
         $repayments = RepaymentSchedule::where('payment_id', $repaymentPayment->id)->get();
         $applicationId = null;
+        $loanId = null;
         for ($i=0; $i < count($repayments); $i++) {
             $applicationId = $repayments[$i]->loan->application_id;
+            $loanId = $repayments[$i]->loan_id;
             $this->completeDirectDebitRequest($body, $repayments[$i]);
         }
 
-        $allPaidRepayments = RepaymentSchedule::where('payment_status', "PAID")->get();
-        $allRepayments = RepaymentSchedule::all();
+        $allPaidRepayments = RepaymentSchedule::where('loan_id', $loanId)->where('payment_status', "PAID")->get();
+        $allRepayments = RepaymentSchedule::where('loan_id', $loanId)->get();
 
         $repaymentPayment->status = 'success';
         $repaymentPayment->save();
@@ -289,7 +291,6 @@ class RepaymentScheduleRepository
             $loan->status = 'Completed';
             $loan->save();
         }
-
 
     }
 
