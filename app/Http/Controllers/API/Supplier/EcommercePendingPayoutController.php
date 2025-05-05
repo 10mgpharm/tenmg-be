@@ -24,7 +24,16 @@ class EcommercePendingPayoutController extends Controller
 
 
         $wallets = EcommerceOrderDetail::where('supplier_id', $business_id)
-        ->whereHas('order', fn($query) => $query->where('status', 'PROCESSING'))
+            ->whereHas('order', fn($query) => $query->where('status', 'PROCESSING'))
+            ->when(
+                $request->input('search'),
+                fn($query, $search) => $query->where(
+                    fn($query) => $query->where('actual_price', 'like', "%{$search}%")
+                        ->orWhere('discount_price', 'like', "%{$search}%")
+                        ->orWhereHas('product', fn($query) => $query->where('name', 'like', "%{$search}%")->orWhere('slug', 'like', "%{$search}%"))
+                )
+                // ->orWhereHas('order', fn($query) => $query->where('order_number', 'like', "%{$search}%"))
+            )
             ->latest('id')
             ->paginate($request->input('perPage', 20))
             ->withQueryString()

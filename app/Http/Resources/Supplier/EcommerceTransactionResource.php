@@ -17,6 +17,7 @@ class EcommerceTransactionResource extends JsonResource
     {
         return [
             'id' => $this->id,
+            'name' => $this->supplier?->name,
             'orderId' => $this->ecommerce_order_id,
             'tenmg_commission' => $this->ecommerce_order_detail_id ? EcommerceOrderDetail::find($this->ecommerce_order_detail_id)->tenmg_commission : null,
             'txnType' => $this->txn_type,
