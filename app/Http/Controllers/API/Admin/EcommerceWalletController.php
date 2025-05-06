@@ -110,8 +110,18 @@ class EcommerceWalletController extends Controller
 
 
             $pending_supplier_payouts = EcommerceOrderDetail::query()
+            ->whereBetween('created_at', $date_range)
             ->whereHas('order', fn ($query) => $query->where('status', 'PROCESSING'))
-            ->select('ecommerce_order_id', 'actual_price', 'discount_price', 'tenmg_commission', 'created_at', 'supplier_id')
+            ->select('ecommerce_order_id', 'actual_price', 'discount_price', 'tenmg_commission', 'created_at', 'supplier_id', 'ecommerce_product_id',)
+            ->when(
+                $request->input('search'),
+                fn($query, $search) => $query->where(
+                    fn($query) => $query->where('actual_price', 'like', "%{$search}%")
+                        ->orWhere('discount_price', 'like', "%{$search}%")
+                        ->orWhereHas('product', fn($query) => $query->where('name', 'like', "%{$search}%")->orWhere('slug', 'like', "%{$search}%"))
+                )
+                // ->orWhereHas('order', fn($query) => $query->where('order_number', 'like', "%{$search}%"))
+            )
             ->latest()
             ->paginate($request->get('perPage', 30))
             ->withQueryString()
