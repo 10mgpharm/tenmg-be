@@ -4,6 +4,7 @@ namespace App\Http\Controllers\API\Admin;
 
 use App\Constants\EcommerceWalletConstants;
 use App\Http\Controllers\Controller;
+use App\Http\Resources\EcommerceOrderDetailResource;
 use App\Http\Resources\Supplier\EcommerceTransactionResource;
 use App\Models\EcommerceOrderDetail;
 use App\Models\EcommerceTransaction;
@@ -87,8 +88,8 @@ class EcommerceWalletController extends Controller
 
         // Fetch transactions with pagination
         $payouts = EcommerceTransaction::query()
-            ->where('txn_group', EcommerceWalletConstants::SUPPLIER_TXN_GROUP_ORDER_PAYMENT)
-            ->where('txn_type', EcommerceWalletConstants::TXN_TYPE_CREDIT)
+            ->whereIn('txn_group', [EcommerceWalletConstants::SUPPLIER_TXN_GROUP_ORDER_PAYMENT])
+            ->whereIn('txn_type', [EcommerceWalletConstants::TXN_TYPE_CREDIT])
             ->whereBetween('created_at', $date_range)
             ->when(
                 $request->input('search'),
@@ -107,6 +108,14 @@ class EcommerceWalletController extends Controller
             ->withQueryString()
             ->through(fn(EcommerceTransaction $message) => new EcommerceTransactionResource($message));
 
+
+            $pending_supplier_payouts = EcommerceOrderDetail::query()
+            ->whereHas('order', fn ($query) => $query->where('status', 'PROCESSING'))
+            ->select('ecommerce_order_id', 'actual_price', 'discount_price', 'tenmg_commission', 'created_at', 'supplier_id')
+            ->latest()
+            ->paginate($request->get('perPage', 30))
+            ->withQueryString()
+            ->through(fn(EcommerceOrderDetail $order) => new EcommerceOrderDetailResource($order));
 
         $transactions = EcommerceTransaction::query()
             ->whereBetween('created_at', $date_range)
@@ -138,6 +147,7 @@ class EcommerceWalletController extends Controller
                 'totalSupplierPayout' => $total_supplier_payout,
                 'transactions' => $transactions,
                 'payouts' => $payouts,
+                'pendingSupplierPayouts' => $pending_supplier_payouts,
             ]
         );
     }
