@@ -24,4 +24,9 @@ class AdminWalletService
     {
         return $this->adminWalletRepository->getPayOutTransactions();
     }
+
+    public function getWalletUserStats($businessId)
+    {
+        return $this->adminWalletRepository->getWalletUserStats($businessId);
+    }
 }

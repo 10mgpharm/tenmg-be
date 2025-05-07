@@ -15,10 +15,14 @@ class EcommerceTransactionController extends Controller
      */
     public function __invoke(Request $request): JsonResponse
     {
-        $user = $request->user();
+        $business_id = $request->input('businessId');
 
-        $business_id = $user->ownerBusinessType?->id
-            ?: $user->businesses()->firstWhere('user_id', $user->id)?->id;
+        if($request->input('businessId') == null) {
+            $user = $request->user();
+            $business_id = $user->ownerBusinessType?->id
+                ?: $user->businesses()->firstWhere('user_id', $user->id)?->id;
+
+        }
 
 
         $wallets = EcommerceTransaction::where('supplier_id', $business_id)
