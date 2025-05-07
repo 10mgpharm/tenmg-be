@@ -20,12 +20,16 @@ class AuditLogController extends Controller
      */
     public function index(SearchAuditLogRequest $request): JsonResponse
     {
-        $query = Activity::query()
+        $query = Activity::with('causer')
             ->when(
                 $request->input('search'),
                 fn($query, $search) =>
-                $query->where('event', 'like', "%{$search}%")
-                ->orWhere('properties->action', 'like', "%{$search}%")
+                $query->where(
+                    fn($q) =>
+                    $q->where('event', 'like', "%{$search}%")
+                        ->orWhere('properties->action', 'like', "%{$search}%")
+                        ->orWhereHas('causer', fn($q2) => $q2->where('name', 'like', "%{$search}%"))
+                )
             )
             ->when(
                 $request->input('event'),
@@ -45,7 +49,7 @@ class AuditLogController extends Controller
                         array_map(fn($s) => trim($s), is_array($crud_type) ? $crud_type : explode(",", $crud_type))
                     )
                 )
-            )         
+            )
             ->when(
                 $request->input('ip'),
                 fn($query, $ip) => $query->whereIn(
@@ -54,7 +58,7 @@ class AuditLogController extends Controller
                         array_map(fn($s) => trim($s), is_array($ip) ? $ip : explode(",", $ip))
                     )
                 )
-            )            
+            )
             ->when(
                 $request->input('fromDate'),
                 fn($query, $from) =>

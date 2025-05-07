@@ -8,6 +8,7 @@ use App\Models\EcommerceOrderDetail;
 use App\Models\EcommerceProduct;
 use App\Models\EcommerceWallet;
 use App\Repositories\OrderRepository;
+use App\Services\AuditLogService;
 use App\Services\SupplierOrderWalletService;
 use App\Settings\CreditSettings;
 use Illuminate\Http\Request;
@@ -38,6 +39,55 @@ class EcommerceCartService
         try {
 
             $order = EcommerceOrder::find($request->input('orderId'));
+            $user = $request->user();
+
+            switch ($order->status) {
+                case 'PENDING':
+                    if($request->input('status') == 'CANCELED'){
+                        AuditLogService::log(
+                            target: $order, // The user is the target (it is being updated)
+                            event: 'order.canceled',
+                            action: "Order cancelled",
+                            description: "An order has been canceled now awaiting a refund.",
+                            crud_type: 'UPDATED', // Use 'UPDATE' for updating actions
+                            properties: [
+                                'order_id' => $order->id,
+                                'order_number' => $order->order_number,
+                                'status' => $request->input('status'),
+                                'reason' => $request->input('reason'),
+                                'requires_refund' => $request->input('requiresRefund'),
+                            ]
+
+                        );
+                    }
+                    break;
+
+                case 'CANCELED':
+                    if($request->input('status') == 'REFUNDED'){
+                        $business = $order->customer->ownerBusinessType
+                            ?: $order->customer->businesses()->firstWhere('user_id', $user->id);
+                        AuditLogService::log(
+                            target: $order, // The user is the target (it is being updated)
+                            event: 'order.refunded',
+                            action: "Cancelled order refunded",
+                            description: "{$business?->name} has now been refunded for the canceled order.",
+                            crud_type: 'UPDATED', // Use 'UPDATE' for updating actions
+                            properties: [
+                                'order_id' => $order->id,
+                                'order_number' => $order->order_number,
+                                'status' => $request->input('status'),
+                                'reason' => $request->input('reason'),
+                                'requires_refund' => $request->input('requiresRefund'),
+                            ]
+
+                        );
+                    }
+                    break;
+                
+                default:
+                    # code...
+                    break;
+            }
             $order->status = $request->input('status');
             $order->refund_status = $request->input('refundStatus');
             $order->requires_refund = $request->input('requiresRefund');

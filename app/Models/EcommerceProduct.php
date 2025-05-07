@@ -70,6 +70,22 @@ class EcommerceProduct extends Model
     }
 
     /**
+     * Get the creator associated with the product.
+     */
+    public function createdBy()
+    {
+        return $this->belongsTo(User::class, 'created_by_id');
+    }
+
+    /**
+     * Get the creator associated with the product.
+     */
+    public function updatedBy()
+    {
+        return $this->belongsTo(User::class, 'updated_by_id');
+    }
+
+    /**
      * Get the branch associated with the product.
      */
     public function brand()
