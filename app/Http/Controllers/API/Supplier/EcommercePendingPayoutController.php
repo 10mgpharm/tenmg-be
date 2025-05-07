@@ -26,10 +26,10 @@ class EcommercePendingPayoutController extends Controller
 
 
         // Calculate the total pending supplier payout (Credit - Debit)
-        $total_pending_payouts = EcommerceOrderDetail::query()
-        ->where('supplier_id', $business_id)
-        ->whereHas('order', fn ($query) => $query->where('status', 'PROCESSING'))
-        ->sum(DB::raw('(COALESCE(discount_price, actual_price))'));
+        // $total_pending_payouts = EcommerceOrderDetail::query()
+        // ->where('supplier_id', $business_id)
+        // ->whereHas('order', fn ($query) => $query->where('status', 'PROCESSING'))
+        // ->sum(DB::raw('(COALESCE(discount_price, actual_price))'));
 
         $payouts = EcommerceTransaction::query()
         ->where('supplier_id', $business_id)
@@ -93,7 +93,7 @@ class EcommercePendingPayoutController extends Controller
                 'pendingPayouts' => $pending_payouts,
                 'payouts' => $payouts,
                 'transactions' => $transactions,
-                'totalPendingPayouts' => $total_pending_payouts,
+                // 'totalPendingPayouts' => $total_pending_payouts,
             ],
         );
     }
