@@ -117,4 +117,14 @@ class Business extends Model
     {
         return $this->hasMany(CreditOffer::class, 'lender_id', 'id');
     }
+
+    public function vendorsVoucherWallet()
+    {
+        return $this->hasOne(CreditVendorWallets::class, 'vendor_id', 'id')->where('type', 'credit_voucher');
+    }
+
+    public function vendorsPayoutWallet()
+    {
+        return $this->hasOne(CreditVendorWallets::class, 'vendor_id', 'id')->where('type', 'payout');
+    }
 }

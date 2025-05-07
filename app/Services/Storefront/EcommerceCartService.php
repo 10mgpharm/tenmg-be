@@ -157,7 +157,6 @@ class EcommerceCartService
                 $orderItem->tenmg_commission_percent = $tenmgPercent;
                 $orderItem->save();
 
-
             }
 
             $cart->order_total = $cart->orderDetails()->sum('discount_price');
