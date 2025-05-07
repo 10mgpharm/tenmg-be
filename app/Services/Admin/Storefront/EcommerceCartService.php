@@ -12,6 +12,7 @@ use App\Services\AuditLogService;
 use App\Services\SupplierOrderWalletService;
 use App\Settings\CreditSettings;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 
@@ -41,6 +42,13 @@ class EcommerceCartService
             $order = EcommerceOrder::find($request->input('orderId'));
             $user = $request->user();
 
+            if ($order->status !== 'PENDING' && in_array($request->input('status'), ['CANCELED', 'COMPLETED'])) {
+                return response()->json([
+                    'message' => 'This order cannot be updated because it is no longer pending.',
+                    'status' => 'error',
+                ], Response::HTTP_UNPROCESSABLE_ENTITY);
+            }
+    
             switch ($order->status) {
                 case 'PENDING':
                     if($request->input('status') == 'CANCELED'){
