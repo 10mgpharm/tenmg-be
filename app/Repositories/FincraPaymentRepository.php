@@ -347,6 +347,11 @@ class FincraPaymentRepository
             $product = $orderItems[$i]->product;
             $supplier = $orderItems[$i]->supplier;
             $owner = $supplier->owner;
+
+            //Reduce product quantity
+            $product->quantity = $product->quantity - $orderItems[$i]->quantity;
+            $product->save();
+
             $owner->sendOrderConfirmationNotification('You have a new order from '.$order->customer->name.'. Order for '.$product->name, $owner);
         }
 

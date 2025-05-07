@@ -73,6 +73,7 @@ use App\Http\Controllers\API\Supplier\GetBankAccountController;
 use App\Http\Controllers\API\Supplier\UpdateBankAccountController;
 use App\Http\Controllers\API\Vendor\AuditLogController as VendorAuditLogController;
 use App\Http\Controllers\API\Vendor\UsersController as VendorUsersController;
+use App\Http\Controllers\API\Vendor\VendorDashboardController;
 use App\Http\Controllers\API\Vendor\VendorWalletController;
 use App\Http\Controllers\API\Webhooks\PaystackWebhookController;
 use App\Http\Controllers\API\WithdrawFundController;
@@ -444,6 +445,11 @@ Route::prefix('v1')->group(function () {
             Route::get('audit-logs', [VendorAuditLogController::class, 'index']);
             Route::get('audit-logs/search', [VendorAuditLogController::class, 'search']);
             Route::post('withdraw-funds', WithdrawFundController::class);
+
+            Route::prefix('dashboard')->group(function () {
+                Route::get('/', [VendorDashboardController::class, 'getDashboardStats'])->name('vendor.dashboard.getDashboardStats');
+                Route::get('/graph-stats', [VendorDashboardController::class, 'getGraphStats'])->name('vendor.dashboard.getGraphStats');
+            });
         });
 
         // ADMIN specific routes
@@ -716,7 +722,7 @@ Route::prefix('v1')->group(function () {
     Route::post('/webhooks/vendor/direct-debit/mandate', [PaystackWebhookController::class, 'handle'])->name('webhooks.paystack.direct_debit');
 
     // Client APIs
-    Route::prefix('client')->group(function () {
+    Route::prefix('client')->middleware(['log.api'])->group(function () {
 
         // [BNPL] get customers
         Route::get('/customers', [ClientController::class, 'getCustomers'])
