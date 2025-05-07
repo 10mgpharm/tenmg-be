@@ -71,7 +71,6 @@ class WithdrawFundController extends Controller
                     'customerName' => $business->name,
                 ]);
 
-                logs()->info($response->headers());
 
                 if (!$response->successful()) {
                     throw new \Exception('Fincra payout failed: ' . $response->body());
