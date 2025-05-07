@@ -2,9 +2,11 @@
 
 namespace App\Http\Requests;
 
+use App\Enums\OtpType;
 use App\Models\EcommerceBankAccount;
 use App\Models\EcommerceWallet;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class WithdrawFundRequest extends FormRequest
 {
@@ -104,6 +106,14 @@ class WithdrawFundRequest extends FormRequest
                 'numeric',
                 'min:1',
                 'max:' . $this->wallet->current_balance,
+            ],
+            'otp' => [
+                'required',
+                'string',
+                'string',
+                Rule::exists('otps', 'code')
+                    ->where('type', OtpType::WITHDRAW_FUND_TO_BANK_ACCOUNT->value)
+                    ->where('user_id', $this->user()->id),
             ],
         ];
     }
