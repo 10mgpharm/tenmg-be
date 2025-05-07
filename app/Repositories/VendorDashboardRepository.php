@@ -38,8 +38,8 @@ class VendorDashboardRepository
             'transactionEvaluation' => $transactionEvaluation,
             'apiCalls' => ($stats['success'] ?? 0) + ($stats['failed'] ?? 0),
             'accountLinking' => [
-                'successfulCalls' => $stats['success'],
-                'errors' => $stats['failed'],
+                'successfulCalls' => $stats['success'] ?? 0,
+                'errors' => $stats['failed'] ?? 0,
             ]
 
 
