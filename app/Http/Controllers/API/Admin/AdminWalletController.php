@@ -36,4 +36,13 @@ class AdminWalletController extends Controller
             data: CreditTransactionsResource::collection($transactions)->response()->getData(true)
         );
     }
+
+    public function getWalletUserStats($businessId)
+    {
+        $response = $this->adminWalletService->getWalletUserStats($businessId);
+
+        return $this->returnJsonResponse(
+            data: $response
+        );
+    }
 }
