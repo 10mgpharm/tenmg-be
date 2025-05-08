@@ -10,6 +10,7 @@ use App\Models\EcommercePayment;
 use App\Models\EcommerceTransaction;
 use App\Models\EcommerceWallet;
 use App\Models\User;
+use App\Services\AuditLogService;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Auth;
@@ -38,10 +39,11 @@ class WithdrawFundController extends Controller
 
                 // Fincra API call
                 $response = Http::withHeaders([
-                    'Authorization' => 'Bearer ' . config('services.fincra.secret_key'),
                     'api-key' => config('services.fincra.secret'),
                     'Content-Type' => 'application/json',
-                ])->post(config('services.fincra.url') . '/disbursements/payouts', [
+                ])
+                ->dd()
+                ->post(config('services.fincra.url') . '/disbursements/payouts', [
                     'amount' => $amount,
                     'beneficiary' => [
                         'accountHolderName' => $user->name,
@@ -52,7 +54,7 @@ class WithdrawFundController extends Controller
                         'lastName' => last(($parts)),
                         'type' => 'individual',
                     ],
-                    'business' => '{{Your Business ID}}',
+                    'business' => config('services.fincra.business_id'),
                     'customerReference' => (string) Str::uuid(),
                     'description' => 'Withdrawal to bank',
                     'destinationCurrency' => 'NGN',
@@ -68,6 +70,7 @@ class WithdrawFundController extends Controller
                     'narration' => 'Wallet withdrawal',
                     'customerName' => $business->name,
                 ]);
+
 
                 if (!$response->successful()) {
                     throw new \Exception('Fincra payout failed: ' . $response->body());
@@ -87,7 +90,7 @@ class WithdrawFundController extends Controller
                 ]);
 
                 // Log Ecommerce Payment
-                EcommercePayment::create([
+                $payment = EcommercePayment::create([
                     'business_id' => $business->id,
                     'wallet_id' => $wallet->id,
                     'amount' => $amount,
@@ -101,6 +104,22 @@ class WithdrawFundController extends Controller
                 $wallet->previous_balance = $wallet->current_balance;
                 $wallet->current_balance -= $amount;
                 $wallet->save();
+
+                AuditLogService::log(
+                    target: $wallet,
+                    event: 'wallet.withdrawal',
+                    action: "Withdrawal to bank",
+                    description: "{$user->name} withdraw {$amount} from {$business->name} wallet.",
+                    crud_type: 'CREATE', // Use 'UPDATE' for updating actions
+                    properties: [
+                        'transaction_id' => $transaction->id,
+                        'payment_id' => $payment->id,
+                        'channel' => 'fincra',
+                        'wallet_id' => $wallet->id,
+                        'business_id' => $business->id,
+                    ]
+
+                );
             });
 
             return $this->returnJsonResponse(

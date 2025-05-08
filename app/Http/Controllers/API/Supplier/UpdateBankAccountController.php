@@ -7,6 +7,7 @@ use App\Http\Requests\Supplier\UpdateBankAccountRequest;
 use App\Http\Resources\Supplier\EcommerceBankAccountResource;
 use App\Models\EcommerceBankAccount;
 use App\Models\EcommerceWallet;
+use App\Services\AuditLogService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\DB;
 
@@ -23,14 +24,14 @@ class UpdateBankAccountController extends Controller
         
         $user = $request->user();
 
-        $business_id = $user->ownerBusinessType?->id
-            ?: $user->businesses()->firstWhere('user_id', $user->id)?->id;
+        $business = $user->ownerBusinessType
+            ?: $user->businesses()->firstWhere('user_id', $user->id);
 
         $validated = $request->validated();
-        $validated['supplier_id'] = $business_id;
+        $validated['supplier_id'] = $business?->id;
 
         
-        return DB::transaction(function () use ($validated, $bank_account) {
+        return DB::transaction(function () use ($validated, $bank_account, $business) {
             $updated = $bank_account->update(array_filter($validated, fn($value) => !is_null($value)));
 
 
@@ -39,6 +40,14 @@ class UpdateBankAccountController extends Controller
                 message: 'Oops, can\'t update bank account at the moment. Please try again later.'
             );
         }
+
+        AuditLogService::log(
+            target: $bank_account, // The user is the target (it is being updated)
+            event: 'bank.account.updated',
+            action: "Bank account updated",
+            description: "{$business?->name} bank account was updated.",
+            crud_type: 'UPDATE', // Use 'UPDATE' for updating actions
+        );
         
             return $this->returnJsonResponse(
                 message: 'Bank account updated successfully.',

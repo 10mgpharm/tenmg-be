@@ -45,8 +45,9 @@ class EcommerceProductService implements IEcommerceProductService
             return DB::transaction(function () use ($validated, $user) {
 
                 // Doc: when business is null that means the product and its dependencies are for global used and created by admin
-                $productBusinessId = $user->ownerBusinessType?->id ?: $user->businesses()
-                        ->firstWhere('user_id', $user->id)?->id;
+                $business = $user->ownerBusinessType ?: $user->businesses()
+                        ->firstWhere('user_id', $user->id);
+                $productBusinessId = $business?->id;
 
                 if ($user && $user->hasRole('admin')) {
                     $validated['business_id'] = null;
@@ -183,7 +184,7 @@ class EcommerceProductService implements IEcommerceProductService
                     target: $product, // The product is the target (it is being created)
                     event: 'create.product',
                     action: "Product created",
-                    description: "{$user->name} created a product with the name '$product->name'",
+                    description: "A new product has been created by {$business?->name}.",
                     crud_type: 'CREATE', // Use 'CREATE' for creation actions
                     properties: [
                         'product_name' => $product->name,
@@ -219,6 +220,9 @@ class EcommerceProductService implements IEcommerceProductService
 
                 // Filter out empty/null values.
                 $validated = array_filter($validated);
+
+                $business = $user->ownerBusinessType ?: $user->businesses()
+                ->firstWhere('user_id', $user->id);
 
                 // Doc: when business is null that means the product and its dependencies are for global used and created by admin
                 if ($user && $user->hasRole('admin')) {
@@ -367,20 +371,37 @@ class EcommerceProductService implements IEcommerceProductService
 
                 $updateProductDetails = $product->productDetails?->update($validated);
 
-                // Log the update event.
-                AuditLogService::log(
-                    target: $product, // The product is the target (it is being updated)
-                    event: 'update.product',
-                    action: "Product updated",
-                    description: "{$user->name} updated a product with the name '$product->name'",
-                    crud_type: 'UPDATE', // Use 'UPDATE' for update actions
-                    properties: [
-                        'product_name' => $product->name,
-                        'product_description' => $product->description,
-                        'product_status' => $product->status,
-                        'product_active' => $product->active,
-                    ]
-                );
+                if($product->status == $validated['status']){
+                    // Log the update event.
+                    AuditLogService::log(
+                        target: $product, // The product is the target (it is being updated)
+                        event: 'update.product',
+                        action: "Product updated",
+                        description: "The product '{$product->name}({$product->medicationType->name})' added by {$product->createdBy->name} has been updated by {$user->name}({$business->name})",
+                        crud_type: 'UPDATE', // Use 'UPDATE' for update actions
+                        properties: [
+                            'product_name' => $product->name,
+                            'product_description' => $product->description,
+                            'product_status' => $product->status,
+                            'product_active' => $product->active,
+                        ]
+                    );
+                } else {
+                    // Log the update event.
+                    AuditLogService::log(
+                        target: $product, // The product is the target (it is being updated)
+                        event: 'update.product',
+                        action: "Product updated",
+                        description: "The product '{$product->name}({$product->medicationType->name})' has been updated to {$validated['status']} by {$user->name}({$business->name})",
+                        crud_type: 'UPDATE', // Use 'UPDATE' for update actions
+                        properties: [
+                            'product_name' => $product->name,
+                            'product_description' => $product->description,
+                            'product_status' => $product->status,
+                            'product_active' => $product->active,
+                        ]
+                    );
+                }
                 return $updateProduct || $updateProductDetails;
             });
         } catch (Exception $e) {

@@ -42,6 +42,7 @@ return [
     'fincra' => [
         'public' => env('FINCRA_PUBKEY'),
         'secret' => env('FINCRA_SECKEY'),
+        'business_id' => env('FINCRA_BUSINESS_ID'),
         'url' => env('FINCRA_BASE_URL', 'https://api.paystack.co'),
     ],
 
