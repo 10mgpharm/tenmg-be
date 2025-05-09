@@ -4,6 +4,7 @@ namespace App\Repositories;
 
 use App\Enums\InAppNotificationType;
 use App\Helpers\UtilityHelper;
+use App\Models\ApiCallLog;
 use App\Models\Business;
 use App\Models\CreditLendersWallet;
 use App\Models\CreditOffer;
@@ -14,6 +15,7 @@ use App\Models\DebitMandate;
 use App\Models\Loan;
 use App\Models\LoanApplication;
 use App\Models\RepaymentSchedule;
+use App\Models\TenmgTransactionHistory;
 use App\Models\TenMgWallet;
 use App\Models\User;
 use App\Notifications\Loan\LoanSubmissionNotification;
@@ -138,6 +140,15 @@ class FincraMandateRepository
                     'createdAt' => $debitMandate->created_at
                 ];
 
+                ApiCallLog::create([
+                    'business_id' => $debitMandate->business_id,
+                    'event' => 'Verify mandate status',
+                    'route' => request()->path(),
+                    'request' => request()->method(),
+                    'response' => '200',
+                    'status' => 'successful',
+                ]);
+
                 return $mandateStatus;
             }
 
@@ -168,6 +179,16 @@ class FincraMandateRepository
             curl_close($curl);
 
             if ($err) {
+
+                ApiCallLog::create([
+                    'business_id' => $debitMandate->business_id,
+                    'event' => 'Verify mandate status',
+                    'route' => request()->path(),
+                    'request' => request()->method(),
+                    'response' => '200',
+                    'status' => 'successful',
+                ]);
+
                 throw new \Exception($err);
             } else {
                 if ($statusCode == 200) {
@@ -179,8 +200,18 @@ class FincraMandateRepository
                     throw new \Exception("No response from Fincra");
                 }
 
+
                 $debitMandate->status = 'approved';
                 $debitMandate->save();
+
+                ApiCallLog::create([
+                    'business_id' => $debitMandate->business_id,
+                    'event' => 'Verify mandate status',
+                    'route' => request()->path(),
+                    'request' => request()->method(),
+                    'response' => '200',
+                    'status' => 'successful',
+                ]);
 
                 $this->completeLoanApplication($debitMandate->application_id);
             }
@@ -325,7 +356,8 @@ class FincraMandateRepository
         $repaymentBreakdown = UtilityHelper::generateRepaymentBreakdown(
             $amount,
             $loanApplication->interest_rate,
-            $loanApplication->duration_in_months
+            $loanApplication->duration_in_months,
+            $loanApplication->tenmg_interest
         );
 
         // Create offer
@@ -449,6 +481,8 @@ class FincraMandateRepository
                 'principal' => $schedule['principal'],
                 'interest' => $schedule['interest'],
                 'balance' => $schedule['balance'],
+                'tenmg_interest' => $schedule['tenmgInterest'],
+                'actual_interest' => $schedule['actualInterest'],
                 'due_date' => Carbon::parse($schedule['month'])->endOfMonth(),
                 'payment_status' => 'PENDING',
             ]);
@@ -602,9 +636,9 @@ class FincraMandateRepository
 
         $mandateData = DebitMandate::where('reference', $data->reference)->first();
 
-        if(!$mandateData){
-            throw new \Exception('Mandate not found');
-        }
+        // if(!$mandateData){
+        //     throw new \Exception('Mandate not found');
+        // }
 
         //amount debited
         $amount = $data->amount;
@@ -613,8 +647,10 @@ class FincraMandateRepository
         //get the loan application id from the mandate
         $applicationId = $mandateData->application_id;
 
+        $loanApplication = LoanApplication::find($applicationId);
+
         //get loan id for the application
-        $loan = Loan::where('application_id', $applicationId)->first()->id;
+        $loan = Loan::where('application_id', $applicationId)->first();
         $loanId = $loan->id;
 
         //get loan payment schedule
@@ -628,7 +664,7 @@ class FincraMandateRepository
         $paymentSchedule = $paymentSchedules->first();
 
         //Change the payment status to SUCCESS
-        $paymentSchedule->payment_status = $status;
+        $paymentSchedule->payment_status = "PAID";
         $paymentSchedule->save();
 
         if($status == "initiated"){
@@ -640,14 +676,11 @@ class FincraMandateRepository
 
         //get the lender business for the loan
         $lenderBusiness = Business::find($lenderBusinessId);
-
         $totalInterest = $paymentSchedule->interest;
-        $loanSettings = new LoanSettings();
-        $lenderInterest = $loanSettings->lenders_interest;
-        $tenmgInterest = $loanSettings->tenmg_interest;
+        $tenmgInterest = $loanApplication->tenmg_interest;
 
-        $tenmgInterestAmount = ($totalInterest * $tenmgInterest) / 100;
-        $lenderInterestAmount = $totalInterest - $tenmgInterestAmount;
+        $tenmgInterestAmount = $paymentSchedule->tenmg_interest;
+        $lenderInterestAmount = $paymentSchedule->actual_interest;
         $lenderTotalExcludingTenmgPercent = $paymentSchedule->principal + $lenderInterestAmount;
 
         //get the lender business investment wallet
@@ -658,13 +691,24 @@ class FincraMandateRepository
 
         //add to lender transaction history
         CreditTransactionHistory::create([
-            'amount' => $lenderTotalExcludingTenmgPercent,
+            'amount' => $paymentSchedule->principal,
             'type' => 'CREDIT',
             'status' => 'success',
             'business_id' => $lenderBusinessId,
             'description' => 'Loan Repayment',
             'loan_application_id' => $applicationId,
             'transaction_group' => 'repayment',
+            'meta' => json_encode($data),
+        ]);
+
+        CreditTransactionHistory::create([
+            'amount' => $lenderInterestAmount,
+            'type' => 'CREDIT',
+            'status' => 'success',
+            'business_id' => $lenderBusinessId,
+            'description' => 'Loan Repayment interest',
+            'loan_application_id' => $applicationId,
+            'transaction_group' => 'repayment_interest',
             'meta' => json_encode($data),
         ]);
 
@@ -681,15 +725,12 @@ class FincraMandateRepository
         $adminBusiness = Business::where('type', 'ADMIN')->first();
 
         //add to admin transaction history
-        CreditTransactionHistory::create([
+        TenmgTransactionHistory::create([
             'amount' => $tenmgInterestAmount,
             'type' => 'CREDIT',
             'status' => 'success',
-            'business_id' => $adminBusiness->id,
             'description' => 'Loan Repayment',
-            'loan_application_id' => $applicationId,
-            'transaction_group' => 'repayment_commission',
-            'meta' => json_encode($data),
+            'transaction_group' => 'loan_interest'
         ]);
 
         //get the vendor for the loan

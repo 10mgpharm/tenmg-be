@@ -2,6 +2,7 @@
 
 namespace App\Services\Bank;
 
+use App\Models\ApiCallLog;
 use App\Models\CreditCustomerBank;
 use App\Models\Customer;
 use Illuminate\Http\Request;
@@ -58,7 +59,7 @@ class BankService
             ->first();
     }
 
-    public function verifyBankAccount(Request $request)
+    public function verifyBankAccount(Request $request, $businessId = null)
     {
         try {
             $accountNumber = $request->accountNumber;
@@ -92,9 +93,27 @@ class BankService
             curl_close($curl);
 
             if ($err) {
+
+                ApiCallLog::create([
+                    'business_id' => $businessId,
+                    'event' => 'Error verifying Account',
+                    'route' => $request->path(),
+                    'request' => $request->method(),
+                    'response' => '500',
+                    'status' => 'failed',
+                ]);
+
                 // echo "cURL Error #:" . $err;
                 throw new \Exception($err);
             } else {
+                ApiCallLog::create([
+                    'business_id' => $businessId,
+                    'event' => 'Bank Account verified',
+                    'route' => $request->path(),
+                    'request' => $request->method(),
+                    'response' => '200',
+                    'status' => 'successful',
+                ]);
                 return json_decode($response);
             }
 
@@ -138,5 +157,15 @@ class BankService
                 'bank_code' => $requestData['bankCode'],
                 'is_default' => 1,
             ]);
+
+        //add api call logs
+        ApiCallLog::create([
+            'business_id' => $businessId,
+            'event' => 'Bank Account Created',
+            'route' => $request->path(),
+            'request' => $request->method(),
+            'response' => json_encode($requestData),
+            'status' => 'successful',
+        ]);
     }
 }

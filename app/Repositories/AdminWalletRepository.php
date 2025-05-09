@@ -10,6 +10,7 @@ use App\Models\CreditVendorWallets;
 use App\Models\EcommerceOrderDetail;
 use App\Models\EcommerceWallet;
 use App\Models\Loan;
+use App\Models\TenmgTransactionHistory;
 use App\Models\TenMgWallet;
 use Illuminate\Support\Facades\DB;
 
@@ -57,6 +58,14 @@ class AdminWalletRepository
     {
         $perPage = request()->query('perPage') ?? 15;
         $query = CreditTransactionHistory::orderBy('created_at', 'desc')->paginate($perPage);
+
+        return $query;
+    }
+
+    public function getAdminTransactions():\Illuminate\Contracts\Pagination\LengthAwarePaginator
+    {
+        $perPage = request()->query('perPage') ?? 15;
+        $query = TenmgTransactionHistory::orderBy('created_at', 'desc')->paginate($perPage);
 
         return $query;
     }

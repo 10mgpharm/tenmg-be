@@ -4,6 +4,7 @@ namespace App\Http\Controllers\API\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Http\Resources\CreditTransactionsResource;
+use App\Http\Resources\TenmgTransactionResource;
 use App\Services\Admin\AdminWalletService;
 use Illuminate\Http\Request;
 
@@ -25,6 +26,15 @@ class AdminWalletController extends Controller
 
         return $this->returnJsonResponse(
             data: CreditTransactionsResource::collection($transactions)->response()->getData(true)
+        );
+    }
+
+    public function getAdminTransactions(Request $request)
+    {
+        $transactions = $this->adminWalletService->getAdminTransactions();
+
+        return $this->returnJsonResponse(
+            data: TenmgTransactionResource::collection($transactions)->response()->getData(true)
         );
     }
 

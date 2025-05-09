@@ -73,6 +73,7 @@ use App\Http\Controllers\API\Supplier\GetBankAccountController;
 use App\Http\Controllers\API\Supplier\UpdateBankAccountController;
 use App\Http\Controllers\API\Vendor\AuditLogController as VendorAuditLogController;
 use App\Http\Controllers\API\Vendor\UsersController as VendorUsersController;
+use App\Http\Controllers\API\Vendor\VendorApiAuditLogController;
 use App\Http\Controllers\API\Vendor\VendorDashboardController;
 use App\Http\Controllers\API\Vendor\VendorWalletController;
 use App\Http\Controllers\API\Webhooks\PaystackWebhookController;
@@ -446,6 +447,12 @@ Route::prefix('v1')->group(function () {
             Route::get('audit-logs/search', [VendorAuditLogController::class, 'search']);
             Route::post('withdraw-funds', WithdrawFundController::class);
 
+            
+
+            Route::prefix('api-logs')->group(function () {
+                Route::get('/', [VendorApiAuditLogController::class, 'getApiLogs']);
+            });
+
             Route::prefix('dashboard')->group(function () {
                 Route::get('/', [VendorDashboardController::class, 'getDashboardStats'])->name('vendor.dashboard.getDashboardStats');
                 Route::get('/graph-stats', [VendorDashboardController::class, 'getGraphStats'])->name('vendor.dashboard.getGraphStats');
@@ -569,6 +576,7 @@ Route::prefix('v1')->group(function () {
                 Route::post('add-bank-account', AddBankAccountController::class);
                 Route::get('/', [AdminWalletController::class, 'getWalletStats']);
                 Route::get('/transactions', [AdminWalletController::class, 'getTransactions']);
+                Route::get('/admin-transactions', [AdminWalletController::class, 'getAdminTransactions']);
                 Route::get('/payouts', [AdminWalletController::class, 'getPayOutTransactions']);
                 Route::prefix('user')->group(function () {
                     Route::get('/{businessId}', [AdminWalletController::class, 'getWalletUserStats']);
@@ -719,8 +727,6 @@ Route::prefix('v1')->group(function () {
                 Route::get('/', [TransactionHistoryController::class, 'getCreditTransactionHistories']);
             });
 
-
-
         });
 
     });
@@ -728,7 +734,7 @@ Route::prefix('v1')->group(function () {
     Route::post('/webhooks/vendor/direct-debit/mandate', [PaystackWebhookController::class, 'handle'])->name('webhooks.paystack.direct_debit');
 
     // Client APIs
-    Route::prefix('client')->middleware(['log.api'])->group(function () {
+    Route::prefix('client')->group(function () {
 
         // [BNPL] get customers
         Route::get('/customers', [ClientController::class, 'getCustomers'])

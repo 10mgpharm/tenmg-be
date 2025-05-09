@@ -20,6 +20,11 @@ class AdminWalletService
         return $this->adminWalletRepository->getTransactions();
     }
 
+    public function getAdminTransactions():\Illuminate\Contracts\Pagination\LengthAwarePaginator
+    {
+        return $this->adminWalletRepository->getAdminTransactions();
+    }
+
     public function getPayOutTransactions():\Illuminate\Contracts\Pagination\LengthAwarePaginator
     {
         return $this->adminWalletRepository->getPayOutTransactions();

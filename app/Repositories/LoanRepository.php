@@ -224,23 +224,18 @@ class LoanRepository
             ->join('credit_offers', 'credit_loans.offer_id', '=', 'credit_offers.id')
             ->join('credit_applications', 'credit_offers.application_id', '=', 'credit_applications.id')
             ->where('credit_offers.lender_id', $business_id)->where('credit_loans.status', '=', 'Ongoing')
-            ->selectRaw('SUM(credit_loans.interest_amount * (1 - (COALESCE(credit_applications.tenmg_interest, 0) / 100))) as total_interest')
-            ->value('total_interest');
+            ->select('credit_applications.*')
+            ->sum('actual_interest');
 
-        $repaidInterest = CreditTransactionHistory::where('type', 'CREDIT')->where('transaction_group', 'repayment')->where('business_id', $business_id)->sum('amount');
+        $repaidInterest = CreditTransactionHistory::where('type', 'CREDIT')->where('transaction_group', 'repayment_interest')->where('business_id', $business_id)->sum('amount');
 
         $totalBalanceInterest = DB::table('credit_repayment_schedules')
             ->join('credit_loans', 'credit_repayment_schedules.loan_id', '=', 'credit_loans.id')
             ->join('credit_offers', 'credit_loans.offer_id', '=', 'credit_offers.id')
             ->join('credit_applications', 'credit_offers.application_id', '=', 'credit_applications.id')
             ->where('credit_offers.lender_id', $business_id)->where('credit_repayment_schedules.payment_status', 'PENDING')
-            ->selectRaw('
-                SUM(
-                    credit_repayment_schedules.interest -
-                    ((credit_applications.tenmg_interest / 100) * credit_loans.interest_amount / credit_applications.duration_in_months)
-                ) as total_interest
-            ')
-            ->value('total_interest');
+            ->select('credit_repayment_schedules.*')
+            ->value('actual_interest');
 
         return [
                 'totalProjectedInterest' => round($totalInterest, 0),

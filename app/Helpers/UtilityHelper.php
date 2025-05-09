@@ -62,13 +62,13 @@ class UtilityHelper
     }
 
     // Generate the repayment breakdown using the amortization formula
-    public static function generateRepaymentBreakdown(float $principal, float $annualInterestRate, int $months)
+    public static function generateRepaymentBreakdown(float $principal, float $annualInterestRate, int $months, $tenmgInterest)
     {
 
-        $loanSettings = new LoanSettings();
-        $interestRate = $loanSettings->lenders_interest;
+        $interestRate = $annualInterestRate;
 
         $totalInterest = $principal * ($interestRate / 100);
+        $tenmgInterestTotal = $totalInterest * ($tenmgInterest / 100);
         $totalRepayment = $principal + $totalInterest;
         $monthlyPayment = $totalRepayment / $months;
 
@@ -76,15 +76,20 @@ class UtilityHelper
         $remainingBalance = $principal;
 
         for ($i = 1; $i <= $months; $i++) {
-            $principalPortion = $principal / $months;
+            $principalPortion = $totalRepayment / $months;
             $interestPortion = $totalInterest / $months;
+            $tenmgInterestPortion = $tenmgInterestTotal / $months;
             $remainingBalance -= $principalPortion;
+            $actualInterest = $interestPortion - $tenmgInterestPortion;
+
 
             $repaymentBreakdown[] = [
                 'month' => Carbon::now()->addMonths($i)->format('F Y'),
                 'totalPayment' => round($monthlyPayment, 2),
                 'principal' => round($principalPortion, 2),
                 'interest' => round($interestPortion, 2),
+                'tenmgInterest' => round($tenmgInterestPortion, 2),
+                'actualInterest' => round($actualInterest, 2),
                 'balance' => round(max($remainingBalance, 0), 2)
             ];
         }

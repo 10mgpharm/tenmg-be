@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\API\Bank;
 
 use App\Http\Controllers\Controller;
+use App\Models\ApiCallLog;
 use App\Models\Customer;
 use App\Services\AuthService;
 use App\Services\Bank\BankService;
@@ -49,7 +50,23 @@ class BankController extends Controller
          * Fincra sandbox often timeout using the sandbox base url
          * https://sandboxapi.fincra.com/core/accounts/resolve
          */
+
+         $businessId = $this->authService->getBusiness()?->id;
+
         if (config('app.env') != 'production') {
+
+
+
+            //add api call logs
+            ApiCallLog::create([
+                'business_id' => $businessId,
+                'event' => 'Bank Account verified',
+                'route' => $request->path(),
+                'request' => $request->method(),
+                'response' => '200',
+                'status' => 'successful',
+            ]);
+
             return $this->returnJsonResponse(
                 message: 'Bank account verified successfully.',
                 data: [
@@ -63,7 +80,7 @@ class BankController extends Controller
             );
         }
 
-        $bankDetails = $this->bankService->verifyBankAccount($request);
+        $bankDetails = $this->bankService->verifyBankAccount($request, $businessId);
 
         return $this->returnJsonResponse(
             message: 'Bank account verified successfully.',

@@ -7,6 +7,7 @@ use App\Http\Controllers\API\Credit\LoanOfferController;
 use App\Http\Resources\BusinessLimitedRecordResource;
 use App\Http\Resources\CreditCustomerResource;
 use App\Http\Resources\LoadApplicationResource;
+use App\Models\ApiCallLog;
 use App\Models\Business;
 use App\Models\CreditCustomerBank;
 use App\Models\CreditLenderPreference;
@@ -321,11 +322,14 @@ class LoanApplicationRepository
             $interestRate = $loanApplication->interest_rate;
             $totalInterest = $requestedAmount * ($interestRate / 100);
             $totalRepayment = $requestedAmount + $totalInterest;
+            $tenmgAmount = $totalInterest * ($loanApplication->tenmg_interest/100);
 
             //update load duration
             $loanApplication->duration_in_months = $request->duration;
             $loanApplication->interest_amount = $totalInterest;
             $loanApplication->total_amount = $totalRepayment;
+            $loanApplication->tenmg_amount = $tenmgAmount;
+            $loanApplication->actual_interest = $totalInterest - $tenmgAmount;
             $loanApplication->save();
 
             $customerId = $loanApplication->customer_id;
@@ -361,12 +365,32 @@ class LoanApplicationRepository
                 ];
 
                 $this->createOrUpdateMandateRecord($request, $mandateResponseInitResponse);
+
+                ApiCallLog::create([
+                    'business_id' => $businessId,
+                    'event' => 'Mandate generated',
+                    'route' => request()->path(),
+                    'request' => request()->method(),
+                    'response' => '200',
+                    'status' => 'successful',
+                ]);
+
                 return $mandateResponseInitResponse;
             }
 
             $mandateResponseInitResponse = $this->fincraMandateRepository->generateMandateForCustomerClientMain($request);
 
             $this->createOrUpdateMandateRecord($request, $mandateResponseInitResponse);
+
+            ApiCallLog::create([
+                'business_id' => $businessId,
+                'event' => 'Mandate generated',
+                'route' => request()->path(),
+                'request' => request()->method(),
+                'response' => '200',
+                'status' => 'successful',
+            ]);
+
             return $mandateResponseInitResponse;
 
         } catch (\Throwable $th) {
