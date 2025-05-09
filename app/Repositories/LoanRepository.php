@@ -235,7 +235,7 @@ class LoanRepository
             ->join('credit_applications', 'credit_offers.application_id', '=', 'credit_applications.id')
             ->where('credit_offers.lender_id', $business_id)->where('credit_repayment_schedules.payment_status', 'PENDING')
             ->select('credit_repayment_schedules.*')
-            ->value('actual_interest');
+            ->sum('actual_interest');
 
         return [
                 'totalProjectedInterest' => round($totalInterest, 0),
