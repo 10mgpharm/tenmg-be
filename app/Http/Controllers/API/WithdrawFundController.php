@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers\API;
 
+use App\Constants\EcommerceWalletConstants;
+use App\Helpers\UtilityHelper;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\WithdrawFundRequest;
 use Illuminate\Support\Str;
@@ -42,7 +44,6 @@ class WithdrawFundController extends Controller
                     'api-key' => config('services.fincra.secret'),
                     'Content-Type' => 'application/json',
                 ])
-                ->dd()
                 ->post(config('services.fincra.url') . '/disbursements/payouts', [
                     'amount' => $amount,
                     'beneficiary' => [
@@ -72,39 +73,58 @@ class WithdrawFundController extends Controller
                 ]);
 
 
-                if (!$response->successful()) {
+                if (!$response->successful() && config('app.env') !== 'local') {
                     throw new \Exception('Fincra payout failed: ' . $response->body());
                 }
 
-                $reference = $response['reference'] ?? uniqid('fallback_', true);
-
-                // Log Commerce Transaction
-                $transaction = EcommerceTransaction::create([
-                    'business_id' => $business->id,
-                    'user_id' => $user->id,
-                    'amount' => $amount,
-                    'reference' => $reference,
-                    'type' => 'withdrawal',
-                    'status' => 'success',
-                    'description' => 'Withdrawal to bank',
-                ]);
-
-                // Log Ecommerce Payment
-                $payment = EcommercePayment::create([
-                    'business_id' => $business->id,
-                    'wallet_id' => $wallet->id,
-                    'amount' => $amount,
-                    'reference' => $reference,
-                    'method' => 'fincra_payout',
-                    'status' => 'success',
-                    'commerce_transaction_id' => $transaction->id,
-                ]);
+                $result = $response->json();
+                $reference = $result['reference'] ?? Str::random(24);
 
                 // Deduct from wallet
                 $wallet->previous_balance = $wallet->current_balance;
                 $wallet->current_balance -= $amount;
                 $wallet->save();
 
+                // Log Commerce Transaction
+                $transaction = EcommerceTransaction::create([
+                    'status' => 'DEBIT',
+                    'description' => 'Withdrawal to bank',
+                    'supplier_id' => $business->id,
+                    'txn_type' => 'DEBIT',
+                    'txn_group' => 'WITHDRAW_TO_BANK',
+                    'amount' => $amount,
+                    'balance_before' => $wallet->previous_balance,
+                    'balance_after' => $wallet->current_balance,
+                    'status' => 'DEBIT',
+                ]);
+
+                // Log Ecommerce Payment
+                $payment = EcommercePayment::create([
+                    'amount' => $amount,
+                    'status' => 'success',
+                    'reference' => Str::random(24),
+                    'external_reference' => $reference,
+                    'customer_id' => $user->id,
+                    'amount' => 5000.00,
+                    'fee' => 200.00,
+                    'total_amount' => 5200.00,
+                    'comment' => 'Payout to bank account',
+                    'paid_at' => now(),
+                    'currency' => 'NGN',
+                    'channel' => 'fincra',
+                    'meta' => json_encode([
+                        'method' => 'fincra_payout',
+                        'initiated_by' => 'system',
+                        'note' => 'Auto payout'
+                    ]),
+                    // Polymorphic wallet
+                    'wallet_id' => $wallet->id,
+                    'wallet_type' => get_class($wallet),
+                    'business_id' => $business->id,
+                    'ecommerce_transaction_id' => $transaction->id,
+                ]);
+
+                // Log 
                 AuditLogService::log(
                     target: $wallet,
                     event: 'wallet.withdrawal',
