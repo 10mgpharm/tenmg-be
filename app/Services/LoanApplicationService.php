@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Helpers\UtilityHelper;
+use App\Models\ApiCallLog;
 use App\Models\Business;
 use App\Models\Customer;
 use App\Models\DebitMandate;
@@ -170,6 +171,15 @@ class LoanApplicationService
 
             $customer = $ongoingApplication->customer;
 
+            ApiCallLog::create([
+                'business_id' => $vendor->id,
+                'event' => 'Loan link generated',
+                'route' => request()->path(),
+                'request' => request()->method(),
+                'response' => '200',
+                'status' => 'successful',
+            ]);
+
             // notifation to customer here
             Notification::route('mail', [
                 $customer?->email => $customer?->name,
@@ -198,14 +208,15 @@ class LoanApplicationService
 
         $customer = $application->customer;
 
-        AuditLogService::log(
-            target: $application, // The discount is the target (it is being created)
-            event: 'create.loan-application',
-            action: "Loan link generated",
-            description: "{$vendor->name} generated loan application link for $customer->name",
-            crud_type: 'CREATE', // Use 'CREATE' for creation actions
-            properties: []
-        );
+
+        ApiCallLog::create([
+            'business_id' => $vendor->id,
+            'event' => 'Loan link generated',
+            'route' => request()->path(),
+            'request' => request()->method(),
+            'response' => '200',
+            'status' => 'successful',
+        ]);
 
         // notifation to customer here
         Notification::route('mail', [

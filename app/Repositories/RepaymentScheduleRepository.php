@@ -2,6 +2,7 @@
 
 namespace App\Repositories;
 
+use App\Models\ApiCallLog;
 use App\Models\Business;
 use App\Models\CreditOffer;
 use App\Models\CreditRepaymentPayments;
@@ -12,6 +13,7 @@ use App\Models\Loan;
 use App\Models\LoanApplication;
 use App\Models\RepaymentPayments;
 use App\Models\RepaymentSchedule;
+use App\Models\TenmgTransactionHistory;
 use App\Models\TenMgWallet;
 use App\Settings\LoanSettings;
 use Carbon\Carbon;
@@ -133,6 +135,15 @@ class RepaymentScheduleRepository
         }else{
             $initData = $this->calculatePartPayment($request, $loan);
         }
+
+        ApiCallLog::create([
+            'business_id' => $loan->business_id,
+            'event' => 'Repayment initiated',
+            'route' => request()->path(),
+            'request' => request()->method(),
+            'response' => '200',
+            'status' => 'successful',
+        ]);
 
         return $initData;
     }
@@ -330,14 +341,14 @@ class RepaymentScheduleRepository
 
         //get the lender business for the loan
         $lenderBusiness = Business::find($lenderBusinessId);
-        $totalInterest = $paymentSchedule->interest;
-        $tenmgInterest = $loanApplication->tenmg_interest;
+        // $totalInterest = $paymentSchedule->interest;
+        // $tenmgInterest = $loanApplication->tenmg_interest;
 
         //get 10mg interest for one repayment in percent
-        $oneMonthTenMgPercent = $tenmgInterest/$loanApplication->duration_in_months;
+        // $oneMonthTenMgPercent = $tenmgInterest/$loanApplication->duration_in_months;
 
-        $tenmgInterestAmount = ($totalInterest * $oneMonthTenMgPercent) / 100;
-        $lenderInterestAmount = $totalInterest - $tenmgInterestAmount;
+        $tenmgInterestAmount = $paymentSchedule->tenmg_interest;
+        $lenderInterestAmount = $paymentSchedule->actual_interest;
         $lenderTotalExcludingTenmgPercent = $paymentSchedule->principal + $lenderInterestAmount;
 
         //get the lender business investment wallet
@@ -348,13 +359,24 @@ class RepaymentScheduleRepository
 
         //add to lender transaction history
         CreditTransactionHistory::create([
-            'amount' => $lenderTotalExcludingTenmgPercent,
+            'amount' => $paymentSchedule->principal,
             'type' => 'CREDIT',
             'status' => 'success',
             'business_id' => $lenderBusinessId,
             'description' => 'Loan Repayment',
             'loan_application_id' => $applicationId,
             'transaction_group' => 'repayment',
+            'meta' => json_encode($data),
+        ]);
+
+        CreditTransactionHistory::create([
+            'amount' => $lenderInterestAmount,
+            'type' => 'CREDIT',
+            'status' => 'success',
+            'business_id' => $lenderBusinessId,
+            'description' => 'Loan Repayment interest',
+            'loan_application_id' => $applicationId,
+            'transaction_group' => 'repayment_interest',
             'meta' => json_encode($data),
         ]);
 
@@ -371,15 +393,12 @@ class RepaymentScheduleRepository
         $adminBusiness = Business::where('type', 'ADMIN')->first();
 
         //add to admin transaction history
-        CreditTransactionHistory::create([
+        TenmgTransactionHistory::create([
             'amount' => $tenmgInterestAmount,
             'type' => 'CREDIT',
             'status' => 'success',
-            'business_id' => $adminBusiness->id,
             'description' => 'Loan Repayment',
-            'loan_application_id' => $applicationId,
-            'transaction_group' => 'repayment_commission',
-            'meta' => json_encode($data),
+            'transaction_group' => 'loan_interest'
         ]);
 
         //get the vendor for the loan

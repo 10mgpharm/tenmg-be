@@ -63,19 +63,15 @@ class CustomerRepository
             return $query->where('active', $filters['status'] === 'active' ? 1 : 0);
         });
 
-        $query->when(isset($filters['vendorId']), function ($query) use ($filters) {
-            return $query->where('business_id', $filters['vendorId']);
-        });
-
         $query->when(isset($filters['createdAtStart']) && isset($filters['createdAtEnd']), function ($query) use ($filters) {
             $createdAtStart = \Carbon\Carbon::parse($filters['createdAtStart'])->startOfDay();
             $createdAtEnd = \Carbon\Carbon::parse($filters['createdAtEnd'])->endOfDay();
             return $query->whereBetween('created_at', [$createdAtStart, $createdAtEnd]);
         });
 
-        // $query->when(isset($filters['vendorId']), function ($query) use ($filters) {
-        //     return $query->where('business_id', $filters['vendorId']);
-        // });
+        $query->when(isset($filters['vendorId']), function ($query) use ($filters) {
+            return $query->where('business_id', $filters['vendorId']);
+        });
 
         $query->orderBy('created_at', 'desc');
 

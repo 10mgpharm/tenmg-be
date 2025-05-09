@@ -24,6 +24,9 @@ class LoanApplication extends Model
         'duration_in_months',
         'source',
         'status',
+        'tenmg_interest',
+        'tenmg_amount',
+        'actual_interest'
     ];
 
     public function business()
