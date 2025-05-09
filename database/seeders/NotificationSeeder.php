@@ -152,7 +152,10 @@ class NotificationSeeder extends Seeder
 
         $notifications = [...$admin_notifications, ...$vendor_notifications, ...$supplier_notifications ];
         foreach ($notifications as $notification) {
-            AppNotification::create($notification);
+            AppNotification::updateOrCreate(
+                ['name' => $notification['name']],
+                $notification
+            );
         }
     }
 }
