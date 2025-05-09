@@ -9,11 +9,16 @@ use App\Models\Loan;
 class VendorWalletRepository
 {
 
-    public function getWalletStats()
+    public function getWalletStats($businessId = null)
     {
-        $user = request()->user();
-        $business_id = $user->ownerBusinessType?->id
-            ?: $user->businesses()->firstWhere('user_id', $user->id)?->id;
+        $business_id = null;
+        if($businessId) {
+            $business_id = $businessId;
+        }else{
+            $user = request()->user();
+            $business_id = $user->ownerBusinessType?->id
+                ?: $user->businesses()->firstWhere('user_id', $user->id)?->id;
+        }
 
             $financials = $this->getBusinessFinancials($business_id);
             $onGoingLoans = $financials['onGoingLoans'];
@@ -47,12 +52,18 @@ class VendorWalletRepository
 
     public function getTransactions():\Illuminate\Contracts\Pagination\LengthAwarePaginator
     {
-        $user = request()->user();
-        $business_id = $user->ownerBusinessType?->id
-            ?: $user->businesses()->firstWhere('user_id', $user->id)?->id;
+
 
 
         $perPage = request()->query('perPage') ?? 15;
+        $business_id = request()->query('businessId');;
+
+        if($business_id == null) {
+            $user = request()->user();
+            $business_id = $user->ownerBusinessType?->id
+                ?: $user->businesses()->firstWhere('user_id', $user->id)?->id;
+        }
+
         $query = CreditTransactionHistory::query();
 
         $query->where('business_id', $business_id)->orderBy('created_at', 'desc');

@@ -215,9 +215,16 @@ class TransactionHistoryRepository
 
     public function getCreditTransactionHistories(array $filters, int $perPage = 15):\Illuminate\Contracts\Pagination\LengthAwarePaginator
     {
-        $user = request()->user();
-        $business_id = $user->ownerBusinessType?->id
-            ?: $user->businesses()->firstWhere('user_id', $user->id)?->id;
+
+        $business_id = null;
+
+        if(isset($filters['businessId'])){
+            $business_id = $filters['businessId'];
+        }else{
+            $user = request()->user();
+            $business_id = $user->ownerBusinessType?->id
+                ?: $user->businesses()->firstWhere('user_id', $user->id)?->id;
+        }
 
         $query = CreditTransactionHistory::query();
 

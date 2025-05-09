@@ -437,7 +437,7 @@ Route::prefix('v1')->group(function () {
             Route::prefix('wallet')->group(function () {
                 Route::get('bank-account', GetBankAccountController::class);
                 Route::patch('add-bank-account/{bank_account}', UpdateBankAccountController::class);
-            Route::post('add-bank-account', AddBankAccountController::class);
+                Route::post('add-bank-account', AddBankAccountController::class);
                 Route::get('/', [VendorWalletController::class, 'getWalletStats']);
                 Route::get('/transactions', [VendorWalletController::class, 'getTransactions']);
             });
@@ -570,6 +570,12 @@ Route::prefix('v1')->group(function () {
                 Route::get('/', [AdminWalletController::class, 'getWalletStats']);
                 Route::get('/transactions', [AdminWalletController::class, 'getTransactions']);
                 Route::get('/payouts', [AdminWalletController::class, 'getPayOutTransactions']);
+                Route::prefix('user')->group(function () {
+                    Route::get('/{businessId}', [AdminWalletController::class, 'getWalletUserStats']);
+                    Route::get('/lender/transactions', [TransactionHistoryController::class, 'getCreditTransactionHistories']);
+                    Route::get('/vendor/transactions', [VendorWalletController::class, 'getTransactions']);
+                    Route::get('supplier/transactions', EcommerceTransactionController::class);
+                });
             });
 
             Route::get('dashboard', AdminDashboardController::class);

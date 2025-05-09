@@ -11,11 +11,17 @@ use Illuminate\Support\Facades\Log;
 
 class LenderDashboardRepository
 {
-    public function getDashboardStats()
+    public function getDashboardStats($businessId = null)
     {
-        $user = request()->user();
-        $business_id = $user->ownerBusinessType?->id
-            ?: $user->businesses()->firstWhere('user_id', $user->id)?->id;
+        $business_id = null;
+        if($businessId == null){
+            $user = request()->user();
+            $business_id = $user->ownerBusinessType?->id
+                ?: $user->businesses()->firstWhere('user_id', $user->id)?->id;
+        }else{
+            $business_id = $businessId;
+        }
+
 
         //check if lender has three wallets temporary fix
         $lenderDepositWallet = Business::find($business_id)->allLendersWallet;
