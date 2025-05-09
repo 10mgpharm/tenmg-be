@@ -22,6 +22,8 @@ class RepaymentSchedule extends Model
         'late_fee',
         'due_date',
         'payment_status',
+        'tenmg_interest',
+        'actual_interest'
     ];
 
     public function loan(): BelongsTo
