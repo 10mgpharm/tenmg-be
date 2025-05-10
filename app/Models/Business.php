@@ -127,4 +127,9 @@ class Business extends Model
     {
         return $this->hasOne(CreditVendorWallets::class, 'vendor_id', 'id')->where('type', 'payout');
     }
+
+    public function apiKey()
+    {
+        return $this->hasOne(ApiKey::class, 'business_id', 'id');
+    }
 }

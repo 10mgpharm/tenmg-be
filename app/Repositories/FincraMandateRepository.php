@@ -561,6 +561,40 @@ class FincraMandateRepository
 
         }
 
+        $vendorBusiness = Business::find($loanApplication->business_id);
+        $apiKey = $vendorBusiness->apiKey;
+        $webhookUrl = $apiKey->is_test ? $apiKey->test_webhook_url:$apiKey->webhook_url;
+        $secretKey = $apiKey->is_test ? $apiKey->test_secret:$apiKey->secret;
+
+        if($webhookUrl != null){
+            \App\Jobs\TriggerWebhookJob::dispatch(
+                $webhookUrl,
+                [
+                    'event' => 'application.submitted', 
+                    'data' => [
+                        'applicationId' => $loanApplication->identifier,
+                        'status' => $loanApplication->status,
+                        'customer' => [
+                            'customerId' => $loanApplication->customer->identifier,
+                            'name' => $loanApplication->customer->name,
+                            'email' => $loanApplication->customer->email,
+                            'phone' => $loanApplication->customer->phone
+                        ],
+                        'requestedAmount' => $loanApplication->requested_amount,
+                        'durationInMonths' => $loanApplication->duration_in_months,
+                        'interest' => $loanApplication->interest_rate
+
+                    ]
+                ],
+                $secretKey,
+                [],
+                10,
+                'X-Signature',
+                $loanApplication->business_id,
+                'POST'
+            );
+        }
+
     }
 
     public function debitCustomerMandate($applicationId)
@@ -766,6 +800,56 @@ class FincraMandateRepository
             $loan->save();
         }
 
+
+        $vendorBusiness = Business::find($loanApplication->business_id);
+        $apiKey = $vendorBusiness->apiKey;
+        $webhookUrl = $apiKey->is_test ? $apiKey->test_webhook_url:$apiKey->webhook_url;
+        $secretKey = $apiKey->is_test ? $apiKey->test_secret:$apiKey->secret;
+
+        if($webhookUrl != null){
+            \App\Jobs\TriggerWebhookJob::dispatch(
+                $webhookUrl,
+                [
+                    'event' => 'loan.repayment', 
+                    'data' => [
+                        'applicationId' => $loanApplication->identifier,
+                        'status' => $loanApplication->status,
+                        'customer' => [
+                            'customerId' => $loanApplication->customer->identifier,
+                            'name' => $loanApplication->customer->name,
+                            'email' => $loanApplication->customer->email,
+                            'phone' => $loanApplication->customer->phone
+                        ],
+                        'requestedAmount' => $loanApplication->requested_amount,
+                        'durationInMonths' => $loanApplication->duration_in_months,
+                        'interest' => $loanApplication->interest_rate,
+                        'loan' => [
+                            'loanId' => $loan->identifier,
+                            'capitalAmount' => $loan->capital_amount,
+                            'status' => $loan->status,
+                            'repaymentStartDate' => $loan->repaymemt_start_date,
+                            'repayment_end_date' => $loan->repaymemt_end_date
+                        ],
+                        'payment' => [
+                            'principal' => $paymentSchedule->principal,
+                            'interest' => $paymentSchedule->interest,
+                            'totalAmount' => $paymentSchedule->total_amount,
+                            'paymentDate' => $paymentSchedule->updated_at,
+                            'balance' => $paymentSchedule->balance,
+                            'type' => 'automatic'
+                        ]
+
+                    ]
+                ],
+                $secretKey,
+                [],
+                10,
+                'X-Signature',
+                $loanApplication->business_id,
+                'POST'
+            );
+        }
+
     }
 
     public function sendLoanApprovalProcess($loanApplication, $offer, $loan, $scheduleForMail)
@@ -888,6 +972,52 @@ class FincraMandateRepository
             crud_type: 'UPDATE',
             properties: []
         );
+
+        $vendorBusiness = Business::find($loanApplication->business_id);
+        $apiKey = $vendorBusiness->apiKey;
+        $webhookUrl = $apiKey->is_test ? $apiKey->test_webhook_url:$apiKey->webhook_url;
+        $secretKey = $apiKey->is_test ? $apiKey->test_secret:$apiKey->secret;
+
+        if($webhookUrl != null){
+            \App\Jobs\TriggerWebhookJob::dispatch(
+                $webhookUrl,
+                [
+                    'event' => 'application.approved', 
+                    'data' => [
+                        'applicationId' => $loanApplication->identifier,
+                        'status' => $loanApplication->status,
+                        'customer' => [
+                            'customerId' => $loanApplication->customer->identifier,
+                            'name' => $loanApplication->customer->name,
+                            'email' => $loanApplication->customer->email,
+                            'phone' => $loanApplication->customer->phone
+                        ],
+                        'requestedAmount' => $loanApplication->requested_amount,
+                        'durationInMonths' => $loanApplication->duration_in_months,
+                        'interest' => $loanApplication->interest_rate,
+                        'loan' => [
+                            'loanId' => $loan->identifier,
+                            'capitalAmount' => $loan->capital_amount,
+                            'status' => $loan->status,
+                            'repaymentStartDate' => $loan->repaymemt_start_date,
+                            'repayment_end_date' => $loan->repaymemt_end_date
+                        ],
+                        'offer' => [
+                            'offerId' => $offer->identifier,
+                            'offerAmount' => $offer->offer_amount,
+                            'repaymentBreakdown' => $offer->repayment_breakdown
+                        ]
+
+                    ]
+                ],
+                $secretKey,
+                [],
+                10,
+                'X-Signature',
+                $loanApplication->business_id,
+                'POST'
+            );
+        }
 
     }
 
