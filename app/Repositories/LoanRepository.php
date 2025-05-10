@@ -225,7 +225,7 @@ class LoanRepository
             ->join('credit_applications', 'credit_offers.application_id', '=', 'credit_applications.id')
             ->where('credit_offers.lender_id', $business_id)->where('credit_loans.status', '=', 'Ongoing')
             ->select('credit_applications.*')
-            ->sum('actual_interest');
+            ->sum('credit_applications.actual_interest');
 
         $repaidInterest = CreditTransactionHistory::where('type', 'CREDIT')->where('transaction_group', 'repayment_interest')->where('business_id', $business_id)->sum('amount');
 
@@ -235,7 +235,7 @@ class LoanRepository
             ->join('credit_applications', 'credit_offers.application_id', '=', 'credit_applications.id')
             ->where('credit_offers.lender_id', $business_id)->where('credit_repayment_schedules.payment_status', 'PENDING')
             ->select('credit_repayment_schedules.*')
-            ->sum('actual_interest');
+            ->sum('credit_repayment_schedules.actual_interest');
 
         return [
                 'totalProjectedInterest' => round($totalInterest, 0),
