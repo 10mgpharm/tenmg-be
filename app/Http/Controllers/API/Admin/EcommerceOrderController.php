@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Resources\EcommerceCartResource;
 use App\Services\Admin\Storefront\EcommerceCartService;
 use Exception;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
 class EcommerceOrderController extends Controller
@@ -48,7 +49,10 @@ class EcommerceOrderController extends Controller
             'refundStatus' => 'required_if:status,CANCELED||in:REFUNDED,AWAITING REFUND'
         ]);
 
-        $this->ecommerceCartService->changeOrderStatus($request);
+        $response = $this->ecommerceCartService->changeOrderStatus($request);
+
+        if($response instanceof JsonResponse)
+            return $response;
 
         return $this->returnJsonResponse(message: 'Order status updated');
 

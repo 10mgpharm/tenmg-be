@@ -390,9 +390,9 @@ class EcommerceProductService implements IEcommerceProductService
                     // Log the update event.
                     AuditLogService::log(
                         target: $product, // The product is the target (it is being updated)
-                        event: 'update.product',
-                        action: "Product updated",
-                        description: "The product '{$product->name}({$product->medicationType->name})' has been updated to {$validated['status']} by {$user->name}({$business->name})",
+                        event: $validated['status'] . '.product',
+                        action: "Product " . $validated['status'],
+                        description: "The product '{$product->name}({$product->medicationType->name})' has been " . $validated['status'] . " by {$user->name}({$business->name})",
                         crud_type: 'UPDATE', // Use 'UPDATE' for update actions
                         properties: [
                             'product_name' => $product->name,
