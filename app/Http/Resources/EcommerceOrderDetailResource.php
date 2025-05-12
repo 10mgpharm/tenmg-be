@@ -20,7 +20,8 @@ class EcommerceOrderDetailResource extends JsonResource
             'discountPrice' => $this->discount_price,
             'quantity' => $this->quantity,
             'product' => $this->whenLoaded('product'),
-            'createdAt' => $this->created_at->format('M d, y h:i A')
+            'createdAt' => $this->created_at->format('M d, y h:i A'),
+            'order' => $this->order
         ];
     }
 }
