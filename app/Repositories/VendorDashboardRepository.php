@@ -2,6 +2,7 @@
 
 namespace App\Repositories;
 
+use App\Jobs\TriggerWebhookJob;
 use App\Models\ApiCallLog;
 use App\Models\Business;
 use App\Models\CreditTransactionHistory;

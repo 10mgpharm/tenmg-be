@@ -162,7 +162,7 @@ class LoanApplicationRepository
             throw new Exception('Loan already approved');
         }
         //check if lender has enough in his wallet to confirm the load
-        $depositWallet = CreditLendersWallet::where('lender_id', $business_id)->where('type', 'deposit')->first();;
+        $depositWallet = CreditLendersWallet::where('lender_id', $business_id)->where('type', 'deposit')->first();
         if ((int)$depositWallet->current_balance < (int)$application->requested_amount) {
             throw new Exception('Insufficient funds in lender\'s wallet to approve loan application.');
         }

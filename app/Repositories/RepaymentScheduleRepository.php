@@ -425,9 +425,57 @@ class RepaymentScheduleRepository
             'transaction_group' => 'payout',
             // 'wallet_id' => $vendorPayoutWallet->id,
             'meta' => json_encode($data),
-        ]);//
+        ]);
 
+        $vendorBusiness = Business::find($loanApplication->business_id);
+        $apiKey = $vendorBusiness->apiKey;
 
+        $webhookUrl = $apiKey->is_test ? $apiKey->test_webhook_url:$apiKey->webhook_url;
+        $secretKey = $apiKey->is_test ? $apiKey->test_secret:$apiKey->secret;
+
+        if($webhookUrl != null){
+            \App\Jobs\TriggerWebhookJob::dispatch(
+                $webhookUrl,
+                [
+                    'event' => 'loan.repayment', 
+                    'data' => [
+                        'applicationId' => $loanApplication->identifier,
+                        'status' => $loanApplication->status,
+                        'customer' => [
+                            'customerId' => $loanApplication->customer->identifier,
+                            'name' => $loanApplication->customer->name,
+                            'email' => $loanApplication->customer->email,
+                            'phone' => $loanApplication->customer->phone
+                        ],
+                        'requestedAmount' => $loanApplication->requested_amount,
+                        'durationInMonths' => $loanApplication->duration_in_months,
+                        'interest' => $loanApplication->interest_rate,
+                        'loan' => [
+                            'loanId' => $loan->identifier,
+                            'capitalAmount' => $loan->capital_amount,
+                            'status' => $loan->status,
+                            'repaymentStartDate' => $loan->repaymemt_start_date,
+                            'repayment_end_date' => $loan->repaymemt_end_date
+                        ],
+                        'payment' => [
+                            'principal' => $paymentSchedule->principal,
+                            'interest' => $paymentSchedule->interest,
+                            'totalAmount' => $paymentSchedule->total_amount,
+                            'paymentDate' => $paymentSchedule->updated_at,
+                            'balance' => $paymentSchedule->balance,
+                            'type' => 'manual'
+                        ]
+
+                    ]
+                ],
+                $secretKey,
+                [],
+                10,
+                'X-Signature',
+                $loanApplication->business_id,
+                'POST'
+            );
+        }
 
     }
 

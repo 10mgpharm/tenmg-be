@@ -451,6 +451,7 @@ Route::prefix('v1')->group(function () {
 
             Route::prefix('api-logs')->group(function () {
                 Route::get('/', [VendorApiAuditLogController::class, 'getApiLogs']);
+                Route::get('/webhook', [VendorApiAuditLogController::class, 'getWebHookLogs']);
             });
 
             Route::prefix('dashboard')->group(function () {
