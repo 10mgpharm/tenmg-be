@@ -5,6 +5,7 @@ namespace App\Http\Resources\Lender;
 use App\Http\Resources\LoadApplicationResource;
 use App\Models\CreditLenderPreference;
 use App\Models\CreditOffer;
+use App\Models\CreditTransactionHistory;
 use App\Models\LoanApplication;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -45,6 +46,9 @@ class LenderDashboardResource extends JsonResource
                          ->whereYear('created_at', $currentYear)->where('lender_id', $business_id)
                          ->get();
 
+        $interestEarned = CreditTransactionHistory::where('business_id', $business_id)->where('transaction_group', 'repayment_interest')->sum('amount');
+
+
         return [
             'id' => $this->id,
             'name' => $this->name,
@@ -52,7 +56,7 @@ class LenderDashboardResource extends JsonResource
             'wallets' => $this->allLendersWallet,
             'loanRequest' => LoadApplicationResource::collection($loansApp),
             'loanApprovalThisMonth' => $records->count(),
-            'interestEarned' => 0,
+            'interestEarned' => $interestEarned,
             'pendingRequests' => $totalCount
 
         ];
