@@ -357,6 +357,14 @@ class RepaymentScheduleRepository
         $lenderBusinessInvWallet->prev_balance = $lenderBusinessInvWallet->current_balance;
         $lenderBusinessInvWallet->save();
 
+        //deduct from lender ledger wallet
+        $amountToDeduct = $paymentSchedule->principal - $paymentSchedule->interest;
+        $ledgerWallet = $lenderBusiness->lendersLedgerWallet;
+        $ledgerWallet->current_balance = $ledgerWallet->current_balance - round($amountToDeduct, 0);
+        $ledgerWallet->prev_balance = $ledgerWallet->current_balance;
+        $ledgerWallet->save();
+
+
         //add to lender transaction history
         CreditTransactionHistory::create([
             'amount' => $paymentSchedule->principal,
@@ -437,7 +445,7 @@ class RepaymentScheduleRepository
             \App\Jobs\TriggerWebhookJob::dispatch(
                 $webhookUrl,
                 [
-                    'event' => 'loan.repayment', 
+                    'event' => 'loan.repayment',
                     'data' => [
                         'applicationId' => $loanApplication->identifier,
                         'status' => $loanApplication->status,
