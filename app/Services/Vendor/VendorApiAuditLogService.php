@@ -24,6 +24,21 @@ class VendorApiAuditLogService
             });
         });
 
+        $query->when(isset($filters['status']), function ($query) use ($filters) {
+            return $query->where('status', $filters['status']);
+        });
+
+        $query->when(
+            isset($criteria['dateFrom']) && isset($criteria['dateTo']),
+            function ($query) use ($filters) {
+                // Parse dates with Carbon to ensure proper format
+                $dateFrom = \Carbon\Carbon::parse($filters['dateFrom'])->startOfDay();
+                $dateTo = \Carbon\Carbon::parse($filters['dateTo'])->endOfDay();
+
+                return $query->whereBetween('created_at', [$dateFrom, $dateTo]);
+            }
+        );
+
         $query->where('business_id', $business_id)->orderBy('created_at', 'desc');
 
         return $query->paginate($perPage);
@@ -44,6 +59,21 @@ class VendorApiAuditLogService
                 $query->where('identifier', 'like', $searchTerm)->orWhere('event', 'like', $searchTerm);
             });
         });
+
+        $query->when(isset($filters['status']), function ($query) use ($filters) {
+            return $query->where('status', $filters['status']);
+        });
+
+        $query->when(
+            isset($criteria['dateFrom']) && isset($criteria['dateTo']),
+            function ($query) use ($filters) {
+                // Parse dates with Carbon to ensure proper format
+                $dateFrom = \Carbon\Carbon::parse($filters['dateFrom'])->startOfDay();
+                $dateTo = \Carbon\Carbon::parse($filters['dateTo'])->endOfDay();
+
+                return $query->whereBetween('created_at', [$dateFrom, $dateTo]);
+            }
+        );
 
         $query->where('business_id', $business_id)->orderBy('created_at', 'desc');
 
