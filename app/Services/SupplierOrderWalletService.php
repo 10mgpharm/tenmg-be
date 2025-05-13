@@ -260,7 +260,7 @@ class SupplierOrderWalletService implements ISupplierOrderWalletService
             'id',
             'supplier_id',
             'tenmg_commission',
-            DB::raw('(COALESCE(discount_price, actual_price) * quantity - COALESCE(tenmg_commission, 0)) as payout')
+            DB::raw('(COALESCE(discount_price, actual_price)) as payout')
         )
             ->whereHas('order', fn($query) => $query->where('id', $order->id))
             ->when(

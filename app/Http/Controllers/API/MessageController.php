@@ -82,7 +82,7 @@ class MessageController extends Controller
      */
     public function markAsRead(MarkAsReadMessageRequest $request, Message $message): JsonResponse
     {
-    
+
         $message = $this->messageService->markAsRead($message);
 
         if (! $message) {
@@ -120,19 +120,34 @@ class MessageController extends Controller
     public function startConversation(Request $request): JsonResponse
     {
         $user = $request->user();
-        $query = User::query()->where('id', '!=', $user->id)->when(
-            $request->input('search'),
-            fn($query, $search) =>
-            $query->where('name', 'like', "%{$search}%")->orWhere('email', 'like', "%{$search}%")
-        );
+        $query = User::query()
+            ->where('id', '!=', $user->id)
+            ->when(
+                $request->input('search'),
+                fn($q, $search) =>
+                $q->where(
+                    fn($q) =>
+                    $q->where('name', 'like', "%{$search}%")
+                        ->orWhere('email', 'like', "%{$search}%")
+                )
+            );
 
-        if(!$user->hasRole('admin')){
-            $query = $query->withinBusiness()->orWhereHas('roles', fn ($q) => $q->where('name', 'admin'));
+        if ($user->hasRole('admin')) {
+            // Admins: fetch all primary users of businesses, excluding pharmacies
+            $query->whereHas('ownerBusinessType')
+                ->whereDoesntHave('roles', fn($q) => $q->where('name', 'pharmacy'));
+        } else {
+            // Non-admins: limit to users within their business or admins
+            $query->where(
+                fn($q) =>
+                $q->withinBusiness()
+                    ->orWhereHas('roles', fn($r) => $r->where('name', 'admin'))
+            );
         }
 
         $users = $query->paginate($request->get('perPage', 30))
-        ->withQueryString()
-        ->through(fn(User $message) => new MessageUserResource($message));
+            ->withQueryString()
+            ->through(fn(User $user) => new MessageUserResource($user));
 
         return $this->returnJsonResponse(
             message: 'Conversable users successfully fetched.',
@@ -140,7 +155,7 @@ class MessageController extends Controller
         );
     }
 
-    
+
     public function unreadCount(Request $request): JsonResponse
     {
         $user = $request->user();
@@ -151,6 +166,4 @@ class MessageController extends Controller
             data: $count
         );
     }
-
-
 }

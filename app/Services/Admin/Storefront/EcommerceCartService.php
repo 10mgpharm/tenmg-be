@@ -42,9 +42,9 @@ class EcommerceCartService
             $order = EcommerceOrder::find($request->input('orderId'));
             $user = $request->user();
 
-            if ($order->status !== 'PENDING' && in_array($request->input('status'), ['CANCELED', 'COMPLETED'])) {
+            if ($order->status !== 'PROCESSING' && in_array($request->input('status'), ['CANCELED', 'COMPLETED'])) {
                 return response()->json([
-                    'message' => 'This order cannot be updated because it is no longer pending.',
+                    'message' => "This order cannot be updated because it is already " . strtolower($order->status) .".",
                     'status' => 'error',
                 ], Response::HTTP_UNPROCESSABLE_ENTITY);
             }
@@ -53,7 +53,7 @@ class EcommerceCartService
                 case 'PENDING':
                     if($request->input('status') == 'CANCELED'){
                         AuditLogService::log(
-                            target: $order, // The user is the target (it is being updated)
+                            target: $order,
                             event: 'order.canceled',
                             action: "Order cancelled",
                             description: "An order has been canceled now awaiting a refund.",
@@ -75,7 +75,7 @@ class EcommerceCartService
                         $business = $order->customer->ownerBusinessType
                             ?: $order->customer->businesses()->firstWhere('user_id', $user->id);
                         AuditLogService::log(
-                            target: $order, // The user is the target (it is being updated)
+                            target: $order, 
                             event: 'order.refunded',
                             action: "Cancelled order refunded",
                             description: "{$business?->name} has now been refunded for the canceled order.",
