@@ -42,9 +42,24 @@ class EcommerceCartService
             $order = EcommerceOrder::find($request->input('orderId'));
             $user = $request->user();
 
-            if ($order->status !== 'PROCESSING' && in_array($request->input('status'), ['CANCELED', 'COMPLETED'])) {
+            $allowed_transitions = [
+                'PENDING' => ['PROCESSING', 'CANCELED'],
+                'PROCESSING' => ['SHIPPED'],
+                'SHIPPED' => ['COMPLETED', 'DELIVERED'],
+                'CANCELED' => ['REFUNDED'],
+                'AWAITING_REFUND' => ['REFUNDED'],
+            ];
+
+            if (!isset($allowed_transitions[$order->status])) {
                 return response()->json([
-                    'message' => "This order cannot be updated because it is already " . strtolower($order->status) .".",
+                    'message' => "Orders with '{$order->status}' status cannot be updated.",
+                    'status' => 'error',
+                ], Response::HTTP_UNPROCESSABLE_ENTITY);
+            }
+
+            if (!in_array($request->input('status'), $allowed_transitions[$order->status]) && $request->input('status') !== $order->status) {
+                return response()->json([
+                    'message' => "Order cannot be moved from '{$order->status}' to '{$request->input('status')}'.",
                     'status' => 'error',
                 ], Response::HTTP_UNPROCESSABLE_ENTITY);
             }
