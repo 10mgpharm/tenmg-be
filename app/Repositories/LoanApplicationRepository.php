@@ -16,6 +16,7 @@ use App\Models\CreditOffer;
 use App\Models\Customer;
 use App\Models\DebitMandate;
 use App\Models\LoanApplication;
+use App\Models\User;
 use App\Services\ActivityLogService;
 use App\Services\AuditLogService;
 use App\Settings\CreditSettings;
@@ -297,6 +298,10 @@ class LoanApplicationRepository
             ->where('active', 1)
             ->first();
 
+            $user = User::find($vendor->owner_id);
+
+            $token = $user->createToken('Full Access Token', ['full']);
+
         $data = [
             'customer' => new CreditCustomerResource($customer),
             'business' => new BusinessLimitedRecordResource($vendor),
@@ -305,6 +310,7 @@ class LoanApplicationRepository
             ],
             'application' => new LoadApplicationResource($application),
             'defaultBank' => $defaultBank, //default bank for mandate authorisation
+            'token' => $token->accessToken
         ];
 
         return $data;

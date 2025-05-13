@@ -91,9 +91,9 @@ class LoanApplicationService
 
         $application = $this->loanApplicationRepository->create($data); //
 
-        $token = $user->createToken('Full Access Token', ['full']);
+        // $token = $user->createToken('Full Access Token', ['full']);
 
-        $link = config('app.frontend_url').'/widgets/applications/'.$application->identifier.'?token='.$token->accessToken;
+        $link = config('app.frontend_url').'/widgets/applications/'.$application->identifier;
 
         $customer = $application->customer;
 
@@ -166,8 +166,8 @@ class LoanApplicationService
             ->first();
 
         if ($ongoingApplication) {
-            $token = $user->createToken('Full Access Token', ['full']);
-            $link = config('app.frontend_url').'/widgets/applications/'.$ongoingApplication->identifier.'?token='.$token->accessToken;
+            // $token = $user->createToken('Full Access Token', ['full']);
+            $link = config('app.frontend_url').'/widgets/applications/'.$ongoingApplication->identifier;
 
             $customer = $ongoingApplication->customer;
 
