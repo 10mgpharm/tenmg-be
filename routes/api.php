@@ -447,7 +447,7 @@ Route::prefix('v1')->group(function () {
             Route::get('audit-logs/search', [VendorAuditLogController::class, 'search']);
             Route::post('withdraw-funds', WithdrawFundController::class);
 
-            
+
 
             Route::prefix('api-logs')->group(function () {
                 Route::get('/', [VendorApiAuditLogController::class, 'getApiLogs']);
@@ -770,7 +770,7 @@ Route::prefix('v1')->group(function () {
 
             // [BNPL] get application config
             Route::get('/config/{reference}', [LoanApplicationController::class, 'verifyApplicationLink'])
-                ->middleware(['auth:api'])
+                ->middleware(['clientAuth'])
                 ->name('client.applications.config');
 
             // [BNPL] create customer mandate

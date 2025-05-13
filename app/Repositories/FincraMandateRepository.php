@@ -430,19 +430,6 @@ class FincraMandateRepository
         $ledgerWallet->current_balance = $prevBalance + $offer->offer_amount;
         $ledgerWallet->save();
 
-        //add to ledger transaction history
-        CreditTransactionHistory::create([
-            'amount' => $offer->offer_amount,
-            'type' => 'CREDIT',
-            'status' => 'success',
-            'business_id' => $offer->lender_id,
-            'description' => 'Loan disbursement',
-            'loan_application_id' => $offer->application_id,
-            'transaction_group' => 'loan_disbursement',
-            // 'wallet_id' => $ledgerWallet->id,
-            'meta' => json_encode($loanData),
-        ]);
-
         //add amount to vendor voucherwallet
         $vendorWallet = CreditVendorWallets::where('vendor_id', $loanApplication->business_id)->where('type', 'credit_voucher')->lockForUpdate()->first();
         $vendorWallet->prev_balance = $vendorWallet->current_balance;
@@ -722,6 +709,12 @@ class FincraMandateRepository
         $lenderBusinessInvWallet->current_balance = $lenderBusinessInvWallet->current_balance + $lenderTotalExcludingTenmgPercent;
         $lenderBusinessInvWallet->prev_balance = $lenderBusinessInvWallet->current_balance;
         $lenderBusinessInvWallet->save();
+
+        $amountToDeduct = $paymentSchedule->principal - $paymentSchedule->interest;
+        $ledgerWallet = $lenderBusiness->lendersLedgerWallet;
+        $ledgerWallet->current_balance = $ledgerWallet->current_balance - round($amountToDeduct, 0);
+        $ledgerWallet->prev_balance = $ledgerWallet->current_balance;
+        $ledgerWallet->save();
 
         //add to lender transaction history
         CreditTransactionHistory::create([
