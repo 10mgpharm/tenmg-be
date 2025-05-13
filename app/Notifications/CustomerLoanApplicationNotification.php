@@ -37,7 +37,7 @@ class CustomerLoanApplicationNotification extends Notification implements Should
         return (new MailMessage)
             ->greeting('Hello!')
             ->line('Your Loan application have been initiated.')
-            ->action('Click to Contnue', $this->link)
+            ->action('Click to Continue', $this->link)
             ->line('Thank you for using 10MG!');
     }
 
