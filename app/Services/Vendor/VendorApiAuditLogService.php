@@ -20,7 +20,7 @@ class VendorApiAuditLogService
         $query->when(isset($filters['search']), function ($query) use ($filters) {
             $searchTerm = "%{$filters['search']}%";
             return $query->where(function ($query) use ($searchTerm) {
-                $query->where('identifier', 'like', $searchTerm)->orWhere('event', 'like', $searchTerm);
+                $query->where('route', 'like', $searchTerm)->orWhere('event', 'like', $searchTerm)->orWhere('response', 'like', $searchTerm);
             });
         });
 
@@ -56,7 +56,7 @@ class VendorApiAuditLogService
         $query->when(isset($filters['search']), function ($query) use ($filters) {
             $searchTerm = "%{$filters['search']}%";
             return $query->where(function ($query) use ($searchTerm) {
-                $query->where('identifier', 'like', $searchTerm)->orWhere('event', 'like', $searchTerm);
+                $query->where('route', 'like', $searchTerm)->orWhere('event', 'like', $searchTerm)->orWhere('response', 'like', $searchTerm);
             });
         });
 
