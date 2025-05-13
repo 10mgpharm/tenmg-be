@@ -8,6 +8,7 @@ use App\Models\Business;
 use App\Models\CreditTransactionHistory;
 use App\Models\CreditTxnHistoryEvaluation;
 use App\Models\Customer;
+use App\Models\Loan;
 use App\Models\LoanApplication;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -26,6 +27,7 @@ class VendorDashboardRepository
         $customer = Customer::where('business_id', $business_id)->count();
         $applications = LoanApplication::where('business_id', $business_id)->count();
         $applicationsPending = LoanApplication::where('business_id', $business_id)->where('status', 'INITIATED')->count();
+        $ongoingApplications = Loan::where('business_id', $business_id)->where('status', 'Ongoing')->count();
         $voucherWallet = Business::find($business_id);
         $transactionEvaluation = CreditTxnHistoryEvaluation::where('business_id', $business_id)->count();
         $stats = ApiCallLog::selectRaw('status, COUNT(*) as count')->where('business_id', $business_id)->groupBy('status')->pluck('count', 'status');
@@ -35,11 +37,12 @@ class VendorDashboardRepository
             'totalApplications' => $applications,
             'totalPendingApplications' => $applicationsPending,
             'creditVoucher' => $voucherWallet->vendorsVoucherWallet?->current_balance ?? 0,
+            'ongoingApplications' => $ongoingApplications,
             'payOutWallet' => $voucherWallet->vendorsPayoutWallet?->current_balance ?? 0,
             'transactionEvaluation' => $transactionEvaluation,
-            'apiCalls' => ($stats['success'] ?? 0) + ($stats['failed'] ?? 0),
+            'apiCalls' => ($stats['successful'] ?? 0) + ($stats['failed'] ?? 0),
             'accountLinking' => [
-                'successfulCalls' => $stats['success'] ?? 0,
+                'successfulCalls' => $stats['successful'] ?? 0,
                 'errors' => $stats['failed'] ?? 0,
             ]
 
