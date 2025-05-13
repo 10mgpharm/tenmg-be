@@ -570,7 +570,7 @@ class FincraMandateRepository
             \App\Jobs\TriggerWebhookJob::dispatch(
                 $webhookUrl,
                 [
-                    'event' => 'application.submitted', 
+                    'event' => 'application.submitted',
                     'data' => [
                         'applicationId' => $loanApplication->identifier,
                         'status' => $loanApplication->status,
@@ -810,7 +810,7 @@ class FincraMandateRepository
             \App\Jobs\TriggerWebhookJob::dispatch(
                 $webhookUrl,
                 [
-                    'event' => 'loan.repayment', 
+                    'event' => 'loan.repayment',
                     'data' => [
                         'applicationId' => $loanApplication->identifier,
                         'status' => $loanApplication->status,
@@ -906,7 +906,7 @@ class FincraMandateRepository
         ])->notify(new LoanSubmissionNotification($mailable));
 
         (new InAppNotificationService)
-            ->forUser($user)->notify(InAppNotificationType::NEW_LOAN_REQUEST);
+            ->forUser($user)->notify(InAppNotificationType::LOAN_REQUEST_APPROVED);
 
         //send notification to lender
         $subject = 'Loan Request Approved';
@@ -933,7 +933,7 @@ class FincraMandateRepository
         ])->notify(new LoanSubmissionNotification($mailable));
 
         (new InAppNotificationService)
-            ->forUser($user)->notify(InAppNotificationType::NEW_LOAN_REQUEST);
+            ->forUser($user)->notify(InAppNotificationType::LOAN_REQUEST_APPROVED);
 
 
         //send mails to all admins
@@ -982,7 +982,7 @@ class FincraMandateRepository
             \App\Jobs\TriggerWebhookJob::dispatch(
                 $webhookUrl,
                 [
-                    'event' => 'application.approved', 
+                    'event' => 'application.approved',
                     'data' => [
                         'applicationId' => $loanApplication->identifier,
                         'status' => $loanApplication->status,
