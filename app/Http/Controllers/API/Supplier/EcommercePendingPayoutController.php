@@ -73,6 +73,7 @@ class EcommercePendingPayoutController extends Controller
 
         $pending_payouts = EcommerceOrderDetail::where('supplier_id', $business_id)
             ->whereHas('order', fn($query) => $query->where('status', 'PROCESSING'))
+            ->select('ecommerce_order_id', 'actual_price', 'discount_price', 'tenmg_commission', 'created_at', 'supplier_id', 'ecommerce_product_id',)
             ->when(
                 $request->input('search'),
                 fn($query, $search) => $query->where(

@@ -83,7 +83,7 @@ class EcommerceWalletController extends Controller
         // Calculate the total pending supplier payout (Credit - Debit)
         $total_pending_supplier_payouts = EcommerceOrderDetail::query()
         ->whereHas('order', fn ($query) => $query->where('status', 'PROCESSING'))
-        ->sum(DB::raw('(COALESCE(discount_price, actual_price) * quantity) - COALESCE(tenmg_commission, 0)'));
+        ->sum(DB::raw('(COALESCE(discount_price, actual_price))'));  
     
 
         // Fetch transactions with pagination
