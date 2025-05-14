@@ -69,7 +69,7 @@ class CustomerRepository
             return $query->whereBetween('created_at', [$createdAtStart, $createdAtEnd]);
         });
 
-        $query->when(isset($filters['vendorId']), function ($query) use ($filters) {
+        $query->when(!empty($filters['vendorId']), function ($query) use ($filters) {
             return $query->where('business_id', $filters['vendorId']);
         });
 
