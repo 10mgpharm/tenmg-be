@@ -19,9 +19,11 @@ class EcommerceOrderDetailResource extends JsonResource
             'actualPrice' => $this->actual_price,
             'discountPrice' => $this->discount_price,
             'quantity' => $this->quantity,
+            'tenmgCommission' => $this->tenmg_commission,
             'product' => $this->whenLoaded('product'),
             'createdAt' => $this->created_at->format('M d, y h:i A'),
-            'order' => $this->order
+            'order' => $this->order->only('id', 'identifier', 'qty_total', 'order_total', 'status', 'grand_total', 'payment_status', 'created_at'),
+    
         ];
     }
 }
