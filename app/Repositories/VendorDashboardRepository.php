@@ -45,8 +45,6 @@ class VendorDashboardRepository
                 'successfulCalls' => $stats['successful'] ?? 0,
                 'errors' => $stats['failed'] ?? 0,
             ]
-
-
         ];
 
     }

@@ -17,6 +17,7 @@ class CreditTransactionHistoryResource extends JsonResource
         // return parent::toArray($request);
         return [
             'id' => $this->id,
+            'identifier' => $this->identifier,
             'amount' => $this->amount,
             'type' => $this->type,
             'status' => $this->status,
