@@ -22,7 +22,7 @@ class AdminWalletController extends Controller
 
     public function getTransactions(Request $request)
     {
-        $transactions = $this->adminWalletService->getTransactions();
+        $transactions = $this->adminWalletService->getTransactions($request->all(), $request->perPage ?? 10);
 
         return $this->returnJsonResponse(
             data: CreditTransactionsResource::collection($transactions)->response()->getData(true)
@@ -31,7 +31,7 @@ class AdminWalletController extends Controller
 
     public function getAdminTransactions(Request $request)
     {
-        $transactions = $this->adminWalletService->getAdminTransactions();
+        $transactions = $this->adminWalletService->getAdminTransactions($request->all(), $request->perPage ?? 10);
 
         return $this->returnJsonResponse(
             data: TenmgTransactionResource::collection($transactions)->response()->getData(true)
