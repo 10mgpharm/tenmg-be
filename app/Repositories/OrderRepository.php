@@ -231,7 +231,7 @@ class OrderRepository
             $maximumDiscountAmount = $foundCoupon->maximum_discount_amount;
             $couponForBusiness = $foundCoupon->business_id;
 
-            if
+
 
 
 
@@ -244,14 +244,16 @@ class OrderRepository
     function applyToAllProducts(EcommerceOrder $cart, EcommerceDiscount $couponData)
     {
 
-        $minimumOrderAmount = $foundCoupon->minimum_order_amount;
-        $maximumDiscountAmount = $foundCoupon->maximum_discount_amount;
+
+
+        $minimumOrderAmount = $couponData->minimum_order_amount;
+        $maximumDiscountAmount = $couponData->maximum_discount_amount;
 
         if($minimumOrderAmount == null && $maximumDiscountAmount == null){
 
             $updatedCartItems = [];
 
-            $couponType = $foundCoupon->type;
+            $couponType = $couponData->type;
 
             //loop through the cart items
             foreach ($cart->orderDetails as $cartItem) {
