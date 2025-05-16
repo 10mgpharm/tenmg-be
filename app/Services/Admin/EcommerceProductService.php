@@ -361,16 +361,6 @@ class EcommerceProductService implements IEcommerceProductService
                 ? ($validated['active'] ?? true )
                 : (false);
 
-                $updateProduct = $product->update([
-                    ...array_filter($validated, fn($each) => $each !== null),
-                    'name' => $validated['product_name'] ?? $product->name,
-                    'description' => $validated['product_description'] ?? $product->description,
-                    'updated_by_id' => $user->id,
-                    'slug' => Str::slug($validated['product_name'] ?? $product->name),
-                ]);
-
-                $updateProductDetails = $product->productDetails?->update($validated);
-
                 if($product->status == $validated['status']){
                     // Log the update event.
                     AuditLogService::log(
@@ -390,9 +380,9 @@ class EcommerceProductService implements IEcommerceProductService
                     // Log the update event.
                     AuditLogService::log(
                         target: $product, // The product is the target (it is being updated)
-                        event: $validated['status'] . '.product',
-                        action: "Product " . $validated['status'],
-                        description: "The product '{$product->name}({$product->medicationType->name})' has been " . $validated['status'] . " by {$user->name}({$business->name})",
+                        event: strtolower($validated['status']) . '.product',
+                        action: "Product " . ucwords($validated['status']),
+                        description: "The product '{$product->name}({$product->medicationType->name})' has been " . strtolower($validated['status']) . " by {$user->name}({$business->name})",
                         crud_type: 'UPDATE', // Use 'UPDATE' for update actions
                         properties: [
                             'product_name' => $product->name,
@@ -402,6 +392,17 @@ class EcommerceProductService implements IEcommerceProductService
                         ]
                     );
                 }
+
+                $updateProduct = $product->update([
+                    ...array_filter($validated, fn($each) => $each !== null),
+                    'name' => $validated['product_name'] ?? $product->name,
+                    'description' => $validated['product_description'] ?? $product->description,
+                    'updated_by_id' => $user->id,
+                    'slug' => Str::slug($validated['product_name'] ?? $product->name),
+                ]);
+
+                $updateProductDetails = $product->productDetails?->update($validated);
+
                 return $updateProduct || $updateProductDetails;
             });
         } catch (Exception $e) {

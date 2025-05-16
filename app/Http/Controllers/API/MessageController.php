@@ -133,9 +133,9 @@ class MessageController extends Controller
             );
 
         if ($user->hasRole('admin')) {
-            // Admins: fetch all primary users of businesses, excluding pharmacies
+            // Admins: fetch all primary users of businesses, excluding pharmacies aka customer
             $query->whereHas('ownerBusinessType')
-                ->whereDoesntHave('roles', fn($q) => $q->where('name', 'pharmacy'));
+                ->whereDoesntHave('roles', fn($q) => $q->where('name', 'customer'));
         } else {
             // Non-admins: limit to users within their business or admins
             $query->where(
