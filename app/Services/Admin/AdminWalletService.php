@@ -15,14 +15,14 @@ class AdminWalletService
         return $this->adminWalletRepository->getWalletStats();
     }
 
-    public function getTransactions():\Illuminate\Contracts\Pagination\LengthAwarePaginator
+    public function getTransactions(array $filters, int $perPage = 15):\Illuminate\Contracts\Pagination\LengthAwarePaginator
     {
-        return $this->adminWalletRepository->getTransactions();
+        return $this->adminWalletRepository->getTransactions($filters, $perPage);
     }
 
-    public function getAdminTransactions():\Illuminate\Contracts\Pagination\LengthAwarePaginator
+    public function getAdminTransactions(array $filters, int $perPage = 15):\Illuminate\Contracts\Pagination\LengthAwarePaginator
     {
-        return $this->adminWalletRepository->getAdminTransactions();
+        return $this->adminWalletRepository->getAdminTransactions($filters, $perPage);
     }
 
     public function getPayOutTransactions():\Illuminate\Contracts\Pagination\LengthAwarePaginator

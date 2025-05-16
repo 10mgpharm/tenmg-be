@@ -54,20 +54,61 @@ class AdminWalletRepository
         ];
     }
 
-    public function getTransactions():\Illuminate\Contracts\Pagination\LengthAwarePaginator
+    public function getTransactions(array $filters, int $perPage = 15):\Illuminate\Contracts\Pagination\LengthAwarePaginator
     {
-        $perPage = request()->query('perPage') ?? 15;
-        $query = CreditTransactionHistory::orderBy('created_at', 'desc')->paginate($perPage);
 
-        return $query;
+
+        $query = CreditTransactionHistory::query();
+
+        $query->when(isset($filters['search']), function ($query) use ($filters) {
+            $searchTerm = "%{$filters['search']}%";
+            return $query->where(function ($query) use ($searchTerm) {
+                $query->where('identifier', 'like', $searchTerm);
+            });
+        });
+
+        $query->when(
+            isset($filters['dateFrom']) && isset($filters['dateTo']),
+            function ($query) use ($filters) {
+                // Parse dates with Carbon to ensure proper format
+                $dateFrom = \Carbon\Carbon::parse($filters['dateFrom'])->startOfDay();
+                $dateTo = \Carbon\Carbon::parse($filters['dateTo'])->endOfDay();
+
+                return $query->whereBetween('created_at', [$dateFrom, $dateTo]);
+            }
+        );
+
+        $query->orderBy('created_at', 'desc');
+
+        return $query->paginate($perPage);
     }
 
-    public function getAdminTransactions():\Illuminate\Contracts\Pagination\LengthAwarePaginator
+    public function getAdminTransactions(array $filters, int $perPage = 15):\Illuminate\Contracts\Pagination\LengthAwarePaginator
     {
-        $perPage = request()->query('perPage') ?? 15;
-        $query = TenmgTransactionHistory::orderBy('created_at', 'desc')->paginate($perPage);
 
-        return $query;
+        $query = TenmgTransactionHistory::query();
+
+        $query->when(isset($filters['search']), function ($query) use ($filters) {
+            $searchTerm = "%{$filters['search']}%";
+            return $query->where(function ($query) use ($searchTerm) {
+                $query->where('identifier', 'like', $searchTerm);
+            });
+        });
+
+        $query->when(
+            isset($filters['dateFrom']) && isset($filters['dateTo']),
+            function ($query) use ($filters) {
+                // Parse dates with Carbon to ensure proper format
+                $dateFrom = \Carbon\Carbon::parse($filters['dateFrom'])->startOfDay();
+                $dateTo = \Carbon\Carbon::parse($filters['dateTo'])->endOfDay();
+
+                return $query->whereBetween('created_at', [$dateFrom, $dateTo]);
+            }
+        );
+
+        $query->orderBy('created_at', 'desc');
+
+        return $query->paginate($perPage);
     }
 
     public function getPayOutTransactions():\Illuminate\Contracts\Pagination\LengthAwarePaginator

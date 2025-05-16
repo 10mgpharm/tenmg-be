@@ -247,7 +247,7 @@ class TransactionHistoryRepository
         });
 
         $query->when(
-            isset($criteria['dateFrom']) && isset($criteria['dateTo']),
+            isset($filters['dateFrom']) && isset($filters['dateTo']),
             function ($query) use ($filters) {
                 // Parse dates with Carbon to ensure proper format
                 $dateFrom = \Carbon\Carbon::parse($filters['dateFrom'])->startOfDay();
