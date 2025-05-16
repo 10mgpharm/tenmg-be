@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\API;
 
 use App\Constants\EcommerceWalletConstants;
+use App\Enums\OtpType;
 use App\Helpers\UtilityHelper;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\WithdrawFundRequest;
@@ -13,6 +14,7 @@ use App\Models\EcommerceTransaction;
 use App\Models\EcommerceWallet;
 use App\Models\User;
 use App\Services\AuditLogService;
+use App\Services\OtpService;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Auth;
@@ -26,6 +28,12 @@ class WithdrawFundController extends Controller
     {
         try {
             DB::transaction(function () use ($request) {
+
+                $otp = (new OtpService)->validate(
+                    OtpType::WITHDRAW_FUND_TO_BANK_ACCOUNT,
+                    $request->input('otp')
+                );
+
                 $user = $request->user();
                 $business = $user->ownerBusinessType
                     ?: $user->businesses()->firstWhere('user_id', $user->id);
@@ -140,6 +148,9 @@ class WithdrawFundController extends Controller
                     ]
 
                 );
+
+                // Delete otp.
+                $otp->delete();
             });
 
             return $this->returnJsonResponse(
