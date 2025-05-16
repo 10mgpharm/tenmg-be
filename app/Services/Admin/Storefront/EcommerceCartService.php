@@ -86,7 +86,7 @@ class EcommerceCartService
                     break;
 
                 case 'CANCELED':
-                    if($request->input('status') == 'REFUNDED'){
+                    if($request->input('refundStatus') == 'REFUNDED'){
                         $business = $order->customer->ownerBusinessType
                             ?: $order->customer->businesses()->firstWhere('user_id', $user->id);
                         AuditLogService::log(
@@ -100,9 +100,28 @@ class EcommerceCartService
                                 'order_number' => $order->order_number,
                                 'status' => $request->input('status'),
                                 'reason' => $request->input('reason'),
+                                'refund_status' => $request->input('refundStatus'),
                                 'requires_refund' => $request->input('requiresRefund'),
                             ]
 
+                        );
+                    } else if($request->input('refundStatus') == 'AWAITING REFUND'){
+                        $business = $order->customer->ownerBusinessType
+                            ?: $order->customer->businesses()->firstWhere('user_id', $user->id);
+                        AuditLogService::log(
+                            target: $order, 
+                            event: 'order.un-refunded',
+                            action: "Cancelled order un-refunded",
+                            description: "{$business?->name} has now been canceled, no refund has been made.",
+                            crud_type: 'UPDATED', // Use 'UPDATE' for updating actions
+                            properties: [
+                                'order_id' => $order->id,
+                                'order_number' => $order->order_number,
+                                'status' => $request->input('status'),
+                                'reason' => $request->input('reason'),
+                                'refund_status' => $request->input('refundStatus'),
+                                'requires_refund' => $request->input('requiresRefund'),
+                            ]
                         );
                     }
                     break;
