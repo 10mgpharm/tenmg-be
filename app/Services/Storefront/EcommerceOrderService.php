@@ -45,6 +45,11 @@ class EcommerceOrderService
         return $this->orderRepository->getOrders($request);
     }
 
+    function couponVerify(Request $request)
+    {
+        return $this->orderRepository->couponVerify($request);
+    }
+
     function getOrderDetails($id)
     {
         return $this->orderRepository->getOrderDetails($id);

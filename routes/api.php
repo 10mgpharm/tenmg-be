@@ -630,6 +630,7 @@ Route::prefix('v1')->group(function () {
             Route::prefix('orders')->name('orders.')->group(function () {
                 Route::get('/', [OrdersController::class, 'getOrders']);
                 Route::get('/{id}', [OrdersController::class, 'getOrderDetails']);
+                Route::get('/coupon/verify', [OrdersController::class, 'couponVerify']);
             });
             Route::prefix('wishlist')->name('wishlist.')->group(function () {
                 Route::get('/', [WishListController::class, 'getWhishList']);

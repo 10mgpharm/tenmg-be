@@ -36,6 +36,13 @@ class OrdersController extends Controller
         return $this->returnJsonResponse(message: 'Success', data: EcommerceCartResource::collection($order));
     }
 
+    function couponVerify(Request $request)
+    {
+        $couponData = $this->ecommerceOrderService->couponVerify($request);
+        return $this->returnJsonResponse(message: 'Success', data: $couponData);
+
+    }
+
     function getOrderDetails($id)
     {
         $order = $this->ecommerceOrderService->getOrderDetails($id);

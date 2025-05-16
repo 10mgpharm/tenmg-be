@@ -94,9 +94,8 @@ class CustomerService implements ICustomerService
 
     public function listCustomers(array $filters, int $perPage): \Illuminate\Contracts\Pagination\LengthAwarePaginator
     {
-        $user = request()->user();
-        $business_id = $user->ownerBusinessType?->id
-            ?: $user->businesses()->firstWhere('user_id', $user->id)?->id;
+
+        $business_id = auth()->user()->businesses()->first()->id;
 
         $filters['vendorId'] = $business_id;
 

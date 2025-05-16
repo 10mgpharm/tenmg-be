@@ -56,7 +56,10 @@ class VendorWalletRepository
 
 
         $perPage = request()->query('perPage') ?? 15;
-        $business_id = request()->query('businessId');;
+        $business_id = request()->query('businessId');
+        $dateFrom = request()->query('dateFrom');
+        $dateTo = request()->query('dateTo');
+        $status = request()->query('status');
 
         if($business_id == null) {
             $user = request()->user();
@@ -65,6 +68,21 @@ class VendorWalletRepository
         }
 
         $query = CreditTransactionHistory::query();
+
+        $query->when(
+            isset($dateFrom) && isset($dateTo),
+            function ($query) use ($dateFrom, $dateTo) {
+                // Parse dates with Carbon to ensure proper format
+                $dateFrom = \Carbon\Carbon::parse($dateFrom)->startOfDay();
+                $dateTo = \Carbon\Carbon::parse($dateTo)->endOfDay();
+
+                return $query->whereBetween('created_at', [$dateFrom, $dateTo]);
+            }
+        );
+
+        $query->when(isset($status), function ($query) use ($status) {
+            return $query->where('status', $status['status']);
+        });
 
         $query->where('business_id', $business_id)->orderBy('created_at', 'desc');
 

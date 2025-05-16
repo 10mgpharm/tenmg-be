@@ -2,7 +2,9 @@
 
 namespace App\Repositories;
 
+use App\Models\EcommerceDiscount;
 use App\Models\EcommerceOrder;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -183,6 +185,93 @@ class OrderRepository
         } catch (\Throwable $th) {
             throw $th;
         }
+    }
+
+    function couponVerify(Request $request)
+    {
+        try {
+
+            $user = Auth::user();
+            $businessId = $user->ownerBusinessType?->id ?: $user->businesses()->firstWhere('user_id', $user->id)?->id;
+
+            $cart = EcommerceOrder::where('status', "CART")->where('business_id', $businessId)->first();
+
+            if (!$cart) {
+                throw "No open cart";
+            }
+
+            $coupon = $request->coupon;
+
+            //get coupon details
+            $foundCoupon = EcommerceDiscount::where('coupon_code', $coupon)->first();
+
+            //check if coupon exist
+            if (!$foundCoupon) {
+                throw "Coupon not found";
+            }
+
+            //check if coupon has expired
+            if ($foundCoupon->status == "EXPIRED") {
+                throw "Coupon has expired";
+            }
+
+            $startDate = Carbon::parse($foundCoupon->start_date);
+            //check if coupon has started
+            if ($startDate->isPast() || $startDate->isToday()) {
+                throw "Coupon has not started";
+            }
+
+
+
+            $couponValue = $foundCoupon->amount;
+            $shouldBeApplyToAllProducts = $foundCoupon->all_products;
+            $applicableProduct = $foundCoupon->applicable_products;
+            $status = $foundCoupon->status;
+            $minimumOrderAmount = $foundCoupon->minimum_order_amount;
+            $maximumDiscountAmount = $foundCoupon->maximum_discount_amount;
+            $couponForBusiness = $foundCoupon->business_id;
+
+
+
+
+
+        } catch (\Throwable $th) {
+            throw $th;
+
+        }
+    }
+
+    function applyToAllProducts(EcommerceOrder $cart, EcommerceDiscount $couponData)
+    {
+
+
+
+        $minimumOrderAmount = $couponData->minimum_order_amount;
+        $maximumDiscountAmount = $couponData->maximum_discount_amount;
+
+        if($minimumOrderAmount == null && $maximumDiscountAmount == null){
+
+            $updatedCartItems = [];
+
+            $couponType = $couponData->type;
+
+            //loop through the cart items
+            foreach ($cart->orderDetails as $cartItem) {
+                $amountToDeduct = 0;
+                if($couponType == "FIXED"){
+                    $amountToDeduct = $couponData->amount;
+                }else{
+                    $amountToDeduct = ($cartItem->discount_amount * $couponData->amount) / 100;
+                }
+                $newDiscount = $couponData->discount_amount - $amountToDeduct;
+                $cartItem->discount_amount = $newDiscount;
+                $cartItem->tenmg_commission = ($cartItem->tenmg_commission * $newDiscount)/100;
+
+                $updatedCartItems[] = $cartItem;
+            }
+
+        }
+
     }
 
 }
