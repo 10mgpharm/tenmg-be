@@ -2,6 +2,9 @@
 
 namespace App\Services\Admin\Storefront;
 
+use App\Enums\InAppNotificationType;
+use App\Enums\MailType;
+use App\Mail\Mailer;
 use App\Models\EcommerceCart;
 use App\Models\EcommerceOrder;
 use App\Models\EcommerceOrderDetail;
@@ -9,12 +12,16 @@ use App\Models\EcommerceProduct;
 use App\Models\EcommerceWallet;
 use App\Repositories\OrderRepository;
 use App\Services\AuditLogService;
+use App\Services\InAppNotificationService;
 use App\Services\SupplierOrderWalletService;
 use App\Settings\CreditSettings;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Database\Eloquent\Collection as EloquentCollection;
+use Illuminate\Support\Facades\Mail;
+use Throwable;
 
 class EcommerceCartService
 {
@@ -63,10 +70,10 @@ class EcommerceCartService
                     'status' => 'error',
                 ], Response::HTTP_UNPROCESSABLE_ENTITY);
             }
-    
+
             switch ($order->status) {
                 case 'PENDING':
-                    if($request->input('status') == 'CANCELED'){
+                    if ($request->input('status') == 'CANCELED') {
                         AuditLogService::log(
                             target: $order,
                             event: 'order.canceled',
@@ -86,11 +93,11 @@ class EcommerceCartService
                     break;
 
                 case 'CANCELED':
-                    if($request->input('refundStatus') == 'REFUNDED'){
+                    if ($request->input('refundStatus') == 'REFUNDED') {
                         $business = $order->customer->ownerBusinessType
                             ?: $order->customer->businesses()->firstWhere('user_id', $user->id);
                         AuditLogService::log(
-                            target: $order, 
+                            target: $order,
                             event: 'order.refunded',
                             action: "Cancelled order refunded",
                             description: "{$business?->name} has now been refunded for the canceled order.",
@@ -105,11 +112,11 @@ class EcommerceCartService
                             ]
 
                         );
-                    } else if($request->input('refundStatus') == 'AWAITING REFUND'){
+                    } else if ($request->input('refundStatus') == 'AWAITING REFUND') {
                         $business = $order->customer->ownerBusinessType
                             ?: $order->customer->businesses()->firstWhere('user_id', $user->id);
                         AuditLogService::log(
-                            target: $order, 
+                            target: $order,
                             event: 'order.un-refunded',
                             action: "Cancelled order un-refunded",
                             description: "{$business?->name} has now been canceled, no refund has been made.",
@@ -125,18 +132,48 @@ class EcommerceCartService
                         );
                     }
                     break;
-                
+
                 default:
                     # code...
                     break;
             }
+
+            // Get all unique users linked to suppliers involved in the order
+            $supplierUsers = new EloquentCollection(
+                $order->orderDetails->pluck('supplier.owner')->flatten()->unique('id')->values()
+            );
+            $customer = $order->customer;
+
+            switch ($request->input('status')) {
+                case 'PROCESSING':
+
+                    // Notify the pharmacy about the processing order
+                    (new InAppNotificationService)
+                        ->forUser($customer)->notify(InAppNotificationType::PROCESSING_ORDER_PHARMACY);
+
+                    // Notify supplier users involved in the order
+                    (new InAppNotificationService)
+                        ->forUsers($supplierUsers)
+                        ->notify(InAppNotificationType::PROCESSING_PRODUCT_ORDER_SUPPLIER);
+
+                    // You can add queued email jobs here, e.g.,
+                    Mail::to($customer->email)->queue(new Mailer(MailType::NEW_ORDER_PAYMENT_STOREFRONT, []));
+
+                    break;
+
+                default:
+                    // No action required for other statuses at the moment
+                    break;
+            }
+
+            return $order;
             $order->status = $request->input('status');
             $order->refund_status = $request->input('refundStatus');
             $order->requires_refund = $request->input('requiresRefund');
             $order->save();
 
 
-            
+
             switch ($order->status) {
                 case 'COMPLETED':
                     // If the order is completed, credit the supplier(s)
@@ -149,19 +186,15 @@ class EcommerceCartService
                     break;
             }
 
-            
-            return $order;
 
+            return $order;
         } catch (\Throwable $th) {
             throw $th;
         }
-
     }
 
     function getOrderDetails($id)
     {
         return $this->orderRepository->getOrderDetails($id);
     }
-
-
 }
