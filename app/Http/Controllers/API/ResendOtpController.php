@@ -31,9 +31,6 @@ class ResendOtpController extends Controller
             return $this->handleErrorResponse($th);
         }
 
-        $otpType = OtpType::from($request->input('type'));
-        (new OtpService)->regenerate($otpType)->sendMail($otpType);
-
         return $this->returnJsonResponse(
             message: 'A one-time password has been resent to your registered email.',
         );
