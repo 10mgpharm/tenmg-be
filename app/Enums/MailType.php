@@ -64,8 +64,8 @@ enum MailType: string
             self::WITHDRAW_FUND_TO_BANK_ACCOUNT => 'mail.view.withdraw_fund_to_bank_account',
             self::NEW_ORDER_PAYMENT_STOREFRONT => 'mail.view.new_order_payment_storefront',
             self::NEW_ORDER_PAYMENT_SUPPLIER => 'mail.view.new_order_payment_supplier',
-            self::NEW_ORDER_PAYMENT_ADMIN => 'mail.view.new_order_payment_supplier',
             self::PROCESSING_ORDER_PHARMACY => 'mail.view.processing_product_order_supplier',
+            self::NEW_ORDER_PAYMENT_ADMIN => 'mail.view.new_order_payment_admin',
             self::PROCESSING_PRODUCT_ORDER_SUPPLIER => 'mail.view.processing_product_order_supplier',
         };
     }
@@ -82,6 +82,7 @@ enum MailType: string
             self::NEW_ORDER_PAYMENT_STOREFRONT => 'mail.text.new_order_payment_storefront',
             self::WITHDRAW_FUND_TO_BANK_ACCOUNT => 'mail.text.withdraw_fund_to_bank_account',
             self::NEW_ORDER_PAYMENT_SUPPLIER => 'mail.text.new_order_payment_supplier',
+            self::NEW_ORDER_PAYMENT_ADMIN => 'mail.text.new_order_payment_admin',
             self::PROCESSING_ORDER_PHARMACY => 'mail.text.processing_product_order_supplier',
             self::PROCESSING_PRODUCT_ORDER_SUPPLIER => 'mail.text.processing_product_order_supplier',
         };

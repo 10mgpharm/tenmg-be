@@ -11,7 +11,7 @@ use App\Notifications\LicenseRejectNotification;
 use App\Notifications\LicenseAcceptanceNotification;
 use App\Notifications\Loan\LoanApprovedNotification;
 use App\Notifications\Loan\NewLoanRequestNotification;
-use App\Notifications\Order\NewOrderPaymentStorefrontNotification;
+use App\Notifications\Order\NewOrderPaymentNotification;
 use App\Notifications\Order\ProcessingOrderPharmacyNotification;
 use App\Notifications\Order\ProcessingOrderSupplierNotification;
 use Illuminate\Database\Eloquent\Collection;
@@ -76,7 +76,9 @@ class InAppNotificationService
             InAppNotificationType::LICENSE_ACCEPTANCE => new LicenseAcceptanceNotification($subject, $message),
             InAppNotificationType::NEW_LOAN_REQUEST => new NewLoanRequestNotification($subject, $message),
             InAppNotificationType::LOAN_REQUEST_APPROVED => new LoanApprovedNotification($subject, $message),
-            InAppNotificationType::NEW_ORDER_PAYMENT_STOREFRONT => new NewOrderPaymentStorefrontNotification($subject, $message),
+            InAppNotificationType::NEW_ORDER_PAYMENT_STOREFRONT => new NewOrderPaymentNotification($subject, $message),
+            InAppNotificationType::NEW_ORDER_PAYMENT_SUPPLIER => new NewOrderPaymentNotification($subject, $message),
+            InAppNotificationType::NEW_ORDER_PAYMENT_ADMIN => new NewOrderPaymentNotification($subject, $message),
             InAppNotificationType::PROCESSING_ORDER_PHARMACY => new ProcessingOrderPharmacyNotification($subject, $message),
             InAppNotificationType::PROCESSING_PRODUCT_ORDER_SUPPLIER => new ProcessingOrderSupplierNotification($subject, $message),
             default => throw new \InvalidArgumentException("Unsupported notification type: {$type->value}"),

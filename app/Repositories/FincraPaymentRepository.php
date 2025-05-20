@@ -6,6 +6,7 @@ use App\Enums\InAppNotificationType;
 use App\Enums\MailType;
 use App\Helpers\UtilityHelper;
 use App\Http\Resources\BusinessResource;
+use App\Jobs\SendInAppNotification;
 use App\Mail\Mailer;
 use App\Models\Business;
 use App\Models\CreditOffer;
@@ -28,6 +29,7 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
 use Throwable;
+use Illuminate\Database\Eloquent\Collection as EloquentCollection;
 
 class FincraPaymentRepository
 {
@@ -76,48 +78,42 @@ class FincraPaymentRepository
         $business = $user->ownerBusinessType ?? $user->businesses()->first();
         $productNames = $order->orderDetails->pluck('product.name')->implode(', ');
 
+        // Get all unique users linked to suppliers involved in the order
+        $supplierUsers = new EloquentCollection(
+            $order->orderDetails->pluck('supplier.owner')->flatten()->unique('id')->values()
+        );
+
         // Prepare admin recipients
         $admins = User::role('admin')->get();
 
         // Create a batch of jobs for notifications and emails
-        Bus::batch([
-            // In-app notifications
-            fn () => (new InAppNotificationService)
-                ->notify(InAppNotificationType::NEW_ORDER_PAYMENT_STOREFRONT),
 
-            // fn () => (new InAppNotificationService)
-            //     ->forUser($user)
-            //     ->notify(InAppNotificationType::NEW_ORDER_PAYMENT_SUPPLIER),
+        SendInAppNotification::dispatch(InAppNotificationType::NEW_ORDER_PAYMENT_STOREFRONT);
+        SendInAppNotification::dispatch(InAppNotificationType::NEW_ORDER_PAYMENT_SUPPLIER, $supplierUsers);
+        SendInAppNotification::dispatch(InAppNotificationType::NEW_ORDER_PAYMENT_ADMIN, $admins);
 
-            fn () => (new InAppNotificationService)
-                ->forUsers($admins)
-                ->notify(InAppNotificationType::NEW_ORDER_PAYMENT_ADMIN),
-
-            // Queued emails
-            fn () => Mail::to($user->email)->queue(new Mailer(MailType::NEW_ORDER_PAYMENT_STOREFRONT, [
-                'name' => $user->name,
+        /* Queued emails */
+        Mail::to($user->email)->queue(new Mailer(MailType::NEW_ORDER_PAYMENT_STOREFRONT, [
+            'name' => $user->name,
+            'order' => $order,
+        ]));
+        // Suppliers email
+        foreach ($supplierUsers as $supplier) {
+            Mail::to($supplier->email)->queue(new Mailer(MailType::NEW_ORDER_PAYMENT_SUPPLIER, [
+                'name' => $supplier->name,
+                'productNames' => $productNames,
                 'order' => $order,
-            ])),
-
-            // fn () => Mail::to($user->email)->queue(new Mailer(MailType::NEW_ORDER_PAYMENT_SUPPLIER, [
-            //     'name' => $user->name,
-            //     'productNames' => $productNames,
-            //     'order' => $order,
-            //     'netAmount' => null,
-            // ])),
-
-            fn () => Mail::to($user->email)->queue(new Mailer(MailType::NEW_ORDER_PAYMENT_ADMIN, [
+                'netAmount' => null,
+            ]));
+        }
+        // Admin email
+        foreach ($admins as $admin) {
+            Mail::to($admin->email)->queue(new Mailer(MailType::NEW_ORDER_PAYMENT_ADMIN, [
                 'order' => $order,
                 'productNames' => $productNames,
                 'pharmacyName' => $business?->name,
-            ])),
-        ])
-        ->name('New Order Payment Notifications & Mails')
-        ->allowFailures()
-        ->catch(function (Batch $batch, Throwable $e) {
-            logs()->error('Batch failed: ' . $e->getMessage());
-        })
-        ->dispatch();
+            ]));
+        }
 
         return $orderPayment;
     }
