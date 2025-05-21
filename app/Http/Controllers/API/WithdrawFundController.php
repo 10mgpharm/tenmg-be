@@ -81,7 +81,7 @@ class WithdrawFundController extends Controller
                 ]);
 
 
-                if (!$response->successful() && config('app.env') !== 'local') {
+                if (!$response->successful() && config('app.env') == 'production') {
                     throw new \Exception('Fincra payout failed: ' . $response->body());
                 }
 
