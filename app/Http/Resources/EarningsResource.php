@@ -27,7 +27,7 @@ class EarningsResource extends JsonResource
             'offerId' => $this->offer_id,
             'capitalAmount' => $this->capital_amount,
             'interestAmount' => $this->repaymentSchedule->sum('actual_interest'),
-            'adminAmount' => $this->repaymentSchedule->sum('tenmg_interest'),
+            'adminAmount' => round($this->repaymentSchedule->sum('tenmg_interest'), 2),
             'totalAmount' => $this->total_amount,
             'status' => $this->status,
             'created_at' => $this->created_at,

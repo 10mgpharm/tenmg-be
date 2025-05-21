@@ -29,7 +29,11 @@ class EcommerceOrderDetail extends Model
         'discount_price',
         'tenmg_commission',
         'quantity',
-        'tenmg_commission_percent'
+        'tenmg_commission_percent',
+        'discount_code',
+        'discount_type',
+        'discount_value',
+        'discount_expiration_date'
     ];
 
     /**

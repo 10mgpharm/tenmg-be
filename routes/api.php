@@ -448,7 +448,6 @@ Route::prefix('v1')->group(function () {
             Route::post('withdraw-funds', WithdrawFundController::class);
 
 
-
             Route::prefix('api-logs')->group(function () {
                 Route::get('/', [VendorApiAuditLogController::class, 'getApiLogs']);
                 Route::get('/webhook', [VendorApiAuditLogController::class, 'getWebHookLogs']);
@@ -630,7 +629,7 @@ Route::prefix('v1')->group(function () {
             Route::prefix('orders')->name('orders.')->group(function () {
                 Route::get('/', [OrdersController::class, 'getOrders']);
                 Route::get('/{id}', [OrdersController::class, 'getOrderDetails']);
-                Route::get('/coupon/verify', [OrdersController::class, 'couponVerify']);
+                Route::post('/coupon/verify', [OrdersController::class, 'couponVerify']);
             });
             Route::prefix('wishlist')->name('wishlist.')->group(function () {
                 Route::get('/', [WishListController::class, 'getWhishList']);
