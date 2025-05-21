@@ -174,8 +174,6 @@ class EcommerceCartService
             $order->requires_refund = $request->input('requiresRefund');
             $order->save();
 
-
-
             switch ($order->status) {
                 case 'COMPLETED':
                     // If the order is completed, credit the supplier(s)
@@ -187,7 +185,6 @@ class EcommerceCartService
                     (new SupplierOrderWalletService)->debit($order);
                     break;
             }
-
 
             return $order;
         } catch (\Throwable $th) {
