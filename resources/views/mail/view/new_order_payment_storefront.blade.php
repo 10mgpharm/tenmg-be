@@ -1,5 +1,5 @@
 @component('mail::message')
-# Hello {{ $name }},
+# Hello {{ $user->name }},
 
 Your order has been successfully placed! We are processing your order and will notify you accordingly.
 

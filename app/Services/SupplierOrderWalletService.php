@@ -84,7 +84,7 @@ class SupplierOrderWalletService implements ISupplierOrderWalletService
                 }
 
                 foreach ($payouts as $row) {
-                    $last_transaction = $this->last($row->supplier_id, $order->id);
+                    $last_transaction = $this->last($row->supplier_id, $order->id, $row->id);
 
                     // Prevent double-crediting for supplier this also prevents double-crediting for tenmg
                     if ($last_transaction && $last_transaction->txn_type === EcommerceWalletConstants::TXN_TYPE_CREDIT) {
@@ -170,7 +170,7 @@ class SupplierOrderWalletService implements ISupplierOrderWalletService
             }
 
             foreach ($payouts as $row) {
-                $last_transaction = $this->last($row->supplier_id, $order->id);
+                $last_transaction = $this->last($row->supplier_id, $order->id, $row->id);
 
                 // Prevent double-debiting
                 if ($last_transaction && $last_transaction->txn_type === EcommerceWalletConstants::TXN_TYPE_DEBIT) {
@@ -235,14 +235,16 @@ class SupplierOrderWalletService implements ISupplierOrderWalletService
      *
      * @param int $supplier_id Supplier's business ID.
      * @param int $order_id Order ID.
+     * @param int $order_detail_id Order Detail ID.
      * @param string $type Transaction type: 'CREDIT' or 'DEBIT'.
      * @return bool True if a transaction already exists.
      */
-    protected function transactionExists(int $supplier_id, int $order_id, string $type): bool
+    protected function transactionExists(int $supplier_id, int $order_id, int $order_detail_id, string $type): bool
     {
         return EcommerceTransaction::where([
             'supplier_id' => $supplier_id,
             'ecommerce_order_id' => $order_id,
+            'ecommerce_order_detail_id' => $order_detail_id,
             'txn_type' => strtoupper($type) === 'DEBIT' ? EcommerceWalletConstants::TXN_TYPE_DEBIT : EcommerceWalletConstants::TXN_TYPE_CREDIT,
             'txn_group' => strtoupper($type) === 'DEBIT' ? EcommerceWalletConstants::SUPPLIER_TXN_GROUP_ORDER_CANCELLATION : EcommerceWalletConstants::SUPPLIER_TXN_GROUP_ORDER_PAYMENT,
         ])->exists();
@@ -260,6 +262,7 @@ class SupplierOrderWalletService implements ISupplierOrderWalletService
             'id',
             'supplier_id',
             'tenmg_commission',
+            'ecommerce_order_id',
             DB::raw('(COALESCE(discount_price, actual_price)) as payout')
         )
             ->whereHas('order', fn($query) => $query->where('id', $order->id))
@@ -310,12 +313,14 @@ class SupplierOrderWalletService implements ISupplierOrderWalletService
      *
      * @param int $supplier_id Supplier's business ID.
      * @param int $order_id Ecommerce order ID.
+     * @param int $order_detail_id Ecommerce order ID.
      * @return EcommerceTransaction|null The latest transaction or null.
      */
-    protected function last(int $supplier_id, int $order_id): ?EcommerceTransaction
+    protected function last(int $supplier_id, int $order_id, int $order_detail_id): ?EcommerceTransaction
     {
         return EcommerceTransaction::where('supplier_id', $supplier_id)
             ->where('ecommerce_order_id', $order_id)
+            ->where('ecommerce_order_detail_id', $order_detail_id)
             ->orderByDesc('id')
             ->first();
     }
