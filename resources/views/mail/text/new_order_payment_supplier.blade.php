@@ -1,4 +1,4 @@
-# Hello {{ $name }},
+# Hello {{ ($user->name ? explode(' ', trim($user->name))[0] : '') }},
 
 You have an order containing your product(s). Below are the details of the product(s) in the order and the amount you will receive:
 

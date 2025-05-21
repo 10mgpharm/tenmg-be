@@ -1,6 +1,6 @@
 # Fund Withdrawal Verification Code
 
-Dear {{ $user->name }},  
+Dear {{  ($user->name ? explode(' ', trim($user->name))[0] : '') }},  
 
 We received a request to withdraw funds to your linked bank account. To proceed with the withdrawal, please use the OTP code below to verify your identity:
 

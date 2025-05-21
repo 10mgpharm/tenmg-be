@@ -39,7 +39,7 @@ class WelcomeUserNotification extends Notification implements ShouldQueue
 
         return (new MailMessage)
             ->subject(Lang::get('Your Email Has Been Verified on '.config('app.name')))
-            ->greeting(Lang::get('Hello ' . $notifiable->name . ','))
+            ->greeting(Lang::get('Hello ' . ($notifiable->name ? explode(' ', trim($notifiable->name))[0] : '') . ','))
             ->line(Lang::get('Your email has been successfully verified on '.config('app.name') . '! 🎉'))
             ->line(Lang::get('You\'re one step closer to accessing all the features of ' . config('app.name') . '.'))
             ->action('Proceed to Dashboard', $url)
