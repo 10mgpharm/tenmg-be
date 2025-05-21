@@ -5,6 +5,7 @@ namespace App\Repositories;
 use App\Models\EcommerceDiscount;
 use App\Models\EcommerceOrder;
 use Carbon\Carbon;
+use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -191,13 +192,14 @@ class OrderRepository
     {
         try {
 
-            $user = Auth::user();
-            $businessId = $user->ownerBusinessType?->id ?: $user->businesses()->firstWhere('user_id', $user->id)?->id;
-
-            $cart = EcommerceOrder::where('status', "CART")->where('business_id', $businessId)->first();
+            $cart = EcommerceOrder::where('status', "CART")->where('customer_id', Auth::id())->first();
 
             if (!$cart) {
-                throw "No open cart";
+                throw new Exception("You don't have item(s) in cart");
+            }
+
+            if(!$cart->discount_code){
+                throw new Exception("Coupon already applied to this order");
             }
 
             $coupon = $request->coupon;
@@ -207,33 +209,23 @@ class OrderRepository
 
             //check if coupon exist
             if (!$foundCoupon) {
-                throw "Coupon not found";
+                throw new Exception("Coupon not found");
             }
 
             //check if coupon has expired
             if ($foundCoupon->status == "EXPIRED") {
-                throw "Coupon has expired";
+                throw new Exception("Coupon has expired");
             }
 
-            $startDate = Carbon::parse($foundCoupon->start_date);
+            // $startDate = Carbon::parse($foundCoupon->start_date);
             //check if coupon has started
-            if ($startDate->isPast() || $startDate->isToday()) {
-                throw "Coupon has not started";
+            if ($foundCoupon->status == "INACTIVE") {
+                throw new Exception("Coupon has not started");
             }
 
+            $updatedOrder = $this->applyDiscountToOrder($cart, $foundCoupon);
 
-
-            $couponValue = $foundCoupon->amount;
-            $shouldBeApplyToAllProducts = $foundCoupon->all_products;
-            $applicableProduct = $foundCoupon->applicable_products;
-            $status = $foundCoupon->status;
-            $minimumOrderAmount = $foundCoupon->minimum_order_amount;
-            $maximumDiscountAmount = $foundCoupon->maximum_discount_amount;
-            $couponForBusiness = $foundCoupon->business_id;
-
-
-
-
+            return $updatedOrder;
 
         } catch (\Throwable $th) {
             throw $th;
@@ -241,36 +233,65 @@ class OrderRepository
         }
     }
 
-    function applyToAllProducts(EcommerceOrder $cart, EcommerceDiscount $couponData)
+    function applyDiscountToOrder(EcommerceOrder $cart, EcommerceDiscount $couponData)
     {
-
 
 
         $minimumOrderAmount = $couponData->minimum_order_amount;
         $maximumDiscountAmount = $couponData->maximum_discount_amount;
+        $couponType = $couponData->type;
+        $applicableProduct = $couponData->applicable_products;
 
-        if($minimumOrderAmount == null && $maximumDiscountAmount == null){
-
-            $updatedCartItems = [];
-
-            $couponType = $couponData->type;
-
-            //loop through the cart items
-            foreach ($cart->orderDetails as $cartItem) {
-                $amountToDeduct = 0;
-                if($couponType == "FIXED"){
-                    $amountToDeduct = $couponData->amount;
-                }else{
-                    $amountToDeduct = ($cartItem->discount_amount * $couponData->amount) / 100;
-                }
-                $newDiscount = $couponData->discount_amount - $amountToDeduct;
-                $cartItem->discount_amount = $newDiscount;
-                $cartItem->tenmg_commission = ($cartItem->tenmg_commission * $newDiscount)/100;
-
-                $updatedCartItems[] = $cartItem;
-            }
-
+        if ($minimumOrderAmount != null && $cart->discount_price < $minimumOrderAmount) {
+            throw new Exception("Order amount is less than minimum order amount for discount");
         }
+
+
+                foreach ($cart->orderDetails as $item) {
+
+                    //check if this order belongs to the business that created the discount
+                    if ($couponData->business_id != $item->supplier_id) {
+                        continue;
+                    }
+
+                    // Skip if product is not eligible for discount
+                    if ($applicableProduct !== null &&
+                        !in_array($item->ecommerce_product_id, $applicableProduct)) {
+                        continue;
+                    }
+
+                    // Calculate discount amount
+                    $discountAmount = ($couponType === "PERCENT")
+                        ? ($couponData->amount * $item->discount_price) / 100
+                        : $couponData->amount;
+
+                    // Apply maximum discount cap if specified
+                    $amountToDeduct = isset($maximumDiscountAmount)
+                        ? min($discountAmount, $maximumDiscountAmount)
+                        : $discountAmount;
+
+                    // Calculate new values
+                    $newPrice = $item->discount_price - $amountToDeduct;
+                    $tenmgCommission = ($item->tenmg_commission_percent * $newPrice) / 100;
+
+                    // Update item
+                    $item->update([
+                        'discount_price' => $newPrice,
+                        'tenmg_commission' => $tenmgCommission,
+                        'discount_code' => $couponData->coupon_code,
+                        'discount_type' => $couponData->type,
+                        'discount_value' => $discountAmount, // discount amount ignoring max cap. To be used to reverse applied coupon when it expires before checkout.
+                        'discount_expiration_date' => $couponData->end_date
+                    ]);
+                }
+
+
+                $cart->order_total = $cart->orderDetails()->sum('discount_price');
+                $cart->grand_total = $cart->orderDetails()->sum('discount_price');
+                $cart->qty_total = $cart->orderDetails()->sum('quantity');
+                $cart->save();
+
+                return $cart;
 
     }
 
