@@ -54,6 +54,7 @@ return [
 
     'url' => env('APP_URL', 'http://localhost'),
     'frontend_url' => env('FRONTEND_APP_URL', 'http://localhost:3000'),
+    'interest_rate' => (float) env('DEFAULT_INTEREST_RATE', 8),
 
     /*
     |--------------------------------------------------------------------------
@@ -66,7 +67,7 @@ return [
     |
     */
 
-    'timezone' => env('APP_TIMEZONE', 'UTC'),
+    'timezone' => env('APP_TIMEZONE', 'Africa/Lagos'),
 
     /*
     |--------------------------------------------------------------------------

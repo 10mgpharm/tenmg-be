@@ -3,6 +3,7 @@
 namespace App\Http\Requests\Auth;
 
 use App\Enums\BusinessType;
+use App\Rules\BusinessEmail;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rules;
 
@@ -43,8 +44,13 @@ class SignupUserRequest extends FormRequest
                 'string',
                 'in:'.implode(',', $allowedBusinessTypes),
             ],
-            'name' => ['required', 'string', 'max:255'],
-            'email' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:users,email'],
+            'fullname' => ['required', 'string', 'max:255'],
+            'name' => ['required', 'string', 'max:255', 'unique:businesses,name'],
+            'email' => [
+                'required', 'string', 'lowercase', 'email',
+                'max:255', 'unique:users,email',
+                new BusinessEmail,
+            ],
             'password' => ['required', Rules\Password::default()],
             'passwordConfirmation' => ['required', 'same:password'],
             'termsAndConditions' => 'required|accepted',
@@ -55,7 +61,7 @@ class SignupUserRequest extends FormRequest
     {
         return [
             'termsAndConditions.required' => 'You must agree to the terms and conditions.',
-            'businessType.in' => 'The business type must be either supplier, pharmacy or vendor',
+            'businessType.in' => 'The business type must be either supplier, pharmacy, vendor or lender',
         ];
     }
 }

@@ -17,6 +17,14 @@ class DatabaseSeeder extends Seeder
             AdminUserRolePermissionSeeder::class,
             BusinessRulesSeeder::class,
             BusinessUserSeeder::class,
+            PassportClientSeeder::class,
+            AffordabilitySeeder::class,
+            DocumentTypeSeeder::class,
+            NotificationSeeder::class,
+            VendorApiKeySeeder::class,
+            VendorCreditWalletSeeder::class,
+            CreateBnplDemoFlowSeeder::class,
+            LenderNotificationSeeder::class,
         ]);
     }
 }

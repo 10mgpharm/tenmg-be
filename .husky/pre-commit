@@ -1,1 +1,5 @@
+# Run linting
 lint-staged
+
+# Run tests
+# php artisan test

@@ -2,13 +2,15 @@
 
 namespace Database\Seeders;
 
+use App\Models\ApiKey;
 use App\Models\Business;
 use App\Models\BusinessUser;
-use App\Models\CreditCustomer;
+use App\Models\Customer;
 use App\Models\Role;
 use App\Models\User;
 use Faker\Factory as Faker;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Str;
 
 class BusinessUserSeeder extends Seeder
 {
@@ -26,6 +28,7 @@ class BusinessUserSeeder extends Seeder
         $supplierRole = Role::where('name', 'supplier')->first();
         $vendorRole = Role::where('name', 'vendor')->first();
         $customerRole = Role::where('name', 'customer')->first(); // Pharmacy / Hospital
+        $lenderRole = Role::where('name', 'lender')->first();
 
         // 1. Setup Admin Business and Users
         $adminUser = User::firstOrCreate(
@@ -75,6 +78,8 @@ class BusinessUserSeeder extends Seeder
 
             $role = ($i <= 2) ? $supportRole :
                     (($i <= 4) ? $operationRole : $adminRole);
+
+            $user->assignRole($role);
 
             BusinessUser::firstOrCreate(
                 ['user_id' => $user->id, 'business_id' => $adminBusiness->id],
@@ -127,7 +132,7 @@ class BusinessUserSeeder extends Seeder
                     'password' => bcrypt('password'),
                 ]
             );
-            $supplierOwner->assignRole($vendorRole);
+            $vendorOwner->assignRole($vendorRole);
 
             $vendorBusiness = Business::firstOrCreate(
                 ['code' => "VENDOR00$i"],
@@ -149,11 +154,19 @@ class BusinessUserSeeder extends Seeder
                 ['role_id' => $vendorRole->id]
             );
 
+            ApiKey::firstOrCreate(
+                ['business_id' => $vendorBusiness->id],
+                [
+                    'key' => time().Str::random(5),
+                    'secret' => time().Str::random(8),
+                ]
+            );
+
             // Creating 5 customers for each vendor business
             for ($j = 1; $j <= 5; $j++) {
                 $identifier = 'CUS-'.$vendorBusiness->code.'-'.now()->format('Ymd').'-'.($j + $vendorBusiness->id * 100);
 
-                CreditCustomer::firstOrCreate(
+                Customer::firstOrCreate(
                     [
                         'identifier' => $identifier,
                         'business_id' => $vendorBusiness->id,
@@ -233,6 +246,40 @@ class BusinessUserSeeder extends Seeder
             BusinessUser::firstOrCreate(
                 ['user_id' => $customerHost->id, 'business_id' => $customerHostBusiness->id],
                 ['role_id' => $customerRole->id]
+            );
+        }
+
+        // 6. Create 5 users with different businesses and type 'LENDER'
+        for ($i = 1; $i <= 5; $i++) {
+            $lenderHost = User::firstOrCreate(
+                ['email' => "lender_LEN$i@example.com"],
+                [
+                    'name' => $faker->name(),
+                    'phone' => $faker->phoneNumber(),
+                    'email_verified_at' => now(),
+                    'password' => bcrypt('password'),
+                ]
+            );
+            $lenderHost->assignRole($lenderRole);
+
+            $lenderHostBusiness = Business::firstOrCreate(
+                ['code' => "LENDER_LEND00$i"],
+                [
+                    'name' => "Lender Business $i",
+                    'short_name' => "lender$i",
+                    'owner_id' => $lenderHost->id,
+                    'type' => 'LENDER',
+                    'address' => $faker->address,
+                    'contact_person' => $faker->name(),
+                    'contact_phone' => $faker->phoneNumber,
+                    'contact_email' => $faker->email,
+                    'status' => 'PENDING_VERIFICATION',
+                ]
+            );
+
+            BusinessUser::firstOrCreate(
+                ['user_id' => $lenderHost->id, 'business_id' => $lenderHostBusiness->id],
+                ['role_id' => $lenderRole->id]
             );
         }
 

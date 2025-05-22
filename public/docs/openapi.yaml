@@ -1,0 +1,1626 @@
+openapi: 3.0.3
+info:
+  title: 10MG
+  description: ''
+  version: 1.0.0
+servers:
+  -
+    url: 'http://localhost'
+paths:
+  /api/v1/auth/signup:
+    post:
+      summary: 'Handle an incoming signup request.'
+      operationId: handleAnIncomingSignupRequest
+      description: ''
+      parameters: []
+      responses: {  }
+      tags:
+        - Endpoints
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                businessType:
+                  type: string
+                  description: ''
+                  example: vendor
+                  enum:
+                    - supplier
+                    - vendor
+                    - customer_pharmacy
+                fullname:
+                  type: string
+                  description: 'Must not be greater than 255 characters.'
+                  example: oqwnafhnjcnerceqcsfyz
+                name:
+                  type: string
+                  description: 'Must not be greater than 255 characters.'
+                  example: 'n'
+                email:
+                  type: string
+                  description: 'Must be a valid email address. Must not be greater than 255 characters.'
+                  example: lurline14@example.org
+                password:
+                  type: string
+                  description: ''
+                  example: accusamus
+                passwordConfirmation:
+                  type: string
+                  description: 'The value and <code>password</code> must match.'
+                  example: quod
+                termsAndConditions:
+                  type: boolean
+                  description: 'Must be accepted.'
+                  example: true
+              required:
+                - businessType
+                - fullname
+                - name
+                - email
+                - password
+                - passwordConfirmation
+                - termsAndConditions
+      security: []
+  /api/v1/auth/signin:
+    post:
+      summary: 'Handle an incoming authentication request.'
+      operationId: handleAnIncomingAuthenticationRequest
+      description: ''
+      parameters: []
+      responses: {  }
+      tags:
+        - Endpoints
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                  description: 'Must be a valid email address.'
+                  example: cwilliamson@example.com
+                password:
+                  type: string
+                  description: ''
+                  example: '#dVOxD>'
+              required:
+                - email
+                - password
+      security: []
+  /api/v1/auth/google:
+    post:
+      summary: 'Handle an incoming google authentication request.'
+      operationId: handleAnIncomingGoogleAuthenticationRequest
+      description: ''
+      parameters: []
+      responses: {  }
+      tags:
+        - Endpoints
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  description: 'Must not be greater than 255 characters.'
+                  example: synzlrj
+                provider:
+                  type: string
+                  description: ''
+                  example: sed
+                picture:
+                  type: string
+                  description: ''
+                  example: nemo
+              required:
+                - name
+                - provider
+      security: []
+  /api/v1/auth/forgot-password:
+    post:
+      summary: 'Send a password reset link.'
+      operationId: sendAPasswordResetLink
+      description: ''
+      parameters: []
+      responses: {  }
+      tags:
+        - Endpoints
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                  description: ''
+                  example: possimus
+              required:
+                - email
+      security: []
+  /api/v1/auth/reset-password:
+    post:
+      summary: 'Handle an incoming new password request.'
+      operationId: handleAnIncomingNewPasswordRequest
+      description: ''
+      parameters: []
+      responses: {  }
+      tags:
+        - Endpoints
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                otp:
+                  type: string
+                  description: ''
+                  example: et
+                email:
+                  type: string
+                  description: ''
+                  example: itaque
+                password:
+                  type: string
+                  description: ''
+                  example: doloribus
+                passwordConfirmation:
+                  type: string
+                  description: 'The value and <code>password</code> must match.'
+                  example: vel
+              required:
+                - otp
+                - email
+                - password
+                - passwordConfirmation
+      security: []
+  /api/v1/auth/signup/complete:
+    post:
+      summary: 'Complete signup flow by updating the business details.'
+      operationId: completeSignupFlowByUpdatingTheBusinessDetails
+      description: "This method handles the final step in the user signup process, ensuring that\nthe business details are updated."
+      parameters: []
+      responses: {  }
+      tags:
+        - Endpoints
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                contact_email:
+                  type: string
+                  description: 'Must be a valid email address. Must not be greater than 255 characters.'
+                  example: hauck.bethany@example.com
+                contact_phone:
+                  type: string
+                  description: 'Must be at least 3 characters. Must not be greater than 255 characters.'
+                  example: ozhbsgfzggxmsw
+                contact_person:
+                  type: string
+                  description: 'Must be at least 3 characters. Must not be greater than 255 characters.'
+                  example: qnqxwryditrcotp
+                contact_person_position:
+                  type: string
+                  description: 'Must be at least 3 characters. Must not be greater than 255 characters.'
+                  example: ofodspnocydgxvvg
+                name:
+                  type: string
+                  description: 'Must not be greater than 255 characters.'
+                  example: fdwvssjjkivktvjujsq
+                termsAndConditions:
+                  type: boolean
+                  description: 'Must be accepted.'
+                  example: true
+                provider:
+                  type: string
+                  description: ''
+                  example: google
+                  enum:
+                    - google
+                    - credentials
+                type:
+                  type: string
+                  description: 'This field is required when <code>provider</code> is <code>google</code>.'
+                  example: vendor
+                  enum:
+                    - supplier
+                    - vendor
+                    - customer_pharmacy
+              required:
+                - contact_email
+                - contact_phone
+                - contact_person
+                - contact_person_position
+                - name
+                - termsAndConditions
+                - provider
+      security: []
+  /api/v1/auth/signout:
+    post:
+      summary: 'Destroy an authenticated session.'
+      operationId: destroyAnAuthenticatedSession
+      description: ''
+      parameters: []
+      responses: {  }
+      tags:
+        - Endpoints
+      security: []
+  /api/v1/auth/resend-otp:
+    post:
+      summary: "Regenerate OTP and send it to the user's email."
+      operationId: regenerateOTPAndSendItToTheUsersEmail
+      description: ''
+      parameters: []
+      responses: {  }
+      tags:
+        - Endpoints
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                type:
+                  type: string
+                  description: ''
+                  example: RESET_PASSWORD_VERIFICATION
+                  enum:
+                    - RESET_PASSWORD_VERIFICATION
+                    - SIGNUP_EMAIL_VERIFICATION
+                    - RESET_MULTI_FACTOR_AUTHENTICATION
+                    - CHANGE_EMAIL_VERIFICATION
+                email:
+                  type: string
+                  description: 'Must be a valid email address.'
+                  example: nhilpert@example.net
+              required:
+                - type
+      security: []
+  /api/v1/auth/invite/view:
+    get:
+      summary: 'Retrieve and display invitation details for a guest user.'
+      operationId: retrieveAndDisplayInvitationDetailsForAGuestUser
+      description: "This method processes the request to view an invitation, using the\ninvite service to fetch the relevant invitation details. It returns\na JSON response containing the invite information, such as role,\nfull name, email, and action URLs for accepting or rejecting the invitation."
+      parameters: []
+      responses:
+        400:
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  success: false
+                  message: 'Invalid parameters supplied.'
+                  data:
+                    inviteToken:
+                      - 'The invite token field is required.'
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: 'Invalid parameters supplied.'
+                  data:
+                    type: object
+                    properties:
+                      inviteToken:
+                        type: array
+                        example:
+                          - 'The invite token field is required.'
+                        items:
+                          type: string
+      tags:
+        - Endpoints
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                invite_token:
+                  type: string
+                  description: ''
+                  example: magni
+              required:
+                - invite_token
+      security: []
+  /api/v1/auth/invite/accept:
+    post:
+      summary: 'Accept an invitation and create a new user account.'
+      operationId: acceptAnInvitationAndCreateANewUserAccount
+      description: "This method validates the invitation details, ensures the token and invite are valid, and creates\na new user account if the invitation is successfully accepted. The invite token must not be expired."
+      parameters: []
+      responses: {  }
+      tags:
+        - Endpoints
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                invite_id:
+                  type: string
+                  description: ''
+                  example: quia
+                invite_token:
+                  type: string
+                  description: ''
+                  example: unde
+                password:
+                  type: string
+                  description: ''
+                  example: velit
+                passwordConfirmation:
+                  type: string
+                  description: 'The value and <code>password</code> must match.'
+                  example: voluptas
+                termsAndConditions:
+                  type: boolean
+                  description: 'Must be accepted.'
+                  example: true
+              required:
+                - invite_id
+                - invite_token
+                - password
+                - passwordConfirmation
+                - termsAndConditions
+      security: []
+  /api/v1/auth/invite/reject:
+    post:
+      summary: 'Reject an invitation for a guest user.'
+      operationId: rejectAnInvitationForAGuestUser
+      description: ''
+      parameters: []
+      responses: {  }
+      tags:
+        - Endpoints
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                invite_id:
+                  type: string
+                  description: ''
+                  example: magnam
+                invite_token:
+                  type: string
+                  description: ''
+                  example: qui
+              required:
+                - invite_id
+                - invite_token
+      security: []
+  /api/v1/account/settings/password:
+    patch:
+      summary: 'Update the authenticated user password.'
+      operationId: updateTheAuthenticatedUserPassword
+      description: ''
+      parameters: []
+      responses: {  }
+      tags:
+        - Endpoints
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                current_password:
+                  type: string
+                  description: 'Must not be greater than 255 characters.'
+                  example: bmvhioaqsrf
+                new_password:
+                  type: string
+                  description: 'This field is required when <code>new_password_confirmation</code> is present.  The value and <code>current_password</code> must be different.'
+                  example: est
+              required:
+                - current_password
+      security: []
+  /api/v1/account/settings/2fa/setup:
+    get:
+      summary: 'Setup multi-factor authentication (MFA) for the user.'
+      operationId: setupMultiFactorAuthenticationMFAForTheUser
+      description: ''
+      parameters: []
+      responses:
+        401:
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  success: false
+                  message: Unauthenticated.
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: Unauthenticated.
+      tags:
+        - Endpoints
+      security: []
+  /api/v1/account/settings/2fa/toggle:
+    post:
+      summary: 'Toggle Two-Factor Authentication (2FA) on or off for the authenticated user.'
+      operationId: toggleTwoFactorAuthentication2FAOnOrOffForTheAuthenticatedUser
+      description: ''
+      parameters: []
+      responses: {  }
+      tags:
+        - Endpoints
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                current_password:
+                  type: string
+                  description: 'Must not be greater than 255 characters.'
+                  example: ypgtorfxzcnw
+                use_two_factor:
+                  type: boolean
+                  description: ''
+                  example: true
+              required:
+                - current_password
+                - use_two_factor
+      security: []
+  /api/v1/account/settings/2fa/verify:
+    post:
+      summary: 'Verify the provided multi-factor authentication token.'
+      operationId: verifyTheProvidedMultiFactorAuthenticationToken
+      description: ''
+      parameters: []
+      responses: {  }
+      tags:
+        - Endpoints
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                code:
+                  type: string
+                  description: 'Must be 6 characters.'
+                  example: gzvuuj
+              required:
+                - code
+      security: []
+  /api/v1/resend-otp:
+    post:
+      summary: "Regenerate OTP and send it to the user's email."
+      operationId: regenerateOTPAndSendItToTheUsersEmail
+      description: ''
+      parameters: []
+      responses: {  }
+      tags:
+        - Endpoints
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                type:
+                  type: string
+                  description: ''
+                  example: CHANGE_EMAIL_VERIFICATION
+                  enum:
+                    - RESET_PASSWORD_VERIFICATION
+                    - SIGNUP_EMAIL_VERIFICATION
+                    - RESET_MULTI_FACTOR_AUTHENTICATION
+                    - CHANGE_EMAIL_VERIFICATION
+                email:
+                  type: string
+                  description: 'Must be a valid email address.'
+                  example: amedhurst@example.net
+              required:
+                - type
+      security: []
+  /api/v1/business/settings:
+    get:
+      summary: 'Display the business details associated with the authenticated user.'
+      operationId: displayTheBusinessDetailsAssociatedWithTheAuthenticatedUser
+      description: ''
+      parameters: []
+      responses:
+        401:
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  success: false
+                  message: Unauthenticated.
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: Unauthenticated.
+      tags:
+        - Endpoints
+      security: []
+  /api/v1/customers:
+    get:
+      summary: ''
+      operationId: getApiV1Customers
+      description: ''
+      parameters: []
+      responses:
+        401:
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  success: false
+                  message: Unauthenticated.
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: Unauthenticated.
+      tags:
+        - Endpoints
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  description: 'Must not be greater than 255 characters.'
+                  example: ahnc
+                email:
+                  type: string
+                  description: 'Must be a valid email address. Must not be greater than 255 characters.'
+                  example: melisa.kling@example.com
+                vendorId:
+                  type: integer
+                  description: ''
+                  example: 4
+                createdAtStart:
+                  type: string
+                  description: 'Must be a valid date. Must be a date before or equal to <code>createdAtEnd</code>.'
+                  example: '2010-11-14'
+                createdAtEnd:
+                  type: string
+                  description: 'Must be a valid date. Must be a date after or equal to <code>createdAtStart</code>.'
+                  example: '2057-01-07'
+                page:
+                  type: integer
+                  description: 'Must be at least 1.'
+                  example: 80
+                perPage:
+                  type: integer
+                  description: 'Must be at least 1. Must not be greater than 100.'
+                  example: 25
+      security: []
+    post:
+      summary: ''
+      operationId: postApiV1Customers
+      description: ''
+      parameters: []
+      responses: {  }
+      tags:
+        - Endpoints
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  description: 'Must not be greater than 255 characters.'
+                  example: jhwqrmkdurjywuw
+                email:
+                  type: string
+                  description: 'Must be a valid email address. Must not be greater than 255 characters.'
+                  example: alan.moen@example.org
+                phone:
+                  type: string
+                  description: 'Must not be greater than 15 characters.'
+                  example: zvlzdvagcjvae
+              required:
+                - name
+                - email
+      security: []
+  /api/v1/customers/export:
+    get:
+      summary: ''
+      operationId: getApiV1CustomersExport
+      description: ''
+      parameters: []
+      responses:
+        401:
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  success: false
+                  message: Unauthenticated.
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: Unauthenticated.
+      tags:
+        - Endpoints
+      security: []
+  /api/v1/customers/import:
+    post:
+      summary: ''
+      operationId: postApiV1CustomersImport
+      description: ''
+      parameters: []
+      responses: {  }
+      tags:
+        - Endpoints
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                file:
+                  type: string
+                  description: 'Must not be greater than 20024 characters.'
+                  example: kwmaxg
+              required:
+                - file
+      security: []
+  '/api/v1/customers/{id}':
+    get:
+      summary: ''
+      operationId: getApiV1CustomersId
+      description: ''
+      parameters: []
+      responses:
+        401:
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  success: false
+                  message: Unauthenticated.
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: Unauthenticated.
+      tags:
+        - Endpoints
+      security: []
+    put:
+      summary: ''
+      operationId: putApiV1CustomersId
+      description: ''
+      parameters: []
+      responses: {  }
+      tags:
+        - Endpoints
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  description: 'Must not be greater than 255 characters.'
+                  example: e
+                email:
+                  type: string
+                  description: 'Must be a valid email address. Must not be greater than 255 characters.'
+                  example: sadie.stehr@example.com
+                phone:
+                  type: string
+                  description: 'Must not be greater than 15 characters.'
+                  example: x
+                active:
+                  type: boolean
+                  description: ''
+                  example: true
+      security: []
+    delete:
+      summary: ''
+      operationId: deleteApiV1CustomersId
+      description: ''
+      parameters: []
+      responses: {  }
+      tags:
+        - Endpoints
+      security: []
+    patch:
+      summary: ''
+      operationId: patchApiV1CustomersId
+      description: ''
+      parameters: []
+      responses: {  }
+      tags:
+        - Endpoints
+      security: []
+    parameters:
+      -
+        in: path
+        name: id
+        description: 'The ID of the customer.'
+        example: tempora
+        required: true
+        schema:
+          type: string
+  /api/v1/vendor/business/settings/invite/team-members:
+    get:
+      summary: "Retrieve all team members for the authenticated user's business."
+      operationId: retrieveAllTeamMembersForTheAuthenticatedUsersBusiness
+      description: ''
+      parameters: []
+      responses:
+        401:
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  success: false
+                  message: Unauthenticated.
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: Unauthenticated.
+      tags:
+        - Endpoints
+      security: []
+  /api/v1/vendor/business/settings/invite:
+    get:
+      summary: "Retrieve all invite for the authenticated user's business."
+      operationId: retrieveAllInviteForTheAuthenticatedUsersBusiness
+      description: ''
+      parameters: []
+      responses:
+        401:
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  success: false
+                  message: Unauthenticated.
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: Unauthenticated.
+      tags:
+        - Endpoints
+      security: []
+    post:
+      summary: "Add a new team member/invite to the authenticated user's business."
+      operationId: addANewTeamMemberinviteToTheAuthenticatedUsersBusiness
+      description: "This method validates the incoming request, creates a new team member/invite\nusing the validated data, and returns a JSON response with the team member's/invite's details."
+      parameters: []
+      responses: {  }
+      tags:
+        - Endpoints
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                full_name:
+                  type: string
+                  description: 'Must not be greater than 255 characters.'
+                  example: wwppwlgyzssdslqwzfpvnc
+                email:
+                  type: string
+                  description: 'Must be a valid email address. Must not be greater than 255 characters.'
+                  example: fschneider@example.net
+                role_id:
+                  type: string
+                  description: ''
+                  example: expedita
+              required:
+                - full_name
+                - email
+                - role_id
+      security: []
+  /api/v1/vendor/txn_history/upload:
+    post:
+      summary: ''
+      operationId: postApiV1VendorTxn_historyUpload
+      description: ''
+      parameters: []
+      responses: {  }
+      tags:
+        - Endpoints
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                file:
+                  type: string
+                  description: 'Must not be greater than 2048 characters.'
+                  example: usxdswhxvpocisjpraucvvigs
+                customerId:
+                  type: string
+                  description: ''
+                  example: minus
+              required:
+                - file
+                - customerId
+      security: []
+  /api/v1/vendor/txn_history/evaluate:
+    post:
+      summary: ''
+      operationId: postApiV1VendorTxn_historyEvaluate
+      description: ''
+      parameters: []
+      responses: {  }
+      tags:
+        - Endpoints
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                transactionHistoryId:
+                  type: string
+                  description: ''
+                  example: harum
+              required:
+                - transactionHistoryId
+      security: []
+  /api/v1/vendor/txn_history/upload_and_evaluate:
+    post:
+      summary: ''
+      operationId: postApiV1VendorTxn_historyUpload_and_evaluate
+      description: ''
+      parameters: []
+      responses: {  }
+      tags:
+        - Endpoints
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                file:
+                  type: string
+                  description: 'Must not be greater than 2048 characters.'
+                  example: zofyq
+                customerId:
+                  type: string
+                  description: ''
+                  example: aut
+              required:
+                - file
+                - customerId
+      security: []
+  /api/v1/vendor/loan-applications:
+    post:
+      summary: ''
+      operationId: postApiV1VendorLoanApplications
+      description: ''
+      parameters: []
+      responses: {  }
+      tags:
+        - Endpoints
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                customerId:
+                  type: string
+                  description: 'This field is required when <code>reference</code> is not present.'
+                  example: null
+                requestedAmount:
+                  type: number
+                  description: 'Must be at least 1.'
+                  example: 52
+                durationInMonths:
+                  type: integer
+                  description: 'Must be at least 1. Must not be greater than 12.'
+                  example: 11
+                reference:
+                  type: string
+                  description: ''
+                  example: null
+              required:
+                - requestedAmount
+                - durationInMonths
+      security: []
+    get:
+      summary: ''
+      operationId: getApiV1VendorLoanApplications
+      description: ''
+      parameters: []
+      responses:
+        401:
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  success: false
+                  message: Unauthenticated.
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: Unauthenticated.
+      tags:
+        - Endpoints
+      security: []
+  /api/v1/vendor/loan-applications/apply:
+    post:
+      summary: ''
+      operationId: postApiV1VendorLoanApplicationsApply
+      description: ''
+      parameters: []
+      responses: {  }
+      tags:
+        - Endpoints
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                customerId:
+                  type: string
+                  description: ''
+                  example: voluptatem
+              required:
+                - customerId
+      security: []
+  /api/v1/vendor/loan-applications/customisations:
+    get:
+      summary: ''
+      operationId: getApiV1VendorLoanApplicationsCustomisations
+      description: ''
+      parameters: []
+      responses:
+        401:
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  success: false
+                  message: Unauthenticated.
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: Unauthenticated.
+      tags:
+        - Endpoints
+      security: []
+  /api/v1/vendor/loan-applications/filter:
+    get:
+      summary: ''
+      operationId: getApiV1VendorLoanApplicationsFilter
+      description: ''
+      parameters: []
+      responses:
+        401:
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  success: false
+                  message: Unauthenticated.
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: Unauthenticated.
+      tags:
+        - Endpoints
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                status:
+                  type: string
+                  description: ''
+                  example: approved
+                  enum:
+                    - pending
+                    - approved
+                    - rejected
+                search:
+                  type: string
+                  description: ''
+                  example: nobis
+                dateFrom:
+                  type: string
+                  description: 'Must be a valid date.'
+                  example: '2024-10-06T09:22:41'
+                dateTo:
+                  type: string
+                  description: 'Must be a valid date.'
+                  example: '2024-10-06T09:22:41'
+                businessId:
+                  type: string
+                  description: ''
+                  example: null
+      security: []
+  '/api/v1/vendor/loan-applications/{reference}':
+    get:
+      summary: ''
+      operationId: getApiV1VendorLoanApplicationsReference
+      description: ''
+      parameters: []
+      responses:
+        401:
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  success: false
+                  message: Unauthenticated.
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: Unauthenticated.
+      tags:
+        - Endpoints
+      security: []
+    parameters:
+      -
+        in: path
+        name: reference
+        description: ''
+        example: dolores
+        required: true
+        schema:
+          type: string
+  '/api/v1/vendor/loan-applications/customer/{customerId}':
+    get:
+      summary: ''
+      operationId: getApiV1VendorLoanApplicationsCustomerCustomerId
+      description: ''
+      parameters: []
+      responses:
+        401:
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  success: false
+                  message: Unauthenticated.
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: Unauthenticated.
+      tags:
+        - Endpoints
+      security: []
+    parameters:
+      -
+        in: path
+        name: customerId
+        description: ''
+        example: quas
+        required: true
+        schema:
+          type: string
+  '/api/v1/vendor/loan-applications/view/{id}':
+    get:
+      summary: ''
+      operationId: getApiV1VendorLoanApplicationsViewId
+      description: ''
+      parameters: []
+      responses:
+        401:
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  success: false
+                  message: Unauthenticated.
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: Unauthenticated.
+      tags:
+        - Endpoints
+      security: []
+    parameters:
+      -
+        in: path
+        name: id
+        description: 'The ID of the view.'
+        example: quia
+        required: true
+        schema:
+          type: string
+  '/api/v1/vendor/loan-applications/{id}':
+    delete:
+      summary: ''
+      operationId: deleteApiV1VendorLoanApplicationsId
+      description: ''
+      parameters: []
+      responses: {  }
+      tags:
+        - Endpoints
+      security: []
+    parameters:
+      -
+        in: path
+        name: id
+        description: 'The ID of the loan application.'
+        example: ratione
+        required: true
+        schema:
+          type: string
+  '/api/v1/vendor/loan-applications/{applicationId}/review':
+    post:
+      summary: ''
+      operationId: postApiV1VendorLoanApplicationsApplicationIdReview
+      description: ''
+      parameters: []
+      responses: {  }
+      tags:
+        - Endpoints
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                status:
+                  type: string
+                  description: ''
+                  example: approve
+                  enum:
+                    - approve
+                    - reject
+                offerAmount:
+                  type: number
+                  description: 'Must be at least 1.'
+                  example: 66
+              required:
+                - status
+                - offerAmount
+      security: []
+    parameters:
+      -
+        in: path
+        name: applicationId
+        description: ''
+        example: ut
+        required: true
+        schema:
+          type: string
+  /api/v1/vendor/offers:
+    post:
+      summary: ''
+      operationId: postApiV1VendorOffers
+      description: ''
+      parameters: []
+      responses: {  }
+      tags:
+        - Endpoints
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                applicationId:
+                  type: string
+                  description: ''
+                  example: suscipit
+                offerAmount:
+                  type: number
+                  description: 'Must be at least 1.'
+                  example: 54
+              required:
+                - applicationId
+                - offerAmount
+      security: []
+    get:
+      summary: ''
+      operationId: getApiV1VendorOffers
+      description: ''
+      parameters: []
+      responses:
+        401:
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  success: false
+                  message: Unauthenticated.
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: Unauthenticated.
+      tags:
+        - Endpoints
+      security: []
+  '/api/v1/vendor/offers/{offerReference}':
+    post:
+      summary: ''
+      operationId: postApiV1VendorOffersOfferReference
+      description: ''
+      parameters: []
+      responses: {  }
+      tags:
+        - Endpoints
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                action:
+                  type: string
+                  description: ''
+                  example: reject
+                  enum:
+                    - accept
+                    - reject
+              required:
+                - action
+      security: []
+    parameters:
+      -
+        in: path
+        name: offerReference
+        description: ''
+        example: dolorum
+        required: true
+        schema:
+          type: string
+  '/api/v1/vendor/offers/{id}':
+    get:
+      summary: ''
+      operationId: getApiV1VendorOffersId
+      description: ''
+      parameters: []
+      responses:
+        401:
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  success: false
+                  message: Unauthenticated.
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: Unauthenticated.
+      tags:
+        - Endpoints
+      security: []
+    delete:
+      summary: ''
+      operationId: deleteApiV1VendorOffersId
+      description: ''
+      parameters: []
+      responses: {  }
+      tags:
+        - Endpoints
+      security: []
+    patch:
+      summary: ''
+      operationId: patchApiV1VendorOffersId
+      description: ''
+      parameters: []
+      responses: {  }
+      tags:
+        - Endpoints
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                active:
+                  type: boolean
+                  description: ''
+                  example: true
+              required:
+                - active
+      security: []
+    parameters:
+      -
+        in: path
+        name: id
+        description: 'The ID of the offer.'
+        example: eaque
+        required: true
+        schema:
+          type: string
+  '/api/v1/vendor/offers/{customerId}/customer':
+    get:
+      summary: ''
+      operationId: getApiV1VendorOffersCustomerIdCustomer
+      description: ''
+      parameters: []
+      responses:
+        401:
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  success: false
+                  message: Unauthenticated.
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: Unauthenticated.
+      tags:
+        - Endpoints
+      security: []
+    parameters:
+      -
+        in: path
+        name: customerId
+        description: ''
+        example: voluptas
+        required: true
+        schema:
+          type: string
+  /api/v1/vendor/direct-debit/mandate/generate:
+    post:
+      summary: ''
+      operationId: postApiV1VendorDirectDebitMandateGenerate
+      description: ''
+      parameters: []
+      responses: {  }
+      tags:
+        - Endpoints
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                offerReference:
+                  type: string
+                  description: ''
+                  example: repudiandae
+              required:
+                - offerReference
+      security: []
+  /api/v1/vendor/direct-debit/mandate/verify:
+    post:
+      summary: ''
+      operationId: postApiV1VendorDirectDebitMandateVerify
+      description: ''
+      parameters: []
+      responses: {  }
+      tags:
+        - Endpoints
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                mandateReference:
+                  type: string
+                  description: ''
+                  example: magni
+              required:
+                - mandateReference
+      security: []
+  /api/v1/vendor/loans:
+    get:
+      summary: 'Get all loans.'
+      operationId: getAllLoans
+      description: ''
+      parameters: []
+      responses:
+        401:
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  success: false
+                  message: Unauthenticated.
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: Unauthenticated.
+      tags:
+        - Endpoints
+      security: []
+  '/api/v1/vendor/loans/{id}':
+    get:
+      summary: 'Get loan by ID.'
+      operationId: getLoanByID
+      description: ''
+      parameters: []
+      responses:
+        401:
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  success: false
+                  message: Unauthenticated.
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: Unauthenticated.
+      tags:
+        - Endpoints
+      security: []
+    parameters:
+      -
+        in: path
+        name: id
+        description: 'The ID of the loan.'
+        example: rem
+        required: true
+        schema:
+          type: string
+  '/api/v1/vendor/loans/{id}/disbursed':
+    post:
+      summary: 'Mark loan as disbursed.'
+      operationId: markLoanAsDisbursed
+      description: ''
+      parameters: []
+      responses: {  }
+      tags:
+        - Endpoints
+      security: []
+    parameters:
+      -
+        in: path
+        name: id
+        description: 'The ID of the loan.'
+        example: non
+        required: true
+        schema:
+          type: string
+  /api/v1/webhooks/vendor/direct-debit/mandate:
+    post:
+      summary: ''
+      operationId: postApiV1WebhooksVendorDirectDebitMandate
+      description: ''
+      parameters: []
+      responses: {  }
+      tags:
+        - Endpoints
+      security: []
+tags:
+  -
+    name: Endpoints
+    description: ''

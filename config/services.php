@@ -34,5 +34,26 @@ return [
             'channel' => env('SLACK_BOT_USER_DEFAULT_CHANNEL'),
         ],
     ],
+    'paystack' => [
+        'public' => env('PAYSTACK_PUBLIC_KEY'),
+        'secret' => env('PAYSTACK_SECRET_KEY'),
+        'url' => env('PAYSTACK_BASE_URL', 'https://api.paystack.co'),
+    ],
+    'fincra' => [
+        'public' => env('FINCRA_PUBKEY'),
+        'secret' => env('FINCRA_SECKEY'),
+        'business_id' => env('FINCRA_BUSINESS_ID'),
+        'url' => env('FINCRA_BASE_URL', 'https://api.paystack.co'),
+    ],
+
+    'tenmg' => [
+        'public' => env('TENMG_PUBKEY'),
+        'secret' => env('TENMG_SECKEY'),
+        'url' => env('TENMG_BASE_URL', 'https://staging-api.10mg.ai'),
+    ],
+
+    'google' => [
+        'oauth_url' => env('GOOGLE_OAUTH2_URL'),
+    ],
 
 ];

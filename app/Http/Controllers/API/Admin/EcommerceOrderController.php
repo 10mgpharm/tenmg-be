@@ -1,0 +1,68 @@
+<?php
+
+namespace App\Http\Controllers\API\Admin;
+
+use App\Http\Controllers\Controller;
+use App\Http\Resources\EcommerceCartResource;
+use App\Services\Admin\Storefront\EcommerceCartService;
+use Exception;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
+
+class EcommerceOrderController extends Controller
+{
+
+    protected $ecommerceCartService;
+
+    function __construct(EcommerceCartService $ecommerceCartService)
+    {
+        $this->ecommerceCartService = $ecommerceCartService;
+    }
+
+    function getOrderByStatus(Request $request)
+    {
+        $validStatuses = ['PENDING','PROCESSING','SHIPPED','DELIVERED','CANCELED','CART','COMPLETED'];
+
+        $orders = $this->ecommerceCartService->getOrderByStatus($request);
+
+        return $this->returnJsonResponse(
+            data: EcommerceCartResource::collection($orders)->response()->getData(true)
+        );
+    }
+
+    function getOrderByStatusCount()
+    {
+        $count = $this->ecommerceCartService->getOrderByStatusCount();
+        return $this->returnJsonResponse(
+            data: $count
+        );
+
+    }
+
+    function changeOrderStatus(Request $request)
+    {
+        $request->validate([
+            'orderId' => 'required|exists:ecommerce_orders,id',
+            'status' => 'required|in:PENDING,PROCESSING,SHIPPED,DELIVERED,CANCELED,COMPLETED',
+            'reason' => 'required_if:status,CANCELED|string',
+            'requiresRefund' => 'required_if:status,CANCELED|boolean',
+            'refundStatus' => 'required_if:status,CANCELED||in:REFUNDED,AWAITING REFUND'
+        ]);
+
+        $response = $this->ecommerceCartService->changeOrderStatus($request);
+
+        if($response instanceof JsonResponse)
+            return $response;
+
+        return $this->returnJsonResponse(message: 'Order status updated');
+
+    }
+
+    function getOrderDetails($id)
+    {
+        $orderDetails = $this->ecommerceCartService->getOrderDetails($id);
+        return $this->returnJsonResponse(
+            data: new EcommerceCartResource($orderDetails)
+        );
+    }
+}

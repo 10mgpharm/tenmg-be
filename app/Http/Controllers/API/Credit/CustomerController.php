@@ -33,7 +33,8 @@ class CustomerController extends Controller
 
     public function store(StoreCustomerRequest $request): JsonResponse
     {
-        $customer = $this->customerService->createCustomer($request->validated());
+
+        $customer = $this->customerService->createCustomer(data: $request->validated(), file: $request->file('file'));
 
         return $this->returnJsonResponse(
             data: $customer,
@@ -41,7 +42,7 @@ class CustomerController extends Controller
         );
     }
 
-    public function show($id)
+    public function show(int $id)
     {
         $customer = $this->customerService->getCustomerById($id);
 
@@ -50,10 +51,18 @@ class CustomerController extends Controller
         );
     }
 
-    public function update(UpdateCustomerRequest $request, $id): JsonResponse
+    public function update(UpdateCustomerRequest $request, int $id): JsonResponse
     {
         $customer = $this->customerService->updateCustomer($id, $request->all());
 
+        if (! $customer) {
+            return $this->returnJsonResponse(
+                message: 'Customer not found',
+                statusCode: Response::HTTP_NOT_FOUND
+            );
+        }
+
+        // Return the updated customer
         return $this->returnJsonResponse(
             data: $customer,
         );
@@ -72,6 +81,9 @@ class CustomerController extends Controller
     public function toggleActive(int $id): JsonResponse
     {
         $customer = $this->customerService->toggleCustomerActiveStatus($id);
+        if (! $customer) {
+            return response()->json(['message' => 'Customer not found'], Response::HTTP_NOT_FOUND);
+        }
 
         return $this->returnJsonResponse(
             data: $customer,
@@ -89,10 +101,39 @@ class CustomerController extends Controller
             'file' => 'required|mimes:xlsx|max:20024',
         ]);
 
-        Excel::import(new CustomersImport, $request->file('file'));
+        $isVendor = $this->customerService->checkIfVendor();
+
+        //check if user type performing this operation is a vendor
+        if (!$isVendor) {
+            return $this->returnJsonResponse(
+                message: 'You are not authorized to perform this operation',
+                statusCode: Response::HTTP_UNAUTHORIZED,
+            );
+        }
+
+        $import = new CustomersImport();
+
+        // Validate headers
+        $error = $import->validateHeaders($request->file('file'));
+
+        if($error != ""){
+            return $this->returnJsonResponse(
+                message: $error ?? "-",
+            );
+        }
+
+        Excel::import($import, $request->file('file'));
 
         return $this->returnJsonResponse(
             message: 'Customers imported successfully',
+        );
+    }
+
+    public function getAllCustomers():JsonResponse
+    {
+        $customer = $this->customerService->getAllCustomers();
+        return $this->returnJsonResponse(
+            data: $customer,
         );
     }
 }

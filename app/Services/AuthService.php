@@ -6,24 +6,29 @@ use App\Enums\BusinessStatus;
 use App\Enums\BusinessType;
 use App\Enums\OtpType;
 use App\Helpers\UtilityHelper;
+use App\Http\Requests\Auth\CompleteUserSignupRequest;
 use App\Http\Requests\Auth\SignupUserRequest;
+use App\Http\Requests\AuthProviderRequest;
 use App\Http\Resources\UserResource;
 use App\Models\Business;
 use App\Models\BusinessUser;
-use App\Models\Otp;
+use App\Models\CreditLendersWallet;
 use App\Models\Role;
 use App\Models\User;
+use App\Repositories\ApiKeyRepository;
+use App\Repositories\CreditVendorWalletRepository;
 use App\Services\Interfaces\IAuthService;
-use Carbon\Carbon;
+use App\Services\Lender\LoanPreferenceService;
 use Exception;
 use Illuminate\Auth\Events\Verified;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Log;
 use Laravel\Passport\PersonalAccessTokenResult;
-use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 
 class AuthService implements IAuthService
 {
@@ -34,7 +39,7 @@ class AuthService implements IAuthService
     /**
      * @throws Exception
      */
-    public function __construct() {}
+    public function __construct(public ApiKeyRepository $apiKeyRepository, public CreditVendorWalletRepository $creditVendorRepository, private LoanPreferenceService $loanPreferenceService) {}
 
     /**
      * Get user
@@ -51,7 +56,44 @@ class AuthService implements IAuthService
         } catch (\Throwable) {
         }
 
-        throw new Exception('User not found', Response::HTTP_NOT_FOUND);
+        throw new Exception('Unable to find auth User', Response::HTTP_UNAUTHORIZED);
+    }
+
+    /**
+     * Get auth id
+     *
+     * @throws Exception
+     */
+    public function getId(): int
+    {
+        try {
+            $auth = Auth::user();
+            if ($auth instanceof User) {
+                return $auth->id;
+            }
+        } catch (\Throwable) {
+        }
+
+        throw new Exception('Unable to find auth User', Response::HTTP_UNAUTHORIZED);
+    }
+
+    /**
+     * Get auth id
+     *
+     * @throws Exception
+     */
+    public function getBusiness(): ?Business
+    {
+        try {
+            $user = Auth::user();
+            if ($user instanceof User) {
+                return $user->businesses->first();
+            }
+        } catch (\Throwable $e) {
+            Log::error($e);
+        }
+
+        throw new Exception('Unable to find auth User', Response::HTTP_UNAUTHORIZED);
     }
 
     /**
@@ -66,7 +108,7 @@ class AuthService implements IAuthService
 
             // create user
             $user = User::create([
-                'name' => $request['name'],
+                'name' => $request['fullname'],
                 'email' => $request['email'],
                 'password' => Hash::make($request['password']),
             ]);
@@ -93,19 +135,16 @@ class AuthService implements IAuthService
                 ['role_id' => $userRole->id]
             );
 
-            $code = UtilityHelper::generateOtp();
-            $otp = Otp::create([
-                'code' => $code,
-                'type' => OtpType::SIGNUP_EMAIL_VERIFICATION,
-                'user_id' => $user->id,
-            ]);
+            // handle dependency signups step
+            $this->handleAccountSetup($adminBusiness, $businessType);
 
-            $user->sendEmailVerification($otp->code);
+            (new OtpService)->forUser($user)
+                ->generate(OtpType::SIGNUP_EMAIL_VERIFICATION)
+                ->sendMail(OtpType::SIGNUP_EMAIL_VERIFICATION);
 
             DB::commit();
 
             return $user;
-
         } catch (\Throwable $th) {
             DB::rollBack();
             throw $th;
@@ -122,7 +161,10 @@ class AuthService implements IAuthService
                 return Role::where('name', 'supplier')->first();
 
             case BusinessType::VENDOR:
-                return Role::where('name', 'supplier')->first();
+                return Role::where('name', 'vendor')->first();
+
+            case BusinessType::LENDER:
+                return Role::where('name', 'lender')->first();
 
             default:
                 // BusinessType::CUSTOMER_PHARMACY
@@ -133,45 +175,29 @@ class AuthService implements IAuthService
     /**
      * verifyUserEmail
      */
-    public function verifyUserEmail(User $user, string $otp): ?JsonResponse
+    public function verifyUserEmail(User $user, string $code, string $type): ?User
     {
         try {
             DB::beginTransaction();
 
-            $otp = $user->otps()->firstWhere('code', $otp);
+            $otpType = OtpType::from(strtoupper($type));
 
-            if (! $otp || Carbon::parse($otp->created_at)->diffInMinutes(now()) > self::TOKEN_EXPIRED_AT) {
-                throw new BadRequestHttpException('OTP expired or invalid.');
-            }
+            $otp = (new OtpService)->forUser($user)
+                ->validate($otpType, $code);
 
             $otp->delete();
 
             if ($user->hasVerifiedEmail()) {
-                $user->token()->revoke();
-                $tokenResult = $user->createToken('Full Access Token', ['full']);
-
-                return $this->returnAuthResponse(
-                    user: $user,
-                    tokenResult: $tokenResult,
-                    message: 'Account verified',
-                    statusCode: Response::HTTP_OK
-                );
+                return $user;
             }
 
             if ($user->markEmailAsVerified()) {
                 event(new Verified($user));
             }
 
-            $user->token()->revoke();
-            $tokenResult = $user->createToken('Full Access Token', ['full']);
-
             DB::commit();
 
-            return $this->returnAuthResponse(
-                user: $user,
-                tokenResult: $tokenResult,
-                statusCode: Response::HTTP_OK
-            );
+            return $user;
         } catch (\Throwable $th) {
             DB::rollBack();
             throw $th;
@@ -195,5 +221,164 @@ class AuthService implements IAuthService
             ])
             ->response()
             ->setStatusCode($statusCode);
+    }
+
+    /**
+     * check email exist
+     */
+    public function emailExist(string $email): ?User
+    {
+        return User::firstWhere('email', $email);
+    }
+
+    /**
+     * create new google user with business
+     */
+    public function googleSignUp(AuthProviderRequest $request): User
+    {
+        try {
+            // Create or find the user
+            $user = User::firstOrCreate(
+                ['email' => $request['email']],
+                [
+                    'name' => $request['name'],
+                    'email_verified_at' => now(),
+                    'password' => Hash::make($request['email']),
+                    'google_picture_url' => $request['picture'] ?? null,
+                ]
+            );
+
+            // verify user
+            if (! $user->hasVerifiedEmail()) {
+                if ($user->markEmailAsVerified()) {
+                    event(new Verified($user));
+                }
+            }
+
+            $businessType = BusinessType::from(strtoupper($request['businessType'] ?: $user->ownerBusinessType->type));
+
+            return $user;
+        } catch (\Throwable $th) {
+            DB::rollBack();
+            throw $th;
+        }
+    }
+
+    /**
+     * Complete signup using google
+     *
+     * @return void
+     */
+    public function completeGoogleSignUp(CompleteUserSignupRequest $request)
+    {
+        try {
+            $validated = $request->validated();
+
+            DB::beginTransaction();
+
+            $businessType = BusinessType::from(strtoupper($validated['type']));
+
+            $user = $request->user();
+            $userRole = $this->resolveSignupRole(type: $businessType);
+            $user->assignRole($userRole);
+
+            // create business
+            $businessCode = UtilityHelper::generateBusinessCode($validated['name']);
+            $adminBusiness = Business::create([
+                'name' => $validated['name'],
+                'code' => $businessCode,
+                'short_name' => $businessCode,
+                'owner_id' => $user->id,
+                'type' => $businessType,
+                'status' => BusinessStatus::PENDING_VERIFICATION->value,
+                'contact_email' => $validated['contact_email'],
+                'contact_phone' => $validated['contact_phone'],
+                'contact_person' => $validated['contact_person'],
+                'contact_person_position' => $validated['contact_person_position'],
+            ]);
+
+            // map user to business
+            BusinessUser::firstOrCreate(
+                [
+                    'user_id' => $user->id,
+                    'business_id' => $adminBusiness->id,
+                ],
+                ['role_id' => $userRole->id]
+            );
+
+            // handle dependency signups step
+            $this->handleAccountSetup($adminBusiness, $businessType);
+
+            DB::commit();
+        } catch (\Throwable $th) {
+            DB::rollBack();
+            throw $th;
+        }
+    }
+
+    /**
+     * Complete signup using credentials
+     *
+     * @return void
+     */
+    public function completeCredentialSignUp(CompleteUserSignupRequest $request)
+    {
+        $validated = $request->validated();
+
+        $data = array_filter(array_intersect_key(
+            $validated,
+            array_flip(['contact_email', 'contact_phone', 'contact_person', 'contact_person_position'])
+        ));  // since fillable isn't used.
+
+        $user = $request->user();
+        $business = Business::firstWhere('owner_id', $user->id);
+        $business->update($data);
+    }
+
+    public function handleAccountSetup(Business $adminBusiness, $businessType)
+    {
+        switch ($businessType) {
+            case BusinessType::SUPPLIER:
+                $this->createEcommerceWallet($adminBusiness);
+                break;
+            case BusinessType::LENDER:
+                $this->createLendersWallet($adminBusiness);
+                $request = new Request(['business_id' => $adminBusiness->id]);
+                $this->loanPreferenceService->createUpdateLoanPreference($request);
+                break;
+            case BusinessType::VENDOR:
+                $this->apiKeyRepository->createVendorApiKey($adminBusiness);
+                $this->creditVendorRepository->createVendorWallet($adminBusiness);
+                break;
+            default:
+                break;
+        }
+    }
+
+    public function createEcommerceWallet($business)
+    {
+        $business->wallet()->create([
+            'business_id' => $business->id,
+            'previous_balance' => 0,
+            'current_balance' => 0,
+        ]);
+
+    }
+
+    public function createLendersWallet($business)
+    {
+        $walletTypes = ['investment', 'deposit', 'ledger'];
+        foreach ($walletTypes as $type) {
+            CreditLendersWallet::firstOrCreate([
+                'lender_id' => $business->id,
+                'type' => $type,
+            ],[
+                'lender_id' => $business->id,
+                'type' => $type,
+                'prev_balance' => 0,
+                'current_balance' => 0,
+            ]);
+        }
+
     }
 }

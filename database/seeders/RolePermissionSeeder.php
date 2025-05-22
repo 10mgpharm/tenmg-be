@@ -158,8 +158,9 @@ class RolePermissionSeeder extends Seeder
         $supplier = RoleConstant::SUPPLIER;
         $customer = RoleConstant::CUSTOMER;
         $vendor = RoleConstant::VENDOR;
+        $lender = RoleConstant::LENDER;
 
-        $roles = [$administrator, $operation, $support, $supplier, $customer, $vendor];
+        $roles = [$administrator, $operation, $support, $supplier, $customer, $vendor, $lender];
 
         // define default permissions for each role
         $rolePermissionList = [
@@ -349,11 +350,36 @@ class RolePermissionSeeder extends Seeder
                 PermissionConstants::CLOSE_LOAN,
                 PermissionConstants::VIEW_REPAYMENTS,
             ],
+
+            $lender => [
+                // Miscellaneous
+                PermissionConstants::VENDOR_DASHBOARD,
+
+
+                PermissionConstants::VIEW_APPLICATIONS_LIST,
+
+                PermissionConstants::VIEW_TRANSACTION_HISTORY_LIST,
+
+                PermissionConstants::VIEW_OFFER_LIST,
+                PermissionConstants::CREATE_OFFER,
+                PermissionConstants::UPDATE_OFFER,
+                PermissionConstants::DELETE_OFFER,
+
+                PermissionConstants::VIEW_LOAN_LIST,
+                PermissionConstants::POST_CASH_REPAYMENT,
+                PermissionConstants::CLOSE_LOAN,
+                PermissionConstants::VIEW_REPAYMENTS,
+            ]
         ];
 
         // create all roles and assign their default permissions
         foreach ($roles as $roleName) {
-            $role = Role::firstOrCreate([
+            $role = Role::firstOrCreate(
+                [
+                'name' => $roleName,
+                'guard_name' => 'api'
+                ],
+                [
                 'name' => $roleName,
                 'guard_name' => 'api',
                 'created_at' => now(),

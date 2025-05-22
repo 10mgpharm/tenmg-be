@@ -1,0 +1,64 @@
+<?php
+
+namespace App\Http\Requests\Admin;
+
+use App\Enums\StatusEnum;
+use App\Models\EcommercePresentation;
+use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
+use Illuminate\Validation\Rules\Enum;
+
+class UpdateEcommercePresentationRequest extends FormRequest
+{
+    /**
+     * Determine if the user is authorized to make this request.
+     */
+    public function authorize(): bool
+    {
+        $user = $this->user();
+
+        return $user && $user->hasRole('admin');
+
+    }
+
+    /**
+     * Get the validation rules that apply to the request.
+     *
+     * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
+     */
+    public function rules(): array
+    {
+        // Retrieve the current medication type from the route
+        $presentation = $this->route('presentation');
+
+        return [
+            'name' => [
+                'required',
+                'string',
+                'max:255',
+                Rule::unique(EcommercePresentation::class)->ignore($presentation->id),
+            ],
+            'status' => [
+                'sometimes',
+                'string',
+                new Enum(StatusEnum::class),
+            ],
+            'active' => [
+                'sometimes',
+                'boolean',
+            ],
+        ];
+    }
+
+    /**
+     * Custom response for failed authorization.
+     *
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function failedAuthorization()
+    {
+        abort(response()->json([
+            'message' => 'You are not authorized to update this resource.',
+        ], 403));
+    }
+}

@@ -11,13 +11,15 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('credit_payment_methods', function (Blueprint $table) {
-            $table->id();
-            $table->string('name')->unique()->comment('10MG_VOUCHER, BANK_TRANSFER, DEBIT_CARD, ACCOUNT_MANDATE');
-            $table->boolean('active')->default(true);
-            $table->boolean('is_default')->default(false);
-            $table->timestamps();
-        });
+        if (! Schema::hasTable('credit_payment_methods')) {
+            Schema::create('credit_payment_methods', function (Blueprint $table) {
+                $table->id();
+                $table->string('name')->unique()->comment('10MG_VOUCHER, BANK_TRANSFER, DEBIT_CARD, ACCOUNT_MANDATE');
+                $table->boolean('active')->default(true);
+                $table->boolean('is_default')->default(false);
+                $table->timestamps();
+            });
+        }
     }
 
     /**

@@ -18,8 +18,8 @@
 ```composer install``` or ```composer update```
 - Install dependcies for frontend ship with the laravel default
 ```npm install```
-- Setup app data and passport access token and use default for any of the prompt value
-```php artisan setup:app && php artisan passport:client --personal```
+- Setup app data and passport automatically with one single command
+```php artisan setup:app```
 - Start the project
 ```php artisan serve```
 

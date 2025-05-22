@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Helpers\UtilityHelper;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
@@ -17,16 +18,50 @@ class Customer extends Model
         'email',
         'phone',
         'identifier',
+        'reference',
         'active',
     ];
+
+    public function banks()
+    {
+        return $this->hasMany(CreditCustomerBank::class);
+    }
 
     public function business()
     {
         return $this->belongsTo(Business::class);
     }
 
+    public function debitMandate()
+    {
+        return $this->hasOne(DebitMandate::class);
+    }
+
     public function avatar()
     {
         return $this->morphOne(FileUpload::class, 'model');
+    }
+
+    public function evaluationHistories()
+    {
+        return $this->hasMany(CreditTxnHistoryEvaluation::class);
+    }
+
+    public function lastEvaluationHistory()
+    {
+        return $this->hasOne(CreditTxnHistoryEvaluation::class)->latest('id');
+    }
+
+    public static function boot()
+    {
+        parent::boot();
+        self::creating(function ($model) {
+            $model->identifier = UtilityHelper::generateSlug('CUS');
+        });
+    }
+
+    public function creditScore()
+    {
+        return $this->hasOne(CreditScore::class, 'id', 'credit_score_id')->latest('id');
     }
 }

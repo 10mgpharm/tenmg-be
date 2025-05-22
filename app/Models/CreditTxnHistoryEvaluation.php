@@ -12,4 +12,14 @@ class CreditTxnHistoryEvaluation extends Model
     protected $table = 'credit_txn_history_evaluations';
 
     protected $guarded = [];
+
+    public function creditScore()
+    {
+        return $this->hasOne(CreditScore::class, 'txn_evaluation_id');
+    }
+
+    public function customerRecord()
+    {
+        return $this->hasOne(Customer::class, 'id', 'customer_id');
+    }
 }

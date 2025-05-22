@@ -3,12 +3,12 @@
 namespace App\Http\Controllers\API\Auth;
 
 use App\Enums\OtpType;
-use App\Helpers\UtilityHelper;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Auth\ForgotPasswordRequest;
 use App\Http\Requests\Auth\ResetPasswordRequest;
-use App\Models\Otp;
 use App\Models\User;
+use App\Services\Interfaces\IAuthService;
+use App\Services\OtpService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Hash;
@@ -16,6 +16,14 @@ use Illuminate\Support\Str;
 
 class PasswordController extends Controller
 {
+    /**
+     * signup user contructor
+     */
+    public function __construct(private IAuthService $authService)
+    {
+        $this->authService = $authService;
+    }
+
     /**
      * Send a password reset link.
      *
@@ -28,16 +36,17 @@ class PasswordController extends Controller
         $user = User::firstWhere(['email' => $request->input('email')]);
 
         if ($user) {
-            $otp = Otp::create([
-                'code' => UtilityHelper::generateOtp(),
-                'type' => OtpType::RESET_PASSWORD_VERIFICATION,
-                'user_id' => $user->id,
-            ]);
-            $user->sendPasswordResetNotification($otp->code);
+            (new OtpService)->forUser($user)
+                ->generate(OtpType::RESET_PASSWORD_VERIFICATION)
+                ->sendMail(OtpType::RESET_PASSWORD_VERIFICATION);
         }
 
-        return $this->returnJsonResponse(
+        $tokenResult = $user->createToken('Full Access Token', ['full']);
+
+        return $this->authService->returnAuthResponse(
             message: 'A one-time password has been sent to your registered email',
+            user: $user,
+            tokenResult: $tokenResult,
             statusCode: Response::HTTP_OK
         );
     }
@@ -47,17 +56,14 @@ class PasswordController extends Controller
      */
     public function reset(ResetPasswordRequest $request): JsonResponse
     {
-        $user = User::firstWhere('email', $request->input('email'));
+        $user = $request->user();
 
         $user->forceFill([
             'password' => Hash::make($request->input('password')),
             'remember_token' => Str::random(60),
         ])->save();
 
-        $user->otps()->firstWhere([
-            'code' => $request->input('otp'),
-            'type' => OtpType::RESET_PASSWORD_VERIFICATION,
-        ])->delete();
+        $user->token()->revoke();
 
         return $this->returnJsonResponse(
             message: __('passwords.reset'),

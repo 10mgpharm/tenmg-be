@@ -1,0 +1,55 @@
+name: Deploy To Production Environment
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+    deploy:
+      runs-on: ubuntu-latest
+
+      steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Set up SSH
+        uses: webfactory/ssh-agent@v0.5.3
+        with:
+          ssh-private-key: ${{ secrets.PROD_SSH_KEY }}
+
+      - name: SSH into EC2 and deploy
+        run: |
+          ssh -o StrictHostKeyChecking=no ubuntu@${{ secrets.PROD_EC2_INSTANCE_IP }} << 'EOF'
+            if [ ! -d "/var/www/koins-prod" ]; then
+              cd /var/www
+              sudo git clone https://${{ secrets.GH_USERNAME }}:${{ secrets.GH_TOKEN }}@github.com/consode/tenmg-be.git tenmg-prod
+            else
+              cd /var/www/koins-prod
+              sudo git reset --hard HEAD
+              sudo git pull https://${{ secrets.GH_USERNAME }}:${{ secrets.GH_TOKEN }}@github.com/consode/tenmg-be.git main
+            fi
+            cd /var/www/koins-prod
+            # sudo php -r "file_exists('.env') || copy('.env.example', '.env');"
+            # Update the .env file with secrets
+            # sudo sed -i "s|^APP_ENV=.*|APP_ENV=staging|" .env
+            # Install composer dependencies
+            sudo composer install --no-dev --optimize-autoloader
+
+            # Run migrations
+            sudo php artisan migrate --force
+
+            # Clear caches
+            sudo php artisan config:clear
+            sudo php artisan config:cache
+            sudo php artisan route:clear
+            sudo php artisan route:cache
+            sudo php artisan view:clear
+            sudo php artisan view:cache
+
+            # Set permissions
+            sudo chown -R $USER:www-data storage && sudo chown -R $USER:www-data bootstrap/cache && chmod -R 775 storage && chmod -R 775 bootstrap/cache
+
+            # Restart web server
+            sudo systemctl restart apache2
+          EOF

@@ -2,14 +2,20 @@
 
 namespace App\Models;
 
+use App\Notifications\AdminVerificationNotification;
 use App\Notifications\Auth\ResetPasswordNotification;
 use App\Notifications\Auth\VerifyEmailNotification;
+use App\Notifications\LicenseVerificationNotification;
+use App\Notifications\LoanSubmissionNotification;
+use App\Notifications\Order\OrderConfirmationNotification;
 use Carbon\Carbon;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
@@ -34,6 +40,14 @@ class User extends Authenticatable implements MustVerifyEmail
         'password',
         'phone',
         'active',
+        'use_two_factor',
+        'gender',
+        'avatar_id',
+        'email_verified_at',
+        'google_picture_url',
+        'force_password_change',
+        'status',
+        'status_comment',
     ];
 
     /**
@@ -56,6 +70,7 @@ class User extends Authenticatable implements MustVerifyEmail
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+            'use_two_factor' => 'boolean',
         ];
     }
 
@@ -76,7 +91,7 @@ class User extends Authenticatable implements MustVerifyEmail
 
         return new Attribute(
             get: function () use ($_this) {
-                return $_this->file?->url;
+                return $_this->file?->url ?? $this->google_picture_url;
             }
         );
     }
@@ -98,7 +113,9 @@ class User extends Authenticatable implements MustVerifyEmail
 
         return new Attribute(
             get: function () use ($_this) {
-                $lastActivity = $_this->activities()->latest()->first();
+                return '-';
+
+                $lastActivity = $_this->activities()->latest('id')->first();
 
                 if (! $lastActivity) {
                     return '-';
@@ -185,6 +202,21 @@ class User extends Authenticatable implements MustVerifyEmail
         $this->notify(new ResetPasswordNotification($code));
     }
 
+    public function sendLicenseVerificationNotification($message, $user = null)
+    {
+        $this->notify(new LicenseVerificationNotification($message, $user));
+    }
+
+    public function sendOrderConfirmationNotification($message, $user = null)
+    {
+        $this->notify(new OrderConfirmationNotification($message, $user));
+    }
+
+    public function sendLoanSubmissionNotification($message, $user = null)
+    {
+        $this->notify(new LoanSubmissionNotification($message, $user));
+    }
+
     protected function getDefaultGuardName(): string
     {
         return 'api';
@@ -195,6 +227,90 @@ class User extends Authenticatable implements MustVerifyEmail
      */
     public function otps(): HasMany
     {
-        return $this->hasMany(Otp::class)->latest();
+        return $this->hasMany(Otp::class)->latest('id');
     }
+
+    public function ownerBusinessType(): HasOne
+    {
+        return $this->hasOne(Business::class, 'owner_id', 'id');
+    }
+
+    public function businesses(): BelongsToMany
+    {
+        return $this->belongsToMany(Business::class, 'business_users', 'user_id', 'business_id');
+    }
+
+    /**
+     * Get the invites created by the user.
+     */
+    public function invites()
+    {
+        return $this->hasMany(Invite::class, 'creator_id')->latest('id');
+    }
+
+    /**
+     * Get the invite record associated to the user.
+     */
+    public function invited()
+    {
+        return $this->belongsTo(Invite::class, 'id', 'user_id');
+    }
+
+    /**
+     * Get the ecommerce medication types created by the user.
+     */
+    public function medicationTypes()
+    {
+        return $this->hasMany(EcommerceMedicationType::class, 'created_by_id')->latest('id');
+    }
+
+    /**
+     * Get the ecommerce brands created by the user.
+     */
+    public function brands()
+    {
+        return $this->hasMany(EcommerceBrand::class, 'created_by_id')->latest('id');
+    }
+
+    /**
+     * Get the ecommerce products created by the user.
+     */
+    public function products()
+    {
+        return $this->hasMany(EcommerceProduct::class, 'created_by_id')->latest('id');
+    }
+
+    /**
+     * Get the ecommerce categories created by the user.
+     */
+    public function categories()
+    {
+        return $this->hasMany(EcommerceCategory::class, 'created_by_id')->latest('id');
+    }
+
+    /**
+     * Define a query scope for filtering by business_id
+     */
+    public function scopeWithinBusiness($query)
+    {
+        $user = request()->user();
+
+        // Get the business ID of the request user
+        $business = $user->ownerBusinessType ?? $user->businesses()->first();
+
+        // Get user IDs that belong to the same business
+        $userIds = BusinessUser::where('business_id', $business?->id)->pluck('user_id');
+
+        return $query->whereIn('id', $userIds);
+    }
+
+    /**
+     * Get the user device tokens.
+     */
+    public function deviceTokens()
+    {
+        return $this->hasMany(DeviceToken::class, 'user_id', 'id')->latest('id');
+    }
+
+
 }
