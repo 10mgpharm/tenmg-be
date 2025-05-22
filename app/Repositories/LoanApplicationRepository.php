@@ -50,6 +50,7 @@ class LoanApplicationRepository
             'duration_in_months' => $data['durationInMonths'] ?? null,
             'source' => $data['source'] ?? 'DASHBOARD',
             'status' => 'PENDING_MANDATE',
+            'reference' => $data['reference'] ?? null,
         ]);
     }
 
@@ -452,6 +453,17 @@ class LoanApplicationRepository
     {
 
         return $this->fincraMandateRepository->verifyMandateStatus($reference);
+    }
+
+    public function verifyLoanApplicationStatus($reference)
+    {
+        $business = request()->business;
+        $application = LoanApplication::where('reference', $reference)->where('business_id', $business->id)->first();
+        if (!$application) {
+            throw new Exception('Loan application not found');
+        }
+
+        return $application;
     }
 
 

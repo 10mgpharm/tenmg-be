@@ -26,7 +26,8 @@ class LoanApplication extends Model
         'status',
         'tenmg_interest',
         'tenmg_amount',
-        'actual_interest'
+        'actual_interest',
+        'reference'
     ];
 
     public function business()

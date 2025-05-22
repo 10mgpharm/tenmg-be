@@ -3,6 +3,7 @@
 namespace App\Services\Storefront;
 
 use App\Models\EcommerceOrder;
+use App\Repositories\EcommercePaymentRepository;
 use App\Repositories\FincraPaymentRepository;
 use App\Repositories\OrderRepository;
 use Illuminate\Http\Request;
@@ -13,7 +14,7 @@ class EcommerceOrderService
     protected $orderRepository;
     protected $fincraPaymentRepository;
 
-    function __construct(OrderRepository $orderRepository, FincraPaymentRepository $fincraPaymentRepository)
+    function __construct(OrderRepository $orderRepository, FincraPaymentRepository $fincraPaymentRepository, private EcommercePaymentRepository $ecommercePaymentRepository)
     {
         $this->orderRepository = $orderRepository;
         $this->fincraPaymentRepository = $fincraPaymentRepository;
@@ -23,11 +24,16 @@ class EcommerceOrderService
     {
         try {
 
-            return $this->fincraPaymentRepository->initializePayment($request);
+            return $this->ecommercePaymentRepository->initializePayment($request);
 
         } catch (\Throwable $th) {
             throw $th;
         }
+    }
+
+    function getPaymentMethods()
+    {
+        return $this->ecommercePaymentRepository->getPaymentMethods();
     }
 
     function getOrderByStatusSuppliers(Request $request)

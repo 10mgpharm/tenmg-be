@@ -201,6 +201,12 @@ class LoanApplicationController extends Controller
         return $this->returnJsonResponse(data: $mandateStatus, message: 'Mandate status retrieved successfully');
     }
 
+    public function verifyLoanApplicationStatus($reference)
+    {
+        $mandateStatus = $this->loanApplicationService->verifyLoanApplicationStatus($reference);
+        return $this->returnJsonResponse(data: $mandateStatus, message: 'Application status retrieved successfully');
+    }
+
     public function completeLoadApplication($applicationId)
     {
         return $this->fincraMandateRepository->completeLoanApplication($applicationId);
