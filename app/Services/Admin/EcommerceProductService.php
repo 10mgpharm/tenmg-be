@@ -377,12 +377,18 @@ class EcommerceProductService implements IEcommerceProductService
                         ]
                     );
                 } else {
+                    $mapped_status = match (strtolower($validated['status'])) {
+                        'active' => 'activated',
+                        'inactive' => 'deactivated',
+                        'flagged' => 'flagged',
+                        default => strtolower($validated['status']),
+                    };
                     // Log the update event.
                     AuditLogService::log(
                         target: $product, // The product is the target (it is being updated)
                         event: strtolower($validated['status']) . '.product',
-                        action: "Product " . ucwords($validated['status']),
-                        description: "The product '{$product->name}({$product->medicationType->name})' has been " . strtolower($validated['status']) . " by {$user->name}({$business->name})",
+                        action: "Product $mapped_status",
+                        description: "The product '{$product->name}({$product->medicationType->name})' has been $mapped_status by {$user->name}({$business->name})",
                         crud_type: 'UPDATE', // Use 'UPDATE' for update actions
                         properties: [
                             'product_name' => $product->name,

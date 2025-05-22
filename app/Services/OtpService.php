@@ -137,20 +137,34 @@ class OtpService implements IOtpService
             throw new BadRequestHttpException('No OTP has been generated for this operation.');
         }
 
-        switch ($type->value) {
-            case 'RESET_PASSWORD_VERIFICATION':
-                $user->sendPasswordResetNotification($this->otp->code);
-                break;
-            case 'SIGNUP_EMAIL_VERIFICATION':
-                $user->sendEmailVerification($this->otp->code);
-                break;
-            case 'SUPPLIER_ADD_BANK_ACCOUNT':
-                Mail::to($user->email)->send(new Mailer(MailType::SUPPLIER_ADD_BANK_ACCOUNT, ['otp' => $this->otp->code]));
-                break;
+        try {
+            switch ($type->value) {
+                case 'RESET_PASSWORD_VERIFICATION':
+                    $user->sendPasswordResetNotification($this->otp->code);
+                    break;
+
+                case 'SIGNUP_EMAIL_VERIFICATION':
+                    $user->sendEmailVerification($this->otp->code);
+                    break;
+
+                case 'SUPPLIER_ADD_BANK_ACCOUNT':
+                    Mail::to($user->email)->send(new Mailer(MailType::SUPPLIER_ADD_BANK_ACCOUNT, ['otp' => $this->otp->code]));
+                    break;
+
+                case 'WITHDRAW_FUND_TO_BANK_ACCOUNT':
+                    Mail::to($user->email)->send(new Mailer(MailType::WITHDRAW_FUND_TO_BANK_ACCOUNT, ['otp' => $this->otp->code, 'user' => $user]));
+                    break;
+
+            }
+        } catch (\Exception $e) {
+            // Log the error and throw a more general exception if needed
+            logger()->error('Error sending OTP email for ' . $type->value . ': ' . $e->getMessage());
+            // throw new \Exception('There was an issue sending the OTP email. Please try again later.');s
         }
 
         return $this;
     }
+
 
     /**
      * Get the generated OTP instance.
