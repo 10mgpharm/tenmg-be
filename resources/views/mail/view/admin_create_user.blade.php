@@ -1,5 +1,5 @@
 @component('mail::message')
-# Welcome to {{ config('app.name') }}, {{ $user->name }}!
+# Welcome to {{ config('app.name') }}, {{  ($user->name ? explode(' ', trim($user->name))[0] : '') }}!
 
 Your account has been successfully created on {{ config('app.name') }}.
 

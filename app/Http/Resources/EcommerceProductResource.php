@@ -4,9 +4,12 @@ namespace App\Http\Resources;
 
 use App\Enums\StatusEnum;
 use App\Http\Resources\Storefront\EcommerceProductRatingResource;
+use App\Http\Resources\Storefront\EcommerceProductReviewOnlyResource;
 use App\Http\Resources\Storefront\EcommerceProductReviewResource;
 use App\Http\Resources\Storefront\EcommerceReviewProductResource;
 use App\Models\EcommerceProduct;
+use App\Models\EcommerceProductReview;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
@@ -42,6 +45,7 @@ class EcommerceProductResource extends JsonResource
             'discountPrice' => $this->discount_price,
             'lowStockLevel' => $this->low_stock_level,
             'outStockLevel' => $this->out_stock_level,
+            'created_at' => Carbon::parse($this->created_at)->format('M d, y h:i A'),
             'expiredAt' => $this->expired_at,
             'commission' => $this->commission,
             'comment' => $this->comment,

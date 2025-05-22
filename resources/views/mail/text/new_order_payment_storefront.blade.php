@@ -1,4 +1,4 @@
-# Hello {{ $name }},
+# Hello {{ ($user->name ? explode(' ', trim($user->name))[0] : '') }},
 
 Your order has been successfully placed! We are processing your order and will notify you accordingly.
 
