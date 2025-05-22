@@ -1,0 +1,10 @@
+# STAGING
+services:
+  app:
+    volumes:
+      - ./.env.staging:/var/www/.env
+    environment:
+      APP_ENV: staging
+      APP_DEBUG: false
+    ports:
+      - "9001:9000"

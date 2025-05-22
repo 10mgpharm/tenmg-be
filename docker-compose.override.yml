@@ -1,0 +1,10 @@
+# DEVELOPMENT
+services:
+  app:
+    volumes:
+      - .:/var/www
+      - ./.env.development:/var/www/.env
+    environment:
+      APP_ENV: local
+      APP_DEBUG: true
+    command: ["php-fpm"]

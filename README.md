@@ -144,3 +144,16 @@ https://laravel.com/docs/11.x/passport#managing-clients
 
 Middlewars
 https://laravel.com/docs/11.x/middleware#global-middleware
+
+## Docker Instruction
+* RUN APP BASE on the environment
+
+* FOR DEV
+```sh
+docker-compose up --build
+```
+
+* FOR STAGING
+```sh
+docker-compose -f docker-compose.yml -f docker-compose.staging.yml up --build
+```

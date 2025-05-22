@@ -1,0 +1,47 @@
+# Stage 1: Install dependencies
+FROM composer:2 AS vendor
+
+WORKDIR /app
+
+COPY . .
+RUN composer install --no-dev --optimize-autoloader
+
+# Stage 2: Build final image
+FROM php:8.2-fpm
+
+WORKDIR /var/www
+
+# Install dependencies
+RUN apt-get update && apt-get install -y \
+    build-essential \
+    libpng-dev \
+    libonig-dev \
+    libxml2-dev \
+    zip \
+    unzip \
+    curl \
+    git \
+    supervisor \
+    && docker-php-ext-install pdo_mysql mbstring exif pcntl bcmath gd \
+    && apt-get clean && rm -rf /var/lib/apt/lists/*
+
+# Install Composer
+COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
+
+# Copy app files and dependencies
+COPY --chown=www-data:www-data . .
+COPY --from=vendor /app/vendor ./vendor
+
+# Supervisor config
+COPY docker/supervisord.conf /etc/supervisord.conf
+COPY docker/laravel-worker.conf /etc/supervisor/conf.d/laravel-worker.conf
+
+# Entrypoint
+COPY docker/entrypoint.sh /entrypoint.sh
+RUN chmod +x /entrypoint.sh
+
+# Expose port
+EXPOSE 9000
+
+ENTRYPOINT ["/entrypoint.sh"]
+CMD ["/usr/bin/supervisord", "-c", "/etc/supervisord.conf"]

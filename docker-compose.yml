@@ -1,0 +1,47 @@
+# BASE (Default)
+version: '3.9'
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: tenmg-backend
+    container_name: tenmg_backend
+    restart: unless-stopped
+    ports:
+      - "9000:9000"
+    volumes:
+      - .:/var/www
+      - ./docker/supervisord.conf:/etc/supervisord.conf
+      - ./docker/laravel-worker.conf:/etc/supervisor/conf.d/laravel-worker.conf
+      - ./docker/entrypoint.sh:/entrypoint.sh
+      - ./logs:/var/www/storage/logs
+      - ./vendor:/var/www/vendor
+    depends_on:
+      - mysql
+      - redis
+
+  mysql:
+    image: mysql:8
+    container_name: mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_DATABASE: laravel
+      MYSQL_USER: user
+      MYSQL_PASSWORD: secret
+      MYSQL_ROOT_PASSWORD: root
+    volumes:
+      - mysql-data:/var/lib/mysql
+    ports:
+      - "3306:3306"
+
+  redis:
+    image: redis:alpine
+    container_name: redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+
+volumes:
+  mysql-data:
