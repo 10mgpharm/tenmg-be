@@ -62,6 +62,7 @@ use App\Http\Controllers\API\Storefront\ProductController as StorefrontProductCo
 use App\Http\Controllers\API\Storefront\ShippingAddressController as StorefrontShippingAddressController;
 use App\Http\Controllers\API\Storefront\ShoppingListController;
 use App\Http\Controllers\API\Storefront\StorefrontController;
+use App\Http\Controllers\API\Storefront\TenmgWebhookController;
 use App\Http\Controllers\API\Storefront\WishListController;
 use App\Http\Controllers\API\Supplier\AddBankAccountController;
 use App\Http\Controllers\API\Supplier\EcommercePendingPayoutController;
@@ -626,6 +627,7 @@ Route::prefix('v1')->group(function () {
             Route::post('/clear-cart', [CartController::class, 'clearUserCart']);
             Route::post('/buy-now', [CartController::class, 'buyNow']);
             Route::post('/checkout', [OrdersController::class, 'checkout']);
+            Route::get('/get-payment-methods', [OrdersController::class, 'getPaymentMethods']);
             Route::prefix('orders')->name('orders.')->group(function () {
                 Route::get('/', [OrdersController::class, 'getOrders']);
                 Route::get('/{id}', [OrdersController::class, 'getOrderDetails']);
@@ -782,6 +784,12 @@ Route::prefix('v1')->group(function () {
             Route::get('/mandate/verify/{reference}', [LoanApplicationController::class, 'verifyMandateStatus'])
                 ->middleware(['auth:api'])
                 ->name('client.applications.mandate.verify');
+
+            //verify payment for 10mg credit
+            Route::get('/payment/verify/{reference}', [LoanApplicationController::class, 'verifyLoanApplicationStatus'])
+                ->middleware(['clientAuth'])
+                ->name('client.applications.payment.verify');
+
         });
 
         Route::prefix('repayment')->group(function () {
@@ -806,3 +814,4 @@ Route::prefix('v1')->group(function () {
 });
 
 Route::post('/fincra/webook', [FincraWebhookController::class, 'verifyFincraPaymentWebHook']);
+Route::post('/tenmg/webook', [TenmgWebhookController::class, 'verifyTenmgCreditPaymentWebHook']);

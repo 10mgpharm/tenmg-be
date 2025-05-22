@@ -560,6 +560,8 @@ class FincraMandateRepository
                     'event' => 'application.submitted',
                     'data' => [
                         'applicationId' => $loanApplication->identifier,
+                        'merchantReference' => $loanApplication->reference,
+                        'reference' => $loanApplication->identifier,
                         'status' => $loanApplication->status,
                         'customer' => [
                             'customerId' => $loanApplication->customer->identifier,
@@ -978,7 +980,9 @@ class FincraMandateRepository
                     'event' => 'application.approved',
                     'data' => [
                         'applicationId' => $loanApplication->identifier,
-                        'status' => $loanApplication->status,
+                        'merchantReference' => $loanApplication->reference,
+                        'reference' => $loanApplication->identifier,
+                        'status' => "successful",
                         'customer' => [
                             'customerId' => $loanApplication->customer->identifier,
                             'name' => $loanApplication->customer->name,

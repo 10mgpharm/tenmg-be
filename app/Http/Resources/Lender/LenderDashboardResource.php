@@ -40,7 +40,7 @@ class LenderDashboardResource extends JsonResource
         $loansApp = $loanRequests->where('status', 'INITIATED')->orderBy("created_at", 'DESC')->take(5)->get();
 
         // Get the total count of all pending loan requests
-        $totalCount = LoanApplication::where('status', 'INITIATED')->count();
+        $totalCount = LoanApplication::where('status', 'INITIATED')->whereNotIn('id', $ignoredIds ?? [])->count();
 
         $records = CreditOffer::whereMonth('created_at', $currentMonth)
                          ->whereYear('created_at', $currentYear)->where('lender_id', $business_id)

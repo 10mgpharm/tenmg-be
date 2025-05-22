@@ -348,4 +348,9 @@ class LoanApplicationService
     {
         return $this->loanApplicationRepository->verifyMandateStatus($reference);
     }
+
+    public function verifyLoanApplicationStatus($reference)
+    {
+        return $this->loanApplicationRepository->verifyLoanApplicationStatus($reference);
+    }
 }

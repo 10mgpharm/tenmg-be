@@ -21,13 +21,19 @@ class OrdersController extends Controller
     {
         $request->validate([
             'orderId' => 'required|exists:ecommerce_orders,id',
-            // 'paymentMethodId' => 'required|exists:ecommerce_payment_methods,id',
             'deliveryAddress' => 'required|string',
-            'deliveryType' => 'required|:STANDARD,EXPRESS'
+            'deliveryType' => 'required|:STANDARD,EXPRESS',
+            'paymentMethod' => 'required|string|exists:ecommerce_payment_methods,slug',
         ]);
         $order = $this->ecommerceOrderService->checkout($request);
 
         return $this->returnJsonResponse(message: 'Success', data: $order);
+    }
+
+    function getPaymentMethods()
+    {
+        $paymentMethods = $this->ecommerceOrderService->getPaymentMethods();
+        return $this->returnJsonResponse(message: 'Success', data: $paymentMethods);
     }
 
     function getOrders(Request $request)
