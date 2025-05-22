@@ -27,7 +27,7 @@ class CreditTransactionsResource extends JsonResource
             "paymentMethod" => $this->payment_method,
             "reference" => $this->reference,
             "walletId" => $this->wallet_id,
-            "loanApplicationId" => $this->loanApplication_id,
+            "loanApplication" => $this->loanApplication == null ? null: new LoadApplicationResource($this->loanApplication),
             "meta" => $this->meta,
             "createdAt" => $this->created_at,
             "updatedAt" => $this->updated_at
