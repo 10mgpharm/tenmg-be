@@ -110,12 +110,17 @@ class LoanApplicationRepository
 
         if($business->type == "LENDER"){
 
+            $lenderId = $business->id;
             $ignoredIds = CreditLenderPreference::where('lender_id', $business->id)->first()->ignored_applications_id;
-            $query->when(!empty($ignoredIds ?? []), function ($querySub) use ($ignoredIds) {
-                $querySub->whereNotIn('id', $ignoredIds);
+            $query->when(!empty($ignoredIds ?? []), function ($querySub) use ($ignoredIds, $lenderId) {
+                $querySub->whereNotIn('id', $ignoredIds)->whereHas('offers', function($offerQuery) use ($lenderId) {
+                  $offerQuery->where('lender_id', $lenderId);
+              });;
             });
 
             $query->where('duration_in_months', '!=', null);
+
+
 
         }
 

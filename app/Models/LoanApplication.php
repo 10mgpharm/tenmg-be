@@ -40,6 +40,11 @@ class LoanApplication extends Model
         return $this->belongsTo(Customer::class);
     }
 
+    public function offers()
+    {
+        return $this->hasOne(CreditOffer::class, 'application_id');
+    }
+
     public static function boot()
     {
         parent::boot();
