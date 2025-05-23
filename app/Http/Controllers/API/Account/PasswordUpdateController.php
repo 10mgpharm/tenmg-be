@@ -36,7 +36,7 @@ class PasswordUpdateController extends Controller
 
                 
                 AuditLogService::log(
-                    target: $$user, // The user is the target (it is being updated)
+                    target: $user, // The user is the target (it is being updated)
                     event: 'update.user',
                     action: "Update password",
                     description: "$user->name updated their password and all other sessions were logged out",

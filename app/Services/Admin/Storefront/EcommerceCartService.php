@@ -157,7 +157,10 @@ class EcommerceCartService
                         ->notify(InAppNotificationType::PROCESSING_PRODUCT_ORDER_SUPPLIER);
 
                     // You can add queued email jobs here, e.g.,
-                    Mail::to($customer->email)->queue(new Mailer(MailType::NEW_ORDER_PAYMENT_STOREFRONT, []));
+                    Mail::to($customer->email)->queue(new Mailer(MailType::NEW_ORDER_PAYMENT_STOREFRONT, [
+                        'user' => $customer,
+                        'order' => $order,
+                    ]));
 
                     break;
 
@@ -166,13 +169,10 @@ class EcommerceCartService
                     break;
             }
 
-            return $order;
             $order->status = $request->input('status');
             $order->refund_status = $request->input('refundStatus');
             $order->requires_refund = $request->input('requiresRefund');
             $order->save();
-
-
 
             switch ($order->status) {
                 case 'COMPLETED':
@@ -185,7 +185,6 @@ class EcommerceCartService
                     (new SupplierOrderWalletService)->debit($order);
                     break;
             }
-
 
             return $order;
         } catch (\Throwable $th) {

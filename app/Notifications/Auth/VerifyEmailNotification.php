@@ -44,7 +44,7 @@ class VerifyEmailNotification extends Notification implements ShouldQueue
 
         return (new MailMessage)
             ->subject(Lang::get('Verify Your Account on ' . config('app.name')))
-            ->greeting(Lang::get('Hello ' . $notifiable->name . ','))
+            ->greeting(Lang::get('Hello ' . ($notifiable->name ? explode(' ', trim($notifiable->name))[0] : '') . ','))
             ->line(Lang::get('Welcome to ' . config('app.name') . '!'))
             ->line(Lang::get('To complete your registration and verify your account, use the code below:'))
             ->line(__('**Verification Code: ') . $this->code . '**')
