@@ -195,11 +195,11 @@ class OrderRepository
             $cart = EcommerceOrder::where('status', "CART")->where('customer_id', Auth::id())->first();
 
             if (!$cart) {
-                throw new Exception("You don't have item(s) in cart", 400);
+                abort(400, 'You don\'t have item(s) in cart');
             }
 
             if($cart->discount_code == $request->coupon) {
-                throw new Exception("Coupon already applied to this order", 400);
+                abort(400, "Coupon already applied to this order");
             }
 
             $coupon = $request->coupon;
@@ -209,7 +209,7 @@ class OrderRepository
 
             //check if coupon exist
             if (!$foundCoupon) {
-                throw new Exception("Coupon not found", 400);
+                abort(400, "Coupon not found");
             }
 
             //check if coupon has expired
@@ -220,7 +220,7 @@ class OrderRepository
             // $startDate = Carbon::parse($foundCoupon->start_date);
             //check if coupon has started
             if ($foundCoupon->status == "INACTIVE") {
-                throw new Exception("Coupon has not started", 400);
+                abort(400, "Coupon has not started");
             }
 
             $updatedOrder = $this->applyDiscountToOrder($cart, $foundCoupon);
@@ -243,7 +243,7 @@ class OrderRepository
         $applicableProduct = $couponData->applicable_products;
 
         if ($minimumOrderAmount != null && $cart->discount_price < $minimumOrderAmount) {
-            throw new Exception("Order amount is less than minimum order amount for discount", 400);
+            abort(400, "Order amount is less than minimum order amount for discount");
         }
 
 
