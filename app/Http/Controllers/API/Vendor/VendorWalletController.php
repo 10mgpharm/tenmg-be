@@ -28,5 +28,36 @@ class VendorWalletController extends Controller
         );
     }
 
+    public function initWithdrawals(Request $request)
+    {
+        $request->validate([
+            'amount' => 'required|numeric|min:1',
+            'bankAccountId' => 'required|exists:ecommerce_bank_accounts,id',
+        ]);
+
+        $withdrawal = $this->vendorWalletService->initWithdrawals($request);
+
+        return $this->returnJsonResponse(
+            message: 'Withdrawal initialized successfully. An otp has been sent to your registered email',
+            data: $withdrawal
+        );
+    }
+
+    public function withdrawFunds(Request $request)
+    {
+        $request->validate([
+            'reference' => 'required|exists:credit_transaction_histories,identifier',
+            'otp' => 'required|exists:otps,code',
+        ]);
+
+        $response = $this->vendorWalletService->withdrawFunds($request);
+
+        return $this->returnJsonResponse(
+            message: 'Withdrawal request submitted successfully.',
+            data: $response
+        );
+
+    }
+
 
 }
