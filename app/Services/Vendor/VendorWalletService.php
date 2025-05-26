@@ -3,6 +3,7 @@
 namespace App\Services\Vendor;
 
 use App\Repositories\VendorWalletRepository;
+use Illuminate\Http\Request;
 
 class VendorWalletService
 {
@@ -18,5 +19,15 @@ class VendorWalletService
     public function getTransactions()
     {
         return $this->vendorWalletRepository->getTransactions();
+    }
+
+    public function initWithdrawals(Request $request)
+    {
+        return $this->vendorWalletRepository->initWithdrawals($request);
+    }
+
+    public function withdrawFunds(Request $request)
+    {
+        return $this->vendorWalletRepository->withdrawFunds($request);
     }
 }
