@@ -446,8 +446,12 @@ Route::prefix('v1')->group(function () {
 
             Route::get('audit-logs', [VendorAuditLogController::class, 'index']);
             Route::get('audit-logs/search', [VendorAuditLogController::class, 'search']);
-            Route::post('withdraw-funds', WithdrawFundController::class);
+            // Route::post('withdraw-funds', WithdrawFundController::class);
 
+            Route::prefix('withdrawals')->group(function () {
+                Route::post('/init', [VendorWalletController::class, 'initWithdrawals']);
+                Route::post('/withdraw-funds', [VendorWalletController::class, 'withdrawFunds']);
+            });
 
             Route::prefix('api-logs')->group(function () {
                 Route::get('/', [VendorApiAuditLogController::class, 'getApiLogs']);
