@@ -11,6 +11,7 @@ use App\Http\Requests\Admin\UpdateEcommerceProductRequest;
 use App\Http\Resources\EcommerceProductResource;
 use App\Models\EcommerceProduct;
 use App\Services\Admin\EcommerceProductService;
+use App\Services\AuditLogService;
 use Illuminate\Http\JsonResponse;
 
 class EcommerceProductController extends Controller
@@ -25,9 +26,9 @@ class EcommerceProductController extends Controller
     public function index(ListEcommerceProductRequest $request): JsonResponse
     {
         $products = EcommerceProduct::with('rating')->latest()
-        ->paginate($request->has('perPage') ? $request->perPage : 10)
-        ->withQueryString()
-        ->through(fn(EcommerceProduct $item) => EcommerceProductResource::make($item));
+            ->paginate($request->has('perPage') ? $request->perPage : 10)
+            ->withQueryString()
+            ->through(fn(EcommerceProduct $item) => EcommerceProductResource::make($item));
 
         return $this->returnJsonResponse(
             message: 'Products successfully fetched.',
@@ -127,6 +128,23 @@ class EcommerceProductController extends Controller
      */
     public function destroy(DeleteEcommerceProductRequest $request, EcommerceProduct $product)
     {
+        $user = $request->user();
+        $business = $user->ownerBusinessType ?? $user->businesses()?->first();
+
+        // Log the update event.
+        AuditLogService::log(
+            target: $product, // The product is the target (it is being updated)
+            event: 'delete.product',
+            action: "Product deleted",
+            description: "The product '{$product->name}({$product->medicationType->name})' added by {$product->createdBy->name} has been deleted by {$user->name}({$business->name})",
+            crud_type: 'DELETE', // Use 'UPDATE' for update actions
+            properties: [
+                'product_name' => $product->name,
+                'product_description' => $product->description,
+                'product_status' => $product->status,
+                'product_active' => $product->active,
+            ]
+        );
         $product->forceDelete();
 
         return $this->returnJsonResponse(
