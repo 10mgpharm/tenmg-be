@@ -33,6 +33,7 @@ class EcommerceOrder extends Model
         'delivery_address',
         'delivery_type',
         'status',
+        'shipping_fee',
     ];
 
     /**
@@ -42,6 +43,7 @@ class EcommerceOrder extends Model
      */
     protected $attributes = [
         'status' => 'PENDING',
+        'shipping_fee' => 0.00,
     ];
 
     /**
