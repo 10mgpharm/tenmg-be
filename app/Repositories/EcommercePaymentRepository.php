@@ -39,7 +39,7 @@ class EcommercePaymentRepository
         }
 
         $amount = $order->grand_total;
-        $transactionFee = 100;
+        $transactionFee = $order->shipping_fee;
         $reference = UtilityHelper::generateSlug('PAY');
 
         $order->delivery_type = $request->deliveryType;

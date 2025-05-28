@@ -202,7 +202,8 @@ class EcommerceCartService
                 'delivery_address' => "address",
                 'status' => 'PENDING',
                 'logistic_total' => 0,
-                'total_weight' => $totalWeight
+                'total_weight' => $totalWeight,
+                'shipping_fee' => 3000.00, // Assuming a fixed shipping fee for now
             ]);
 
             $createOrder->orderDetails()->create([
