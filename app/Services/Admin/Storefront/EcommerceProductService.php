@@ -2,6 +2,7 @@
 
 namespace App\Services\Admin\Storefront;
 
+use App\Enums\StatusEnum;
 use App\Http\Resources\Storefront\EcommerceProductResource;
 use App\Models\EcommerceProduct;
 use App\Services\Interfaces\Storefront\IEcommerceProductService;
@@ -37,13 +38,17 @@ class EcommerceProductService implements IEcommerceProductService
     public function search(Request $request): LengthAwarePaginator
     {
         // Start the query directly from the EcommerceProduct model
-        $query = EcommerceProduct::where('active', 1)->whereIn('status', ['ACTIVE', 'APPROVED'])
+        $query = EcommerceProduct::where('active', 1)->whereIn('status', StatusEnum::actives())
             // Filter by product name
             ->when(
-                $request->input('search'),
-                fn($query, $search) => $query->where(
-                    fn($q) => $q->where('name', 'like', "%{$search}%")
-                    ->orWhere('slug', 'LIKE', "%{$search}%"))
+                $request->filled('search'),
+                function ($query) use ($request) {
+                    $search = addcslashes(trim($request->input('search')), '%_\\');
+                    $query->where(
+                        fn($q)  => $q->where('name', 'like', "%{$search}%")
+                        ->orWhere('slug', 'like', "%{$search}%")
+                    );
+                }
             )
             // Filter by inventory status (OUT OF STOCK, LOW STOCK, IN STOCK)
             ->when($request->input('inventories'), function ($query, $inventory) {
