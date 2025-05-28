@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\API\Admin;
 
+use App\Enums\InAppNotificationType;
 use App\Enums\StatusEnum;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\CreateUserRequest;
@@ -13,8 +14,14 @@ use App\Http\Requests\Admin\UpdateUserStatusRequest;
 use App\Http\Resources\Admin\UserResource;
 use App\Http\Resources\Admin\UserWithBusinessResource;
 use App\Models\User;
+use App\Notifications\Loan\LoanSubmissionNotification;
+use App\Notifications\UserStatusNotification;
 use App\Services\Admin\UserService;
+use App\Services\AuditLogService;
+use App\Services\InAppNotificationService;
 use Illuminate\Http\Request;
+use Illuminate\Notifications\Messages\MailMessage;
+use Illuminate\Support\Facades\Notification;
 
 class UsersController extends Controller
 {
@@ -50,12 +57,12 @@ class UsersController extends Controller
         if (!is_null($request->input('active'))) {
             $query->where('active', $request->input('active'));
         }
-        
+
         if($status = $request->input('status')){
             $status = is_array($status) ? array_unique(array_map('trim', array_map('strtoupper', $status))) : array_unique(array_map('trim', array_map('strtoupper', explode(",", $status))));
             $query->whereIn('status', $status);
         }
-    
+
         $users = $query->whereHas('ownerBusinessType')->latest('id')->paginate();
 
         return $this->returnJsonResponse(
@@ -70,7 +77,7 @@ class UsersController extends Controller
      * Admin add a new supplier, vendor, pharmacy.
      *
      * This method validates the incoming request, creates a new new supplier, vendor, pharmacy/
-     * using the validated data, and returns a JSON response with the new supplier's, vendor's, 
+     * using the validated data, and returns a JSON response with the new supplier's, vendor's,
      * pharmacy's details.
      *
      * @param CreateUserRequest $request
@@ -136,7 +143,41 @@ class UsersController extends Controller
         }
 
         $status = strtolower($validated['status']);
-        
+
+        AuditLogService::log(
+            target: $user,
+            event: 'User.'.$status,
+            action: 'User '.$status,
+            description: "User status has been successfully updated to {$status}.",
+            crud_type: 'UPDATE',
+            properties: []
+        );
+
+
+        $subject = $status == "suspended" ? "Account suspended" : "Account unsuspended";
+        $message = $status == "suspended"
+            ? "Your account has been suspended. Please contact support for more information."
+            : "Your account has been unsuspended. You can now access your account again.";
+        $mailable = (new MailMessage)
+            ->greeting('Hello '.$user->name)
+            ->subject($subject)
+            ->line($message)
+            ->line('Best Regards,')
+            ->line('The 10MG Health Team');
+
+        Notification::route('mail', [
+            $user->email => $user->name,
+        ])->notify(new UserStatusNotification($mailable));
+
+
+        if($status == "suspended") {
+            (new InAppNotificationService)
+                ->forUser($user)->notify(InAppNotificationType::ACCOUNT_SUSPENSION);
+        } else{
+            (new InAppNotificationService)
+                ->forUser($user)->notify(InAppNotificationType::ACCOUNT_UNSUSPENDED);
+        }
+
         return $this->returnJsonResponse(
             message: "User status has been successfully updated to {$status}.",
             data: new UserResource($user->refresh())
@@ -146,7 +187,7 @@ class UsersController extends Controller
     /**
      * Update the specified user's role and other details.
      *
-     * Validates the request data, updates the user's role (removes the current role and assigns the new one), 
+     * Validates the request data, updates the user's role (removes the current role and assigns the new one),
      * and returns a JSON response with the updated user data.
      *
      * @param UpdateUserRequest $request The validated request instance containing the user's updated data.
@@ -191,6 +232,15 @@ class UsersController extends Controller
     public function destroy(DeleteUserRequest $request, User $user)
     {
         $user->forceDelete();
+
+        AuditLogService::log(
+            target: $user,
+            event: 'User.deleted',
+            action: 'User deleted',
+            description: "User deleted successfully",
+            crud_type: 'DELETE',
+            properties: []
+        );
 
         return $this->returnJsonResponse(
             message: 'User successfully deleted.',
