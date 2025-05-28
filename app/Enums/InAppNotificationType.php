@@ -16,6 +16,8 @@ enum InAppNotificationType: string
     case NEW_ORDER_PAYMENT_ADMIN = 'new_order_payment_admin';
     case PROCESSING_ORDER_PHARMACY = 'processing_order_pharmacy';
     case PROCESSING_PRODUCT_ORDER_SUPPLIER = 'processing_product_order_supplier';
+    case ACCOUNT_SUSPENSION = 'account_suspension';
+    case ACCOUNT_UNSUSPENDED = 'account_unsuspended';
 
     /**
      * Get the subject for the notification type.
@@ -35,6 +37,8 @@ enum InAppNotificationType: string
             self::NEW_ORDER_PAYMENT_ADMIN => 'New Order Received',
             self::PROCESSING_ORDER_PHARMACY => 'Your Order is Now Being Processed',
             self::PROCESSING_PRODUCT_ORDER_SUPPLIER => 'Your Product is Now Being Processed',
+            self::ACCOUNT_SUSPENSION => 'Account Suspended',
+            self::ACCOUNT_UNSUSPENDED => 'Account Unsuspended',
         };
     }
 
@@ -63,6 +67,8 @@ enum InAppNotificationType: string
             self::NEW_ORDER_PAYMENT_ADMIN => 'A new order has been placed.',
             self::PROCESSING_ORDER_PHARMACY => 'Your order is now being processed! We are preparing your items for shipment and will notify you once they are on the way.',
             self::PROCESSING_PRODUCT_ORDER_SUPPLIER => 'Your product(s) in an order have been moved to the processing stage.',
+            self::ACCOUNT_SUSPENSION => 'Your account has been suspended. Please contact support for more information.',
+            self::ACCOUNT_UNSUSPENDED => 'Your account has been unsuspended. You can now access your account again.',
         };
     }
 
