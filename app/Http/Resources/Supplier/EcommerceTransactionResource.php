@@ -19,7 +19,7 @@ class EcommerceTransactionResource extends JsonResource
             'id' => $this->id,
             'name' => $this->supplier?->name,
             'orderId' => $this->ecommerce_order_id,
-            'order' =>$this->order,
+            'order' => $this->order?->only('id', 'amount', 'identifier', 'status', 'created_at'),
             'tenmg_commission' => $this->ecommerce_order_detail_id ? EcommerceOrderDetail::find($this->ecommerce_order_detail_id)->tenmg_commission : null,
             'txnType' => $this->txn_type,
             'txnGroup' => $this->txn_group,
