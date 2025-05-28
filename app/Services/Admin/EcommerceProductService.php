@@ -362,20 +362,38 @@ class EcommerceProductService implements IEcommerceProductService
                 : (false);
 
                 if($product->status == $validated['status']){
-                    // Log the update event.
-                    AuditLogService::log(
-                        target: $product, // The product is the target (it is being updated)
-                        event: 'update.product',
-                        action: "Product updated",
-                        description: "The product '{$product->name}({$product->medicationType->name})' added by {$product->createdBy->name} has been updated by {$user->name}({$business->name})",
-                        crud_type: 'UPDATE', // Use 'UPDATE' for update actions
-                        properties: [
-                            'product_name' => $product->name,
-                            'product_description' => $product->description,
-                            'product_status' => $product->status,
-                            'product_active' => $product->active,
-                        ]
-                    );
+
+                    if($validated['quantity'] && $product->quantity !== $validated['quantity']){
+                         // Log the restock event.
+                        AuditLogService::log(
+                            target: $product, // The product is the target (it is being updated)
+                            event: 'restock.product',
+                            action: "Product restocked",
+                            description: "A product has been restocked by {$user->name}({$business->name})",
+                            crud_type: 'UPDATE', // Use 'UPDATE' for update actions
+                            properties: [
+                                'product_name' => $product->name,
+                                'product_description' => $product->description,
+                                'product_status' => $product->status,
+                                'product_active' => $product->active,
+                            ]
+                        );
+                    } else {
+                        // Log the update event.
+                        AuditLogService::log(
+                            target: $product, // The product is the target (it is being updated)
+                            event: 'update.product',
+                            action: "Product updated",
+                            description: "The product '{$product->name}({$product->medicationType->name})' added by {$product->createdBy->name} has been updated by {$user->name}({$business->name})",
+                            crud_type: 'UPDATE', // Use 'UPDATE' for update actions
+                            properties: [
+                                'product_name' => $product->name,
+                                'product_description' => $product->description,
+                                'product_status' => $product->status,
+                                'product_active' => $product->active,
+                            ]
+                        );
+                    }
                 } else {
                     $mapped_status = match (strtolower($validated['status'])) {
                         'active' => 'activated',
