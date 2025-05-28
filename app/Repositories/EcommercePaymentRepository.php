@@ -39,7 +39,7 @@ class EcommercePaymentRepository
         }
 
         $amount = $order->grand_total;
-        $transactionFee = $order->shipping_fee;
+        $transactionFee = 100;
         $reference = UtilityHelper::generateSlug('PAY');
 
         $order->delivery_type = $request->deliveryType;
@@ -58,7 +58,7 @@ class EcommercePaymentRepository
         $orderPayment->customer_id = Auth::id();
         $orderPayment->amount = $amount;
         $orderPayment->fee = $transactionFee;
-        $orderPayment->total_amount = $amount + $transactionFee;
+        $orderPayment->total_amount = $amount + $transactionFee + $order->shipping_fee;
         $orderPayment->channel = $request->paymentMethod;
         $orderPayment->currency = 'NGN';
         $orderPayment->save();
