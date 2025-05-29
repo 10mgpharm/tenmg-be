@@ -162,6 +162,7 @@ class EcommerceCartService
             $cart->order_total = $cart->orderDetails()->sum('discount_price');
             $cart->grand_total = $cart->orderDetails()->sum('discount_price');
             $cart->qty_total = $cart->orderDetails()->sum('quantity');
+            $cart->shipping_fee = 3000.00; // Assuming a fixed shipping fee for now
             $cart->save();
 
             return $cart;

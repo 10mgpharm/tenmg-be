@@ -8,6 +8,8 @@ use App\Helpers\UtilityHelper;
 use App\Mail\Mailer;
 use App\Models\Otp;
 use App\Models\User;
+use App\Notifications\SupplierAddBankAccountNotification;
+use App\Notifications\WithdrawFundToBankAccountNotification;
 use App\Services\Interfaces\IOtpService;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Mail;
@@ -148,11 +150,10 @@ class OtpService implements IOtpService
                     break;
 
                 case 'SUPPLIER_ADD_BANK_ACCOUNT':
-                    Mail::to($user->email)->send(new Mailer(MailType::SUPPLIER_ADD_BANK_ACCOUNT, ['otp' => $this->otp->code]));
-                    break;
+                    $user->notify(new SupplierAddBankAccountNotification($this->otp->code));
 
                 case 'WITHDRAW_FUND_TO_BANK_ACCOUNT':
-                    Mail::to($user->email)->send(new Mailer(MailType::WITHDRAW_FUND_TO_BANK_ACCOUNT, ['otp' => $this->otp->code, 'user' => $user]));
+                    $user->notify(new WithdrawFundToBankAccountNotification($this->otp->code));
                     break;
 
             }

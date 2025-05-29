@@ -27,13 +27,14 @@ class StorefrontController extends Controller
             'products' => fn($query) => $query->where('active', 1)
                 ->whereIn('status', StatusEnum::actives())
                 ->latest('id')
-                ->limit(15)
-                ->with(['rating','reviews'])
-        ])->where('active', 1)
-            ->whereIn('status', StatusEnum::actives())
-            ->paginate($request->has('perPage') ? $request->perPage : 10)
-            ->withQueryString()
-            ->through(fn(EcommerceCategory $item) => StorefrontResource::make($item));
+                ->limit(10)
+                ->with(['rating', 'reviews'])
+        ])
+        ->where('active', 1)
+        ->whereIn('status', StatusEnum::actives())
+        ->paginate($request->input('perPage', 10))
+        ->withQueryString()
+        ->through(fn(EcommerceCategory $item) => StorefrontResource::make($item));
 
         return $this->returnJsonResponse(
             message: 'Products fetched successfully.',

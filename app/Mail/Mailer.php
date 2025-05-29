@@ -36,7 +36,7 @@ class Mailer extends Mailable implements ShouldQueue
     {
         return new Content(
             view: config('app.env') != 'local' ? $this->mailType->view() : null,
-            text: config('app.env') == 'local' ? $this->mailType->text() : null,
+            text: config('app.env') == 'local' ? $this->mailType->view() : null,
             with: $this->data,
         );
     }
