@@ -507,9 +507,9 @@ Route::prefix('v1')->group(function () {
 
                 });
 
-                Route::prefix('config')->group(function () {
-                    Route::get('/', [SettingConfigController::class, 'getAllSettings']);
-                    Route::post('/', [SettingConfigController::class, 'updateSettingsConfig']);
+                Route::prefix('api-manage')->group(function () {
+                    Route::get('/', [ApiKeyController::class, 'getVendorsWithAccess']);
+                    Route::post('/', [ApiKeyController::class, 'revokeApiKey']);
 
                 });
 

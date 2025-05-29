@@ -5,6 +5,7 @@ namespace App\Repositories;
 use App\Models\ApiKey;
 use App\Models\Business;
 use Exception;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 
 class ApiKeyRepository
@@ -98,5 +99,33 @@ class ApiKeyRepository
         }
 
         return $key->business;
+    }
+
+    public function getVendorsWithAccess(int $perPage = 15):\Illuminate\Contracts\Pagination\LengthAwarePaginator
+    {
+        $apiKeys = ApiKey::orderBy('created_at', 'desc')->paginate($perPage);
+
+        return $apiKeys;
+    }
+
+    public function revokeApiKey(Request $request)
+    {
+        $apiKey = ApiKey::where('business_id', $request->businessId)->first();
+
+        if (!$apiKey) {
+            throw new Exception('Api key not found for the given business.');
+        }
+
+        if ($request->environment == 'test') {
+            $apiKey->test_key = null;
+            $apiKey->test_secret = null;
+            $apiKey->save();
+        } else {
+            $apiKey->key = null;
+            $apiKey->secret = null;
+            $apiKey->save();
+        }
+
+        return $apiKey;
     }
 }
