@@ -12,7 +12,7 @@ interface IApiKeyService
 
     public function generateNewKeys(Business $business, string $type, string $environment): ?string;
 
-    public function updateApiKeyConfig(Business $business, string $environment, string $webhook_url, string $callback_url): ?ApiKey;
+    public function updateApiKeyConfig(Business $business, string $environment, string $webhook_url, string $callback_url, string $transactionUrl): ?ApiKey;
 
     public function getVendorsWithAccess(Business $business): \Illuminate\Contracts\Pagination\LengthAwarePaginator;
 

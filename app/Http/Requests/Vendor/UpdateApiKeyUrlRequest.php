@@ -40,6 +40,11 @@ class UpdateApiKeyUrlRequest extends FormRequest
                     $fail($attribute.' must be a valid URL starting with http:// or https://');
                 }
             }],
+            'transactionUrl' => ['sometimes', 'nullable', 'string', 'url', function ($attribute, $value, $fail) {
+                if (! preg_match('/^https?:\/\//', $value)) {
+                    $fail($attribute.' must be a valid URL starting with http:// or https://');
+                }
+            }],
         ];
     }
 

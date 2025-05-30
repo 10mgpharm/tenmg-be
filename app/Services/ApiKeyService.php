@@ -54,15 +54,17 @@ class ApiKeyService implements IApiKeyService
         return $apiKey ? $generatedKey : throw new Exception('Unable to generate new key');
     }
 
-    public function updateApiKeyConfig(Business $business, string $environment, string $webhookUrl, string $callbackUrl): ?ApiKey
+    public function updateApiKeyConfig(Business $business, string $environment, string $webhookUrl, string $callbackUrl, string $transactionUrl): ?ApiKey
     {
         $apiKey = $this->apiKeyRepository->updateVendorKey($business, $environment == 'test' ?
             [
                 'test_webhook_url' => $webhookUrl,
                 'test_callback_url' => $callbackUrl,
+                'test_transaction_url' => $transactionUrl,
             ] : [
                 'webhook_url' => $webhookUrl,
                 'callback_url' => $callbackUrl,
+                'transaction_url' => $transactionUrl,
             ]
         );
 
