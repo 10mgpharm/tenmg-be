@@ -123,10 +123,11 @@ class LoanApplicationService
         $customerData = array_key_exists('customer', $data) ? $data['customer'] : [];
         $customer = null;
 
-        if (array_key_exists('reference', $customerData) && isset($customerData['reference'])) {
+        // if (array_key_exists('reference', $customerData) && isset($customerData['reference'])) {
+        if (array_key_exists('email', $customerData) && isset($customerData['email'])) {
             $customer = Customer::firstOrCreate(
                 [
-                    'reference' => $customerData['reference'],
+                    'email' => $customerData['email'],
                     'business_id' => $vendor->id,
                 ],
                 [
@@ -150,6 +151,11 @@ class LoanApplicationService
                     'identifier' => UtilityHelper::generateSlug('CUS'),
                     'active' => true,
                 ]);
+        }
+
+        //check if the customer is suspended
+        if (!$customer->active) {
+            throw new Exception('Customer is suspended', Response::HTTP_FORBIDDEN);
         }
 
         $user = User::find($vendor->owner_id);
