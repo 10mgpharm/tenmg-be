@@ -3,6 +3,7 @@
 namespace App\Http\Requests\Vendor;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\Rule;
 
 class UpdateApiKeyUrlRequest extends FormRequest
@@ -14,7 +15,7 @@ class UpdateApiKeyUrlRequest extends FormRequest
     {
         $user = $this->user();
 
-        if (! $user) {
+        if (!$user) {
             return false;
         }
 
@@ -30,12 +31,12 @@ class UpdateApiKeyUrlRequest extends FormRequest
     {
         return [
             'environment' => ['required', 'string', Rule::in('test', 'live')],
-            'webhookUrl' => ['required', 'string', 'url', function ($attribute, $value, $fail) {
+            'webhookUrl' => ['sometimes', 'nullable', 'string', 'url', function ($attribute, $value, $fail) {
                 if (! preg_match('/^https?:\/\//', $value)) {
                     $fail($attribute.' must be a valid URL starting with http:// or https://');
                 }
             }],
-            'callbackUrl' => ['required', 'string', 'url', function ($attribute, $value, $fail) {
+            'callbackUrl' => ['sometimes', 'nullable', 'string', 'url', function ($attribute, $value, $fail) {
                 if (! preg_match('/^https?:\/\//', $value)) {
                     $fail($attribute.' must be a valid URL starting with http:// or https://');
                 }

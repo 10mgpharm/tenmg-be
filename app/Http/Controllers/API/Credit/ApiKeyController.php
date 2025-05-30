@@ -50,9 +50,9 @@ class ApiKeyController extends Controller
         $result = $this->apiKeyService->updateApiKeyConfig(
             $business,
             $request->environment,
-            $request->webhookUrl,
-            $request->callbackUrl,
-            $request->transactionUrl
+            $request->webhookUrl ?? '',
+            $request->callbackUrl ?? '',
+            $request->transactionUrl ?? ''
         );
 
         return $this->returnJsonResponse(
