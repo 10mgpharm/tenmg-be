@@ -304,9 +304,31 @@ class LoanApplicationRepository
             ->where('active', 1)
             ->first();
 
-            $user = User::find($vendor->owner_id);
+        $user = User::find($vendor->owner_id);
 
-            $token = $user->createToken('Full Access Token', ['full']);
+        $token = $user->createToken('Full Access Token', ['full']);
+
+        // TODO: check if vendor has a Transaction URL set, if not, use the default one
+        // If YES, call endpint to get the transaction hisoty of the customer'
+        // Secret-Key: $vendor->api_key->secret
+        // payload = [
+        //     'email' => $customer->emau=il
+        //     ]
+        // ];
+        // if response is successful, return the transaction history
+        // call to evaluate txn and run credit score - reuse methods
+        // else fall
+
+        // $data = [
+        //     'customer' => new CreditCustomerResource($customer),
+        //     'business' => new BusinessLimitedRecordResource($vendor),
+        //     'interestConfig' => [
+        //         'rate' => $loanSettings->lenders_interest,
+        //     ],
+        //     'application' => new LoadApplicationResource($application),
+        //     'defaultBank' => $defaultBank, //default bank for mandate authorisation
+        //     'token' => $token->accessToken
+        // ];
 
         $data = [
             'customer' => new CreditCustomerResource($customer),
