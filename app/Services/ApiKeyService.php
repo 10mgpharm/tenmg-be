@@ -7,6 +7,7 @@ use App\Models\Business;
 use App\Repositories\ApiKeyRepository;
 use App\Services\Interfaces\IApiKeyService;
 use Exception;
+use Illuminate\Http\Request;
 
 class ApiKeyService implements IApiKeyService
 {
@@ -66,5 +67,15 @@ class ApiKeyService implements IApiKeyService
         );
 
         return $apiKey;
+    }
+
+    public function getVendorsWithAccess($perPage = 10): \Illuminate\Contracts\Pagination\LengthAwarePaginator
+    {
+        return $this->apiKeyRepository->getVendorsWithAccess($perPage);
+    }
+
+    public function revokeApiKey(Request $request)
+    {
+        return $this->apiKeyRepository->revokeApiKey($request);
     }
 }
