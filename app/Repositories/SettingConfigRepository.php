@@ -2,6 +2,7 @@
 
 namespace App\Repositories;
 
+use App\Models\ApiKey;
 use App\Settings\CreditSettings;
 use App\Settings\LoanSettings;
 use Exception;

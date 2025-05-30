@@ -512,6 +512,12 @@ Route::prefix('v1')->group(function () {
 
                 });
 
+                Route::prefix('api-manage')->group(function () {
+                    Route::get('/', [ApiKeyController::class, 'getVendorsWithAccess']);
+                    Route::post('/', [ApiKeyController::class, 'revokeApiKey']);
+
+                });
+
 
             });
 

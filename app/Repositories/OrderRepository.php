@@ -214,13 +214,13 @@ class OrderRepository
 
             //check if coupon has expired
             if ($foundCoupon->status == "EXPIRED") {
-                throw new Exception("Coupon has expired", 400);
+                abort(400, "Coupon has expired");
             }
 
             // $startDate = Carbon::parse($foundCoupon->start_date);
             //check if coupon has started
             if ($foundCoupon->status == "INACTIVE") {
-                abort(400, "Coupon has not started");
+                abort(400, "Coupon has not started or is inactive");
             }
 
             $updatedOrder = $this->applyDiscountToOrder($cart, $foundCoupon);

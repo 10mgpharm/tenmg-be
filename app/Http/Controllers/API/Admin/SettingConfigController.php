@@ -21,4 +21,5 @@ class SettingConfigController extends Controller
         return $this->settingConfigService->updateSettingsConfig($request);
     }
 
+
 }
