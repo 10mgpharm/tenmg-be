@@ -27,7 +27,7 @@ class VendorEcommerceTransactionController extends Controller
             ->where('status', 'completed')
             ->whereHas('customer.roles', function ($query) use ($validated) {
                 $query->where('name', 'customer')
-                    ->where('email', '!=', $validated['email']);
+                    ->where('email', $validated['email']);
             })
             ->whereBetween('created_at', [now()->subMonths(6), now()])
             ->get();
