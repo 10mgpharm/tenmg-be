@@ -7,6 +7,7 @@ use App\Http\Middleware\ClientPublicApiMiddleware;
 use App\Http\Middleware\Cors;
 use App\Http\Middleware\ForceJsonResponse;
 use App\Http\Middleware\HandleAuthProvider;
+use App\Http\Middleware\Integration\VendorEcommerceTransactionMiddleware;
 use App\Http\Middleware\IsAdmin;
 use App\Http\Middleware\LogApiCall;
 use App\Http\Middleware\RoleCheckMiddleware;
@@ -50,6 +51,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'roleCheck' => RoleCheckMiddleware::class,
             'clientAuth' => ClientPublicApiMiddleware::class,
             'log.api' => LogApiCall::class,
+            'integration.vendor.ecommerce-transaction' => VendorEcommerceTransactionMiddleware::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {
