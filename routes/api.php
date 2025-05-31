@@ -80,6 +80,7 @@ use App\Http\Controllers\API\Vendor\VendorWalletController;
 use App\Http\Controllers\API\Webhooks\PaystackWebhookController;
 use App\Http\Controllers\API\WithdrawFundController;
 use App\Http\Controllers\BusinessSettingController;
+use App\Http\Controllers\Integration\VendorEcommerceTransactionController;
 use App\Http\Controllers\InviteController;
 use App\Http\Controllers\Supplier\DashboardController as SupplierDashboardController;
 use App\Http\Controllers\Supplier\EcommerceBrandController as SupplierEcommerceBrandController;
@@ -94,6 +95,10 @@ use Illuminate\Support\Facades\Route;
 
 Route::prefix('v1')->group(function () {
 
+    Route::get('integration/vendor/ecommerce-transactions', VendorEcommerceTransactionController::class)
+        ->name('integration.vendor.ecommerce-transactions')
+        ->middleware('integration.vendor.ecommerce-transaction');
+    
     // public routes
     Route::prefix('auth')->name('auth.')->group(function () {
         Route::post('/signup', [SignupUserController::class, 'store'])
