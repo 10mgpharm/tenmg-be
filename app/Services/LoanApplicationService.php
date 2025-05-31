@@ -117,8 +117,6 @@ class LoanApplicationService
     // Submit Loan Application link
     public function generateExternalApplicationLink(Business $vendor, array $data)
     {
-
-
         $requestedAmount = $data['requestedAmount'];
         $customerData = array_key_exists('customer', $data) ? $data['customer'] : [];
         $customer = null;
@@ -177,6 +175,12 @@ class LoanApplicationService
 
             $customer = $ongoingApplication->customer;
 
+            // if ongoing application, always update external vendor reference and amount incase it has changed
+            $txnReference =  array_key_exists('txnReference', $data) ? $data['txnReference'] : null;
+            $ongoingApplication->reference = $txnReference;
+            $ongoingApplication->requested_amount = $requestedAmount;
+            $ongoingApplication->save();
+
             ApiCallLog::create([
                 'business_id' => $vendor->id,
                 'event' => 'Loan link generated',
@@ -213,7 +217,6 @@ class LoanApplicationService
         $link = config('app.frontend_url').'/widgets/applications/'.$application->identifier.'?token='.$token->accessToken;
 
         $customer = $application->customer;
-
 
         ApiCallLog::create([
             'business_id' => $vendor->id,
@@ -358,5 +361,10 @@ class LoanApplicationService
     public function verifyLoanApplicationStatus($reference)
     {
         return $this->loanApplicationRepository->verifyLoanApplicationStatus($reference);
+    }
+
+    public function getApplicationStatus($reference)
+    {
+        return $this->loanApplicationRepository->getApplicationStatus($reference);
     }
 }

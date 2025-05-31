@@ -26,7 +26,6 @@ class SetupApplication extends Command
     public function handle()
     {
         $this->info('## Start setup.');
-        $this->call('optimize:clear');
 
         // Wipe the database
         $this->info('Wiping database....');
@@ -44,6 +43,7 @@ class SetupApplication extends Command
         $this->info('Data seeded.');
 
         // Output a success message
+        $this->call('optimize:clear');
         $this->info('## Setup done.');
 
         return Command::SUCCESS;
