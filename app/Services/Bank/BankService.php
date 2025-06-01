@@ -45,7 +45,6 @@ class BankService
                     if (Storage::disk('local')->exists($filePath)) {
                         $response = Storage::disk('local')->get($filePath);
                         $data = json_decode($response);
-                        Log::info('Bank List fetched from local file', ['response' => $data]);
                         return $data;
                     }
                 }
@@ -56,10 +55,6 @@ class BankService
                 if ($data->success == false) {
                     return [];
                 }
-
-                Log::info('Bank List fetched successfully', [
-                    'response' => $data,
-                ]);
 
                 return $data->data; // [{ "id", "code", "name", "isMobileVerified", "branches"},....]
             }

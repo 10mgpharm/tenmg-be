@@ -23,9 +23,6 @@ class PaystackWebhookController extends Controller
             return response()->json(['message' => 'Invalid signature'], 400);
         }
 
-        // Log the request for debugging
-        Log::info('Paystack Webhook Event', ['data' => $request->all()]);
-
         // Handle the event based on the type
         $event = $request->event;
         $payload = $request->data;

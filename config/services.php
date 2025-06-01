@@ -55,12 +55,4 @@ return [
     'google' => [
         'oauth_url' => env('GOOGLE_OAUTH2_URL'),
     ],
-    'integration' => [
-        'vendor' => [
-            'ecommerce_transaction' => [
-                'public_key' => env('VENDOR_ECOMMERCE_TRANSACTION_PUBLIC_KEY'),
-            ],
-        ],
-    ]
-
 ];

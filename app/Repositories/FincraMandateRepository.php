@@ -846,8 +846,6 @@ class FincraMandateRepository
 
         $vendorBusiness = Business::where('id', $loan->business_id)->first();
 
-        Log::info("info", $scheduleForMail);
-
         //send notification to customer
         $subject = 'Your Loan Has Been Approved!';
         $message = "Good news! Your loan application has been approved. Below are the details:";

@@ -360,8 +360,6 @@ class FincraPaymentRepository
 
     public function completeOrder($data)
     {
-        Log::info('completeOrder', ['data' => $data]);
-
         $body = $data->data;
         $merchantReference = $body->merchantReference;
         $status = $body->status;
