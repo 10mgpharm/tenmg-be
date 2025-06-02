@@ -6,6 +6,8 @@ use App\Models\ApiCallLog;
 use App\Models\CreditCustomerBank;
 use App\Models\Customer;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Storage;
 
 class BankService
 {
@@ -34,6 +36,18 @@ class BankService
             curl_close($curl);
 
             if ($err) {
+                if (config('app.env') !== 'production') {
+                    Log::error('Error fetching bank list', [
+                        'error' => $err,
+                    ]);
+                    $filePath = 'mock/banks.json';
+
+                    if (Storage::disk('local')->exists($filePath)) {
+                        $response = Storage::disk('local')->get($filePath);
+                        $data = json_decode($response);
+                        return $data;
+                    }
+                }
                 throw new \Exception($err);
             } else {
                 $data = json_decode($response);

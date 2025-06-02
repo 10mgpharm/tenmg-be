@@ -26,6 +26,7 @@ class LoadApplicationResource extends JsonResource
             'totalAmount' => $this->total_amount,
             'interestRate' => $this->interest_rate,
             'durationInMonths' => $this->duration_in_months,
+            'txnReference' => $this->reference, // return the reference the vendor send to us
             'source' => $this->source,
             'status' => $this->status,
             'createdAt' => $this->created_at,

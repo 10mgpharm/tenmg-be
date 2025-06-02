@@ -805,6 +805,10 @@ Route::prefix('v1')->group(function () {
                 ->middleware(['clientAuth'])
                 ->name('client.applications.payment.verify');
 
+            // [BNPL] get application status for order confirmation
+            Route::post('/status', [LoanApplicationController::class, 'getApplicationStatus'])
+                ->middleware('clientAuth')
+                ->name('client.applications.status');
         });
 
         Route::prefix('repayment')->group(function () {

@@ -224,8 +224,6 @@ class FincraMandateRepository
 
     public function completeLoanApplication($applicationId)
     {
-
-
         //get the loan application
         $loanApplication = LoanApplication::where('id', $applicationId)->first();
         if(!$loanApplication){
@@ -449,7 +447,6 @@ class FincraMandateRepository
             'meta' => json_encode($loanData),
         ]);
 
-
         // Create the loan record
         $loan = $this->loanRepository->updateOrCreate([
             'business_id' => $loanApplication->business_id,
@@ -477,12 +474,9 @@ class FincraMandateRepository
             $initTerm++;
         }
 
-
         $this->sendLoanApprovalProcess($loanApplication, $offer, $loan, $scheduleForMail);
 
-
         $this->createDisbursementRecord($loan, $offer->lender_id);
-
     }
 
     public function createDisbursementRecord($loan, $lenderId)
@@ -851,8 +845,6 @@ class FincraMandateRepository
     {
 
         $vendorBusiness = Business::where('id', $loan->business_id)->first();
-
-        Log::info("info", $scheduleForMail);
 
         //send notification to customer
         $subject = 'Your Loan Has Been Approved!';

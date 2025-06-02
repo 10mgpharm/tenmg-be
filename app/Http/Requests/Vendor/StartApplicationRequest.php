@@ -23,6 +23,7 @@ class StartApplicationRequest extends FormRequest
     {
         return [
             'requestedAmount' => ['required', 'min:0', 'numeric'],
+            'txnReference' => ['sometimes', 'nullable', 'string'],
         ];
     }
 }

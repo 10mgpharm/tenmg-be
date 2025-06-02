@@ -15,9 +15,7 @@ class VendorEcommerceTransactionMiddleware
      */
     public function handle(Request $request, Closure $next): Response
     {
-        
-
-        if ($request->header('X-Public-Key') !== config('services.integration.vendor.ecommerce_transaction.public_key')) {
+        if ($request->header('X-Public-Key') !== config('services.tenmg.public')) {
             return response()->json(['error' => 'Unauthorized. Invalid public key.'], 401);
         }
 

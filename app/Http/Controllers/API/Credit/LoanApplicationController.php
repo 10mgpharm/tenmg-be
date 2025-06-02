@@ -50,7 +50,6 @@ class LoanApplicationController extends Controller
 
     public function verifyApplicationLink($reference)
     {
-
         //check if load application exist with this id
         $application = LoanApplication::where("identifier", $reference)->first();
 
@@ -215,5 +214,15 @@ class LoanApplicationController extends Controller
     public function debitCustomerMandate($applicationId)
     {
         return $this->fincraMandateRepository->debitCustomerMandate($applicationId);
+    }
+
+    public function getApplicationStatus(Request $request)
+    {
+        $applicationStatus = $this->loanApplicationService->getApplicationStatus($request->reference);
+
+        return $this->returnJsonResponse(
+            data: $applicationStatus,
+            message: 'Application status retrieved successfully'
+        );
     }
 }

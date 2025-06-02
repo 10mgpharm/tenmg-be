@@ -179,7 +179,7 @@ class PaystackService
             !$isLiquidation && $repayment->update(['payment_status' => 'PROCESSING', 'payment_id' => $repaymentLog->id]);
 
             return $response;
-        } 
+        }
         $errorMessage = 'Paystack Error: '. $data['message'] ?? 'Failed to debit customer';
         Log::error('Failed to debit customer: ' . $response->body());
         throw new Exception($errorMessage, HttpResponse::HTTP_FAILED_DEPENDENCY);

@@ -3,7 +3,6 @@
 namespace App\Repositories;
 
 use App\Helpers\UtilityHelper;
-use App\Http\Controllers\API\Credit\LoanOfferController;
 use App\Http\Resources\BusinessLimitedRecordResource;
 use App\Http\Resources\CreditCustomerResource;
 use App\Http\Resources\LoadApplicationResource;
@@ -16,17 +15,18 @@ use App\Models\CreditLendersWallet;
 use App\Models\CreditOffer;
 use App\Models\Customer;
 use App\Models\DebitMandate;
+use App\Models\Loan;
 use App\Models\LoanApplication;
 use App\Models\User;
 use App\Services\ActivityLogService;
 use App\Services\AuditLogService;
-use App\Settings\CreditSettings;
 use App\Settings\LoanSettings;
 use Carbon\Carbon;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 
 class LoanApplicationRepository
@@ -37,6 +37,9 @@ class LoanApplicationRepository
     public function create(array $data)
     {
         $loanSettings = new LoanSettings();
+
+        // external provided reference by vender (optional)
+        $txnReference =  array_key_exists('txnReference', $data) ? $data['txnReference'] : null;
 
         return LoanApplication::create([
             'business_id' => $data['businessId'],
@@ -50,7 +53,7 @@ class LoanApplicationRepository
             'duration_in_months' => $data['durationInMonths'] ?? null,
             'source' => $data['source'] ?? 'DASHBOARD',
             'status' => 'PENDING_MANDATE',
-            'reference' => $data['reference'] ?? null,
+            'reference' => $txnReference,
         ]);
     }
 
@@ -149,8 +152,7 @@ class LoanApplicationRepository
 
     public function approveLoanApplicationManually(Request $request)
     {
-
-        if ($request->action == 'decline') {
+        if($request->action == 'decline'){
             return $this->declineLoanApplicationByLender($request);
         }
 
@@ -395,7 +397,9 @@ class LoanApplicationRepository
             ],
             'application' => new LoadApplicationResource($application),
             'defaultBank' => $defaultBank, //default bank for mandate authorisation
-            'token' => $token->accessToken
+            'token' => $token->accessToken,
+            // flag to indicate if the vendor is a demo vendor
+            'isDemo' => str_contains($vendor->email, 'demo'),
         ];
 
         return $data;
@@ -544,5 +548,70 @@ class LoanApplicationRepository
         }
 
         return $application;
+    }
+
+    public function getApplicationStatus($reference)
+    {
+        $application = LoanApplication::where('identifier', $reference)
+            ->orWhere('reference', $reference)
+            ->first();
+
+        if (!$application) {
+            throw new Exception('Provided application does not exist');
+        }
+
+        $message = '';
+        $orderStatus = '';
+
+        switch ($application->status) {
+            case 'CANCELLED':
+                $message = 'Your Application has been cancelled';
+                $orderStatus = 'CANCELLED';
+                break;
+            case 'INITIATED':
+                $message = 'Your Application is still being processed. Please wait';
+                $orderStatus = 'PENDING PAYMENT';
+                break;
+            case 'PENDING_MANDATE':
+                $message = 'Your Application is incomplete, provide mandate to continue';
+                $orderStatus = 'PENDING PAYMENT';
+                break;
+            case 'REJECTED':
+                $message = 'Unfortunately, your credit application was rejected.';
+                $orderStatus = 'CLOSED';
+                break;
+            default:
+                $message = 'Application has been approved';
+                $orderStatus = 'PAID';
+                break;
+        }
+
+        $vendor = $application->business;
+        $customer = $application->customer;
+
+        $user = User::where("id", $vendor->owner_id)->first();
+        $token = $user->createToken('Full Access Token', ['full']);
+        $loan = Loan::where('application_id', $application->id)->first();
+        $link = "";
+
+        if($loan){
+            $link = config('app.frontend_url') . '/widgets/repayments/' . $loan?->identifier.'?token='.$token->accessToken;
+        }
+
+        $data = [
+            'customer' => new CreditCustomerResource($customer),
+            'business' => new BusinessLimitedRecordResource($vendor),
+            'application' => new LoadApplicationResource($application),
+            'message' => $message,
+            'orderStatus' => $orderStatus,
+            'repaymentUrl' => $link,
+        ];
+
+        // only send property for demo instance
+        if(str_contains($vendor->email, 'demo')){
+            $data['isDemo'] = str_contains($vendor->email, 'demo');
+        }
+
+        return $data;
     }
 }

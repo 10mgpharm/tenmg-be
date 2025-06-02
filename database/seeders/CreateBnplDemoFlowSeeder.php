@@ -7,6 +7,7 @@ use App\Enums\BusinessType;
 use App\Helpers\UtilityHelper;
 use App\Models\Business;
 use App\Models\BusinessUser;
+use App\Models\CreditLendersWallet;
 use App\Models\User;
 use App\Repositories\ApiKeyRepository;
 use App\Services\AttachmentService;
@@ -42,11 +43,22 @@ class CreateBnplDemoFlowSeeder extends Seeder
         $this->command->info('Creating Demo Records ........');
 
         // create demo lender
-        $lender = $this->createDemoUser(BusinessType::LENDER, 'Kachi Solomon', 'lender@demo.com', 'Demo Lender');
-        //TODO: update lender business info
+        $lender = $this->createDemoUser(BusinessType::LENDER, 'John Kimani', 'lender@demo.com', 'Demo Lender');
+        $walletTypes = ['investment', 'deposit', 'ledger'];
+        foreach ($walletTypes as $type) {
+            CreditLendersWallet::firstOrCreate([
+                'lender_id' => $lender->id,
+                'type' => $type,
+            ],[
+                'lender_id' => $lender->id,
+                'type' => $type,
+                'prev_balance' => 0,
+                'current_balance' => $type === 'deposit' ? 5000000 : 0,
+            ]);
+        }
 
         // create demo vendor
-        $vendor = $this->createDemoUser(BusinessType::VENDOR, 'Danjuma Kehinde', 'vendor@demo.com', 'Demo Vendor');
+        $vendor = $this->createDemoUser(BusinessType::VENDOR, 'Sarah Conor', 'vendor@demo.com', 'Stealth Medics Store');
 
         $this->apiKeyRepository->updateVendorKey($vendor, [
             'key' => 'pk_live_DEMO_REMOVED_PLACEHOLDER',
@@ -71,7 +83,7 @@ class CreateBnplDemoFlowSeeder extends Seeder
         if (! $customer1) {
             $customer1 = $this->customerService->createCustomer(
                 data: [
-                    'name' => 'Daniel Aminat - Verified',
+                    'name' => 'Mart Olumide',
                     'email' => 'customer1@demo.com',
                     'phone' => '08093570288',
                     'reference' => UtilityHelper::generateSlug('CUS'),
@@ -86,7 +98,7 @@ class CreateBnplDemoFlowSeeder extends Seeder
         if (! $customer2) {
             $customer2 = $this->customerService->createCustomer(
                 data: [
-                    'name' => 'Saadat Adeola - UnVerified',
+                    'name' => 'Saadat Ademola',
                     'email' => 'customer2@demo.com',
                     'phone' => '08093570280',
                     'reference' => UtilityHelper::generateSlug('CUS'),
@@ -110,6 +122,7 @@ class CreateBnplDemoFlowSeeder extends Seeder
             [
                 'name' => $name,
                 'password' => Hash::make('password'),
+                'email_verified_at' => now(),
             ]
         );
         $userRole = $this->authService->resolveSignupRole(type: $businessType);
