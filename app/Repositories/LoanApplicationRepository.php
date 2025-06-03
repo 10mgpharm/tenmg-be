@@ -274,7 +274,7 @@ class LoanApplicationRepository
         if ($application->status == 'APPROVED') {
             throw new Exception('Application has been approved');
         }
-        if ($application->status == 'CANCELLED') {
+        if (strtolower($application->status) == 'cancelled' || strtolower($application->status) == 'canceled') {
             throw new Exception('Application has been cancelled');
         }
 
