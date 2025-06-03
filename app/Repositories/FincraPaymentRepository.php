@@ -30,6 +30,7 @@ use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
 use Throwable;
 use Illuminate\Database\Eloquent\Collection as EloquentCollection;
+use Illuminate\Support\Facades\Http;
 
 class FincraPaymentRepository
 {
@@ -181,88 +182,30 @@ class FincraPaymentRepository
         $customer = null;
         $amount = 0;
 
-        if(Str::startsWith($ref, "PAY")){
-
-            //check if we have a payment with this ref
-            $payment = EcommercePayment::where('reference', $ref)->first();
-            if (! $payment) {
-                throw new \Exception('Payment not found');
-            }
-
-            if ($payment->status != 'initiated') {
-                throw new \Exception('Payment already processed');
-            }
-
-            $customerData = User::find($payment->customer_id);
-            $customer = [
-                'name' => $customerData->name,
-                'email' => $customerData->email,
-                'phone' => $customerData->phone,
-                "bank_code"=> null,
-                "card_scheme"=> "mastercard"
-            ];
-
-            $amount = $payment->total_amount;
-
-
-        }elseif(Str::startsWith($ref, "THG")){
-
-            //check if we have a payment with this ref
-            $payment = CreditTransactionHistory::where('identifier', $ref)->where('transaction_group', 'deposit')->first();
-            if (! $payment) {
-                throw new \Exception('No payment exist with this reference');
-            }
-
-            if ($payment->status == 'cancelled') {
-                throw new \Exception('Payment has been cancelled');
-            }
-
-            if ($payment->status == 'success') {
-                throw new \Exception('Payment already processed');
-            }
-
-            $business = Business::find($payment->business_id)->owner;
-
-            $customer = [
-                'name' => $business->name,
-                'email' => $business->email,
-                'phone' => $business->phone,
-                "bank_code"=> null,
-                "card_scheme"=> "mastercard"
-            ];
-
-            $amount = $payment->amount;
-
-        }elseif(Str::startsWith($ref, "LNR")){
-
-            //check if we have a payment with this ref
-            $payment = CreditRepaymentPayments::where('reference', $ref)->first();
-            if (! $payment) {
-                throw new \Exception('No payment exist with this reference');
-            }
-
-            if ($payment->status == 'cancelled') {
-                throw new \Exception('Payment has been cancelled');
-            }
-
-            if ($payment->status == 'success') {
-                throw new \Exception('Payment already processed');
-            }
-
-            $business = Business::find($payment->business_id)->owner;
-
-            $customer = [
-                'name' => $business->name,
-                'email' => $business->email,
-                'phone' => $business->phone,
-                "bank_code"=> null,
-                "card_scheme"=> "mastercard"
-            ];
-
-            $amount = $payment->amount;
-
-        }else{
-            throw new \Exception('Invalid reference');
+        switch (true) {
+            case Str::startsWith($ref, "PAY"):
+                 $res = $this->ecommerceVerify($ref);
+                 $customer = $res['customer'];
+                 $amount = $res['amount'];
+                 $channel = $res['channel'];
+                 if($channel == "tenmg_credit"){
+                    return $this->completeOrderTenmgPayment($ref);
+                 }
+                break;
+            case Str::startsWith($ref, "THG"):
+                // This is a transaction history reference
+                $res = $this->transactionHistoryVerify($ref);
+                $customer = $res['customer'];
+                $amount = $res['amount'];
+                break;
+            case Str::startsWith($ref, "LNR"):
+                // This is a loan repayment reference
+                $res = $this->loanRepaymentVerify($ref);
+                $customer = $res['customer'];
+                $amount = $res['amount'];
+                break;
+            default:
+                throw new \Exception('Invalid reference');
         }
 
         //check if it is development environment
@@ -290,13 +233,6 @@ class FincraPaymentRepository
         $response = curl_exec($curl);
         $err = curl_error($curl);
 
-        // Log::info('completeOrder', [
-        //     'response' => $response,
-        //     'url' => config('services.fincra.url'),
-        //     'secret' => config('services.fincra.secret'),
-        //     'ref' => config('services.fincra.url').'/collections/merchant-reference/'.$ref,
-        // ]);
-
         curl_close($curl);
 
 
@@ -317,6 +253,110 @@ class FincraPaymentRepository
                 throw new \Exception("No response from Fincra");
             }
         }
+
+    }
+
+    public function ecommerceVerify($ref)
+    {
+
+        //check if we have a payment with this ref
+            $payment = EcommercePayment::where('reference', $ref)->first();
+            if (! $payment) {
+                throw new \Exception('Payment not found');
+            }
+
+            if ($payment->status != 'initiated') {
+                throw new \Exception('Payment already processed');
+            }
+
+            $customerData = User::find($payment->customer_id);
+            $customer = [
+                'name' => $customerData->name,
+                'email' => $customerData->email,
+                'phone' => $customerData->phone,
+                "bank_code"=> null,
+                "card_scheme"=> "mastercard"
+            ];
+
+            $amount = $payment->total_amount;
+
+            return [
+                'customer' => $customer,
+                'amount' => $amount,
+                'channel' => $payment->channel
+            ];
+
+    }
+
+    public function transactionHistoryVerify($ref)
+    {
+
+        //check if we have a payment with this ref
+        $payment = CreditTransactionHistory::where('identifier', $ref)->where('transaction_group', 'deposit')->first();
+        if (! $payment) {
+            throw new \Exception('No payment exist with this reference');
+        }
+
+        if ($payment->status == 'cancelled') {
+            throw new \Exception('Payment has been cancelled');
+        }
+
+        if ($payment->status == 'success') {
+            throw new \Exception('Payment already processed');
+        }
+
+        $business = Business::find($payment->business_id)->owner;
+
+        $customer = [
+            'name' => $business->name,
+            'email' => $business->email,
+            'phone' => $business->phone,
+            "bank_code"=> null,
+            "card_scheme"=> "mastercard"
+        ];
+
+        $amount = $payment->amount;
+
+        return [
+            'customer' => $customer,
+            'amount' => $amount
+        ];
+
+    }
+
+    public function loanRepaymentVerify($ref)
+    {
+
+        //check if we have a payment with this ref
+        $payment = CreditRepaymentPayments::where('reference', $ref)->first();
+        if (! $payment) {
+            throw new \Exception('No payment exist with this reference');
+        }
+
+        if ($payment->status == 'cancelled') {
+            throw new \Exception('Payment has been cancelled');
+        }
+
+        if ($payment->status == 'success') {
+            throw new \Exception('Payment already processed');
+        }
+
+        $business = Business::find($payment->business_id)->owner;
+
+        $customer = [
+            'name' => $business->name,
+            'email' => $business->email,
+            'phone' => $business->phone,
+            "bank_code"=> null,
+            "card_scheme"=> "mastercard"
+        ];
+
+        $amount = $payment->amount;
+
+        return [
+            'customer' => $customer,
+            'amount' => $amount
+        ];
 
     }
 
@@ -386,6 +426,94 @@ class FincraPaymentRepository
         //send email to customer.
         $customer = User::find($order->customer_id);
         $customer->sendOrderConfirmationNotification('Your payment with id '.$merchantReference.' was successful. Your order is processing.', $customer);
+
+        //send email to supplier
+        $orderItems = $order->orderDetails;
+
+        $this->removeBoughtItemFromShoppingList($orderItems);
+
+        for ($i = 0; $i < count($orderItems); $i++) {
+            $product = $orderItems[$i]->product;
+            $supplier = $orderItems[$i]->supplier;
+            $owner = $supplier->owner;
+
+            //Reduce product quantity
+            $product->quantity = $product->quantity - $orderItems[$i]->quantity;
+            $product->save();
+
+            $owner->sendOrderConfirmationNotification('You have a new order from '.$order->customer->name.'. Order for '.$product->name, $owner);
+        }
+
+        $admins = User::role('admin')->get();
+        foreach ($admins as $admin) {
+            $admin->sendOrderConfirmationNotification('New order from '.$order->customer->name, $admin);
+        }
+
+        return $orderPayment;
+
+    }
+
+    public function completeOrderTenmgPayment($ref)
+    {
+        $body = null;
+        $status = "initiated";
+        $externalReference = null;
+
+
+        //make a http call to 10mg payment api to verify the payment using
+        $data = [
+            'reference' => $ref,
+        ];
+
+        // Send the POST request
+        $response = Http::withHeaders([
+            'Secret-Key' => config('services.tenmg.secret'),
+            'Accept' => 'application/json',
+        ])->post(config('services.tenmg.url')."/api/v1/client/applications/status", $data);
+
+
+        if($response->successful()){
+
+            $res = $response->json();
+
+            // return $res['data'];
+
+            $status = $res['data']['orderStatus'] == "PAID" ? 'success':'initiated';
+            $externalReference = $res['data']['application']['identifier'];
+            $body = $res['data'];
+
+        }else{
+
+        }
+
+        // //get the order payment instance
+        $orderPayment = EcommercePayment::where('reference', $ref)->first();
+
+        // return $status;
+
+        if ($status != 'success') {
+            // throw new \Exception('Your payment is processing');
+            $orderPayment['applicationStatus'] = $body['orderStatus'];
+            return $orderPayment;
+        }
+
+
+        // //update external reference
+        $orderPayment->external_reference = $externalReference;
+        $orderPayment->status = 'success';
+        $orderPayment->paid_at = now();
+        $orderPayment->meta = json_encode($body);
+        $orderPayment->save();
+
+        //update order status
+        $order = EcommerceOrder::find($orderPayment->order_id);
+        $order->status = 'PENDING';
+        $order->payment_status = "PAYMENT_SUCCESSFUL";
+        $order->save();
+
+        //send email to customer.
+        $customer = User::find($order->customer_id);
+        $customer->sendOrderConfirmationNotification('Your payment with id '.$ref.' was successful. Your order is processing.', $customer);
 
         //send email to supplier
         $orderItems = $order->orderDetails;

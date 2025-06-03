@@ -236,41 +236,6 @@ class LoanApplicationService
         return $link;
     }
 
-    public function spoolExternalTransaction($businessId, $customer)
-    {
-
-        $apiKeys = ApiKey::where('business_id', $businessId)->first();
-
-        $spoolUrl = null;
-
-        if($apiKeys->is_test) {
-            $spoolUrl = $apiKeys->test_transaction_url ?? null;
-        } else {
-            $spoolUrl = $apiKeys->transaction_url ?? null;
-        }
-
-        //make request to spool url
-        $curl = curl_init();
-        curl_setopt_array($curl, array(
-            CURLOPT_URL => $spoolUrl,
-            CURLOPT_RETURNTRANSFER => true,
-            CURLOPT_ENCODING => '',
-            CURLOPT_MAXREDIRS => 10,
-            CURLOPT_TIMEOUT => 0,
-            CURLOPT_FOLLOWLOCATION => true,
-            CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
-            CURLOPT_CUSTOMREQUEST => 'POST',
-            CURLOPT_POSTFIELDS => json_encode([
-                'customer' => $customer,
-            ]),
-            CURLOPT_HTTPHEADER => array(
-                'Content-Type: application/json',
-                'Authorization: Bearer '.$apiKeys->api_key,
-            ),
-        ));
-
-    }
-
     public function verifyApplicationLink($reference)
     {
         return $this->loanApplicationRepository->verifyApplicationLink($reference);

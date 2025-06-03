@@ -23,6 +23,7 @@ use App\Services\AuditLogService;
 use App\Settings\LoanSettings;
 use Carbon\Carbon;
 use Exception;
+use Illuminate\Filesystem\FilesystemManager;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
@@ -32,7 +33,7 @@ use Illuminate\Support\Str;
 class LoanApplicationRepository
 {
 
-    function __construct(private FincraMandateRepository $fincraMandateRepository, private ActivityLogService $activityLogService) {}
+    function __construct(private FincraMandateRepository $fincraMandateRepository, private ActivityLogService $activityLogService, private FilesystemManager $fileSystem) {}
 
     public function create(array $data)
     {
@@ -335,11 +336,23 @@ class LoanApplicationRepository
                     $jsonData = $response->json();
 
                     if (is_array($jsonData) || is_object($jsonData)) {
-                        return response()->json([
-                            'status' => 'success',
-                            'type' => 'json',
-                            'data' => $jsonData
-                        ]);
+
+                        $jsonString = json_encode($jsonData, JSON_PRETTY_PRINT);
+                        // Define the file name and path for temporary storage
+                        $fileName = 'temp_' . time() . '.json';
+                        $filePath = 'temp/' . $fileName;
+
+                        // // Ensure the temp directory exists
+                        // Storage::disk($disk)->makeDirectory('temp');
+
+                        // // Save the file content to a temporary file in the specified disk
+                        // Storage::disk($disk)->put($filePath, $fileContent);
+
+                        // return response()->json([
+                        //     'status' => 'success',
+                        //     'type' => 'json',
+                        //     'data' => $jsonData
+                        // ]);
                     }
                 }
 
@@ -348,12 +361,12 @@ class LoanApplicationRepository
                 if ($contentDisposition && str_contains($contentDisposition, 'attachment') && str_contains($contentDisposition, '.json')) {
                     // Handle as a JSON file (e.g., save or process the file content)
                     $fileContent = $response->body();
-                    return response()->json([
-                        'status' => 'success',
-                        'type' => 'json_file',
-                        'filename' => $this->getFileNameFromDisposition($contentDisposition),
-                        'content' => $fileContent
-                    ]);
+                    // return response()->json([
+                    //     'status' => 'success',
+                    //     'type' => 'json_file',
+                    //     // 'filename' => $this->getFileNameFromDisposition($contentDisposition),
+                    //     'content' => $fileContent
+                    // ]);
                 }
 
 
