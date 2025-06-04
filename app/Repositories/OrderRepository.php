@@ -2,8 +2,11 @@
 
 namespace App\Repositories;
 
+use App\Models\Application;
 use App\Models\EcommerceDiscount;
 use App\Models\EcommerceOrder;
+use App\Models\EcommercePayment;
+use App\Models\LoanApplication;
 use Carbon\Carbon;
 use Exception;
 use Illuminate\Http\Request;
@@ -293,6 +296,23 @@ class OrderRepository
 
                 return $cart;
 
+    }
+
+    function lastPaymentStatus()
+    {
+        $latestOrderPayment = EcommercePayment::where('customer_id', Auth::id())
+            ->where('channel', 'tenmg_credit')
+            ->orderBy('created_at', 'desc')
+            ->first();
+        $loanApplication = null;
+        if ($latestOrderPayment) {
+            $loanApplication = $loanApplication = LoanApplication::where('reference', $latestOrderPayment->reference)->first();
+        }
+
+        return [
+            'transaction' => $latestOrderPayment,
+            'application' =>$loanApplication
+        ];
     }
 
 }

@@ -75,4 +75,10 @@ class EcommerceOrderService
     {
         return $this->fincraPaymentRepository->cancelPayment($ref);
     }
+
+    function lastPaymentStatus()
+    {
+        return $this->orderRepository->lastPaymentStatus();
+
+    }
 }
