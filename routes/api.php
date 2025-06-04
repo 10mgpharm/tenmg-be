@@ -839,5 +839,5 @@ Route::prefix('v1')->group(function () {
     });
 });
 
-Route::post('/fincra/webook', [FincraWebhookController::class, 'verifyFincraPaymentWebHook']);
-Route::post('/tenmg/webook', [TenmgWebhookController::class, 'verifyTenmgCreditPaymentWebHook']);
+Route::post('/fincra/webhook', [FincraWebhookController::class, 'verifyFincraPaymentWebHook']);
+Route::post('/tenmg/webhook', [TenmgWebhookController::class, 'verifyTenmgCreditPaymentWebHook']);
