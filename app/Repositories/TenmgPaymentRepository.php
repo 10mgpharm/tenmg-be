@@ -44,6 +44,7 @@ class TenmgPaymentRepository
                 case 'application.approved':
                     $this->completeOrder($data);
                     break;
+                // TODO: application.rejected
                 default:
 
                     break;
