@@ -203,7 +203,7 @@ class LoanApplicationService
         $loans = $this->loanRepository->fetchLoansByCustomerId($customer->id);
         $hasOngoingLoan = false;
         foreach ($loans as $loan) {
-            if ($loan['status'] === 'ONGOING_REPAYMENT') {
+            if ($loan['status'] === 'Ongoing') {
                 $hasOngoingLoan = true;
                 break;
             }
