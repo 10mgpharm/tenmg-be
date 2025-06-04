@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Helpers\UtilityHelper;
 use App\Models\ApiCallLog;
+use App\Models\ApiKey;
 use App\Models\Business;
 use App\Models\Customer;
 use App\Models\DebitMandate;
@@ -366,5 +367,10 @@ class LoanApplicationService
     public function getApplicationStatus($reference)
     {
         return $this->loanApplicationRepository->getApplicationStatus($reference);
+    }
+
+    public function cancelApplication($reference)
+    {
+        return $this->loanApplicationRepository->cancelApplication($reference);
     }
 }

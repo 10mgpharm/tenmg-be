@@ -98,7 +98,7 @@ Route::prefix('v1')->group(function () {
     Route::get('integration/vendor/ecommerce-transactions', VendorEcommerceTransactionController::class)
         ->name('integration.vendor.ecommerce-transactions')
         ->middleware('integration.vendor.ecommerce-transaction');
-    
+
     // public routes
     Route::prefix('auth')->name('auth.')->group(function () {
         Route::post('/signup', [SignupUserController::class, 'store'])
@@ -647,6 +647,7 @@ Route::prefix('v1')->group(function () {
                 Route::get('/', [OrdersController::class, 'getOrders']);
                 Route::get('/{id}', [OrdersController::class, 'getOrderDetails']);
                 Route::post('/coupon/verify', [OrdersController::class, 'couponVerify']);
+
             });
             Route::prefix('wishlist')->name('wishlist.')->group(function () {
                 Route::get('/', [WishListController::class, 'getWhishList']);
@@ -661,6 +662,7 @@ Route::prefix('v1')->group(function () {
             Route::prefix('payment')->name('payment.')->group(function () {
                 Route::get('/verify/{ref}', [OrdersController::class, 'verifyFincraPayment']);
                 Route::get('/cancel/{ref}', [OrdersController::class, 'cancelPayment']);
+                Route::get('/last-payment-status', [OrdersController::class, 'lastPaymentStatus']);
             });
 
             Route::get('reviews/unreviewed', [EcommerceProductReviewController::class, 'unreviewed']);
@@ -809,6 +811,11 @@ Route::prefix('v1')->group(function () {
             Route::post('/status', [LoanApplicationController::class, 'getApplicationStatus'])
                 ->middleware('clientAuth')
                 ->name('client.applications.status');
+
+            // [BNPL] cancel application
+            Route::get('/{reference}/cancel', [LoanApplicationController::class, 'cancelApplication'])
+                ->middleware('clientAuth')
+                ->name('client.applications.cancel');
         });
 
         Route::prefix('repayment')->group(function () {
@@ -832,5 +839,5 @@ Route::prefix('v1')->group(function () {
     });
 });
 
-Route::post('/fincra/webook', [FincraWebhookController::class, 'verifyFincraPaymentWebHook']);
-Route::post('/tenmg/webook', [TenmgWebhookController::class, 'verifyTenmgCreditPaymentWebHook']);
+Route::post('/fincra/webhook', [FincraWebhookController::class, 'verifyFincraPaymentWebHook']);
+Route::post('/tenmg/webhook', [TenmgWebhookController::class, 'verifyTenmgCreditPaymentWebHook']);

@@ -2,13 +2,19 @@
 
 namespace App\Repositories;
 
+use App\Models\Application;
 use App\Models\EcommerceDiscount;
 use App\Models\EcommerceOrder;
+use App\Models\EcommercePayment;
+use App\Models\EcommerceShopingList;
+use App\Models\LoanApplication;
+use App\Models\User;
 use Carbon\Carbon;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class OrderRepository
 {
@@ -294,5 +300,93 @@ class OrderRepository
                 return $cart;
 
     }
+
+    function lastPaymentStatus()
+    {
+        $latestOrderPayment = EcommercePayment::where('customer_id', Auth::id())
+            ->where('channel', 'tenmg_credit')
+            ->orderBy('created_at', 'desc')
+            ->first();
+        $loanApplication = null;
+        if ($latestOrderPayment) {
+            $loanApplication = $loanApplication = LoanApplication::where('reference', $latestOrderPayment->reference)->first();
+            if($loanApplication->status == "APPROVED"){
+                $this->completeOrder($loanApplication);
+            }
+        }
+
+        return [
+            'transaction' => $latestOrderPayment,
+            'application' =>$loanApplication
+        ];
+    }
+
+    public function completeOrder($data)
+    {
+        // $body = $data->data;
+        $merchantReference = $data->reference;
+        // $status = $data->status;
+
+        // if ($status != 'APPROVED') {
+        //     throw new \Exception('Payment not successful');
+        // }
+
+        // //get the order payment instance
+        $orderPayment = EcommercePayment::where('reference', $merchantReference)->first();
+
+        if($orderPayment->status == 'success') {
+            return $orderPayment;
+        }
+
+        // //update external reference
+        $orderPayment->external_reference = $data->identifier;
+        $orderPayment->status = 'success';
+        $orderPayment->paid_at = now();
+        $orderPayment->meta = json_encode($data);
+        $orderPayment->save();
+
+        //update order status
+        $order = EcommerceOrder::find($orderPayment->order_id);
+        $order->status = 'PENDING';
+        $order->payment_status = "PAYMENT_SUCCESSFUL";
+        $order->save();
+
+        //send email to customer.
+        $customer = User::find($order->customer_id);
+        $customer->sendOrderConfirmationNotification('Your payment with id '.$merchantReference.' was successful. Your order is processing.', $customer);
+
+        //send email to supplier
+        $orderItems = $order->orderDetails;
+
+        $this->removeBoughtItemFromShoppingList($orderItems);
+
+        for ($i = 0; $i < count($orderItems); $i++) {
+            $product = $orderItems[$i]->product;
+            $supplier = $orderItems[$i]->supplier;
+            $owner = $supplier->owner;
+
+            //Reduce product quantity
+            $product->quantity = $product->quantity - $orderItems[$i]->quantity;
+            $product->save();
+
+            $owner->sendOrderConfirmationNotification('You have a new order from '.$order->customer->name.'. Order for '.$product->name, $owner);
+        }
+
+        $admins = User::role('admin')->get();
+        foreach ($admins as $admin) {
+            $admin->sendOrderConfirmationNotification('New order from '.$order->customer->name, $admin);
+        }
+
+        return $orderPayment;
+
+    }
+
+    public function removeBoughtItemFromShoppingList($orderItems)
+    {
+        for ($i = 0; $i < count($orderItems); $i++) {
+            EcommerceShopingList::where('user_id', Auth::id())->where('product_id', $orderItems[$i]->ecommerce_product_id)->delete();
+        }
+    }
+
 
 }

@@ -225,4 +225,13 @@ class LoanApplicationController extends Controller
             message: 'Application status retrieved successfully'
         );
     }
+
+    public function cancelApplication($reference)
+    {
+        $this->loanApplicationService->cancelApplication($reference);
+
+        return $this->returnJsonResponse(
+            message: 'Application cancelled successfully'
+        );
+    }
 }

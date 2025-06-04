@@ -72,4 +72,11 @@ class OrdersController extends Controller
         $orderPayment = $this->ecommerceOrderService->verifyFincraPaymentWebhook($ref);
         // return $this->returnJsonResponse(message: 'Success', data: $orderPayment);
     }
+
+    function lastPaymentStatus()
+    {
+        $orderLatestPayment = $this->ecommerceOrderService->lastPaymentStatus();
+
+        return $this->returnJsonResponse(message: 'Success', data: $orderLatestPayment);
+    }
 }

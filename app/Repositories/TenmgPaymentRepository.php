@@ -70,7 +70,13 @@ class TenmgPaymentRepository
 
         // //get the order payment instance
         $orderPayment = EcommercePayment::where('reference', $merchantReference)->first();
-        // //update external reference
+
+        if($orderPayment->status == 'success') {
+            Log::info('Payment already processed for reference: ' . $merchantReference);
+            return $orderPayment;
+        }
+
+        // update external reference
         $orderPayment->external_reference = $body->reference;
         $orderPayment->status = 'success';
         $orderPayment->paid_at = now();
