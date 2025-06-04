@@ -18,6 +18,7 @@ use App\Models\DebitMandate;
 use App\Models\Loan;
 use App\Models\LoanApplication;
 use App\Models\User;
+use App\Notifications\Loan\LoanSubmissionNotification;
 use App\Services\ActivityLogService;
 use App\Services\AuditLogService;
 use App\Settings\LoanSettings;
@@ -25,9 +26,11 @@ use Carbon\Carbon;
 use Exception;
 use Illuminate\Filesystem\FilesystemManager;
 use Illuminate\Http\Request;
+use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Str;
 
 class LoanApplicationRepository
@@ -626,5 +629,46 @@ class LoanApplicationRepository
         }
 
         return $data;
+    }
+
+    public function cancelApplication(string $reference)
+    {
+        $loanApplication = LoanApplication::where('identifier', $reference)
+            ->orWhere('reference', $reference)->first();
+
+        if (!$loanApplication) {
+            throw new Exception('Provided application does not exist');
+        }
+
+
+        if ($loanApplication->status == 'CANCELED') {
+            throw new Exception('Application has already been cancelled');
+        }
+
+        if ($loanApplication->status == 'APPROVED') {
+            throw new Exception('Application has already been approved');
+        }
+
+        $loanApplication->status = 'CANCELED';
+        $loanApplication->save();
+
+        $vendorBusiness = $loanApplication->business;
+
+        $subject = 'Loan Application Cancelled';
+        $user = User::where('id', $vendorBusiness->owner_id)->first();
+        $message = $loanApplication->customer->name." has cancelled their loan application";
+
+        $mailable = (new MailMessage)
+            ->greeting('Hello '.$user->name)
+            ->subject($subject)
+            ->line($message)
+            ->line('Best Regards,')
+            ->line('The 10MG Health Team');
+
+        Notification::route('mail', [
+            $user->email => $user->name,
+        ])->notify(new LoanSubmissionNotification($mailable));
+
+        return $loanApplication;
     }
 }

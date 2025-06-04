@@ -368,4 +368,9 @@ class LoanApplicationService
     {
         return $this->loanApplicationRepository->getApplicationStatus($reference);
     }
+
+    public function cancelApplication($reference)
+    {
+        return $this->loanApplicationRepository->cancelApplication($reference);
+    }
 }

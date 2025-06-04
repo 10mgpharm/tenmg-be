@@ -811,6 +811,11 @@ Route::prefix('v1')->group(function () {
             Route::post('/status', [LoanApplicationController::class, 'getApplicationStatus'])
                 ->middleware('clientAuth')
                 ->name('client.applications.status');
+
+            // [BNPL] cancel application
+            Route::get('/{reference}/cancel', [LoanApplicationController::class, 'cancelApplication'])
+                ->middleware('clientAuth')
+                ->name('client.applications.cancel');
         });
 
         Route::prefix('repayment')->group(function () {
@@ -834,5 +839,5 @@ Route::prefix('v1')->group(function () {
     });
 });
 
-Route::post('/fincra/webook', [FincraWebhookController::class, 'verifyFincraPaymentWebHook']);
-Route::post('/tenmg/webook', [TenmgWebhookController::class, 'verifyTenmgCreditPaymentWebHook']);
+Route::post('/fincra/webhook', [FincraWebhookController::class, 'verifyFincraPaymentWebHook']);
+Route::post('/tenmg/webhook', [TenmgWebhookController::class, 'verifyTenmgCreditPaymentWebHook']);
