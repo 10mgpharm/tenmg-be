@@ -309,8 +309,8 @@ class OrderRepository
             ->first();
         $loanApplication = null;
         if ($latestOrderPayment) {
-            $loanApplication = $loanApplication = LoanApplication::where('reference', $latestOrderPayment->reference)->first();
-            if($loanApplication->status == "APPROVED"){
+            $loanApplication = LoanApplication::where('reference', $latestOrderPayment->reference)->first();
+            if($loanApplication?->status == "APPROVED"){
                 $this->completeOrder($loanApplication);
             }
         }
