@@ -11,6 +11,7 @@ use App\Http\Middleware\Integration\VendorEcommerceTransactionMiddleware;
 use App\Http\Middleware\IsAdmin;
 use App\Http\Middleware\LogApiCall;
 use App\Http\Middleware\RoleCheckMiddleware;
+use App\Http\Middleware\StoreVisitorCountMiddleware;
 use Illuminate\Auth\AuthenticationException;
 use Illuminate\Database\QueryException;
 use Illuminate\Foundation\Application;
@@ -52,6 +53,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'clientAuth' => ClientPublicApiMiddleware::class,
             'log.api' => LogApiCall::class,
             'integration.vendor.ecommerce-transaction' => VendorEcommerceTransactionMiddleware::class,
+            'store.visitor.count' => StoreVisitorCountMiddleware::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {
