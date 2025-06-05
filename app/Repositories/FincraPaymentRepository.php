@@ -95,7 +95,7 @@ class FincraPaymentRepository
 
         /* Queued emails */
         Mail::to($user->email)->queue(new Mailer(MailType::NEW_ORDER_PAYMENT_STOREFRONT, [
-            'name' => $user->name,
+            'user' => $user,
             'order' => $order,
         ]));
         // Suppliers email
