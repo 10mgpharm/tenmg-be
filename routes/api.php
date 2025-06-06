@@ -138,7 +138,7 @@ Route::prefix('v1')->group(function () {
         Route::post('invite/accept', [InviteController::class, 'accept'])->name('invite.accept');
     });
 
-    Route::prefix('storefront')->name('storefront.')->group(function () {
+    Route::prefix('storefront')->middleware('store.visitor.count')->name('storefront.')->group(function () {
         Route::get('images', [CarouselImageController::class, 'index']);
         Route::get('faqs', [StorefrontFaqController::class, 'index']);
     });
@@ -607,7 +607,7 @@ Route::prefix('v1')->group(function () {
         });
 
         // STOREFRONTS specific routes
-        Route::prefix('storefront')->name('storefront.')->group(function () {
+        Route::prefix('storefront')->middleware('store.visitor.count')->name('storefront.')->group(function () {
 
             Route::prefix('settings')->name('settings.')->group(function () {
                 Route::get('/', [BusinessSettingController::class, 'show']);
