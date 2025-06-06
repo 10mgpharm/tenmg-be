@@ -3,6 +3,7 @@
 namespace App\Repositories;
 
 use App\Helpers\UtilityHelper;
+use App\Http\Controllers\API\Credit\TransactionHistoryController;
 use App\Http\Resources\BusinessLimitedRecordResource;
 use App\Http\Resources\CreditCustomerResource;
 use App\Http\Resources\LoadApplicationResource;
@@ -31,12 +32,14 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Notification;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
+use SplFileInfo;
 
 class LoanApplicationRepository
 {
 
-    function __construct(private FincraMandateRepository $fincraMandateRepository, private ActivityLogService $activityLogService, private FilesystemManager $fileSystem) {}
+    function __construct(private FincraMandateRepository $fincraMandateRepository, private ActivityLogService $activityLogService, private FilesystemManager $fileSystem, private TransactionHistoryController $transactionHistoryController) {}
 
     public function create(array $data)
     {
@@ -346,40 +349,31 @@ class LoanApplicationRepository
                         $filePath = 'temp/' . $fileName;
 
                         // // Ensure the temp directory exists
-                        // Storage::disk($disk)->makeDirectory('temp');
+                        Storage::disk('local')->makeDirectory('temp');
 
-                        // // Save the file content to a temporary file in the specified disk
-                        // Storage::disk($disk)->put($filePath, $fileContent);
+                        // Save the file content to a temporary file in the specified disk
+                        Storage::disk('local')->put($filePath, $jsonString);
 
-                        // return response()->json([
-                        //     'status' => 'success',
-                        //     'type' => 'json',
-                        //     'data' => $jsonData
-                        // ]);
+                        // Get the full path to the file
+                        $fullFilePath = storage_path('app/' . $filePath);
+
+                        $finalFile = new SplFileInfo($fullFilePath);
+                        $this->transactionHistoryController->uploadTransactionHistory(
+                            request: new Request([
+                                'file' => $finalFile,
+                                'customerId' => $application->customer->id
+                            ])
+                        );
+
+                        if (file_exists($finalFile->getPathname())) {
+                            unlink($finalFile->getPathname());
+                        }
                     }
-                }
-
-                // Check if the response is a JSON file
-                $contentDisposition = $response->header('Content-Disposition');
-                if ($contentDisposition && str_contains($contentDisposition, 'attachment') && str_contains($contentDisposition, '.json')) {
-                    // Handle as a JSON file (e.g., save or process the file content)
-                    $fileContent = $response->body();
-                    // return response()->json([
-                    //     'status' => 'success',
-                    //     'type' => 'json_file',
-                    //     // 'filename' => $this->getFileNameFromDisposition($contentDisposition),
-                    //     'content' => $fileContent
-                    // ]);
                 }
 
 
             } else {
                 // Handle the error
-                // return response()->json([
-                //     'status' => 'error',
-                //     'message' => $response->status(),
-                //     'errors' => $response->json()
-                // ], $response->status());
             }
         }
 
