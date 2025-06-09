@@ -100,7 +100,8 @@ class EcommerceWalletController extends Controller
                         ->orWhere('balance_before', 'like', "%{$search}%")
                         ->orWhere('balance_after', 'like', "%{$search}%")
                         ->orWhereHas('supplier', fn($query) => $query->where('name', 'like', "%{$search}%")->orWhere('short_name', 'like', "%{$search}%"))
-                    // ->orWhereHas('order', fn($query) => $query->where('order_number', 'like', "%{$search}%"))
+                        ->orWhereHas('order', fn($query) => $query->where('identifier', 'like', "%{$search}%"))
+
                 )
             )
             ->latest('id')
@@ -120,7 +121,8 @@ class EcommerceWalletController extends Controller
                         ->orWhere('discount_price', 'like', "%{$search}%")
                         ->orWhereHas('product', fn($query) => $query->where('name', 'like', "%{$search}%")->orWhere('slug', 'like', "%{$search}%"))
                 )
-                // ->orWhereHas('order', fn($query) => $query->where('order_number', 'like', "%{$search}%"))
+                ->orWhereHas('order', fn($query) => $query->where('identifier', 'like', "%{$search}%"))
+
             )
             ->latest()
             ->paginate($request->get('perPage', 30))
