@@ -21,6 +21,7 @@ class DashboardResource extends JsonResource
             'todayOrder' => $this['today_order'],
             'revenuePerProduct' => $this['revenue_per_product'],
             'users' => $this['users'],
+            'storeVisitors' => $this['store_visitors'],
             'onGoingLoans' => $this['onGoingLoans'],
             'loanRequests' => $this['loanRequests'],
             'loans' => $this['loans'],

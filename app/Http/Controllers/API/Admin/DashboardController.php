@@ -13,6 +13,7 @@ use App\Models\EcommerceProduct;
 use App\Models\Loan;
 use App\Models\LoanApplication;
 use App\Models\Role;
+use App\Models\StoreVisitorCount;
 use Exception;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\DB;
@@ -74,8 +75,8 @@ class DashboardController extends Controller
                         ->when($role->name === 'vendor', fn($q) => $q->whereHas('ownerBusinessType'))
                         ->count();
                     return [$role->name => $count];
-                })
-                ->toArray(),
+                })->toArray(),
+                'store_visitors' => StoreVisitorCount::query()->whereBetween('date', $date_range)->sum('count'),
                 'onGoingLoans' => Loan::where('status', 'Ongoing')->count(),
                 'loanRequests' => LoadApplicationResource::collection($loanRequests),
                 'loans' => Loan::query()->with(['customer', 'business'])->where('status', 'Ongoing')->paginate($request->has('perPage') ? $request->perPage : 10)

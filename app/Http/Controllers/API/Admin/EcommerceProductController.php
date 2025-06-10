@@ -13,6 +13,7 @@ use App\Models\EcommerceProduct;
 use App\Services\Admin\EcommerceProductService;
 use App\Services\AuditLogService;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Facades\DB;
 
 class EcommerceProductController extends Controller
 {
@@ -25,11 +26,19 @@ class EcommerceProductController extends Controller
      */
     public function index(ListEcommerceProductRequest $request): JsonResponse
     {
-        $products = EcommerceProduct::with('rating')->latest()
+        $products = EcommerceProduct::with([
+            'category',
+            'brand',
+            'variation',
+            'measurement',
+            'presentation',
+            'medicationType',
+            'productDetails',
+            'rating',
+        ])->latest()
             ->paginate($request->has('perPage') ? $request->perPage : 10)
             ->withQueryString()
             ->through(fn(EcommerceProduct $item) => EcommerceProductResource::make($item));
-
         return $this->returnJsonResponse(
             message: 'Products successfully fetched.',
             data: $products
@@ -72,7 +81,17 @@ class EcommerceProductController extends Controller
         return $product
             ? $this->returnJsonResponse(
                 message: 'Product successfully fetched.',
-                data: new EcommerceProductResource($product->load(['reviews', 'rating',]))
+                data: new EcommerceProductResource($product->load([
+                    'category',
+                    'brand',
+                    'variation',
+                    'measurement',
+                    'presentation',
+                    'medicationType',
+                    'productDetails',
+                    'rating',
+                    'reviews',
+                ]))
             )
             : $this->returnJsonResponse(
                 message: 'Oops, can\'t view product at the moment. Please try again later.'
