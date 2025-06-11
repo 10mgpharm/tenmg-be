@@ -26,6 +26,7 @@ use App\Http\Controllers\API\Admin\FaqController;
 use App\Http\Controllers\API\Admin\MedicationTypeController as AdminMedicationTypeController;
 use App\Http\Controllers\API\Admin\ProductInsightsController as AdminProductInsightsController;
 use App\Http\Controllers\API\Admin\SettingConfigController;
+use App\Http\Controllers\API\Admin\ShippingFeeController;
 use App\Http\Controllers\API\Supplier\ProductInsightsController as SupplierProductInsightsController;
 use App\Http\Controllers\API\Admin\UsersController;
 use App\Http\Controllers\API\Auth\AuthenticatedController;
@@ -501,6 +502,9 @@ Route::prefix('v1')->group(function () {
                 Route::apiResource('faqs', FaqController::class);
                 Route::get('audit-logs', [AuditLogController::class, 'index']);
                 Route::get('audit-logs/search', [AuditLogController::class, 'search']);
+                Route::get('shipping-fee', [ShippingFeeController::class, 'index']);
+                Route::post('shipping-fee', [ShippingFeeController::class, 'store']);
+                Route::match(['patch', 'put'], 'shipping-fee', [ShippingFeeController::class, 'update']);
 
                 Route::get('/', [BusinessSettingController::class, 'show']);
                 // Update business information
