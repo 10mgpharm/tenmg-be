@@ -28,7 +28,7 @@ class WishListRepository
 
     function getWhishList()
     {
-        $wishList = EcommerceWishList::with('product', 'customer')->where('user_id', Auth::id())->get();
+        $wishList = EcommerceWishList::where('user_id', Auth::id())->get();
         return $wishList;
     }
 

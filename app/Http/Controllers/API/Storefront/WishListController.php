@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\API\Storefront;
 
 use App\Http\Controllers\Controller;
+use App\Http\Resources\EcommerceWishListResource;
 use App\Services\Storefront\EcommerceWishService;
 use Illuminate\Http\Request;
 
@@ -36,7 +37,7 @@ class WishListController extends Controller
         $wishList = $this->ecommerceWishService->getWhishList();
         return $this->returnJsonResponse(
             message: 'Wish list fetched successfully',
-            data: $wishList
+            data: EcommerceWishListResource::collection($wishList)
         );
     }
 
