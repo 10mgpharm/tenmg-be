@@ -4,9 +4,12 @@ namespace App\Repositories;
 
 use App\Models\Business;
 use App\Models\CreditLendersWallet;
+use App\Models\CreditLenderTxnHistory;
 use App\Models\CreditTransactionHistory;
 use App\Services\AuditLogService;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
 class LenderDashboardRepository
@@ -53,7 +56,44 @@ class LenderDashboardRepository
 
         $business = Business::find($business_id);
 
-        return $business;
+        $currentYear = Carbon::now()->year; // e.g., 2025
+        $currentMonth = Carbon::now()->month; // e.g., 6 (June)
+
+        // Generate array of months with full names (January to current month)
+        $months = collect(range(1, $currentMonth))->map(function ($month) use ($currentYear) {
+            return [
+                'month' => $month,
+                'month_name' => Carbon::createFromDate($currentYear, $month, 1)->monthName, // e.g., "January"
+                'year' => $currentYear,
+                'total_interest' => 0, // Default for months with no records
+            ];
+        });
+
+        // Query actual interest totals
+        $totals = CreditTransactionHistory::select(
+                DB::raw('MONTH(created_at) as month'),
+                DB::raw('YEAR(created_at) as year'),
+                DB::raw('SUM(amount) as total_interest')
+            )
+            ->where('business_id', $business_id)
+            ->whereYear('created_at', $currentYear)
+            ->whereMonth('created_at', '<=', $currentMonth)
+            ->where('transaction_group', 'repayment_interest')
+            ->groupBy(DB::raw('MONTH(created_at)'), DB::raw('YEAR(created_at)'))
+            ->get();
+
+        // Merge actual totals with all months, overriding defaults where data exists
+        $result = $months->map(function ($monthItem) use ($totals) {
+            $matched = $totals->firstWhere('month', $monthItem['month']);
+            return [
+                'month' => $monthItem['month'],
+                'month_name' => $monthItem['month_name'],
+                'year' => $monthItem['year'],
+                'total_interest' => $matched ? (float) $matched->total_interest : 0,
+            ];
+        });
+
+        return $result;
     }
 
     public function initializeDeposit(Request $request)
