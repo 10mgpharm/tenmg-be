@@ -35,7 +35,7 @@ class EcommerceTransactionController extends Controller
                         ->orWhere('balance_before', 'like', "%{$search}%")
                         ->orWhere('balance_after', 'like', "%{$search}%")
                         ->orWhereHas('supplier', fn($query) => $query->where('name', 'like', "%{$search}%")->orWhere('short_name', 'like', "%{$search}%"))
-                    // ->orWhereHas('order', fn($query) => $query->where('order_number', 'like', "%{$search}%"))
+                    ->orWhereHas('order', fn($query) => $query->where('identifier', 'like', "%{$search}%"))
                 )
             )
             ->when($request->input('fromDate'), fn($query, $from) => $query->whereDate('created_at', '>=', $from))

@@ -50,15 +50,23 @@ class EcommerceProductResource extends JsonResource
             'expiredAt' => $this->expired_at,
             'commission' => $this->commission,
             'comment' => $this->comment,
-            'company' => (request()->user() && request()->user()->hasRole('admin')) ? $this->business?->name ?? '10MG FAMILY PHARMACY' : null,
-            'category' => new EcommerceCategoryResource($this->category),
-            'brand' => new EcommerceBrandResource($this->brand),
-            'medicationType' => new EcommerceMedicationTypeResource($this->medicationType),
-            'presentation' => new EcommercePresentationResource($this->presentation),
-            'variation' => new EcommerceMedicationVariationResource($this->variation),
-            'measurement' => new EcommerceMeasurementResource($this->measurement),
-            'productDetails' => $this->productDetails == null ? null : $this->productDetails->only('essential', 'starting_stock', 'current_stock', 'id', 'ecommerce_product_id'),
-            'rating' => $this->whenLoaded('rating', fn ($rating) => $rating),
+            'company' => (request()->user()?->hasRole('admin'))
+                ? $this->business?->name ?? '10MG FAMILY PHARMACY'
+                : null,
+            'category' => $this->whenLoaded('category', fn() => new EcommerceCategoryResource($this->category->withoutRelations())),
+            'brand' => $this->whenLoaded('brand', fn() => new EcommerceBrandResource($this->brand->withoutRelations())),
+            'medicationType' => $this->whenLoaded('medicationType', fn() => new EcommerceMedicationTypeResource($this->medicationType->withoutRelations())),
+            'presentation' => $this->whenLoaded('presentation', fn() => new EcommercePresentationResource($this->presentation->withoutRelations())),
+            'variation' => $this->whenLoaded('variation', fn() => new EcommerceMedicationVariationResource($this->variation->withoutRelations())),
+            'measurement' => $this->whenLoaded('measurement', fn() => new EcommerceMeasurementResource($this->measurement->withoutRelations())),
+            'productDetails' => $this->productDetails?->only([
+                'essential',
+                'starting_stock',
+                'current_stock',
+                'id',
+                'ecommerce_product_id',
+            ]),
+            'rating' => $this->whenLoaded('rating'),
             'reviews' => $this->whenLoaded('reviews', fn() => $this->reviews()
                 ->paginate($request->has('perPage') ? $request->perPage : 20)
                 ->withQueryString()
