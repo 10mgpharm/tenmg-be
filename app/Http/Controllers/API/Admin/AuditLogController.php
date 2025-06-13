@@ -10,6 +10,7 @@ use App\Models\AuditLog;
 use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class AuditLogController extends Controller
 {
@@ -27,7 +28,7 @@ class AuditLogController extends Controller
                 $query->where(
                     fn($q) =>
                     $q->where('event', 'like', "%{$search}%")
-                        ->orWhere('properties->action', 'like', "%{$search}%")
+                        ->orWhere(DB::raw("LOWER(JSON_UNQUOTE(JSON_EXTRACT(properties, '$.action')))"), 'like', '%' . strtolower($search) . '%')
                         ->orWhereHas('causer', fn($q2) => $q2->where('name', 'like', "%{$search}%"))
                 )
             )
@@ -39,7 +40,7 @@ class AuditLogController extends Controller
             ->when(
                 $request->input('action'),
                 fn($query, $action) =>
-                $query->where('properties->action', 'like', "%{$action}%")
+                $query->where(DB::raw("LOWER(JSON_UNQUOTE(JSON_EXTRACT(properties, '$.action')))"), 'like', '%' . strtolower($action) . '%')
             )
             ->when(
                 $request->input('crudType'),

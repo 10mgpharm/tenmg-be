@@ -6,6 +6,7 @@ use App\Models\EcommerceCart;
 use App\Models\EcommerceOrder;
 use App\Models\EcommerceOrderDetail;
 use App\Models\EcommerceProduct;
+use App\Models\ShippingFee;
 use App\Settings\CreditSettings;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -162,7 +163,7 @@ class EcommerceCartService
             $cart->order_total = $cart->orderDetails()->sum('discount_price');
             $cart->grand_total = $cart->orderDetails()->sum('discount_price');
             $cart->qty_total = $cart->orderDetails()->sum('quantity');
-            $cart->shipping_fee = 3000.00; // Assuming a fixed shipping fee for now
+            $cart->shipping_fee = ShippingFee::first()?->fee ?? 0.00;
             $cart->save();
 
             return $cart;
@@ -204,7 +205,7 @@ class EcommerceCartService
                 'status' => 'PENDING',
                 'logistic_total' => 0,
                 'total_weight' => $totalWeight,
-                'shipping_fee' => 3000.00, // Assuming a fixed shipping fee for now
+                'shipping_fee' => ShippingFee::first()?->fee ?? 0.00
             ]);
 
             $createOrder->orderDetails()->create([
