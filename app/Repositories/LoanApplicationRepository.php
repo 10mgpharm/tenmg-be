@@ -327,7 +327,7 @@ class LoanApplicationRepository
 
             // Send the POST request
             $response = Http::withHeaders([
-                'Secret-Key' => $apiKeyData->is_test ? $apiKeyData->test_secret : $apiKeyData->secret,
+                'X-Public-Key' => $apiKeyData->is_test ? $apiKeyData->test_key : $apiKeyData->key,
                 'Accept' => 'application/json',
             ])->post($transactionUrl, $data);
 
