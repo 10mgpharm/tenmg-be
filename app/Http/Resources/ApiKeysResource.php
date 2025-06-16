@@ -28,6 +28,8 @@ class ApiKeysResource extends JsonResource
             'testEncryptionKey' => $this->test_encryption_key,
             'encryptionKey' => $this->encryption_key,
             'business' => $this->business,
+            'isTest' => $this->is_test == 1 ? true:false,
+            'isActive' => $this->is_active == 1 ? true:false,
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
         ];

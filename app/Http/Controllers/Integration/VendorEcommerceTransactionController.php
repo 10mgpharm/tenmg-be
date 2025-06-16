@@ -32,18 +32,19 @@ class VendorEcommerceTransactionController extends Controller
             ->whereBetween('created_at', [now()->subMonths(6), now()])
             ->get();
 
-        return response()->json([
-                    'message' => 'Ecommerce transactions successfully fetched.',
-                    'data' => $result->map(function ($order) {
+        return response()->json(
+                    // 'message' => 'Ecommerce transactions successfully fetched.',
+                    $result->map(function ($order) {
                         return [
-                            'identifier' => $order->identifier,
-                            'customer_name' => $order->customer->name,
-                            'customer_email' => $order->customer->email,
-                            'total_amount' => $order->order_total,
-                            'status' => $order->status,
-                            'created_at' => $order->created_at->toDateTimeString(),
+                            'Reference' => $order->identifier,
+                            // 'customer_name' => $order->customer->name,
+                            // 'customer_email' => $order->customer->email,
+                            'Amount' => $order->order_total,
+                            // 'status' => $order->status,
+                            'Description' => 'Product purchase',
+                            'Date' => $order->created_at->toDateTimeString(),
                         ];
                     }),
-                ], Response::HTTP_OK);
+                 Response::HTTP_OK);
     }
 }

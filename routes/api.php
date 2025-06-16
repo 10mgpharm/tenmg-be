@@ -97,7 +97,7 @@ use Illuminate\Support\Facades\Route;
 
 Route::prefix('v1')->group(function () {
 
-    Route::get('integration/vendor/ecommerce-transactions', VendorEcommerceTransactionController::class)
+    Route::post('integration/vendor/ecommerce-transactions', VendorEcommerceTransactionController::class)
         ->name('integration.vendor.ecommerce-transactions')
         ->middleware('integration.vendor.ecommerce-transaction');
 
