@@ -4,15 +4,18 @@ namespace App\Services;
 
 use App\Enums\MailType;
 use App\Mail\Mailer;
+use App\Models\AppNotification;
 use App\Models\BusinessUser;
 use App\Models\Invite;
 use App\Models\Role;
 use App\Models\User;
+use App\Notifications\InvitationResponseNotification;
 use App\Services\Interfaces\IInviteService;
 use Exception;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
@@ -159,6 +162,21 @@ class InviteService implements IInviteService
                 // Delete the invite after successful user creation
                 $invite->update(['status' => 'ACCEPTED', 'user_id' => $user->id]);
 
+                // Notify the users about the new invite acceptance
+                $notification = AppNotification::where('name', 'Invitation Response')->first();
+
+                if ($notification) {
+                    $subscribedUsers = User::whereHas('businesses', fn($q) => $q->where('business_id', $invite->business_id)
+                    )
+                    ->whereHas('notificationSettings', function ($q) use ($notification) {
+                        $q->where('app_notification_id', $notification->id);
+                    })
+                    ->get();
+
+                    Notification::send($subscribedUsers, new InvitationResponseNotification($invite));
+                }
+
+
                 return $user->refresh(); // Return the updated user instance
             });
         } catch (HttpException $e) {
@@ -187,6 +205,20 @@ class InviteService implements IInviteService
             return DB::transaction(function () use ($invite) {
                 // Update the invite status to rejected
                 $invite->update(['status' => 'REJECTED']);
+
+                 // Notify the users about the new invite rejections
+                $notification = AppNotification::where('name', 'Invitation Response')->first();
+
+                if ($notification) {
+                    $subscribedUsers = User::whereHas('businesses', fn($q) => $q->where('business_id', $invite->business_id)
+                    )
+                    ->whereHas('notificationSettings', function ($q) use ($notification) {
+                        $q->where('app_notification_id', $notification->id);
+                    })
+                    ->get();
+
+                    Notification::send($subscribedUsers, new InvitationResponseNotification($invite));
+                }
 
                 return true;
             });

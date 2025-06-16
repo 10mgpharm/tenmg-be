@@ -22,7 +22,7 @@ class NotificationSetting extends Model
      * @var array<int, string>
      */
     protected $fillable = [
-        'notification_id',
+        'app_notification_id',
         'user_id',
     ];
 
