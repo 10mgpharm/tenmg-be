@@ -11,6 +11,7 @@ use App\Http\Controllers\API\Account\NotificationController;
 use App\Http\Controllers\API\Account\PasswordUpdateController;
 use App\Http\Controllers\API\Account\TwoFactorAuthenticationController;
 use App\Http\Controllers\API\Account\UpdateFcmTokenController;
+use App\Http\Controllers\API\Account\UserPermissionController;
 use App\Http\Controllers\API\Admin\AdminWalletController;
 use App\Http\Controllers\API\Admin\AuditLogController;
 use App\Http\Controllers\API\Admin\BusinessLicenseController;
@@ -186,6 +187,8 @@ Route::prefix('v1')->group(function () {
                 ->forUser($request->user())
                 ->notify(InAppNotificationType::NEW_MESSAGE);
             });
+
+            Route::get('permissions', UserPermissionController::class);
         });
 
         Route::prefix('bank')->group(function () {
