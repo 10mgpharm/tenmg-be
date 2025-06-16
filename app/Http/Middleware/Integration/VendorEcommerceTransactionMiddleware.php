@@ -15,8 +15,8 @@ class VendorEcommerceTransactionMiddleware
      */
     public function handle(Request $request, Closure $next): Response
     {
-        if ($request->header('X-Public-Key') !== config('services.tenmg.public')) {
-            return response()->json(['error' => 'Unauthorized. Invalid public key.'], 401);
+        if ($request->header('X-Secret-Key') !== config('services.tenmg.secret')) {
+            return response()->json(['error' => 'Unauthorized. Invalid secret key.'], 401);
         }
 
         return $next($request);
