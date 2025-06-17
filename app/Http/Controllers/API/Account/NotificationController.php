@@ -17,7 +17,7 @@ class NotificationController extends Controller
         $user = $request->user();
     
         $notifications = $user->notifications()->latest('id')
-        ->paginate(request()->has('perPage') ? request()->input('perPage') : 10)
+        ->paginate(request()->has('perPage') ? request()->input('perPage') : 30)
             ->withQueryString()
             ->through(fn(DatabaseNotification $item) => NotificationResource::make($item));
 
