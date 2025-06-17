@@ -374,7 +374,7 @@ class LoanApplicationRepository
 
             } else {
                 // Handle the error
-                continue;
+                // continue;
             }
         }
 
