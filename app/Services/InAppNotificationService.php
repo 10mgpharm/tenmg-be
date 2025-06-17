@@ -14,6 +14,7 @@ use App\Notifications\Loan\NewLoanRequestNotification;
 use App\Notifications\Order\NewOrderPaymentNotification;
 use App\Notifications\Order\ProcessingOrderPharmacyNotification;
 use App\Notifications\Order\ProcessingOrderSupplierNotification;
+use App\Notifications\UserSuspensionNotification;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\Notification;
 
@@ -56,7 +57,7 @@ class InAppNotificationService
     {
         // Determine the recipient(s)
         $recipients = $this->recipients ?? request()->user(); // If no recipients are set, use the currently logged-in user
-        
+
         if (!$recipients) {
             throw new \RuntimeException('No recipients found.');
         }
@@ -81,6 +82,8 @@ class InAppNotificationService
             InAppNotificationType::NEW_ORDER_PAYMENT_ADMIN => new NewOrderPaymentNotification($subject, $message),
             InAppNotificationType::PROCESSING_ORDER_PHARMACY => new ProcessingOrderPharmacyNotification($subject, $message),
             InAppNotificationType::PROCESSING_PRODUCT_ORDER_SUPPLIER => new ProcessingOrderSupplierNotification($subject, $message),
+            InAppNotificationType::ACCOUNT_SUSPENSION => new UserSuspensionNotification($subject, $message),
+            InAppNotificationType::ACCOUNT_UNSUSPENDED => new UserSuspensionNotification($subject, $message),
             default => throw new \InvalidArgumentException("Unsupported notification type: {$type->value}"),
         };
 
