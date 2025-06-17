@@ -148,7 +148,7 @@ class UsersController extends Controller
             target: $user,
             event: 'User.'.$status,
             action: 'User '.$status,
-            description: "User status has been successfully updated to {$status}.",
+            description: "User($user->name) status has been successfully updated to {$status}.",
             crud_type: 'UPDATE',
             properties: []
         );
