@@ -21,7 +21,9 @@ class MarkAsReadMessageRequest extends FormRequest
 
         $message = $this->route('message');
         
-        if (!$message || $receiver->id == $message->receiver_id) {
+    
+
+        if (!$message || $receiver->id != $message->receiver_id) {
             return false; // Ensure receiver exists, and can update
         }
 

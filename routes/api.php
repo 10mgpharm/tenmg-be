@@ -81,6 +81,7 @@ use App\Http\Controllers\API\Vendor\VendorDashboardController;
 use App\Http\Controllers\API\Vendor\VendorWalletController;
 use App\Http\Controllers\API\Webhooks\PaystackWebhookController;
 use App\Http\Controllers\API\WithdrawFundController;
+use App\Http\Controllers\API\Admin\WithdrawFundController as AdminWithdrawFundController;
 use App\Http\Controllers\BusinessSettingController;
 use App\Http\Controllers\Integration\VendorEcommerceTransactionController;
 use App\Http\Controllers\InviteController;
@@ -610,7 +611,7 @@ Route::prefix('v1')->group(function () {
             });
 
             Route::get('dashboard', AdminDashboardController::class);
-            Route::post('withdraw-funds', WithdrawFundController::class);
+            Route::post('withdraw-funds', AdminWithdrawFundController::class);
         });
 
         // STOREFRONTS specific routes
