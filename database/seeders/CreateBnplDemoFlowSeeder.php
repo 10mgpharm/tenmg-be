@@ -17,6 +17,7 @@ use Illuminate\Database\Seeder;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 
 class CreateBnplDemoFlowSeeder extends Seeder
 {
@@ -60,11 +61,18 @@ class CreateBnplDemoFlowSeeder extends Seeder
         // create demo vendor
         $vendor = $this->createDemoUser(BusinessType::VENDOR, 'Sarah Conor', 'vendor@demo.com', 'Stealth Medics Store');
 
+        // Generate demo API keys for vendor (using placeholder format for demo purposes)
+        $hashedShortName = hash('sha256', $vendor->short_name . 'demo_seed');
+        $keyPart = substr($hashedShortName, 0, 24) ?: Str::random(24);
+        $secretPart = substr($hashedShortName, 25, 48) ?: Str::random(48);
+        $testKeyPart = Str::random(24);
+        $testSecretPart = Str::random(48);
+
         $this->apiKeyRepository->updateVendorKey($vendor, [
-            'key' => 'pk_live_DEMO_REMOVED_PLACEHOLDER',
-            'secret' => 'sk_live_DEMO_REMOVED_PLACEHOLDER',
-            'test_key' => 'pk_test_DEMO_REMOVED_PLACEHOLDER',
-            'test_secret' => 'sk_test_DEMO_REMOVED_PLACEHOLDER',
+            'key' => 'pk_live_' . $keyPart,
+            'secret' => 'sk_live_' . $secretPart,
+            'test_key' => 'pk_test_' . $testKeyPart,
+            'test_secret' => 'sk_test_' . $testSecretPart,
         ]);
 
         // create vendor customers with transaction history
