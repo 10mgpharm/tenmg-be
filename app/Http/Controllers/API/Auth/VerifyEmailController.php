@@ -34,7 +34,7 @@ class VerifyEmailController extends Controller
             data: [
                 'emailVerifiedAt' => $verifiedUser?->email_verified_at,
             ],
-            status: Response::HTTP_OK
+            status: 'success'
         );
 
         return $this->authService->verifyUserEmail($user, $request->input('otp'));

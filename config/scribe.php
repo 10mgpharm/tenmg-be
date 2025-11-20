@@ -7,7 +7,7 @@ return [
     'title' => null,
 
     // A short description of your API. Will be included in the docs webpage, Postman collection and OpenAPI spec.
-    'description' => '',
+    'description' => '10MG API provides comprehensive endpoints for e-commerce operations, user management, credit/BNPL services, and business integrations. The API supports role-based access control for Admin, Vendor, Supplier, Lender, and Storefront users.',
 
     // The base URL displayed in the docs. If this is empty, Scribe will use the value of config('app.url') at generation time.
     // If you're using `laravel` type, you can set this to a dynamic string, like '{{ config("app.tenant_url") }}' to get a dynamic base URL.
@@ -18,13 +18,10 @@ return [
             // Routes that match these conditions will be included in the docs
             'match' => [
                 // Match only routes whose paths match this pattern (use * as a wildcard to match any characters). Example: 'users/*'.
-                'prefixes' => ['api/*'],
+                'prefixes' => ['api/v1/*'],
 
                 // Match only routes whose domains match this pattern (use * as a wildcard to match any characters). Example: 'api.*'.
                 'domains' => ['*'],
-
-                // [Dingo router only] Match only routes registered under this version. Wildcards are NOT supported.
-                'versions' => ['v1'],
             ],
 
             // Include these routes even if they did not match the rules above.
@@ -44,7 +41,7 @@ return [
     // - "laravel" will generate the documentation as a Blade view, so you can add routing and authentication.
     // - "external_static" and "external_laravel" do the same as above, but generate a basic template,
     // passing the OpenAPI spec as a URL, allowing you to easily use the docs with an external generator
-    'type' => 'static',
+    'type' => 'laravel',
 
     // See https://scribe.knuckles.wtf/laravel/reference/config#theme for supported options
     'theme' => 'default',
@@ -74,7 +71,7 @@ return [
     ],
 
     'external' => [
-        'html_attributes' => []
+        'html_attributes' => [],
     ],
 
     'try_it_out' => [
@@ -96,18 +93,18 @@ return [
     // How is your API authenticated? This information will be used in the displayed docs, generated examples and response calls.
     'auth' => [
         // Set this to true if ANY endpoints in your API use authentication.
-        'enabled' => false,
+        'enabled' => true,
 
         // Set this to true if your API should be authenticated by default. If so, you must also set `enabled` (above) to true.
         // You can then use @unauthenticated or @authenticated on individual endpoints to change their status from the default.
-        'default' => false,
+        'default' => true,
 
         // Where is the auth value meant to be sent in a request?
         // Options: query, body, basic, bearer, header (for custom header)
         'in' => 'bearer',
 
         // The name of the auth parameter (eg token, key, apiKey) or header (eg Authorization, Api-Key).
-        'name' => 'key',
+        'name' => 'Authorization',
 
         // The value of the parameter to be used by Scribe to authenticate response calls.
         // This will NOT be included in the generated documentation. If empty, Scribe will use a random value.
@@ -115,15 +112,27 @@ return [
 
         // Placeholder your users will see for the auth parameter in the example requests.
         // Set this to null if you want Scribe to use a random value as placeholder instead.
-        'placeholder' => '{YOUR_AUTH_KEY}',
+        'placeholder' => '{YOUR_AUTH_TOKEN}',
 
         // Any extra authentication-related info for your users. Markdown and HTML are supported.
-        'extra_info' => 'You can retrieve your token by visiting your dashboard and clicking <b>Generate API token</b>.',
+        'extra_info' => 'This API uses Laravel Passport (OAuth2) for authentication. Obtain your access token by logging in through the authentication endpoint. Include the token in the Authorization header as: <code>Authorization: Bearer {token}</code>',
     ],
 
     // Text to place in the "Introduction" section, right after the `description`. Markdown and HTML are supported.
-    'intro_text' => <<<INTRO
-This documentation aims to provide all the information you need to work with our API.
+    'intro_text' => <<<'INTRO'
+This documentation provides comprehensive information about the 10MG API, including authentication, endpoints, request/response formats, and code examples.
+
+## Authentication
+
+Most endpoints require authentication using OAuth2 Bearer tokens via Laravel Passport. Authenticate by making a request to the authentication endpoint to receive an access token, then include it in the `Authorization` header for subsequent requests.
+
+## API Versioning
+
+This API is versioned and currently uses **v1**. All endpoints are prefixed with `/api/v1/`.
+
+## Rate Limiting
+
+Some endpoints may be rate-limited. Check response headers for rate limit information.
 
 <aside>As you scroll, you'll see code examples for working with the API in different programming languages in the dark area to the right (or as part of the content on mobile).
 You can switch the language used with the tabs at the top right (or from the nav menu at the top left on mobile).</aside>
@@ -136,6 +145,7 @@ INTRO
     'example_languages' => [
         'bash',
         'javascript',
+        'php',
     ],
 
     // Generate a Postman collection (v2.1.0) in addition to HTML docs.
@@ -219,13 +229,10 @@ INTRO
         'headers' => [
             Strategies\Headers\GetFromHeaderAttribute::class,
             Strategies\Headers\GetFromHeaderTag::class,
-            [
-                'override',
-                [
-                    'Content-Type' => 'application/json',
-                    'Accept' => 'application/json',
-                ]
-            ]
+            Strategies\StaticData::withSettings(data: [
+                'Content-Type' => 'application/json',
+                'Accept' => 'application/json',
+            ]),
         ],
         'bodyParameters' => [
             Strategies\BodyParameters\GetFromFormRequest::class,
@@ -247,8 +254,8 @@ INTRO
                     'config' => [
                         'app.debug' => false,
                     ],
-                ]
-            ]
+                ],
+            ],
         ],
         'responseFields' => [
             Strategies\ResponseFields\GetFromResponseFieldAttribute::class,

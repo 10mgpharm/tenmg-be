@@ -35,15 +35,14 @@ class ResetPasswordNotification extends Notification implements ShouldQueue
      */
     public function toMail($notifiable)
     {
+        $firstName = $notifiable->name ? explode(' ', trim($notifiable->name))[0] : 'there';
+
         return (new MailMessage)
             ->subject('Reset Password Notification')
-            ->greeting('Hello ' . ($notifiable->name ? explode(' ', trim($notifiable->name))[0] : ''))
-            ->line('You are receiving this email because we received a password reset request for your '.config('app.name').' account.')
-            ->line('Use the code below to verify your account')
-            ->line('Code: '.$this->code)
-            ->line('This code will expire in 15 minutes.')
-            ->salutation(config('app.name'))
-            ->line('If you did not request a password reset, no further action is required.');
+            ->view('emails.auth.reset-password', [
+                'firstName' => $firstName,
+                'code' => $this->code,
+            ]);
     }
 
     /**

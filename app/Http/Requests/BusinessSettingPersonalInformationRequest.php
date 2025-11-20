@@ -15,10 +15,16 @@ class BusinessSettingPersonalInformationRequest extends FormRequest
     {
         $user = $this->user();
 
-        if($user->hasRole('admin')){
+        // Return false if user is null (e.g., during Scribe documentation generation)
+        if (! $user) {
+            return false;
+        }
+
+        if ($user->hasRole('admin')) {
             return true;
         }
-        return (bool) $this->user()->ownerBusinessType;
+
+        return (bool) $user->ownerBusinessType;
     }
 
     /**
@@ -44,7 +50,11 @@ class BusinessSettingPersonalInformationRequest extends FormRequest
     public function rules(): array
     {
         $user = $this->user();
-        $business = $user->ownerBusinessType ?? $user->businesses()->first();
+        $business = null;
+
+        if ($user) {
+            $business = $user->ownerBusinessType ?? $user->businesses()->first();
+        }
 
         return [
             'name' => [
@@ -68,7 +78,7 @@ class BusinessSettingPersonalInformationRequest extends FormRequest
                 'email',
                 new BusinessEmail,
             ],
-            'contact_person_position' => ['required', 'string', 'min:3', 'max:255',],
+            'contact_person_position' => ['required', 'string', 'min:3', 'max:255'],
             'address' => [
                 'required',
                 'string',

@@ -33,21 +33,28 @@ class PasswordController extends Controller
      */
     public function forgot(ForgotPasswordRequest $request): JsonResponse
     {
+        // Validation ensures email exists, so user will always be found
         $user = User::firstWhere(['email' => $request->input('email')]);
 
         if ($user) {
             (new OtpService)->forUser($user)
                 ->generate(OtpType::RESET_PASSWORD_VERIFICATION)
                 ->sendMail(OtpType::RESET_PASSWORD_VERIFICATION);
+
+            $tokenResult = $user->createToken('Full Access Token', ['full']);
+
+            return $this->authService->returnAuthResponse(
+                message: 'A one-time password has been sent to your registered email',
+                user: $user,
+                tokenResult: $tokenResult,
+                statusCode: Response::HTTP_OK
+            );
         }
 
-        $tokenResult = $user->createToken('Full Access Token', ['full']);
-
-        return $this->authService->returnAuthResponse(
+        // This should never happen due to validation, but handle it gracefully
+        return $this->returnJsonResponse(
             message: 'A one-time password has been sent to your registered email',
-            user: $user,
-            tokenResult: $tokenResult,
-            statusCode: Response::HTTP_OK
+            status: 'success'
         );
     }
 

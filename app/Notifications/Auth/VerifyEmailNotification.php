@@ -42,18 +42,17 @@ class VerifyEmailNotification extends Notification implements ShouldQueue
             $type = 'Healthcare Provider';
         }
 
+        $firstName = $notifiable->name ? explode(' ', trim($notifiable->name))[0] : 'there';
+        $supportEmail = config('mail.from.support', config('mail.from.address'));
+
         return (new MailMessage)
-            ->subject(Lang::get('Verify Your Account on ' . config('app.name')))
-            ->greeting(Lang::get('Hello ' . ($notifiable->name ? explode(' ', trim($notifiable->name))[0] : '') . ','))
-            ->line(Lang::get('Welcome to ' . config('app.name') . '!'))
-            ->line(Lang::get('To complete your registration and verify your account, use the code below:'))
-            ->line(__('**Verification Code: ') . $this->code . '**')
-            ->line(__('This code will expire in **15 minutes.**'))
-            ->line(__('We’re excited to have you on board as a ') . '**' . ucwords($type) . '**' . __(' and look forward to working with you. If you have any questions, please contact us at ') . '**' . config('mail.from.support') . '**.')
-            ->line(__('No action is required if you did not request an account or are unsure about this email.'))
-            ->line('')
-            ->line('Best Regards,')
-            ->salutation(Lang::get('The '.  config('app.name') . ' Team'));
+            ->subject(Lang::get('Verify Your Account on '.config('app.name')))
+            ->view('emails.auth.verify-email', [
+                'firstName' => $firstName,
+                'code' => $this->code,
+                'roleLabel' => ucwords($type),
+                'supportEmail' => $supportEmail,
+            ]);
     }
 
     /**
