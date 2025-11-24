@@ -9,9 +9,9 @@ abstract class TestCase extends BaseTestCase
 {
     use RefreshDatabase;
 
-    protected function setUp(): void
-    {
-        parent::setUp();
-        $this->seed();
-    }
+    /**
+     * Seed the database only once per test suite.
+     * This is cached and reused across all tests in the suite.
+     */
+    protected bool $seed = true;
 }

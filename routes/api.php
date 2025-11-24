@@ -2,7 +2,6 @@
 
 use App\Enums\InAppNotificationType;
 use App\Http\Controllers\Admin\AppNotificationController;
-use App\Http\Controllers\API\Admin\DashboardController as AdminDashboardController;
 use App\Http\Controllers\API\Account\AccountController;
 use App\Http\Controllers\API\Account\AppNotificationController as AccountAppNotificationController;
 use App\Http\Controllers\API\Account\CountUnreadNotificationController;
@@ -16,6 +15,7 @@ use App\Http\Controllers\API\Admin\AdminWalletController;
 use App\Http\Controllers\API\Admin\AuditLogController;
 use App\Http\Controllers\API\Admin\BusinessLicenseController;
 use App\Http\Controllers\API\Admin\CarouselImageController;
+use App\Http\Controllers\API\Admin\DashboardController as AdminDashboardController;
 use App\Http\Controllers\API\Admin\EcommerceBrandController as AdminEcommerceBrandController;
 use App\Http\Controllers\API\Admin\EcommerceCategoryController as AdminEcommerceCategoryController;
 use App\Http\Controllers\API\Admin\EcommerceMeasurementController as AdminEcommerceMeasurementController;
@@ -28,8 +28,8 @@ use App\Http\Controllers\API\Admin\MedicationTypeController as AdminMedicationTy
 use App\Http\Controllers\API\Admin\ProductInsightsController as AdminProductInsightsController;
 use App\Http\Controllers\API\Admin\SettingConfigController;
 use App\Http\Controllers\API\Admin\ShippingFeeController;
-use App\Http\Controllers\API\Supplier\ProductInsightsController as SupplierProductInsightsController;
 use App\Http\Controllers\API\Admin\UsersController;
+use App\Http\Controllers\API\Admin\WithdrawFundController as AdminWithdrawFundController;
 use App\Http\Controllers\API\Auth\AuthenticatedController;
 use App\Http\Controllers\API\Auth\PasswordController;
 use App\Http\Controllers\API\Auth\SignupUserController;
@@ -44,6 +44,8 @@ use App\Http\Controllers\API\Credit\LoanOfferController;
 use App\Http\Controllers\API\Credit\LoanRepaymentController;
 use App\Http\Controllers\API\Credit\TransactionHistoryController;
 use App\Http\Controllers\API\EcommerceDiscountController;
+use App\Http\Controllers\API\Job\JobApplicationController;
+use App\Http\Controllers\API\Job\JobController;
 use App\Http\Controllers\API\Lender\LenderDashboardController;
 use App\Http\Controllers\API\Lender\LoanPreferenceController;
 use App\Http\Controllers\API\MessageController;
@@ -52,8 +54,8 @@ use App\Http\Controllers\API\ResendOtpController;
 use App\Http\Controllers\API\Storefront\BrandController as StorefrontBrandController;
 use App\Http\Controllers\API\Storefront\CartController;
 use App\Http\Controllers\API\Storefront\CategoryController as StorefrontCategoryController;
-use App\Http\Controllers\API\Storefront\EcommerceProductReviewController;
 use App\Http\Controllers\API\Storefront\EcommerceProductRatingController;
+use App\Http\Controllers\API\Storefront\EcommerceProductReviewController;
 use App\Http\Controllers\API\Storefront\FaqController as StorefrontFaqController;
 use App\Http\Controllers\API\Storefront\FincraWebhookController;
 use App\Http\Controllers\API\Storefront\MeasurementController as StorefrontMeasurementController;
@@ -73,6 +75,7 @@ use App\Http\Controllers\API\Supplier\EcommerceStoreAddressController;
 use App\Http\Controllers\API\Supplier\EcommerceTransactionController;
 use App\Http\Controllers\API\Supplier\EcommerceWalletController;
 use App\Http\Controllers\API\Supplier\GetBankAccountController;
+use App\Http\Controllers\API\Supplier\ProductInsightsController as SupplierProductInsightsController;
 use App\Http\Controllers\API\Supplier\UpdateBankAccountController;
 use App\Http\Controllers\API\Vendor\AuditLogController as VendorAuditLogController;
 use App\Http\Controllers\API\Vendor\UsersController as VendorUsersController;
@@ -81,7 +84,6 @@ use App\Http\Controllers\API\Vendor\VendorDashboardController;
 use App\Http\Controllers\API\Vendor\VendorWalletController;
 use App\Http\Controllers\API\Webhooks\PaystackWebhookController;
 use App\Http\Controllers\API\WithdrawFundController;
-use App\Http\Controllers\API\Admin\WithdrawFundController as AdminWithdrawFundController;
 use App\Http\Controllers\BusinessSettingController;
 use App\Http\Controllers\Integration\VendorEcommerceTransactionController;
 use App\Http\Controllers\InviteController;
@@ -146,6 +148,11 @@ Route::prefix('v1')->group(function () {
         Route::get('faqs', [StorefrontFaqController::class, 'index']);
     });
 
+    Route::get('jobs', [JobController::class, 'index'])->name('jobs.index');
+    Route::get('jobs/{job}', [JobController::class, 'show'])->name('jobs.show');
+
+    Route::post('jobs/applications', [JobApplicationController::class, 'store'])->name('jobs.applications.store');
+
     // Protected routes
     Route::middleware(['auth:api', 'scope:full'])->group(function () {
 
@@ -168,7 +175,7 @@ Route::prefix('v1')->group(function () {
                     Route::post('verify', 'verify');
                 });
 
-            Route::match(['put', 'patch'],'notifications/mark-all-read', MarkAllAsReadController::class);
+            Route::match(['put', 'patch'], 'notifications/mark-all-read', MarkAllAsReadController::class);
             Route::get('count-unread-notifications', CountUnreadNotificationController::class);
             Route::apiResource('notifications', NotificationController::class);
 
@@ -180,13 +187,13 @@ Route::prefix('v1')->group(function () {
 
             Route::get('messages/start-conversation', [MessageController::class, 'startConversation']);
             Route::get('messages/unread-count', [MessageController::class, 'unreadCount']);
-            Route::match(['PUT', 'PATCH'],'messages/mark-as-read/{message}', [MessageController::class, 'markAsRead']);
+            Route::match(['PUT', 'PATCH'], 'messages/mark-as-read/{message}', [MessageController::class, 'markAsRead']);
             Route::apiResource('messages', MessageController::class);
             Route::post('/fcm-token', UpdateFcmTokenController::class);
-            Route::post('/test-notification', function(Request $request){
+            Route::post('/test-notification', function (Request $request) {
                 (new InAppNotificationService)
-                ->forUser($request->user())
-                ->notify(InAppNotificationType::NEW_MESSAGE);
+                    ->forUser($request->user())
+                    ->notify(InAppNotificationType::NEW_MESSAGE);
             });
 
             Route::get('permissions', UserPermissionController::class);
@@ -196,6 +203,17 @@ Route::prefix('v1')->group(function () {
             Route::get('/list', [BankController::class, 'getBankList']);
             Route::post('/verify-account', [BankController::class, 'verifyBankAccount']);
 
+        });
+
+        Route::prefix('jobs')->group(function () {
+            Route::post('/', [JobController::class, 'store']);
+            Route::match(['PUT', 'PATCH'], '{job}', [JobController::class, 'update']);
+            Route::delete('{job}', [JobController::class, 'destroy']);
+        });
+
+        Route::prefix('job-applications')->group(function () {
+            Route::get('/', [JobApplicationController::class, 'index'])->name('job-applications.index');
+            Route::get('{jobApplication}', [JobApplicationController::class, 'show'])->name('job-applications.show');
         });
 
         Route::prefix('test')->group(function () {
@@ -315,11 +333,11 @@ Route::prefix('v1')->group(function () {
                 Route::post('/upload', [TransactionHistoryController::class, 'uploadTransactionHistory'])
                     ->name('vendor.txn_history.upload');
 
-                //download uploaded transaction history file
+                // download uploaded transaction history file
                 Route::post('/download/{txnEvaluationId}', [TransactionHistoryController::class, 'downloadTransactionHistory'])
                     ->name('vendor.txn_history.download');
 
-                //view uploaded transaction history
+                // view uploaded transaction history
                 Route::post('/view', [TransactionHistoryController::class, 'viewTransactionHistory'])
                     ->name('vendor.txn_history.view');
 
@@ -526,7 +544,6 @@ Route::prefix('v1')->group(function () {
 
                 });
 
-
             });
 
             Route::get('discounts/count', [EcommerceDiscountController::class, 'count']);
@@ -580,7 +597,7 @@ Route::prefix('v1')->group(function () {
 
             Route::prefix('txn_history')->group(function () {
 
-                //download uploaded transaction history file
+                // download uploaded transaction history file
                 Route::post('/download/{txnEvaluationId}', [TransactionHistoryController::class, 'downloadTransactionHistory'])
                     ->name('admin.txn_history.download');
 
@@ -706,7 +723,7 @@ Route::prefix('v1')->group(function () {
                 Route::match(['post', 'patch'], 'license', [BusinessSettingController::class, 'license']);
                 Route::get('license', [BusinessSettingController::class, 'getBusinessStatus']);
 
-                //loan preferences
+                // loan preferences
                 Route::patch('update-loan-preferences', [LoanPreferenceController::class, 'createUpdateLoanPreference']);
                 Route::get('get-loan-preferences', [LoanPreferenceController::class, 'getLoanPreference']);
                 Route::get('get-loan-preferences-prefill', [LoanPreferenceController::class, 'getLoanPreferencePrefill']);
@@ -730,7 +747,7 @@ Route::prefix('v1')->group(function () {
 
             Route::prefix('txn_history')->group(function () {
 
-                //download uploaded transaction history file
+                // download uploaded transaction history file
                 Route::post('/download/{txnEvaluationId}', [TransactionHistoryController::class, 'downloadTransactionHistory'])
                     ->name('lender.txn_history.download');
 
@@ -810,7 +827,7 @@ Route::prefix('v1')->group(function () {
                 ->middleware(['auth:api'])
                 ->name('client.applications.mandate.verify');
 
-            //verify payment for 10mg credit
+            // verify payment for 10mg credit
             Route::get('/payment/verify/{reference}', [LoanApplicationController::class, 'verifyLoanApplicationStatus'])
                 ->middleware(['clientAuth'])
                 ->name('client.applications.payment.verify');

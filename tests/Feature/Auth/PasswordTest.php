@@ -3,153 +3,202 @@
 namespace Tests\Feature\Auth;
 
 use App\Enums\OtpType;
-use App\Helpers\UtilityHelper;
+use App\Enums\StatusEnum;
+use App\Models\Otp;
 use App\Models\User;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Notification;
-use Laravel\Passport\Passport;
-use Laravel\Passport\Token;
-use Mockery;
+use Illuminate\Testing\Fluent\AssertableJson;
 
 beforeEach(function () {
-    $this->forgot = 'api/v1/auth/forgot-password';
-    $this->reset = 'api/v1/auth/reset-password';
-
-    $this->email = fake()->email();
-    $this->password = fake()->password(8);
-
-    $this->user = User::factory()->create([
-        'name' => 'Test User',
-        'email' => $this->email,
-        'password' => Hash::make($this->password),
-    ]);
+    $this->forgotPasswordEndpoint = route('auth.password.forgot');
+    $this->resetPasswordEndpoint = route('auth.password.reset');
+    Notification::fake();
 });
 
-// test('forgot password with valid email', function () {
-//     Notification::fake();
+describe('Forgot Password Tests', function () {
+    test('user can request password reset with valid email', function () {
+        $user = User::factory()->create([
+            'email' => 'testuser@example.com',
+            'status' => StatusEnum::ACTIVE->value,
+        ]);
 
-//     $response = $this->postJson($this->forgot, ['email' => $this->email]);
+        $data = [
+            'email' => $user->email,
+        ];
 
-//     $responseData = $response->json();
+        $response = $this->postJson($this->forgotPasswordEndpoint, $data);
 
-//     expect($response->status())->toBe(Response::HTTP_OK);
+        $response->assertStatus(Response::HTTP_OK)
+            ->assertJson(
+                fn (AssertableJson $json) => $json
+                    ->where('status', 'success')
+                    ->where('message', 'A one-time password has been sent to your registered email')
+                    ->has('accessToken', fn ($token) => $token
+                        ->has('token')
+                        ->where('tokenType', 'bearer')
+                        ->has('expiresAt')
+                    )
+                    ->has('data', fn ($data) => $data
+                        ->where('email', $user->email)
+                        ->has('id')
+                    )
+            );
 
-//     expect($responseData)
-//         ->toHaveKey('message', 'A one-time password has been sent to your registered email')
-//         ->toHaveKey('status', 'success');
+        // Assert OTP was created
+        $this->assertDatabaseHas('otps', [
+            'user_id' => $user->id,
+            'type' => OtpType::RESET_PASSWORD_VERIFICATION->value,
+        ]);
+    });
 
-//     Notification::assertSentTo(
-//         $this->user,
-//         \App\Notifications\Auth\ResetPasswordNotification::class
-//     );
+    test('forgot password requires email to exist in database', function () {
+        $data = [
+            'email' => 'nonexistent@example.com',
+        ];
 
-//     $this->assertDatabaseHas('otps', [
-//         'user_id' => $this->user->id,
-//         'type' => OtpType::RESET_PASSWORD_VERIFICATION->value,
-//     ]);
-// });
+        $response = $this->postJson($this->forgotPasswordEndpoint, $data);
 
-test('forgot password with invalid email', function () {
-    $response = $this->postJson($this->forgot, ['email' => fake()->email()]);
+        // The validation rule requires the email to exist
+        $response->assertStatus(Response::HTTP_BAD_REQUEST)
+            ->assertJsonValidationErrors(['email']);
+    });
 
-    $responseData = $response->json();
+    test('forgot password requires email field', function () {
+        $response = $this->postJson($this->forgotPasswordEndpoint, []);
 
-    expect($response->status())->toBe(Response::HTTP_BAD_REQUEST);
+        $response->assertStatus(Response::HTTP_BAD_REQUEST)
+            ->assertJsonValidationErrors(['email']);
+    });
 
-    expect($responseData)
-        ->toHaveKey('message', 'Invalid parameters supplied.')
-        ->toHaveKey('errors')
-        ->toHaveKey('errors.email.0', 'The selected email is invalid.');
+    test('forgot password requires valid email format', function () {
+        $data = [
+            'email' => 'invalid-email',
+        ];
 
-    // Assert the database does not have the OTP
-    $this->assertDatabaseMissing('otps', [
-        'user_id' => $this->user->id,
-        'type' => OtpType::RESET_PASSWORD_VERIFICATION->value,
-    ]);
+        $response = $this->postJson($this->forgotPasswordEndpoint, $data);
+
+        $response->assertStatus(Response::HTTP_BAD_REQUEST)
+            ->assertJsonValidationErrors(['email']);
+    });
 });
 
-// TODO: fix password test dependencies
-// test('reset password with valid data', function () {
-//     $otp = $this->user->otps()->create([
-//         'code' => UtilityHelper::generateOtp(),
-//         'type' => OtpType::RESET_PASSWORD_VERIFICATION->value,
-//     ]);
+describe('Reset Password Tests', function () {
+    test('authenticated user can reset password with valid OTP', function () {
+        $oldPassword = 'OldPassword123!';
+        $newPassword = 'NewPassword123!';
 
-//     // Mock the createToken method to return a fake token
-//    $this->user = Mockery::mock($this->user)->makePartial();
+        $user = User::factory()->create([
+            'email' => 'testuser@example.com',
+            'password' => Hash::make($oldPassword),
+            'status' => StatusEnum::ACTIVE->value,
+        ]);
 
-//     $mockedToken = 'fake-access-token';
-//     $this->user->shouldReceive('createToken')->andReturn((object)[
-//         'accessToken' => $mockedToken,
-//     ]);
-//     // Create a mock token object
-//     $mockToken = Mockery::mock(Token::class);
-//     $mockToken->id = 'mock-token-id'; // Provide a mock ID for the access token
-//     // Mock the createToken method to return the mock token
-//     $this->user->shouldReceive('createToken')->andReturn((object)[
-//         'accessToken' => $mockedToken,
-//         'token' => $mockToken, // Return the mock token with the ID
-//     ]);
+        // Create OTP for password reset
+        $otp = Otp::factory()->create([
+            'user_id' => $user->id,
+            'type' => OtpType::RESET_PASSWORD_VERIFICATION->value,
+            'code' => '123456',
+        ]);
 
-//     Passport::actingAs($this->user, ['full']);
+        $tokenResult = $user->createToken('Full Access Token', ['full']);
+        $token = $tokenResult->accessToken;
 
-//     $response = $this->withHeaders(['Authorization' => "Bearer $mockedToken"])
-//         ->postJson($this->reset, [
-//             'password' => 'newpassword123',
-//             'passwordConfirmation' => 'newpassword123',
-//         ]);
+        $data = [
+            'otp' => '123456',
+            'password' => $newPassword,
+            'passwordConfirmation' => $newPassword,
+        ];
 
-//     $responseData = $response->json();
+        $response = $this->withHeaders(['Authorization' => "Bearer $token"])
+            ->postJson($this->resetPasswordEndpoint, $data);
 
-//     expect($response->status())->toBe(Response::HTTP_OK);
+        $response->assertStatus(Response::HTTP_OK)
+            ->assertJson(
+                fn (AssertableJson $json) => $json
+                    ->has('status')
+                    ->has('message')
+            );
 
-//     expect($responseData)
-//         ->toHaveKey('message', 'Your password has been reset.')
-//         ->toHaveKey('status', 'success');
+        // Assert password was changed
+        $user->refresh();
+        $this->assertTrue(Hash::check($newPassword, $user->password));
+        $this->assertFalse(Hash::check($oldPassword, $user->password));
 
-//     expect(Hash::check('newpassword123', $this->user->fresh()->password))->toBeTrue();
-//     $this->assertDatabaseMissing('otps', ['code' => $otp->code, 'type' => OtpType::RESET_PASSWORD_VERIFICATION->value]);
-// });
+        // Assert token was revoked after password reset
+        $this->assertDatabaseMissing('oauth_access_tokens', [
+            'id' => $tokenResult->token->id,
+            'revoked' => false,
+        ]);
+    });
 
-// test('reset password with invalid otp', function () {
-//     $response = $this->postJson($this->reset, [
-//         'email' => $this->email,
-//         'otp' => 'invalidotp',
-//         'password' => 'newpassword123',
-//         'password_confirmation' => 'newpassword123',
-//     ]);
+    test('reset password requires authentication', function () {
+        $data = [
+            'otp' => '123456',
+            'password' => 'NewPassword123!',
+            'passwordConfirmation' => 'NewPassword123!',
+        ];
 
-//     $responseData = $response->json();
+        $response = $this->postJson($this->resetPasswordEndpoint, $data);
 
-//     expect($response->status())->toBe(Response::HTTP_BAD_REQUEST);
+        $response->assertStatus(Response::HTTP_UNAUTHORIZED);
+    });
 
-//     expect($responseData)
-//         ->toHaveKey('message', 'Invalid parameters supplied.')
-//         ->toHaveKey('errors')
-//         ->toHaveKey('errors.otp.0', 'The OTP provided is incorrect or has expired. Please try again.');
-// });
+    test('reset password requires valid password', function () {
+        $user = User::factory()->create([
+            'email' => 'testuser@example.com',
+            'password' => Hash::make('OldPassword123!'),
+        ]);
 
-// test('reset password with non-existent email', function () {
-//     $response = $this->postJson($this->reset, [
-//         'email' => 'nonexistent@example.com',
-//         'otp' => 'anyotp',
-//         'password' => 'newpassword123',
-//         'password_confirmation' => 'newpassword123',
-//     ]);
+        $tokenResult = $user->createToken('Full Access Token', ['full']);
+        $token = $tokenResult->accessToken;
 
-//     $responseData = $response->json();
+        $data = [
+            'otp' => '123456',
+            'password' => 'weak', // Too weak
+            'passwordConfirmation' => 'weak',
+        ];
 
-//     expect($response->status())->toBe(Response::HTTP_BAD_REQUEST);
+        $response = $this->withHeaders(['Authorization' => "Bearer $token"])
+            ->postJson($this->resetPasswordEndpoint, $data);
 
-//     expect($responseData)
-//         ->toHaveKey('message', 'Invalid parameters supplied.')
-//         ->toHaveKey('errors')
-//         ->toHaveKey('errors.otp.0', 'Invalid email or otp is incorrect. Please try again.');
-// });
+        $response->assertStatus(Response::HTTP_BAD_REQUEST)
+            ->assertJsonValidationErrors(['password']);
+    });
 
-afterEach(function () {
-    if ($this->user) {
-        $this->user->delete();
-    }
+    test('reset password requires password confirmation match', function () {
+        $user = User::factory()->create([
+            'email' => 'testuser@example.com',
+            'password' => Hash::make('OldPassword123!'),
+        ]);
+
+        $tokenResult = $user->createToken('Full Access Token', ['full']);
+        $token = $tokenResult->accessToken;
+
+        $data = [
+            'otp' => '123456',
+            'password' => 'NewPassword123!',
+            'passwordConfirmation' => 'DifferentPassword123!',
+        ];
+
+        $response = $this->withHeaders(['Authorization' => "Bearer $token"])
+            ->postJson($this->resetPasswordEndpoint, $data);
+
+        $response->assertStatus(Response::HTTP_BAD_REQUEST)
+            ->assertJsonValidationErrors(['passwordConfirmation']); // Already camelCase in rule
+    });
+
+    test('reset password requires all fields', function () {
+        $user = User::factory()->create();
+
+        $tokenResult = $user->createToken('Full Access Token', ['full']);
+        $token = $tokenResult->accessToken;
+
+        $response = $this->withHeaders(['Authorization' => "Bearer $token"])
+            ->postJson($this->resetPasswordEndpoint, []);
+
+        $response->assertStatus(Response::HTTP_BAD_REQUEST)
+            ->assertJsonValidationErrors(['password', 'passwordConfirmation']);
+    });
 });

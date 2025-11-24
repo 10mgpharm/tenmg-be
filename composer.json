@@ -8,15 +8,16 @@
         "php": "^8.2",
         "bacon/bacon-qr-code": "^3.0",
         "fakerphp/faker": "^1.23",
-        "knuckleswtf/scribe": "^4.37",
+        "knuckleswtf/scribe": "^5.0",
         "kreait/laravel-firebase": "^6.0",
-        "laravel/framework": "^11.9",
+        "laravel/framework": "^12.0",
         "laravel/passport": "^12.0",
         "laravel/telescope": "^5.2",
         "laravel/tinker": "^2.9",
         "league/csv": "^9.18",
         "league/flysystem-aws-s3-v3": "^3.0",
         "maatwebsite/excel": "^3.1",
+        "phpmailer/phpmailer": "*",
         "pragmarx/google2fa-laravel": "^2.2",
         "spatie/laravel-activitylog": "^4.8",
         "spatie/laravel-data": "^4.11",
@@ -28,8 +29,8 @@
         "laravel/sail": "^1.26",
         "mockery/mockery": "^1.6",
         "nunomaduro/collision": "^8.0",
-        "pestphp/pest": "^2.35",
-        "pestphp/pest-plugin-laravel": "^2.4"
+         "pestphp/pest": "^4.0",
+        "pestphp/pest-plugin-laravel": "^4.0"
     },
     "autoload": {
         "psr-4": {

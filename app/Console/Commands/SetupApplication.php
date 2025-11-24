@@ -28,9 +28,9 @@ class SetupApplication extends Command
         $this->info('## Start setup.');
 
         // Wipe the database
-        $this->info('Wiping database....');
-        $this->call('db:wipe', ['--force' => true]);
-        $this->info('Database wiped.');
+        // $this->info('Wiping database....');
+        // $this->call('db:wipe', ['--force' => true]);
+        // $this->info('Database wiped.');
 
         // Run migrations
         $this->info('Running migration....');

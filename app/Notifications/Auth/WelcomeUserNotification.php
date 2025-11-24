@@ -36,18 +36,16 @@ class WelcomeUserNotification extends Notification implements ShouldQueue
     public function toMail(object $notifiable): MailMessage
     {
         $url = config('app.frontend_url');
+        $firstName = $notifiable->name ? explode(' ', trim($notifiable->name))[0] : 'there';
+        $supportEmail = config('mail.from.support', config('mail.from.address'));
 
         return (new MailMessage)
             ->subject(Lang::get('Your Email Has Been Verified on '.config('app.name')))
-            ->greeting(Lang::get('Hello ' . ($notifiable->name ? explode(' ', trim($notifiable->name))[0] : '') . ','))
-            ->line(Lang::get('Your email has been successfully verified on '.config('app.name') . '! 🎉'))
-            ->line(Lang::get('You\'re one step closer to accessing all the features of ' . config('app.name') . '.'))
-            ->action('Proceed to Dashboard', $url)
-            ->line(__('We’re excited to have you on board!') . __(' If you have any questions, please contact us at ') . '**' . config('mail.from.support') . '**.')
-            ->line(Lang::get('No further action is required if you did not initiate this verification or are unsure about this account.'))
-            ->line('')
-            ->line('Best Regards,')
-            ->salutation(Lang::get('The '.  config('app.name') . ' Team'));
+            ->view('emails.auth.welcome-user', [
+                'firstName' => $firstName,
+                'dashboardUrl' => $url,
+                'supportEmail' => $supportEmail,
+            ]);
     }
 
     /**

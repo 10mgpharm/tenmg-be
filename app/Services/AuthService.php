@@ -113,6 +113,11 @@ class AuthService implements IAuthService
                 'password' => Hash::make($request['password']),
             ]);
             $userRole = $this->resolveSignupRole(type: $businessType);
+
+            if (! $userRole) {
+                throw new Exception("Role for business type '{$businessType->value}' not found. Please ensure roles are seeded.", Response::HTTP_INTERNAL_SERVER_ERROR);
+            }
+
             $user->assignRole($userRole);
 
             // create business
@@ -280,6 +285,11 @@ class AuthService implements IAuthService
 
             $user = $request->user();
             $userRole = $this->resolveSignupRole(type: $businessType);
+
+            if (! $userRole) {
+                throw new Exception("Role for business type '{$businessType->value}' not found. Please ensure roles are seeded.", Response::HTTP_INTERNAL_SERVER_ERROR);
+            }
+
             $user->assignRole($userRole);
 
             // create business
@@ -372,7 +382,7 @@ class AuthService implements IAuthService
             CreditLendersWallet::firstOrCreate([
                 'lender_id' => $business->id,
                 'type' => $type,
-            ],[
+            ], [
                 'lender_id' => $business->id,
                 'type' => $type,
                 'prev_balance' => 0,

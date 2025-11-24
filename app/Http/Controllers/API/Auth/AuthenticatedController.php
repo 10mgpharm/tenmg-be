@@ -6,12 +6,11 @@ use App\Enums\StatusEnum;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Auth\AuthenticatedRequest;
 use App\Http\Requests\AuthProviderRequest;
-use App\Services\Interfaces\IAuthService;
 use App\Services\AuditLogService;
+use App\Services\Interfaces\IAuthService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
-use Illuminate\Validation\ValidationException;
 
 class AuthenticatedController extends Controller
 {
@@ -106,6 +105,27 @@ class AuthenticatedController extends Controller
 
         return $this->returnJsonResponse(
             message: 'Logged out successfully',
+        );
+    }
+
+    /**
+     * Check if email exists.
+     */
+    public function emailExist(Request $request): JsonResponse
+    {
+        $email = $request->query('email');
+        $user = $this->authService->emailExist($email);
+
+        return $this->returnJsonResponse(
+            message: 'Email check completed',
+            data: [
+                'exists' => (bool) $user,
+                'user' => $user ? [
+                    'id' => $user->id,
+                    'email' => $user->email,
+                    'name' => $user->name,
+                ] : null,
+            ]
         );
     }
 

@@ -65,7 +65,7 @@ class SignupUserController extends Controller
 
         return $this->returnJsonResponse(
             message: 'Signup process completed successfully.',
-            status: Response::HTTP_OK
+            status: 'success'
         );
     }
 }
