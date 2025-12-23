@@ -137,4 +137,19 @@ class Business extends Model
     {
         return $this->hasOne(ApiKey::class, 'business_id', 'id');
     }
+
+    public function lenderSetting()
+    {
+        return $this->hasOne(LenderSetting::class, 'business_id', 'id');
+    }
+
+    public function lenderMatchesAsVendor()
+    {
+        return $this->hasMany(LenderMatch::class, 'vendor_business_id', 'id');
+    }
+
+    public function lenderMatchesAsLender()
+    {
+        return $this->hasMany(LenderMatch::class, 'lender_business_id', 'id');
+    }
 }

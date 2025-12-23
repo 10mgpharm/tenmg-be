@@ -6,6 +6,7 @@ use App\Models\ApiKey;
 use App\Models\Business;
 use App\Models\BusinessUser;
 use App\Models\Customer;
+use App\Models\LenderSetting;
 use App\Models\Role;
 use App\Models\User;
 use Faker\Factory as Faker;
@@ -250,6 +251,20 @@ class BusinessUserSeeder extends Seeder
         }
 
         // 6. Create 5 users with different businesses and type 'LENDER'
+        $lenderRates = [5.0, 6.5, 7.0, 8.0, 8.5]; // Different rates between 3-9%
+        $lenderInstructions = [
+            // Lender 1: Focus on category and past performance
+            'Approve loans only for customers in credit category B or above who have no previous defaulted or written-off loans.',
+            // Lender 2: Strict on previous loans regardless of category
+            'Do not approve any loan for customers with a history of defaulted, written-off, or restructured loans, even if they are in category A.',
+            // Lender 3: Conservative towards first-time borrowers
+            'Even if a customer is in credit category A, decline if this is their first-ever loan and there is no previous repayment history.',
+            // Lender 4: Require proven repayment history
+            'Only approve where the customer has at least one fully repaid loan in the last 12 months with a performing status throughout.',
+            // Lender 5: Active loan and category-based rules
+            'If the customer currently has an active loan, only approve a new one when they are in category B or above and the existing loan has been performing for at least 6 months.',
+        ];
+
         for ($i = 1; $i <= 5; $i++) {
             $lenderHost = User::firstOrCreate(
                 ['email' => "lender_LEN$i@example.com"],
@@ -280,6 +295,20 @@ class BusinessUserSeeder extends Seeder
             BusinessUser::firstOrCreate(
                 ['user_id' => $lenderHost->id, 'business_id' => $lenderHostBusiness->id],
                 ['role_id' => $lenderRole->id]
+            );
+
+            // Create lender settings for each lender
+            LenderSetting::firstOrCreate(
+                ['business_id' => $lenderHostBusiness->id],
+                [
+                    'rate' => $lenderRates[$i - 1],
+                    'instruction' => $lenderInstructions[$i - 1],
+                    'instruction_config' => [
+                        'disbursement_channel' => 'bank_transfer',
+                        'require_manual_approval' => $i % 2 === 0, // Alternate between true/false
+                        'verification_required' => true,
+                    ],
+                ]
             );
         }
 

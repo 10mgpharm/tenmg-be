@@ -41,6 +41,7 @@ use App\Http\Controllers\API\Credit\CustomerController;
 use App\Http\Controllers\API\Credit\LoanApplicationController;
 use App\Http\Controllers\API\Credit\LoanController;
 use App\Http\Controllers\API\Credit\LoanOfferController;
+use App\Http\Controllers\API\Credit\LoanPreferenceController as CreditLoanPreferenceController;
 use App\Http\Controllers\API\Credit\LoanRepaymentController;
 use App\Http\Controllers\API\Credit\TransactionHistoryController;
 use App\Http\Controllers\API\EcommerceDiscountController;
@@ -785,6 +786,17 @@ Route::prefix('v1')->group(function () {
         Route::get('/customers', [ClientController::class, 'getCustomers'])
             ->middleware('clientAuth')
             ->name('client.customers');
+
+        // [BNPL] Loan preference simulation (does not touch real lender preferences)
+        // Protected by clientAuth so we can resolve the vendor business from API keys
+        Route::post('/loan/simulate', [CreditLoanPreferenceController::class, 'simulate'])
+            ->middleware('clientAuth')
+            ->name('loan.simulate');
+
+        Route::prefix('credit')->group(function () {
+            Route::post('/mono-test', [TransactionHistoryController::class, 'testMonoCreditWorthiness'])
+                ->name('vendor.credit.mono-test');
+        });
 
         // [BNPL] get banks
         Route::prefix('banks')->group(function () {
