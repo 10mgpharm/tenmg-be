@@ -8,6 +8,7 @@ use App\Http\Resources\CreditTransactionsResource;
 use App\Http\Resources\TxnHistoryResource;
 use App\Models\CreditTxnHistoryEvaluation;
 use App\Models\FileUpload;
+use App\Services\Credit\MonoCreditWorthinessService;
 use App\Services\Interfaces\ITxnHistoryService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -16,7 +17,10 @@ use Illuminate\Support\Facades\Storage;
 
 class TransactionHistoryController extends Controller
 {
-    public function __construct(private ITxnHistoryService $txnHistoryService) {}
+    public function __construct(
+        private ITxnHistoryService $txnHistoryService,
+        private MonoCreditWorthinessService $monoCreditWorthinessService
+    ) {}
 
     public function index(int $customerId): JsonResponse
     {
@@ -70,7 +74,7 @@ class TransactionHistoryController extends Controller
 
         $evaluation = CreditTxnHistoryEvaluation::findOrFail($txnEvaluationId);
         $fileId = $evaluation->transaction_file_id;
-        //get file upload entry
+        // get file upload entry
         $fileUpload = FileUpload::findOrFail($fileId);
 
         $filePath = $fileUpload->path;
@@ -99,7 +103,7 @@ class TransactionHistoryController extends Controller
 
         $evaluation = CreditTxnHistoryEvaluation::findOrFail($request->transactionHistoryId);
         $fileId = $evaluation->transaction_file_id;
-        //get file upload entry
+        // get file upload entry
         $fileUploaded = FileUpload::findOrFail($fileId);
 
         if (! Storage::exists($fileUploaded->path)) {
@@ -168,6 +172,96 @@ class TransactionHistoryController extends Controller
     public function getCreditTransactionHistories(Request $request)
     {
         $histories = $this->txnHistoryService->getCreditTransactionHistories($request->all(), $request->perPage ?? 10);
+
         return $this->returnJsonResponse(message: 'Transaction histories fetched', data: CreditTransactionsResource::collection($histories)->response()->getData(true));
+    }
+
+    /**
+     * Test endpoint for Mono credit history analysis using Gemini AI
+     */
+    public function testMonoCreditWorthiness(Request $request): JsonResponse
+    {
+        // Validate BVN and borrower_reference are provided
+        $request->validate([
+            'bvn' => 'required|string|size:11',
+            'borrower_reference' => 'required|string|max:255',
+        ]);
+
+        $bvn = $request->input('bvn');
+        $borrowerReference = $request->input('borrower_reference');
+        // Provider comes from config/env, not from user input
+        $provider = config('services.mono.default_provider', 'crc');
+
+        // Fetch credit history from Mono API
+        $apiResponse = $this->monoCreditWorthinessService->fetchCreditHistory($bvn, $provider);
+
+        if (! $apiResponse['success']) {
+            // Return detailed error information
+            $errorData = [
+                'error' => $apiResponse['error'] ?? 'Failed to fetch credit history from Mono API',
+                'status_code' => $apiResponse['status_code'] ?? null,
+                'response' => $apiResponse['response'] ?? null,
+                'raw_response' => $apiResponse['raw_response'] ?? null,
+                'exception_type' => $apiResponse['exception_type'] ?? null,
+            ];
+
+            // Remove null values for cleaner response
+            $errorData = array_filter($errorData, fn ($value) => $value !== null);
+
+            return $this->returnJsonResponse(
+                message: $apiResponse['error'] ?? 'Failed to fetch credit history from Mono API',
+                data: $errorData,
+                statusCode: $apiResponse['status_code'] ?? Response::HTTP_INTERNAL_SERVER_ERROR,
+                status: 'failed'
+            );
+        }
+
+        // Format response to match expected structure
+        $monoData = [
+            'status' => 'successful',
+            'message' => 'Report Fetched Successfully',
+            'timestamp' => now()->toIso8601String(),
+            'data' => $apiResponse['data'],
+        ];
+
+        try {
+            // Analyze credit history data with Gemini AI
+            $analysis = $this->monoCreditWorthinessService->analyzeMonoCreditWorthiness($monoData, $borrowerReference);
+
+            if (! $analysis['success']) {
+                return $this->returnJsonResponse(
+                    message: $analysis['message'] ?? 'Failed to analyze credit history',
+                    data: $analysis,
+                    statusCode: Response::HTTP_INTERNAL_SERVER_ERROR,
+                    status: 'failed'
+                );
+            }
+
+            // Format response - return analysis directly if parsing was successful
+            $responseData = [
+                'borrower_reference' => $borrowerReference,
+                'analysis' => $analysis['analysis'] ?? null,
+                'mono_data' => $analysis['mono_data'] ?? null,
+            ];
+
+            // Only include raw_response if parsing failed or for debugging
+            if (isset($analysis['parse_error']) || ! isset($analysis['analysis'])) {
+                $responseData['raw_response'] = $analysis['raw_response'] ?? null;
+                $responseData['parse_error'] = $analysis['parse_error'] ?? null;
+            }
+
+            return $this->returnJsonResponse(
+                message: 'Mono credit history analyzed successfully',
+                data: $responseData
+            );
+
+        } catch (\Exception $e) {
+            return $this->returnJsonResponse(
+                message: 'Error processing Mono credit history analysis',
+                data: ['error' => $e->getMessage()],
+                statusCode: Response::HTTP_INTERNAL_SERVER_ERROR,
+                status: 'failed'
+            );
+        }
     }
 }

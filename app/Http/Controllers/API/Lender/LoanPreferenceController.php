@@ -8,10 +8,9 @@ use Illuminate\Http\Request;
 
 class LoanPreferenceController extends Controller
 {
-
     private $loanPreferenceService;
 
-    function __construct(LoanPreferenceService $loanPreferenceService)
+    public function __construct(LoanPreferenceService $loanPreferenceService)
     {
         $this->loanPreferenceService = $loanPreferenceService;
     }
@@ -26,8 +25,8 @@ class LoanPreferenceController extends Controller
         ]);
 
         $user = $request->user();
-            $business_id = $user->ownerBusinessType?->id
-                ?: $user->businesses()->firstWhere('user_id', $user->id)?->id;
+        $business_id = $user->ownerBusinessType?->id
+            ?: $user->businesses()->firstWhere('user_id', $user->id)?->id;
 
         $request->merge(['business_id' => $business_id]);
 
@@ -42,7 +41,9 @@ class LoanPreferenceController extends Controller
 
     public function getLoanPreference()
     {
+
         $loanPreference = $this->loanPreferenceService->getLoanPreference();
+
         return $this->returnJsonResponse(
             data: $loanPreference,
             message: 'Loan Preference Successfully fetched'
@@ -52,6 +53,7 @@ class LoanPreferenceController extends Controller
     public function getLoanPreferencePrefill()
     {
         $prefill = $this->loanPreferenceService->getLoanPreferencePrefill();
+
         return $this->returnJsonResponse(
             data: $prefill,
             message: 'Loan Preference prefill'
@@ -61,15 +63,15 @@ class LoanPreferenceController extends Controller
     public function updateAutoAcceptStatus(Request $request)
     {
         $request->validate([
-            'status' => 'required|boolean'
+            'status' => 'required|boolean',
         ]);
 
         $loanPreference = $this->loanPreferenceService->updateAutoAcceptStatus($request);
+
         return $this->returnJsonResponse(
             data: $loanPreference,
             message: 'Loan Preference auto accept status updated'
         );
 
     }
-
 }
