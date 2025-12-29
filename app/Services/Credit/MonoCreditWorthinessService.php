@@ -359,8 +359,13 @@ class MonoCreditWorthinessService
             'providers' => $providers,
             'profile' => [
                 'full_name' => $profile['full_name'] ?? null,
+                'first_name' => $profile['first_name'] ?? null,
+                'last_name' => $profile['last_name'] ?? null,
                 'dob' => $profile['date_of_birth'] ?? $profile['dob'] ?? null,
                 'gender' => $profile['gender'] ?? null,
+                'email' => $profile['email'] ?? ($profile['email_address'] ?? ($profile['email_addresses'][0] ?? null)),
+                'phone' => $profile['phone'] ?? ($profile['phone_number'] ?? ($profile['phone_numbers'][0] ?? null)),
+                'address' => $profile['address'] ?? ($profile['address_history'][0]['address'] ?? ($profile['address_history'][0] ?? null)),
                 'address_history_count' => count($profile['address_history'] ?? []),
                 'email_addresses' => $profile['email_address'] ?? $profile['email_addresses'] ?? [],
                 'phone_numbers' => $profile['phone_number'] ?? $profile['phone_numbers'] ?? [],

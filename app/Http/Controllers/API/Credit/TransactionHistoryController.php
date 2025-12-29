@@ -6,13 +6,19 @@ use App\Http\Controllers\Controller;
 use App\Http\Resources\CreditScoreResource;
 use App\Http\Resources\CreditTransactionsResource;
 use App\Http\Resources\TxnHistoryResource;
+use App\Models\Business;
 use App\Models\CreditTxnHistoryEvaluation;
 use App\Models\FileUpload;
+use App\Models\LenderMatch;
+use App\Models\MonoCustomer;
 use App\Services\Credit\MonoCreditWorthinessService;
+use App\Services\Credit\MonoCustomerService;
+use App\Services\Credit\MonoMandateService;
 use App\Services\Interfaces\ITxnHistoryService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 
 class TransactionHistoryController extends Controller
@@ -224,6 +230,117 @@ class TransactionHistoryController extends Controller
             'data' => $apiResponse['data'],
         ];
 
+        // Extract profile data and create/get Mono customer
+        $monoCustomerService = app(MonoCustomerService::class);
+        $profileData = $apiResponse['data']['profile'] ?? [];
+
+        // Get vendor business from lender_matches table using borrower_reference
+        $vendorBusiness = null;
+        $lenderMatch = LenderMatch::where('borrower_reference', $borrowerReference)->first();
+        if ($lenderMatch && $lenderMatch->vendor_business_id) {
+            $vendorBusiness = Business::find($lenderMatch->vendor_business_id);
+        }
+
+        // Extract first_name and last_name from Mono credit history response
+        // Mono returns: "fullName": "Samuel Olamide", "firstName": null, "lastName": null
+        $fullName = $profileData['fullName'] ?? $profileData['full_name'] ?? null;
+        $firstName = $profileData['firstName'] ?? $profileData['first_name'] ?? null;
+        $lastName = $profileData['lastName'] ?? $profileData['last_name'] ?? null;
+
+        // If first_name or last_name not available, split fullName
+        if ((! $firstName || ! $lastName) && ! empty($fullName)) {
+            $fullName = trim($fullName);
+            if ($fullName) {
+                $nameParts = explode(' ', $fullName, 2);
+                if (! $firstName) {
+                    $firstName = $nameParts[0] ?? null;
+                }
+                if (! $lastName && isset($nameParts[1])) {
+                    $lastName = $nameParts[1];
+                }
+            }
+        }
+
+        // Extract customer fields from profile - ensure strings, not arrays
+        $email = $profileData['email'] ?? null;
+        if (is_array($email)) {
+            $email = $email[0] ?? null;
+        }
+        if (! $email) {
+            $emailAddress = $profileData['email_address'] ?? null;
+            if (is_array($emailAddress)) {
+                $email = $emailAddress[0] ?? null;
+            } else {
+                $email = $emailAddress;
+            }
+        }
+        if (! $email && isset($profileData['email_addresses']) && is_array($profileData['email_addresses'])) {
+            $email = $profileData['email_addresses'][0] ?? null;
+        }
+
+        $phone = $profileData['phone'] ?? null;
+        if (is_array($phone)) {
+            $phone = $phone[0] ?? null;
+        }
+        if (! $phone) {
+            $phoneNumber = $profileData['phone_number'] ?? null;
+            if (is_array($phoneNumber)) {
+                $phone = $phoneNumber[0] ?? null;
+            } else {
+                $phone = $phoneNumber;
+            }
+        }
+        if (! $phone && isset($profileData['phone_numbers']) && is_array($profileData['phone_numbers'])) {
+            $phone = $profileData['phone_numbers'][0] ?? null;
+        }
+
+        $address = $profileData['address'] ?? null;
+        if (! $address && isset($profileData['address_history'][0])) {
+            $addressHistory = $profileData['address_history'][0];
+            if (is_array($addressHistory)) {
+                $address = $addressHistory['address'] ?? ($addressHistory[0] ?? null);
+            } else {
+                $address = $addressHistory;
+            }
+        }
+
+        $customerProfileData = [
+            'first_name' => $firstName,
+            'last_name' => $lastName,
+            'full_name' => $fullName ?? ($profileData['fullName'] ?? $profileData['full_name'] ?? null),
+            'email' => $email,
+            'phone' => $phone,
+            'address' => $address,
+            'bvn' => $bvn, // Include BVN for Mono API
+        ];
+
+        // Create or get Mono customer (don't fail if this fails)
+        $monoCustomerId = null;
+        try {
+            $monoCustomerId = $monoCustomerService->createOrGetMonoCustomer(
+                $customerProfileData,
+                $bvn,
+                $vendorBusiness
+            );
+
+            // Update lender match with Mono customer ID
+            if ($monoCustomerId) {
+                $monoCustomer = MonoCustomer::where('mono_customer_id', $monoCustomerId)->first();
+                if ($monoCustomer) {
+                    LenderMatch::where('borrower_reference', $borrowerReference)
+                        ->update(['mono_customer_id' => $monoCustomer->id]);
+                    // Refresh lender match to get updated mono_customer_id
+                    $lenderMatch->refresh();
+                }
+            }
+        } catch (\Exception $e) {
+            // Log error but don't block credit analysis
+            Log::warning('Failed to create/get Mono customer', [
+                'error' => $e->getMessage(),
+                'borrower_reference' => $borrowerReference,
+            ]);
+        }
+
         try {
             // Analyze credit history data with Gemini AI
             $analysis = $this->monoCreditWorthinessService->analyzeMonoCreditWorthiness($monoData, $borrowerReference);
@@ -237,12 +354,45 @@ class TransactionHistoryController extends Controller
                 );
             }
 
+            // Automatically initiate GSM mandate after successful credit analysis
+            $mandateUrl = null;
+            if ($monoCustomerId && $lenderMatch) {
+                try {
+                    $monoMandateService = app(MonoMandateService::class);
+                    $mandateResult = $monoMandateService->initiateMandate($lenderMatch);
+
+                    if ($mandateResult['success']) {
+                        $mandateUrl = $mandateResult['mandate_url'];
+                        Log::info('GSM mandate initiated automatically', [
+                            'borrower_reference' => $borrowerReference,
+                            'mandate_url' => $mandateUrl,
+                        ]);
+                    } else {
+                        Log::warning('Failed to initiate GSM mandate', [
+                            'borrower_reference' => $borrowerReference,
+                            'error' => $mandateResult['error'] ?? 'Unknown error',
+                        ]);
+                    }
+                } catch (\Exception $e) {
+                    // Log error but don't block credit analysis response
+                    Log::error('Exception while initiating GSM mandate', [
+                        'borrower_reference' => $borrowerReference,
+                        'error' => $e->getMessage(),
+                    ]);
+                }
+            }
+
             // Format response - return analysis directly if parsing was successful
             $responseData = [
                 'borrower_reference' => $borrowerReference,
                 'analysis' => $analysis['analysis'] ?? null,
                 'mono_data' => $analysis['mono_data'] ?? null,
             ];
+
+            // Include mandate URL if available
+            if ($mandateUrl) {
+                $responseData['mandate_url'] = $mandateUrl;
+            }
 
             // Only include raw_response if parsing failed or for debugging
             if (isset($analysis['parse_error']) || ! isset($analysis['analysis'])) {
@@ -258,6 +408,153 @@ class TransactionHistoryController extends Controller
         } catch (\Exception $e) {
             return $this->returnJsonResponse(
                 message: 'Error processing Mono credit history analysis',
+                data: ['error' => $e->getMessage()],
+                statusCode: Response::HTTP_INTERNAL_SERVER_ERROR,
+                status: 'failed'
+            );
+        }
+    }
+
+    /**
+     * Test endpoint for Mono GSM mandate initiation
+     * POST /api/v1/client/credit/mono-test-mandate
+     * Use this endpoint to test direct debit mandate with Postman
+     * Does not affect the main implementation
+     *
+     * Request body:
+     * {
+     *   "mono_customer_id": "69518e4b1e504b81ea8b27d0",
+     *   "amount": 50000,
+     *   "borrower_reference": "TEST_REF_001",
+     *   "default_tenor": 6,
+     *   "callback_url": "https://your-app.com/callback"
+     * }
+     */
+    public function testMonoMandate(Request $request): JsonResponse
+    {
+        // Validate required fields
+        $request->validate([
+            'mono_customer_id' => 'required|string',
+            'amount' => 'required|numeric|min:1',
+            'borrower_reference' => 'required|string|max:255',
+            'default_tenor' => 'required|integer|min:1',
+            'callback_url' => 'nullable|url',
+        ]);
+
+        try {
+            $baseUrl = config('services.mono.base_url');
+            $secretKey = config('services.mono.secret_key');
+
+            if (! $secretKey) {
+                return $this->returnJsonResponse(
+                    message: 'Mono secret key is not configured',
+                    data: ['error' => 'Mono secret key is not configured'],
+                    statusCode: Response::HTTP_INTERNAL_SERVER_ERROR,
+                    status: 'failed'
+                );
+            }
+
+            $url = "{$baseUrl}/v2/payments/initiate";
+
+            // Calculate dates based on tenor
+            $startDate = \Carbon\Carbon::today();
+            $endDate = \Carbon\Carbon::today()->addMonths($request->input('default_tenor'));
+
+            // Generate unique reference
+            $mandateReference = $request->input('borrower_reference').'_mandate_'.time();
+
+            // Prepare mandate payload
+            $mandatePayload = [
+                'amount' => (int) $request->input('amount'),
+                'type' => 'recurring-debit',
+                'method' => 'mandate',
+                'mandate_type' => 'emandate', // Global Standing Mandate
+                'debit_type' => 'variable', // Variable allows flexible debit amounts
+                'description' => "Loan repayment for {$request->input('borrower_reference')}",
+                'reference' => $mandateReference,
+                'redirect_url' => $request->input('callback_url') ?? config('app.url'),
+                'customer' => [
+                    'id' => $request->input('mono_customer_id'),
+                ],
+                'start_date' => $startDate->format('Y-m-d'),
+                'end_date' => $endDate->format('Y-m-d'),
+                'meta' => [
+                    'borrower_reference' => $request->input('borrower_reference'),
+                    'test_mode' => true,
+                ],
+            ];
+
+            Log::info('Testing Mono GSM mandate initiation', [
+                'url' => $url,
+                'borrower_reference' => $request->input('borrower_reference'),
+                'payload' => $mandatePayload,
+            ]);
+
+            $response = \Illuminate\Support\Facades\Http::withHeaders([
+                'mono-sec-key' => $secretKey,
+                'accept' => 'application/json',
+                'content-type' => 'application/json',
+            ])->post($url, $mandatePayload);
+
+            $statusCode = $response->status();
+            $responseBody = $response->body();
+            $responseData = $response->json();
+
+            Log::info('Mono mandate test response', [
+                'status_code' => $statusCode,
+                'response_body' => $responseBody,
+                'response_data' => $responseData,
+            ]);
+
+            if ($response->failed()) {
+                $errorMessage = $responseData['message'] ?? $responseData['error'] ?? 'Failed to initiate Mono mandate';
+
+                return $this->returnJsonResponse(
+                    message: $errorMessage,
+                    data: [
+                        'error' => $errorMessage,
+                        'status_code' => $statusCode,
+                        'full_response' => $responseData,
+                    ],
+                    statusCode: $statusCode,
+                    status: 'failed'
+                );
+            }
+
+            // Extract mandate URL from response
+            $mandateData = $responseData['data'] ?? $responseData;
+            $monoMandateUrl = $mandateData['mono_url'] ?? null;
+
+            if (! $monoMandateUrl) {
+                return $this->returnJsonResponse(
+                    message: 'Mono mandate URL not found in response',
+                    data: [
+                        'error' => 'Mono mandate URL not found in response',
+                        'response' => $responseData,
+                    ],
+                    statusCode: Response::HTTP_BAD_REQUEST,
+                    status: 'failed'
+                );
+            }
+
+            return $this->returnJsonResponse(
+                message: 'Mono GSM mandate initiated successfully',
+                data: [
+                    'mandate_url' => $monoMandateUrl,
+                    'mandate_id' => $mandateData['mandate_id'] ?? null,
+                    'reference' => $mandateReference,
+                    'status_code' => $statusCode,
+                ]
+            );
+
+        } catch (\Exception $e) {
+            Log::error('Exception in test Mono mandate endpoint', [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+            ]);
+
+            return $this->returnJsonResponse(
+                message: 'Error initiating Mono mandate',
                 data: ['error' => $e->getMessage()],
                 statusCode: Response::HTTP_INTERNAL_SERVER_ERROR,
                 status: 'failed'
