@@ -8,6 +8,7 @@
         "php": "^8.2",
         "bacon/bacon-qr-code": "^3.0",
         "fakerphp/faker": "^1.23",
+        "google-gemini-php/laravel": "^2.0",
         "knuckleswtf/scribe": "^5.0",
         "kreait/laravel-firebase": "^6.0",
         "laravel/framework": "^12.0",

@@ -55,4 +55,10 @@ return [
     'google' => [
         'oauth_url' => env('GOOGLE_OAUTH2_URL'),
     ],
+
+    'mono' => [
+        'secret_key' => env('MONO_SEC_KEY'),
+        'base_url' => env('MONO_BASE_URL', 'https://api.withmono.com'),
+        'default_provider' => env('MONO_DEFAULT_PROVIDER', 'crc'),
+    ],
 ];

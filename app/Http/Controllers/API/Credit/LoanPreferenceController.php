@@ -1,0 +1,61 @@
+<?php
+
+namespace App\Http\Controllers\API\Credit;
+
+use App\Http\Controllers\Controller;
+use App\Services\Credit\LoanPreferenceService;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
+
+class LoanPreferenceController extends Controller
+{
+    public function __construct(
+        private LoanPreferenceService $loanPreferenceService
+    ) {}
+
+    /**
+     * Simulate repayment plan for a purchase.
+     *
+     * Request body:
+     * - amount (required, numeric)
+     * - default_tenor (required, numeric) - 3, 6, 9, or 12 months
+     * - borrower_reference (required, string) - unique identifier for the vendor's customer
+     * - currency (optional, string) - default NGN
+     * - transaction_history (optional, array) - optional transaction history data
+     * - product_items (optional, array) - optional product items data
+     * - callback_url (optional, url) - callback URL for notifications
+     *
+     * Note: interest rate is determined internally per tenor (loan preference config).
+     */
+    public function simulate(Request $request): JsonResponse
+    {
+        $validated = $request->validate([
+            'amount' => 'required|numeric|min:1000',
+            'default_tenor' => 'required|numeric|in:3,6,9,12',
+            // We handle uniqueness at the DB + service layer (update-or-create by borrower_reference)
+            'borrower_reference' => 'required|string|max:255',
+            'currency' => 'nullable|string|size:3',
+            'transaction_history' => 'nullable|array',
+            'product_items' => 'nullable|array',
+            'callback_url' => 'nullable|url',
+        ]);
+
+        // When called via clientAuth, the middleware attaches the vendor Business model
+        // into the request as 'business'. We forward it to the service via the payload
+        // so it can create/update LenderMatch records even without an authenticated user.
+        $businessFromClient = $request->input('business');
+        if ($businessFromClient) {
+            $validated['business'] = $businessFromClient;
+        }
+
+        $amount = (int) $validated['amount'];
+        $tenor = (int) $validated['default_tenor'];
+
+        $result = $this->loanPreferenceService->simulate($amount, $tenor, $validated);
+
+        return $this->returnJsonResponse(
+            data: $result,
+            message: 'Repayment plan calculated successfully'
+        );
+    }
+}
