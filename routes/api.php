@@ -43,6 +43,7 @@ use App\Http\Controllers\API\Credit\LoanController;
 use App\Http\Controllers\API\Credit\LoanOfferController;
 use App\Http\Controllers\API\Credit\LoanPreferenceController as CreditLoanPreferenceController;
 use App\Http\Controllers\API\Credit\LoanRepaymentController;
+use App\Http\Controllers\API\Credit\MonoCustomerController;
 use App\Http\Controllers\API\Credit\TransactionHistoryController;
 use App\Http\Controllers\API\EcommerceDiscountController;
 use App\Http\Controllers\API\Job\JobApplicationController;
@@ -358,6 +359,23 @@ Route::prefix('v1')->group(function () {
 
                 Route::get('/{customerId}', [TransactionHistoryController::class, 'index'])->name('vendor.txn_history');
 
+            });
+
+            // Mono Customer Management
+            Route::prefix('credit')->group(function () {
+                Route::prefix('mono-customers')->group(function () {
+                    // List all Mono customers
+                    Route::get('/', [MonoCustomerController::class, 'list'])
+                        ->name('vendor.credit.mono-customers.list');
+
+                    // Retrieve a Mono customer by ID
+                    Route::get('/{id}', [MonoCustomerController::class, 'retrieve'])
+                        ->name('vendor.credit.mono-customers.retrieve');
+
+                    // Delete a Mono customer by ID
+                    Route::delete('/{id}', [MonoCustomerController::class, 'delete'])
+                        ->name('vendor.credit.mono-customers.delete');
+                });
             });
 
             // Loan Application
@@ -796,6 +814,10 @@ Route::prefix('v1')->group(function () {
         Route::prefix('credit')->group(function () {
             Route::post('/mono-test', [TransactionHistoryController::class, 'testMonoCreditWorthiness'])
                 ->name('vendor.credit.mono-test');
+
+            // Test endpoint for Mono GSM mandate initiation (for Postman testing)
+            Route::post('/mono-test-mandate', [TransactionHistoryController::class, 'testMonoMandate'])
+                ->name('client.credit.mono-test-mandate');
         });
 
         // [BNPL] get banks
@@ -872,6 +894,23 @@ Route::prefix('v1')->group(function () {
                 ->middleware(['auth:api'])
                 ->name('client.repayment.verify-payment');
 
+        });
+    });
+
+    // Public Mono Customer Management (No authentication required)
+    Route::prefix('client')->group(function () {
+        Route::prefix('mono-customers')->group(function () {
+            // List all Mono customers (Public - no auth required)
+            Route::get('/', [MonoCustomerController::class, 'list'])
+                ->name('client.credit.mono-customers.list');
+
+            // Retrieve a Mono customer by ID (Public - no auth required)
+            Route::get('/{id}', [MonoCustomerController::class, 'retrieve'])
+                ->name('client.credit.mono-customers.retrieve');
+
+            // Delete a Mono customer by ID (Public - no auth required)
+            Route::delete('/{id}', [MonoCustomerController::class, 'delete'])
+                ->name('client.credit.mono-customers.delete');
         });
     });
 });

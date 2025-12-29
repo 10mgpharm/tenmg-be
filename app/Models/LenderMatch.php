@@ -21,6 +21,7 @@ class LenderMatch extends Model
         'product_items',
         'callback_url',
         'status',
+        'mono_customer_id',
     ];
 
     protected $casts = [
@@ -43,5 +44,13 @@ class LenderMatch extends Model
     public function lender(): BelongsTo
     {
         return $this->belongsTo(Business::class, 'lender_business_id');
+    }
+
+    /**
+     * Get the Mono customer for this lender match.
+     */
+    public function monoCustomer(): BelongsTo
+    {
+        return $this->belongsTo(MonoCustomer::class, 'mono_customer_id');
     }
 }
