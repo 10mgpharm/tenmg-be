@@ -824,6 +824,16 @@ Route::prefix('v1')->group(function () {
             Route::post('/initiate-mandate', [TransactionHistoryController::class, 'initiateMandate'])
                 ->middleware('clientAuth')
                 ->name('client.credit.initiate-mandate');
+
+            // Verify Mono mandate status
+            Route::get('/verify-mandate/{mandate_id}', [TransactionHistoryController::class, 'verifyMandate'])
+                ->middleware('clientAuth')
+                ->name('client.credit.verify-mandate');
+
+            // Update Mono mandate status
+            Route::match(['put', 'patch'], '/update-mandate-status/{mandate_id}', [TransactionHistoryController::class, 'updateMandateStatus'])
+                ->middleware('clientAuth')
+                ->name('client.credit.update-mandate-status');
         });
 
         // [BNPL] get banks

@@ -142,14 +142,14 @@ class LenderProveController extends Controller
             'meta' => $data,
         ]);
 
-        return $this->returnJsonResponse(
-            message: 'Lender KYC via Mono Prove initiated successfully',
-            data: [
-                'kyc_session_id' => $session->id,
-                'mono_url' => $session->mono_url,
-                'prove_id' => $session->prove_id,
-                'status' => $session->status,
-            ]
-        );
+        // Return Mono's response structure directly
+        $monoResponse = $result['mono_response'] ?? [
+            'status' => 'successful',
+            'message' => 'Request completed successfully',
+            'timestamp' => now()->toIso8601String(),
+            'data' => $data,
+        ];
+
+        return response()->json($monoResponse);
     }
 }

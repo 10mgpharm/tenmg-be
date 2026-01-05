@@ -71,13 +71,12 @@ class MonoProveService
                 ];
             }
 
-            // Handle Mono's response structure: { status, message, timestamp, data }
-            $monoData = $responseData['data'] ?? $responseData;
-
+            // Return Mono's full response structure
             return [
                 'success' => true,
                 'status_code' => $statusCode,
-                'data' => $monoData,
+                'mono_response' => $responseData, // Full Mono response structure
+                'data' => $responseData['data'] ?? $responseData, // Also include extracted data for backward compatibility
             ];
         } catch (\Throwable $e) {
             Log::error('Mono Prove initiate exception', [
@@ -96,11 +95,12 @@ class MonoProveService
     /**
      * Generate a mock Prove response when business is not active
      * This allows testing without completing Mono compliance
+     * Returns the full Mono response structure, which will be processed the same way as real responses
      */
     private function generateMockProveResponse(array $payload): array
     {
         // Generate mock Prove ID (similar format to Mono: starts with lowercase letters)
-        $mockProveId = 're'.strtoupper(bin2hex(random_bytes(6)));
+        $mockProveId = strtoupper(bin2hex(random_bytes(6)));
 
         // Generate mock customer ID (hex format like Mono)
         $mockCustomerId = bin2hex(random_bytes(12));
@@ -111,7 +111,7 @@ class MonoProveService
         $timestamp = now()->toIso8601String();
 
         // Build mock response matching Mono's exact structure
-        $mockResponse = [
+        $mockMonoResponse = [
             'status' => 'successful',
             'message' => 'Request completed successfully',
             'timestamp' => $timestamp,
@@ -128,12 +128,12 @@ class MonoProveService
             ],
         ];
 
-        // Return in the format expected by the controller
-        // The controller extracts 'data' from Mono's response structure
+        // Return the full Mono response structure
         return [
             'success' => true,
             'status_code' => 200,
-            'data' => $mockResponse['data'],
+            'mono_response' => $mockMonoResponse, // Full Mono response structure
+            'data' => $mockMonoResponse['data'], // Also include extracted data for controller to use
         ];
     }
 }

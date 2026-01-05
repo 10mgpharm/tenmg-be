@@ -11,6 +11,7 @@ use App\Models\CreditTxnHistoryEvaluation;
 use App\Models\FileUpload;
 use App\Models\LenderMatch;
 use App\Models\MonoCustomer;
+use App\Models\MonoMandate;
 use App\Services\Credit\MonoCreditWorthinessService;
 use App\Services\Credit\MonoCustomerService;
 use App\Services\Credit\MonoMandateService;
@@ -441,7 +442,9 @@ class TransactionHistoryController extends Controller
             if (isset($result['mock_response'])) {
                 return $this->returnJsonResponse(
                     message: 'Payment Initiated Successfully',
-                    data: $result['mock_response']
+                    data: array_merge($result['mock_response'], [
+                        'mandate_id' => $result['mandate_id'] ?? null,
+                    ])
                 );
             }
 
@@ -449,6 +452,7 @@ class TransactionHistoryController extends Controller
                 message: 'Payment Initiated Successfully',
                 data: [
                     'mono_url' => $result['mandate_url'],
+                    'mandate_id' => $result['mandate_id'] ?? null,
                     'status_code' => $result['status_code'] ?? 200,
                 ]
             );
@@ -462,6 +466,126 @@ class TransactionHistoryController extends Controller
 
             return $this->returnJsonResponse(
                 message: 'Error initiating Mono mandate',
+                data: ['error' => $e->getMessage()],
+                statusCode: Response::HTTP_INTERNAL_SERVER_ERROR,
+                status: 'failed'
+            );
+        }
+    }
+
+    /**
+     * Verify Mono mandate status
+     * GET /api/v1/client/credit/verify-mandate/{mandate_id}
+     */
+    public function verifyMandate(string $mandateId): JsonResponse
+    {
+        try {
+            $mandate = MonoMandate::where('mandate_id', $mandateId)->first();
+
+            if (! $mandate) {
+                return $this->returnJsonResponse(
+                    message: 'Mandate not found',
+                    data: ['error' => 'Mandate not found'],
+                    statusCode: Response::HTTP_NOT_FOUND,
+                    status: 'failed'
+                );
+            }
+
+            return $this->returnJsonResponse(
+                message: 'Mandate status retrieved successfully',
+                data: [
+                    'mandate_id' => $mandate->mandate_id,
+                    'reference' => $mandate->reference,
+                    'status' => $mandate->status,
+                    'mono_url' => $mandate->mono_url,
+                    'amount' => $mandate->amount,
+                    'currency' => $mandate->currency,
+                    'start_date' => $mandate->start_date->format('Y-m-d'),
+                    'end_date' => $mandate->end_date->format('Y-m-d'),
+                    'is_mock' => $mandate->is_mock,
+                    'created_at' => $mandate->created_at->toIso8601String(),
+                ]
+            );
+        } catch (\Exception $e) {
+            Log::error('Exception while verifying Mono mandate', [
+                'mandate_id' => $mandateId,
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+            ]);
+
+            return $this->returnJsonResponse(
+                message: 'Failed to verify mandate',
+                data: ['error' => $e->getMessage()],
+                statusCode: Response::HTTP_INTERNAL_SERVER_ERROR,
+                status: 'failed'
+            );
+        }
+    }
+
+    /**
+     * Update Mono mandate status
+     * PUT/PATCH /api/v1/client/credit/update-mandate-status/{mandate_id}
+     *
+     * Request body:
+     * {
+     *   "status": "approved" // pending, approved, rejected, cancelled, expired
+     * }
+     */
+    public function updateMandateStatus(Request $request, string $mandateId): JsonResponse
+    {
+        try {
+            $validated = $request->validate([
+                'status' => 'required|string|in:pending,approved,rejected,cancelled,expired',
+            ]);
+
+            $mandate = MonoMandate::where('mandate_id', $mandateId)->first();
+
+            if (! $mandate) {
+                return $this->returnJsonResponse(
+                    message: 'Mandate not found',
+                    data: ['error' => 'Mandate not found'],
+                    statusCode: Response::HTTP_NOT_FOUND,
+                    status: 'failed'
+                );
+            }
+
+            $oldStatus = $mandate->status;
+            $mandate->update([
+                'status' => $validated['status'],
+            ]);
+
+            Log::info('Mono mandate status updated', [
+                'mandate_id' => $mandateId,
+                'old_status' => $oldStatus,
+                'new_status' => $validated['status'],
+            ]);
+
+            return $this->returnJsonResponse(
+                message: 'Mandate status updated successfully',
+                data: [
+                    'mandate_id' => $mandate->mandate_id,
+                    'reference' => $mandate->reference,
+                    'status' => $mandate->status,
+                    'previous_status' => $oldStatus,
+                    'updated_at' => $mandate->updated_at->toIso8601String(),
+                ]
+            );
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return $this->returnJsonResponse(
+                message: 'Validation failed',
+                data: ['errors' => $e->errors()],
+                statusCode: Response::HTTP_UNPROCESSABLE_ENTITY,
+                status: 'failed'
+            );
+        } catch (\Exception $e) {
+            Log::error('Exception while updating Mono mandate status', [
+                'mandate_id' => $mandateId,
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+            ]);
+
+            return $this->returnJsonResponse(
+                message: 'Failed to update mandate status',
                 data: ['error' => $e->getMessage()],
                 statusCode: Response::HTTP_INTERNAL_SERVER_ERROR,
                 status: 'failed'
