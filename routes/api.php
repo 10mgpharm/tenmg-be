@@ -730,6 +730,11 @@ Route::prefix('v1')->group(function () {
                 Route::post('/cancel/{reference}', [LenderDashboardController::class, 'cancelDepositPayment']);
             });
 
+            Route::prefix('kyc')->name('kyc.')->group(function () {
+                Route::post('/prove/initiate', [\App\Http\Controllers\API\Credit\LenderProveController::class, 'initiate'])
+                    ->name('prove.initiate');
+            });
+
             Route::prefix('settings')->name('settings.')->group(function () {
                 Route::get('/', [BusinessSettingController::class, 'show']);
                 Route::match(['post', 'patch'], 'business-account', [BusinessSettingController::class, 'businessBankAccount']);
@@ -815,9 +820,10 @@ Route::prefix('v1')->group(function () {
             Route::post('/mono-test', [TransactionHistoryController::class, 'testMonoCreditWorthiness'])
                 ->name('vendor.credit.mono-test');
 
-            // Test endpoint for Mono GSM mandate initiation (for Postman testing)
-            Route::post('/mono-test-mandate', [TransactionHistoryController::class, 'testMonoMandate'])
-                ->name('client.credit.mono-test-mandate');
+            // Initiate Mono GSM mandate after credit check
+            Route::post('/initiate-mandate', [TransactionHistoryController::class, 'initiateMandate'])
+                ->middleware('clientAuth')
+                ->name('client.credit.initiate-mandate');
         });
 
         // [BNPL] get banks
