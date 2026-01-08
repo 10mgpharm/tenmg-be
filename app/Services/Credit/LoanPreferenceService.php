@@ -148,6 +148,7 @@ class LoanPreferenceService
                             'amount' => $amount,
                             'currency' => $payload['currency'] ?? 'NGN',
                             'default_tenor' => $tenorInMonths,
+                            'businessname' => $payload['businessname'] ?? null,
                             'transaction_history' => $payload['transaction_history'] ?? null,
                             'product_items' => $payload['product_items'] ?? null,
                             'callback_url' => $payload['callback_url'] ?? null,

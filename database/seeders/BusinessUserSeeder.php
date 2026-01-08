@@ -10,11 +10,28 @@ use App\Models\LenderSetting;
 use App\Models\Role;
 use App\Models\User;
 use Faker\Factory as Faker;
+use Illuminate\Database\QueryException;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Str;
 
 class BusinessUserSeeder extends Seeder
 {
+    /**
+     * Safely get or create a user, skipping if already exists
+     */
+    private function safeGetOrCreateUser(string $email, array $attributes): ?User
+    {
+        try {
+            return User::firstOrCreate(['email' => $email], $attributes);
+        } catch (QueryException $e) {
+            // If user already exists, just return it
+            if ($e->getCode() === '23000' || str_contains($e->getMessage(), 'Duplicate entry')) {
+                return User::where('email', $email)->first();
+            }
+            throw $e;
+        }
+    }
+
     /**
      * Run the database seeds.
      */
@@ -32,24 +49,22 @@ class BusinessUserSeeder extends Seeder
         $lenderRole = Role::where('name', 'lender')->first();
 
         // 1. Setup Admin Business and Users
-        $adminUser = User::firstOrCreate(
-            ['email' => 'admin@example.com'],
-            [
-                'name' => $faker->name(),
-                'phone' => $faker->phoneNumber(),
-                'email_verified_at' => now(),
-                'password' => bcrypt('password'),
-            ]
-        );
+        $adminUser = $this->safeGetOrCreateUser('admin@example.com', [
+            'name' => $faker->name(),
+            'phone' => $faker->phoneNumber(),
+            'email_verified_at' => now(),
+            'password' => bcrypt('password'),
+        ]);
         $adminUser->assignRole($adminRole);
 
+        // Use short_name as unique identifier since it has a unique constraint
         $adminBusiness = Business::firstOrCreate(
             [
-                'code' => '10MG',
-                'name' => '10MG Health',
                 'short_name' => 'tenmg',
             ],
             [
+                'code' => '10MG',
+                'name' => '10MG Health',
                 'owner_id' => $adminUser->id,
                 'type' => 'ADMIN',
                 'address' => $faker->address,
@@ -67,15 +82,16 @@ class BusinessUserSeeder extends Seeder
 
         // Admin Staffs (Other users) - 2 operation, 2 support, 1 additional admin
         for ($i = 1; $i <= 5; $i++) {
-            $user = User::firstOrCreate(
-                ['email' => "admin_user_$i@example.com"],
-                [
-                    'name' => $faker->name(),
-                    'phone' => $faker->phoneNumber(),
-                    'email_verified_at' => now(),
-                    'password' => bcrypt('password'),
-                ]
-            );
+            $user = $this->safeGetOrCreateUser("admin_user_$i@example.com", [
+                'name' => $faker->name(),
+                'phone' => $faker->phoneNumber(),
+                'email_verified_at' => now(),
+                'password' => bcrypt('password'),
+            ]);
+
+            if (! $user) {
+                continue; // Skip if user creation failed
+            }
 
             $role = ($i <= 2) ? $supportRole :
                     (($i <= 4) ? $operationRole : $adminRole);
@@ -90,22 +106,24 @@ class BusinessUserSeeder extends Seeder
 
         // 2. Create 5 users with different businesses and type 'SUPPLIER'
         for ($i = 1; $i <= 5; $i++) {
-            $supplierOwner = User::firstOrCreate(
-                ['email' => "supplier_$i@example.com"],
-                [
-                    'name' => $faker->name(),
-                    'phone' => $faker->phoneNumber(),
-                    'email_verified_at' => now(),
-                    'password' => bcrypt('password'),
-                ]
-            );
+            $supplierOwner = $this->safeGetOrCreateUser("supplier_$i@example.com", [
+                'name' => $faker->name(),
+                'phone' => $faker->phoneNumber(),
+                'email_verified_at' => now(),
+                'password' => bcrypt('password'),
+            ]);
+
+            if (! $supplierOwner) {
+                continue; // Skip if user creation failed
+            }
             $supplierOwner->assignRole($supplierRole);
 
+            // Use short_name as unique identifier since it has a unique constraint
             $supplierBusiness = Business::firstOrCreate(
-                ['code' => "SUPPLIER00$i"],
+                ['short_name' => "Supplier$i"],
                 [
+                    'code' => "SUPPLIER00$i",
                     'name' => "Supplier Business $i",
-                    'short_name' => "Supplier$i",
                     'owner_id' => $supplierOwner->id,
                     'type' => 'SUPPLIER',
                     'address' => $faker->address,
@@ -124,22 +142,24 @@ class BusinessUserSeeder extends Seeder
 
         // 3. Create 5 users with different businesses and type 'VENDOR'
         for ($i = 1; $i <= 5; $i++) {
-            $vendorOwner = User::firstOrCreate(
-                ['email' => "vendor_$i@example.com"],
-                [
-                    'name' => $faker->name(),
-                    'phone' => $faker->phoneNumber(),
-                    'email_verified_at' => now(),
-                    'password' => bcrypt('password'),
-                ]
-            );
+            $vendorOwner = $this->safeGetOrCreateUser("vendor_$i@example.com", [
+                'name' => $faker->name(),
+                'phone' => $faker->phoneNumber(),
+                'email_verified_at' => now(),
+                'password' => bcrypt('password'),
+            ]);
+
+            if (! $vendorOwner) {
+                continue; // Skip if user creation failed
+            }
             $vendorOwner->assignRole($vendorRole);
 
+            // Use short_name as unique identifier since it has a unique constraint
             $vendorBusiness = Business::firstOrCreate(
-                ['code' => "VENDOR00$i"],
+                ['short_name' => "Vendor$i"],
                 [
+                    'code' => "VENDOR00$i",
                     'name' => "Vendor Business $i",
-                    'short_name' => "Vendor$i",
                     'owner_id' => $vendorOwner->id,
                     'type' => 'VENDOR',
                     'address' => $faker->address,
@@ -184,22 +204,24 @@ class BusinessUserSeeder extends Seeder
 
         // 4. Create 5 users with different businesses and type 'CUSTOMER_PHARMACY'
         for ($i = 1; $i <= 5; $i++) {
-            $customerPharm = User::firstOrCreate(
-                ['email' => "customer_pharmacy_$i@example.com"],
-                [
-                    'name' => $faker->name(),
-                    'phone' => $faker->phoneNumber(),
-                    'email_verified_at' => now(),
-                    'password' => bcrypt('password'),
-                ]
-            );
+            $customerPharm = $this->safeGetOrCreateUser("customer_pharmacy_$i@example.com", [
+                'name' => $faker->name(),
+                'phone' => $faker->phoneNumber(),
+                'email_verified_at' => now(),
+                'password' => bcrypt('password'),
+            ]);
+
+            if (! $customerPharm) {
+                continue; // Skip if user creation failed
+            }
             $customerPharm->assignRole($customerRole);
 
+            // Use short_name as unique identifier since it has a unique constraint
             $customerPharmBusiness = Business::firstOrCreate(
-                ['code' => "CUSTOMER_PHARM00$i"],
+                ['short_name' => "Pharmacy$i"],
                 [
+                    'code' => "CUSTOMER_PHARM00$i",
                     'name' => "Pharmacy Business $i",
-                    'short_name' => "Pharmacy$i",
                     'owner_id' => $customerPharm->id,
                     'type' => 'CUSTOMER_PHARMACY',
                     'address' => $faker->address,
@@ -218,22 +240,24 @@ class BusinessUserSeeder extends Seeder
 
         // 5. Create 5 users with different businesses and type 'CUSTOMER_HOSPITAL'
         for ($i = 1; $i <= 5; $i++) {
-            $customerHost = User::firstOrCreate(
-                ['email' => "customer_hospital_$i@example.com"],
-                [
-                    'name' => $faker->name(),
-                    'phone' => $faker->phoneNumber(),
-                    'email_verified_at' => now(),
-                    'password' => bcrypt('password'),
-                ]
-            );
+            $customerHost = $this->safeGetOrCreateUser("customer_hospital_$i@example.com", [
+                'name' => $faker->name(),
+                'phone' => $faker->phoneNumber(),
+                'email_verified_at' => now(),
+                'password' => bcrypt('password'),
+            ]);
+
+            if (! $customerHost) {
+                continue; // Skip if user creation failed
+            }
             $customerHost->assignRole($customerRole);
 
+            // Use short_name as unique identifier since it has a unique constraint
             $customerHostBusiness = Business::firstOrCreate(
-                ['code' => "CUSTOMER_HOSP00$i"],
+                ['short_name' => "Hospital$i"],
                 [
+                    'code' => "CUSTOMER_HOSP00$i",
                     'name' => "Hospital Business $i",
-                    'short_name' => "Hospital$i",
                     'owner_id' => $customerHost->id,
                     'type' => 'CUSTOMER_PHARMACY',
                     'address' => $faker->address,
@@ -266,22 +290,24 @@ class BusinessUserSeeder extends Seeder
         ];
 
         for ($i = 1; $i <= 5; $i++) {
-            $lenderHost = User::firstOrCreate(
-                ['email' => "lender_LEN$i@example.com"],
-                [
-                    'name' => $faker->name(),
-                    'phone' => $faker->phoneNumber(),
-                    'email_verified_at' => now(),
-                    'password' => bcrypt('password'),
-                ]
-            );
+            $lenderHost = $this->safeGetOrCreateUser("lender_LEN$i@example.com", [
+                'name' => $faker->name(),
+                'phone' => $faker->phoneNumber(),
+                'email_verified_at' => now(),
+                'password' => bcrypt('password'),
+            ]);
+
+            if (! $lenderHost) {
+                continue; // Skip if user creation failed
+            }
             $lenderHost->assignRole($lenderRole);
 
+            // Use short_name as unique identifier since it has a unique constraint
             $lenderHostBusiness = Business::firstOrCreate(
-                ['code' => "LENDER_LEND00$i"],
+                ['short_name' => "lender$i"],
                 [
+                    'code' => "LENDER_LEND00$i",
                     'name' => "Lender Business $i",
-                    'short_name' => "lender$i",
                     'owner_id' => $lenderHost->id,
                     'type' => 'LENDER',
                     'address' => $faker->address,
@@ -304,6 +330,10 @@ class BusinessUserSeeder extends Seeder
                     'rate' => $lenderRates[$i - 1],
                     'instruction' => $lenderInstructions[$i - 1],
                     'instruction_config' => [
+                        'active' => true, // Lender is active and open to new loans
+                        'supported_tenors' => [3, 6, 9, 12], // Support all system tenors
+                        'min_amount' => 5000, // Minimum loan amount
+                        'max_amount' => null, // No maximum (unlimited)
                         'disbursement_channel' => 'bank_transfer',
                         'require_manual_approval' => $i % 2 === 0, // Alternate between true/false
                         'verification_required' => true,

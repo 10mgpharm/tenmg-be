@@ -3,6 +3,7 @@
 namespace App\Services\Credit;
 
 use App\Models\LenderMatch;
+use App\Models\MonoMandate;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
@@ -142,6 +143,7 @@ class MonoMandateService
             // Extract mandate URL from response
             $mandateData = $responseData['data'] ?? $responseData;
             $monoMandateUrl = $mandateData['mono_url'] ?? null;
+            $mandateId = $mandateData['id'] ?? $mandateData['mandate_id'] ?? null;
 
             if (! $monoMandateUrl) {
                 Log::error('Mono mandate URL not found in response', [
@@ -156,14 +158,40 @@ class MonoMandateService
                 ];
             }
 
+            // Generate mandate_id if not provided by Mono
+            if (! $mandateId) {
+                $mandateId = 'mmc_'.bin2hex(random_bytes(12));
+            }
+
+            // Store mandate record in database
+            $monoMandate = MonoMandate::create([
+                'lender_match_id' => $lenderMatch->id,
+                'mono_customer_id' => $monoCustomer->id,
+                'mandate_id' => $mandateId,
+                'reference' => $mandateReference,
+                'mono_url' => $monoMandateUrl,
+                'status' => 'pending',
+                'amount' => (int) $lenderMatch->amount,
+                'currency' => $lenderMatch->currency ?? 'NGN',
+                'start_date' => $startDate,
+                'end_date' => $endDate,
+                'description' => $mandatePayload['description'],
+                'redirect_url' => $mandatePayload['redirect_url'],
+                'meta' => $mandatePayload['meta'],
+                'mono_response' => $responseData,
+                'is_mock' => false,
+            ]);
+
             Log::info('Mono GSM mandate initiated successfully', [
                 'lender_match_id' => $lenderMatch->id,
+                'mandate_id' => $monoMandate->mandate_id,
                 'mandate_url' => $monoMandateUrl,
             ]);
 
             return [
                 'success' => true,
                 'mandate_url' => $monoMandateUrl,
+                'mandate_id' => $monoMandate->mandate_id,
                 'status_code' => $statusCode,
             ];
 
@@ -205,9 +233,38 @@ class MonoMandateService
 
         $now = Carbon::now();
 
+        // Store mock mandate record in database
+        $monoMandate = MonoMandate::create([
+            'lender_match_id' => $lenderMatch->id,
+            'mono_customer_id' => $monoCustomer->id,
+            'mandate_id' => $mockMandateId,
+            'reference' => $mandateReference,
+            'mono_url' => $mockMonoUrl,
+            'status' => 'pending', // Set to pending for dummy responses
+            'amount' => (int) $lenderMatch->amount,
+            'currency' => $lenderMatch->currency ?? 'NGN',
+            'start_date' => $startDate,
+            'end_date' => $endDate,
+            'description' => $description,
+            'redirect_url' => $lenderMatch->callback_url ?? config('app.url', 'https://mono.co'),
+            'meta' => [
+                'borrower_reference' => $lenderMatch->borrower_reference,
+                'lender_match_id' => $lenderMatch->id,
+            ],
+            'mono_response' => [
+                'mono_url' => $mockMonoUrl,
+                'mandate_id' => $mockMandateId,
+                'type' => 'recurring-debit',
+                'method' => 'mandate',
+                'mandate_type' => 'gsm',
+            ],
+            'is_mock' => true,
+        ]);
+
         return [
             'success' => true,
             'mandate_url' => $mockMonoUrl,
+            'mandate_id' => $mockMandateId,
             'status_code' => 200,
             'mock_response' => [
                 'mono_url' => $mockMonoUrl,
