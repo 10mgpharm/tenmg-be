@@ -733,6 +733,21 @@ Route::prefix('v1')->group(function () {
             Route::prefix('kyc')->name('kyc.')->group(function () {
                 Route::post('/prove/initiate', [\App\Http\Controllers\API\Credit\LenderProveController::class, 'initiate'])
                     ->name('prove.initiate');
+                Route::get('/prove/customers/{reference}', [\App\Http\Controllers\API\Credit\LenderProveController::class, 'fetchCustomerDetails'])
+                    ->name('prove.fetch-customer-details');
+            });
+
+            Route::prefix('credit')->name('credit.')->group(function () {
+                Route::prefix('bvn-lookup')->name('bvn-lookup.')->group(function () {
+                    Route::post('/initiate', [\App\Http\Controllers\API\Credit\LenderBvnLookupController::class, 'initiate'])
+                        ->name('initiate');
+                    Route::post('/verify', [\App\Http\Controllers\API\Credit\LenderBvnLookupController::class, 'verify'])
+                        ->name('verify');
+                    Route::post('/details', [\App\Http\Controllers\API\Credit\LenderBvnLookupController::class, 'fetchDetails'])
+                        ->name('details');
+                    Route::get('/{session_id}', [\App\Http\Controllers\API\Credit\LenderBvnLookupController::class, 'show'])
+                        ->name('show');
+                });
             });
 
             Route::prefix('settings')->name('settings.')->group(function () {
@@ -834,6 +849,11 @@ Route::prefix('v1')->group(function () {
             Route::match(['put', 'patch'], '/update-mandate-status/{mandate_id}', [TransactionHistoryController::class, 'updateMandateStatus'])
                 ->middleware('clientAuth')
                 ->name('client.credit.update-mandate-status');
+
+            // Update lender match status (also updates related mandate status)
+            Route::match(['put', 'patch'], '/update-match-status/{borrower_reference}', [TransactionHistoryController::class, 'updateMatchStatus'])
+                ->middleware('clientAuth')
+                ->name('client.credit.update-match-status');
         });
 
         // [BNPL] get banks

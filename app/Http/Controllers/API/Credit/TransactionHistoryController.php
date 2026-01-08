@@ -592,4 +592,110 @@ class TransactionHistoryController extends Controller
             );
         }
     }
+
+    /**
+     * Update lender match status and related mandate status
+     * PUT/PATCH /api/v1/client/credit/update-match-status/{borrower_reference}
+     *
+     * Request body:
+     * {
+     *   "status": "approved", // matched, approved, rejected, cancelled, expired
+     *   "businessname": "Business Name" // optional
+     * }
+     *
+     * When match status is updated, related mandate status is also updated.
+     */
+    public function updateMatchStatus(Request $request, string $borrowerReference): JsonResponse
+    {
+        try {
+            $validated = $request->validate([
+                'status' => 'required|string|in:matched,approved,rejected,cancelled,expired',
+                'businessname' => 'nullable|string|max:255',
+            ]);
+
+            $lenderMatch = LenderMatch::where('borrower_reference', $borrowerReference)->first();
+
+            if (! $lenderMatch) {
+                return $this->returnJsonResponse(
+                    message: 'Lender match not found',
+                    data: ['error' => 'Lender match not found'],
+                    statusCode: Response::HTTP_NOT_FOUND,
+                    status: 'failed'
+                );
+            }
+
+            $oldStatus = $lenderMatch->status;
+
+            $updateData = [
+                'status' => $validated['status'],
+            ];
+
+            // Add businessname if provided
+            if (isset($validated['businessname'])) {
+                $updateData['businessname'] = $validated['businessname'];
+            }
+
+            $lenderMatch->update($updateData);
+
+            // Map match status to mandate status
+            $mandateStatusMap = [
+                'matched' => 'pending',
+                'approved' => 'approved',
+                'rejected' => 'rejected',
+                'cancelled' => 'cancelled',
+                'expired' => 'expired',
+            ];
+
+            $mandateStatus = $mandateStatusMap[$validated['status']] ?? 'pending';
+
+            // Update all related mandates
+            $updatedMandates = $lenderMatch->monoMandates()->update([
+                'status' => $mandateStatus,
+            ]);
+
+            Log::info('Lender match status updated with related mandates', [
+                'borrower_reference' => $borrowerReference,
+                'lender_match_id' => $lenderMatch->id,
+                'old_status' => $oldStatus,
+                'new_status' => $validated['status'],
+                'businessname' => $validated['businessname'] ?? null,
+                'mandate_status' => $mandateStatus,
+                'mandates_updated' => $updatedMandates,
+            ]);
+
+            return $this->returnJsonResponse(
+                message: 'Match status updated successfully',
+                data: [
+                    'borrower_reference' => $lenderMatch->borrower_reference,
+                    'lender_match_id' => $lenderMatch->id,
+                    'status' => $lenderMatch->status,
+                    'businessname' => $lenderMatch->businessname,
+                    'previous_status' => $oldStatus,
+                    'mandate_status' => $mandateStatus,
+                    'mandates_updated' => $updatedMandates,
+                    'updated_at' => $lenderMatch->updated_at->toIso8601String(),
+                ]
+            );
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return $this->returnJsonResponse(
+                message: 'Validation failed',
+                data: ['errors' => $e->errors()],
+                statusCode: Response::HTTP_UNPROCESSABLE_ENTITY,
+                status: 'failed'
+            );
+        } catch (\Exception $e) {
+            Log::error('Exception while updating lender match status', [
+                'borrower_reference' => $borrowerReference,
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+            ]);
+
+            return $this->returnJsonResponse(
+                message: 'Failed to update match status',
+                data: ['error' => $e->getMessage()],
+                statusCode: Response::HTTP_INTERNAL_SERVER_ERROR,
+                status: 'failed'
+            );
+        }
+    }
 }

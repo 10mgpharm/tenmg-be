@@ -34,6 +34,7 @@ class LoanPreferenceController extends Controller
             'default_tenor' => 'required|numeric|in:3,6,9,12',
             // We handle uniqueness at the DB + service layer (update-or-create by borrower_reference)
             'borrower_reference' => 'required|string|max:255',
+            'businessname' => 'nullable|string|max:255',
             'currency' => 'nullable|string|size:3',
             'transaction_history' => 'nullable|array',
             'product_items' => 'nullable|array',
