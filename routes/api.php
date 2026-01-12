@@ -839,15 +839,19 @@ Route::prefix('v1')->group(function () {
             ->middleware('clientAuth')
             ->name('client.customers');
 
-        // [BNPL] Loan preference simulation (does not touch real lender preferences)
+        // [BNPL] Match lender with vendor customer
+        // Supports both modes:
+        // 1. With request_id: fetches stored payload from Tenmg credit request
+        // 2. Without request_id: accepts full payload directly
         // Protected by clientAuth so we can resolve the vendor business from API keys
-        Route::post('/loan/simulate', [CreditLoanPreferenceController::class, 'simulate'])
+        Route::post('/loan/match', [CreditLoanPreferenceController::class, 'match'])
             ->middleware('clientAuth')
-            ->name('loan.simulate');
+            ->name('loan.match');
 
         Route::prefix('credit')->group(function () {
-            Route::post('/mono-test', [TransactionHistoryController::class, 'testMonoCreditWorthiness'])
-                ->name('vendor.credit.mono-test');
+            Route::post('/check-credit-worthiness', [TransactionHistoryController::class, 'testMonoCreditWorthiness'])
+                ->middleware('clientAuth')
+                ->name('client.credit.check-credit-worthiness');
 
             // Initiate Mono GSM mandate after credit check
             Route::post('/initiate-mandate', [TransactionHistoryController::class, 'initiateMandate'])

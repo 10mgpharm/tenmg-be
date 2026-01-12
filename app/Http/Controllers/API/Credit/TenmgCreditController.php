@@ -21,6 +21,10 @@ class TenmgCreditController extends Controller
     {
         $payload = $request->validated() ?: $request->all();
 
+        // Remove business-related fields from payload
+        $businessFields = ['businessname', 'business', 'business_id', 'business_name'];
+        $filteredPayload = array_diff_key($payload, array_flip($businessFields));
+
         $requestId = 'TENMGREQ-'.Str::upper(Str::random(12));
         $sdkBaseUrl = rtrim(config('services.tenmg_credit.sdk_base_url') ?? config('app.url'), '/');
         $sdkUrl = $sdkBaseUrl.'/tenmg-credit?request_id='.$requestId;
@@ -30,7 +34,7 @@ class TenmgCreditController extends Controller
 
         $record = TenmgCreditRequest::create([
             'request_id' => $requestId,
-            'payload' => $payload,
+            'payload' => $filteredPayload,
             'status' => 'pending',
             'sdk_url' => $sdkUrl,
             'initiated_by' => $initiatedBy,
@@ -39,7 +43,7 @@ class TenmgCreditController extends Controller
         Log::info('Tenmg credit request initiated', [
             'request_id' => $requestId,
             'initiated_by' => $initiatedBy,
-            'payload' => $payload,
+            'payload' => $filteredPayload,
         ]);
 
         return $this->returnJsonResponse(
@@ -75,7 +79,6 @@ class TenmgCreditController extends Controller
                 'payload' => $record->payload,
                 'status' => $record->status,
                 'sdk_url' => $record->sdk_url,
-                'initiated_by' => $record->initiated_by,
                 'created_at' => $record->created_at,
             ]
         );
