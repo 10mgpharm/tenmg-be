@@ -24,6 +24,7 @@ use App\Http\Controllers\API\Admin\EcommercePresentationController as AdminEcomm
 use App\Http\Controllers\API\Admin\EcommerceProductController as AdminEcommerceProductController;
 use App\Http\Controllers\API\Admin\EcommerceWalletController as AdminEcommerceWalletController;
 use App\Http\Controllers\API\Admin\FaqController;
+use App\Http\Controllers\API\Admin\LenderKycController;
 use App\Http\Controllers\API\Admin\MedicationTypeController as AdminMedicationTypeController;
 use App\Http\Controllers\API\Admin\ProductInsightsController as AdminProductInsightsController;
 use App\Http\Controllers\API\Admin\SettingConfigController;
@@ -84,6 +85,7 @@ use App\Http\Controllers\API\Vendor\UsersController as VendorUsersController;
 use App\Http\Controllers\API\Vendor\VendorApiAuditLogController;
 use App\Http\Controllers\API\Vendor\VendorDashboardController;
 use App\Http\Controllers\API\Vendor\VendorWalletController;
+use App\Http\Controllers\API\Webhooks\MonoProveWebhookController;
 use App\Http\Controllers\API\Webhooks\PaystackWebhookController;
 use App\Http\Controllers\API\WithdrawFundController;
 use App\Http\Controllers\BusinessSettingController;
@@ -611,6 +613,14 @@ Route::prefix('v1')->group(function () {
 
             });
 
+            Route::prefix('lender-kyc')->name('lender-kyc.')->group(function () {
+                Route::get('/', [LenderKycController::class, 'index'])->name('index');
+                Route::get('/stats', [LenderKycController::class, 'stats'])->name('stats');
+                Route::get('/{session}', [LenderKycController::class, 'show'])->name('show');
+                Route::patch('/{session}/status', [LenderKycController::class, 'updateStatus'])->name('update-status');
+                Route::post('/complete-tier', [LenderKycController::class, 'completeTier'])->name('complete-tier');
+            });
+
             Route::get('insights/filters', [AdminProductInsightsController::class, 'filters']);
             Route::get('insights', [AdminProductInsightsController::class, 'insights']);
 
@@ -735,6 +745,8 @@ Route::prefix('v1')->group(function () {
                     ->name('prove.initiate');
                 Route::get('/prove/customers/{reference}', [\App\Http\Controllers\API\Credit\LenderProveController::class, 'fetchCustomerDetails'])
                     ->name('prove.fetch-customer-details');
+                Route::patch('/prove/sessions/{reference}/status', [\App\Http\Controllers\API\Credit\LenderProveController::class, 'updateSessionStatus'])
+                    ->name('prove.update-session-status');
             });
 
             Route::prefix('credit')->name('credit.')->group(function () {
@@ -817,6 +829,8 @@ Route::prefix('v1')->group(function () {
 
     Route::post('/webhooks/vendor/direct-debit/mandate', [PaystackWebhookController::class, 'handle'])->name('webhooks.paystack.direct_debit');
 
+    Route::post('/webhooks/mono/prove', [MonoProveWebhookController::class, 'handle'])->name('webhooks.mono.prove');
+
     // Client APIs
     Route::prefix('client')->group(function () {
 
@@ -854,6 +868,16 @@ Route::prefix('v1')->group(function () {
             Route::match(['put', 'patch'], '/update-match-status/{borrower_reference}', [TransactionHistoryController::class, 'updateMatchStatus'])
                 ->middleware('clientAuth')
                 ->name('client.credit.update-match-status');
+
+            Route::prefix('tenmg')->group(function () {
+                Route::post('/initiate', [\App\Http\Controllers\API\Credit\TenmgCreditController::class, 'initiate'])
+                    ->middleware('clientAuth')
+                    ->name('client.credit.tenmg.initiate');
+
+                Route::get('/requests/{request_id}', [\App\Http\Controllers\API\Credit\TenmgCreditController::class, 'show'])
+                    ->middleware('clientAuth')
+                    ->name('client.credit.tenmg.show');
+            });
         });
 
         // [BNPL] get banks

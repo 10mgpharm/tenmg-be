@@ -29,7 +29,7 @@ class UserResource extends JsonResource
             }
         }
 
-        return [
+        $response = [
             'id' => $this->id,
             'name' => $this->name,
             'email' => $this->email,
@@ -51,5 +51,54 @@ class UserResource extends JsonResource
                 && $business?->contact_email
             ),
         ];
+
+        // Only include lenderType and kycStatus when business type is LENDER
+        if ($business?->type === 'LENDER') {
+            if ($business?->lender_type) {
+                $response['lenderType'] = $business->lender_type;
+            }
+
+            // Determine KYC status for lenders with enhanced tier information
+            $latestKycSession = \App\Models\LenderKycSession::where('lender_business_id', $business->id)
+                ->latest()
+                ->first();
+
+            $highestCompletedTier = null;
+            if ($business->highest_completed_kyc_tier) {
+                $highestCompletedTier = $business->highest_completed_kyc_tier;
+            } else {
+                // Fallback: check completed sessions if not cached on business
+                $completedSession = \App\Models\LenderKycSession::where('lender_business_id', $business->id)
+                    ->where('status', 'successful')
+                    ->whereNotNull('completed_tier')
+                    ->orderByRaw("FIELD(completed_tier, 'tier_1', 'tier_2', 'tier_3') DESC")
+                    ->first();
+                $highestCompletedTier = $completedSession?->completed_tier;
+            }
+
+            if (! $latestKycSession) {
+                // No KYC sessions initiated
+                $response['kycStatus'] = 'NO_KYC_INITIATED';
+            } elseif ($highestCompletedTier) {
+                // Has completed tier(s) - show highest completed
+                $response['kycStatus'] = strtoupper($highestCompletedTier).'_COMPLETED';
+
+                // If latest session is pending and different from highest completed, show pending status
+                if ($latestKycSession->status === 'pending' && $latestKycSession->kyc_level !== $highestCompletedTier) {
+                    $response['kycStatus'] = strtoupper($latestKycSession->kyc_level ?? 'UNKNOWN').'_PENDING';
+                }
+            } elseif ($latestKycSession->status === 'successful') {
+                // Session successful but tier not marked yet (shouldn't happen, but handle gracefully)
+                $tier = $latestKycSession->kyc_level ?? 'UNKNOWN';
+                $response['kycStatus'] = strtoupper($tier).'_COMPLETED';
+            } else {
+                // Has sessions but none completed - show current status with tier
+                $tier = $latestKycSession->kyc_level ?? 'UNKNOWN';
+                $status = strtoupper($latestKycSession->status ?? 'UNKNOWN');
+                $response['kycStatus'] = strtoupper($tier).'_'.$status;
+            }
+        }
+
+        return $response;
     }
 }

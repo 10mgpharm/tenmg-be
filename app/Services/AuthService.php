@@ -122,14 +122,21 @@ class AuthService implements IAuthService
 
             // create business
             $businessCode = UtilityHelper::generateBusinessCode($request['name']);
-            $adminBusiness = Business::create([
+            $businessData = [
                 'name' => $request['name'],
                 'code' => $businessCode,
                 'short_name' => $businessCode,
                 'owner_id' => $user->id,
                 'type' => $businessType,
                 'status' => BusinessStatus::PENDING_VERIFICATION->value,
-            ]);
+            ];
+
+            // Add lender_type if business type is LENDER
+            if ($businessType === BusinessType::LENDER && $request->has('lender_type')) {
+                $businessData['lender_type'] = $request['lender_type'];
+            }
+
+            $adminBusiness = Business::create($businessData);
 
             // map user to business
             BusinessUser::firstOrCreate(
@@ -337,7 +344,7 @@ class AuthService implements IAuthService
 
         $data = array_filter(array_intersect_key(
             $validated,
-            array_flip(['contact_email', 'contact_phone', 'contact_person', 'contact_person_position'])
+            array_flip(['contact_email', 'contact_phone', 'contact_person', 'contact_person_position', 'lender_type'])
         ));  // since fillable isn't used.
 
         $user = $request->user();

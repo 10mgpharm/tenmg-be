@@ -25,6 +25,7 @@ class SignupUserRequest extends FormRequest
     {
         $this->merge([
             'password_confirmation' => $this->input('passwordConfirmation'),
+            'lender_type' => $this->input('lenderType'),
         ]);
     }
 
@@ -44,6 +45,11 @@ class SignupUserRequest extends FormRequest
                 'string',
                 'in:'.implode(',', $allowedBusinessTypes),
             ],
+            'lenderType' => [
+                'required_if:businessType,lender',
+                'string',
+                'in:individual,business',
+            ],
             'fullname' => ['required', 'string', 'max:255'],
             'name' => ['required', 'string', 'max:255', 'unique:businesses,name'],
             'email' => [
@@ -62,6 +68,8 @@ class SignupUserRequest extends FormRequest
         return [
             'termsAndConditions.required' => 'You must agree to the terms and conditions.',
             'businessType.in' => 'The business type must be either supplier, pharmacy, vendor or lender',
+            'lenderType.required_if' => 'The lender type is required when registering as a lender.',
+            'lenderType.in' => 'The lender type must be either individual or business.',
         ];
     }
 }

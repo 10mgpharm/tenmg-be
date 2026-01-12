@@ -169,12 +169,45 @@ class LenderMonoRegistrationService
             if ($response->failed()) {
                 $errorMessage = $responseData['message'] ?? $responseData['error'] ?? 'Failed to create lender Mono customer';
 
+                // Check for specific error types that we can handle
+                $isRecoverable = false;
+
+                // API key issues
+                if ($statusCode === 401) {
+                    $errorMessage = 'Mono API authentication failed. Check your API keys.';
+                }
+                // Rate limiting
+                elseif ($statusCode === 429) {
+                    $errorMessage = 'Mono API rate limit exceeded. Try again later.';
+                }
+                // Invalid identity
+                elseif ($statusCode === 400 && str_contains(strtolower($errorMessage), 'identity')) {
+                    $errorMessage = 'Invalid identity details provided. Check BVN/NIN format and validity.';
+                }
+                // Duplicate customer (should be handled above, but just in case)
+                elseif ($statusCode === 400 && (str_contains(strtolower($errorMessage), 'exist') || str_contains(strtolower($errorMessage), 'duplicate'))) {
+                    $errorMessage = 'Customer already exists with this identity.';
+                }
+                // Service unavailable - could be recoverable
+                elseif ($statusCode >= 500) {
+                    $errorMessage = 'Mono service temporarily unavailable. Try again later.';
+                    $isRecoverable = true;
+                }
+
                 Log::error('Lender Mono customer creation failed', [
                     'status_code' => $statusCode,
                     'error_message' => $errorMessage,
+                    'is_recoverable' => $isRecoverable,
                     'full_response' => $responseData,
                     'response_body' => $responseBody,
                 ]);
+
+                // For recoverable errors, don't fail completely - return null so KYC can proceed
+                if ($isRecoverable) {
+                    Log::warning('Recoverable Mono customer creation error - allowing KYC to proceed without customer registration');
+
+                    return null;
+                }
 
                 return null;
             }
