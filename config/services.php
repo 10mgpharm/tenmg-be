@@ -61,4 +61,8 @@ return [
         'base_url' => env('MONO_BASE_URL', 'https://api.withmono.com'),
         'default_provider' => env('MONO_DEFAULT_PROVIDER', 'crc'),
     ],
+
+    'tenmg_credit' => [
+        'sdk_base_url' => env('TENMG_CREDIT_SDK_BASE_URL', env('APP_URL')),
+    ],
 ];

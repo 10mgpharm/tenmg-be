@@ -22,11 +22,16 @@ class LenderKycSession extends Model
         'kyc_level',
         'bank_accounts',
         'meta',
+        'completed_at',
+        'verified_at',
+        'completed_tier',
     ];
 
     protected $casts = [
         'bank_accounts' => 'boolean',
         'meta' => 'array',
+        'completed_at' => 'datetime',
+        'verified_at' => 'datetime',
     ];
 
     public function lenderBusiness(): BelongsTo
@@ -37,5 +42,29 @@ class LenderKycSession extends Model
     public function lenderMonoProfile(): BelongsTo
     {
         return $this->belongsTo(LenderMonoProfile::class, 'lender_mono_profile_id');
+    }
+
+    /**
+     * Scope a query to only include completed sessions.
+     */
+    public function scopeCompleted($query)
+    {
+        return $query->where('status', 'successful');
+    }
+
+    /**
+     * Scope a query to filter by tier.
+     */
+    public function scopeForTier($query, string $tier)
+    {
+        return $query->where('kyc_level', $tier)->orWhere('completed_tier', $tier);
+    }
+
+    /**
+     * Scope a query to get the latest completed session.
+     */
+    public function scopeLatestCompleted($query)
+    {
+        return $query->completed()->latest('completed_at');
     }
 }
