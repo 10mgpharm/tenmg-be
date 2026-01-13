@@ -12,7 +12,7 @@ class TenmgCreditTest extends TestCase
 {
     use RefreshDatabase;
 
-    public function test_it_initiates_tenmg_credit_and_returns_sdk_url(): void
+    public function test_it_initiates_tenmg_credit_and_returns_checkout_url(): void
     {
         config(['services.tenmg_credit.sdk_base_url' => 'https://sdk.tenmg.ai']);
 
@@ -29,7 +29,7 @@ class TenmgCreditTest extends TestCase
         $response->assertStatus(200)
             ->assertJsonPath('data.status', 'pending')
             ->assertJsonPath('data.request_id', fn ($value) => is_string($value) && str_starts_with($value, 'TENMGREQ-'))
-            ->assertJsonPath('data.sdk_url', fn ($value) => str_starts_with($value, 'https://sdk.tenmg.ai/tenmg-credit?request_id='));
+            ->assertJsonPath('data.checkout_url', fn ($value) => str_starts_with($value, 'https://sdk.tenmg.ai/tenmg-credit?request_id='));
 
         $requestId = $response->json('data.request_id');
 

@@ -27,7 +27,7 @@ class TenmgCreditController extends Controller
 
         $requestId = 'TENMGREQ-'.Str::upper(Str::random(12));
         $sdkBaseUrl = rtrim(config('services.tenmg_credit.sdk_base_url') ?? config('app.url'), '/');
-        $sdkUrl = $sdkBaseUrl.'/tenmg-credit?request_id='.$requestId;
+        $checkoutUrl = $sdkBaseUrl.'/tenmg-credit?request_id='.$requestId;
 
         $business = $request->input('business');
         $initiatedBy = ($business instanceof Business) ? (string) $business->id : null;
@@ -36,7 +36,7 @@ class TenmgCreditController extends Controller
             'request_id' => $requestId,
             'payload' => $filteredPayload,
             'status' => 'pending',
-            'sdk_url' => $sdkUrl,
+            'sdk_url' => $checkoutUrl,
             'initiated_by' => $initiatedBy,
         ]);
 
@@ -50,8 +50,7 @@ class TenmgCreditController extends Controller
             message: 'Tenmg credit request initiated',
             data: [
                 'request_id' => $record->request_id,
-                'sdk_url' => $record->sdk_url,
-                'status' => $record->status,
+                'checkout_url' => $record->sdk_url,
             ]
         );
     }
