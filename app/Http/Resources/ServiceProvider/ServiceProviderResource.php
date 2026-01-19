@@ -30,7 +30,7 @@ class ServiceProviderResource extends JsonResource
             'isMobileMoneyPayoutProvider' => $this->is_mobile_money_payout_provider,
             'isIdentityVerificationProvider' => $this->is_identity_verification_provider,
             'currenciesSupported' => $this->currencies_supported,
-            'status' => $this->status?->value,
+            'status' => $this->status,
             'createdAt' => $this->created_at?->toIso8601String(),
             'updatedAt' => $this->updated_at?->toIso8601String(),
         ];

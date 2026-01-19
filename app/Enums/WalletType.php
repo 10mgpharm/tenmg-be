@@ -4,10 +4,7 @@ namespace App\Enums;
 
 enum WalletType: string
 {
-    case VENDOR_PAYOUT = 'vendor_payout';
-    case VENDOR_CREDIT_VOUCHER = 'vendor_credit_voucher';
-    case LENDER_INVESTMENT = 'lender_investment';
-    case LENDER_DEPOSIT = 'lender_deposit';
-    case LENDER_LEDGER = 'lender_ledger';
-    case ADMIN_MAIN = 'admin_main';
+    case VENDOR_PAYOUT_WALLET = 'vendor_payout_wallet';
+    case LENDER_WALLET = 'lender_wallet';
+    case ADMIN_WALLET = 'admin_wallet';
 }

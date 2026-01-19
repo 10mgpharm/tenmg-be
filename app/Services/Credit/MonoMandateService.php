@@ -94,38 +94,6 @@ class MonoMandateService
             if ($response->failed()) {
                 $errorMessage = $responseData['message'] ?? $responseData['error'] ?? 'Failed to initiate Mono mandate';
 
-                // Check if error is due to business not being active (compliance not completed) or unauthorized
-                // If so, return a mock success response for testing purposes
-                $shouldMock = false;
-                $mockReason = '';
-
-                if ($statusCode === 400 && (
-                    str_contains(strtolower($errorMessage), 'business is currently not active') ||
-                    str_contains(strtolower($errorMessage), 'not active') ||
-                    str_contains(strtolower($errorMessage), 'complete compliance')
-                )) {
-                    $shouldMock = true;
-                    $mockReason = 'business not active';
-                } elseif ($statusCode === 401 && (
-                    str_contains(strtolower($errorMessage), 'unauthorized') ||
-                    str_contains(strtolower($errorMessage), 'invalid app') ||
-                    str_contains(strtolower($errorMessage), 'invalid')
-                )) {
-                    $shouldMock = true;
-                    $mockReason = 'unauthorized/invalid app';
-                }
-
-                if ($shouldMock) {
-                    Log::warning("Mono API error ({$mockReason}) - returning mock success response", [
-                        'lender_match_id' => $lenderMatch->id,
-                        'borrower_reference' => $lenderMatch->borrower_reference,
-                        'status_code' => $statusCode,
-                        'original_error' => $errorMessage,
-                    ]);
-
-                    return $this->generateMockMandateResponse($lenderMatch, $monoCustomer, $mandateReference, $startDate, $endDate);
-                }
-
                 Log::error('Mono mandate initiation failed', [
                     'status_code' => $statusCode,
                     'error_message' => $errorMessage,
@@ -208,80 +176,5 @@ class MonoMandateService
                 'error' => $e->getMessage(),
             ];
         }
-    }
-
-    /**
-     * Generate a mock mandate response when business is not active
-     * This allows testing without completing Mono compliance
-     */
-    private function generateMockMandateResponse(
-        LenderMatch $lenderMatch,
-        $monoCustomer,
-        string $mandateReference,
-        Carbon $startDate,
-        Carbon $endDate
-    ): array {
-        // Generate mock mandate ID
-        $mockMandateId = 'mmc_'.bin2hex(random_bytes(12));
-
-        // Generate mock authorization URL
-        $mockMonoUrl = 'https://authorise.mono.co/RD'.strtoupper(bin2hex(random_bytes(6)));
-
-        // Get customer email for description if available
-        $customerEmail = $monoCustomer->email ?? $lenderMatch->borrower_reference;
-        $description = "Repayment for {$customerEmail}";
-
-        $now = Carbon::now();
-
-        // Store mock mandate record in database
-        $monoMandate = MonoMandate::create([
-            'lender_match_id' => $lenderMatch->id,
-            'mono_customer_id' => $monoCustomer->id,
-            'mandate_id' => $mockMandateId,
-            'reference' => $mandateReference,
-            'mono_url' => $mockMonoUrl,
-            'status' => 'pending', // Set to pending for dummy responses
-            'amount' => (int) $lenderMatch->amount,
-            'currency' => $lenderMatch->currency ?? 'NGN',
-            'start_date' => $startDate,
-            'end_date' => $endDate,
-            'description' => $description,
-            'redirect_url' => $lenderMatch->callback_url ?? config('app.url', 'https://mono.co'),
-            'meta' => [
-                'borrower_reference' => $lenderMatch->borrower_reference,
-                'lender_match_id' => $lenderMatch->id,
-            ],
-            'mono_response' => [
-                'mono_url' => $mockMonoUrl,
-                'mandate_id' => $mockMandateId,
-                'type' => 'recurring-debit',
-                'method' => 'mandate',
-                'mandate_type' => 'gsm',
-            ],
-            'is_mock' => true,
-        ]);
-
-        return [
-            'success' => true,
-            'mandate_url' => $mockMonoUrl,
-            'mandate_id' => $mockMandateId,
-            'status_code' => 200,
-            'mock_response' => [
-                'mono_url' => $mockMonoUrl,
-                'mandate_id' => $mockMandateId,
-                'type' => 'recurring-debit',
-                'method' => 'mandate',
-                'mandate_type' => 'emandate',
-                'amount' => (int) $lenderMatch->amount,
-                'description' => $description,
-                'reference' => $mandateReference,
-                'customer' => $monoCustomer->mono_customer_id,
-                'redirect_url' => $lenderMatch->callback_url ?? config('app.url', 'https://mono.co'),
-                'created_at' => $now->toIso8601String(),
-                'updated_at' => $now->toIso8601String(),
-                'start_date' => $startDate->format('Y-m-d'),
-                'end_date' => $endDate->format('Y-m-d'),
-            ],
-        ];
     }
 }

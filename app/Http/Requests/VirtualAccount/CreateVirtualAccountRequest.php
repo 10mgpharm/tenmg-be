@@ -2,10 +2,8 @@
 
 namespace App\Http\Requests\VirtualAccount;
 
-use App\Enums\VirtualAccountType;
 use App\Models\Wallet;
 use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Validation\Rules\Enum;
 
 class CreateVirtualAccountRequest extends FormRequest
 {
@@ -39,7 +37,8 @@ class CreateVirtualAccountRequest extends FormRequest
             return false;
         }
 
-        return $user->hasRole('vendor') || $user->hasRole('lender') || $user->hasRole('admin');
+        // Only lenders and admins can create virtual accounts
+        return $user->hasRole('lender') || $user->hasRole('admin');
     }
 
     /**
@@ -49,18 +48,20 @@ class CreateVirtualAccountRequest extends FormRequest
     {
         $this->merge([
             'wallet_id' => $this->input('walletId'),
-            'type' => $this->input('type'),
         ]);
     }
 
     /**
      * Get the validation rules that apply to the request.
+     * Note: Only lenders can create virtual accounts.
+     * Account type is automatically determined by lender_type:
+     * - Individual lenders → INDIVIDUAL
+     * - Business lenders → CORPORATE
      */
     public function rules(): array
     {
         return [
             'wallet_id' => ['required', 'uuid', 'exists:wallets,id'],
-            'type' => ['required', new Enum(VirtualAccountType::class)],
         ];
     }
 

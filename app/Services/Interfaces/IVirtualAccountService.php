@@ -2,9 +2,8 @@
 
 namespace App\Services\Interfaces;
 
-use App\Enums\VirtualAccountType;
 use App\Models\Business;
-use App\Models\ServiceProvider;
+use App\Models\LenderKycSession;
 use App\Models\VirtualAccount;
 use App\Models\Wallet;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
@@ -17,8 +16,13 @@ interface IVirtualAccountService
 {
     /**
      * Create a virtual account for a wallet
+     * Uses provider configured on currency, KYC session optional for providers that require it
      */
-    public function createVirtualAccount(Wallet $wallet, ServiceProvider $provider, VirtualAccountType $type, array $providerData = []): VirtualAccount;
+    public function createVirtualAccount(
+        Wallet $wallet,
+        Business $business,
+        ?LenderKycSession $kycSession = null
+    ): ?VirtualAccount;
 
     /**
      * Get a virtual account by ID

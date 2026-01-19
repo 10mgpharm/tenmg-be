@@ -1,51 +1,66 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Services\Interfaces;
 
 use App\Enums\WalletType;
 use App\Models\Business;
-use App\Models\Currency;
 use App\Models\Wallet;
-use Illuminate\Contracts\Pagination\LengthAwarePaginator;
-use Illuminate\Support\Collection;
 
-/**
- * Interface IWalletService defines the contract for wallet operations
- */
 interface IWalletService
 {
     /**
-     * Create a new wallet for a business
+     * Credit a wallet with the specified amount
      */
-    public function createWallet(Business $business, Currency $currency, WalletType $walletType, ?string $walletName = null): Wallet;
+    public function creditWallet(
+        Wallet $wallet,
+        float $amount,
+        string $transactionReference,
+        string $transactionId
+    ): bool;
 
     /**
-     * Get a wallet by ID
+     * Debit a wallet with the specified amount
      */
-    public function getWallet(string $walletId): ?Wallet;
+    public function debitWallet(
+        Wallet $wallet,
+        float $amount,
+        string $transactionReference,
+        string $transactionId
+    ): bool;
 
     /**
-     * List wallets with optional filters
+     * Check if wallet has sufficient balance for a transaction
      */
-    public function listWallets(?Business $business = null, ?WalletType $walletType = null, ?Currency $currency = null, int $perPage = 15): LengthAwarePaginator|Collection;
+    public function hasSufficientBalance(Wallet $wallet, float $amount): bool;
 
     /**
-     * Update wallet name
+     * Get current wallet balance (fresh from database)
      */
-    public function updateWallet(Wallet $wallet, string $walletName): Wallet;
+    public function getCurrentBalance(Wallet $wallet): float;
 
     /**
-     * Get wallet balance
+     * Create a main wallet for a business with default currency
+     *
+     * @param  string  $currencyCode  Default currency code (e.g., 'NGN')
+     * @param  WalletType|null  $walletType  Wallet type (defaults to ADMIN_WALLET)
      */
-    public function getWalletBalance(Wallet $wallet): float;
+    public function createMainWallet(
+        Business $business,
+        string $currencyCode = 'NGN',
+        ?WalletType $walletType = null
+    ): Wallet;
 
     /**
-     * Credit amount to wallet
+     * Create a secondary wallet for a business with specified currency
+     *
+     * @param  string  $currencyCode  Currency code (e.g., 'USD', 'EUR')
+     * @param  WalletType  $walletType  Wallet type
      */
-    public function creditWallet(Wallet $wallet, float $amount, string $transactionType, array $metadata = []): Wallet;
-
-    /**
-     * Debit amount from wallet
-     */
-    public function debitWallet(Wallet $wallet, float $amount, string $transactionType, array $metadata = []): Wallet;
+    public function createSecondaryWallet(
+        Business $business,
+        string $currencyCode,
+        WalletType $walletType
+    ): Wallet;
 }

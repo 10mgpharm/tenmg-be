@@ -2,6 +2,7 @@
 
 namespace App\Http\Resources;
 
+use App\Http\Resources\Wallet\WalletResource;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
@@ -14,7 +15,11 @@ class UserResource extends JsonResource
      */
     public function toArray(Request $request): array
     {
-        $business = $this->businesses()->firstWhere('user_id', $this->id);
+        // Get business from loaded relationship or query
+        $business = $this->relationLoaded('businesses')
+            ? $this->businesses->first()
+            : $this->businesses()->firstWhere('user_id', $this->id);
+
         $businessStatus = $business?->status ?? 'PENDING_VERIFICATION';
 
         if ($business?->type != 'ADMIN') {
@@ -52,6 +57,20 @@ class UserResource extends JsonResource
             ),
         ];
 
+        // Include wallets from business
+        if ($business) {
+            // If wallets relationship is loaded, use it; otherwise load it
+            if ($business->relationLoaded('wallets')) {
+                $response['wallets'] = WalletResource::collection($business->wallets);
+            } else {
+                // Load wallets with currency relationship
+                $business->load('wallets.currency');
+                $response['wallets'] = WalletResource::collection($business->wallets);
+            }
+        } else {
+            $response['wallets'] = [];
+        }
+
         // Only include lenderType and kycStatus when business type is LENDER
         if ($business?->type === 'LENDER') {
             if ($business?->lender_type) {
@@ -76,27 +95,28 @@ class UserResource extends JsonResource
                 $highestCompletedTier = $completedSession?->completed_tier;
             }
 
-            if (! $latestKycSession) {
-                // No KYC sessions initiated
-                $response['kycStatus'] = 'NO_KYC_INITIATED';
-            } elseif ($highestCompletedTier) {
-                // Has completed tier(s) - show highest completed
-                $response['kycStatus'] = strtoupper($highestCompletedTier).'_COMPLETED';
+            // New KYC payload (tier + status + combined) for frontend
+            $kycTierRaw = $latestKycSession?->kyc_level
+                ?? $latestKycSession?->completed_tier
+                ?? $highestCompletedTier
+                ?? null;
 
-                // If latest session is pending and different from highest completed, show pending status
-                if ($latestKycSession->status === 'pending' && $latestKycSession->kyc_level !== $highestCompletedTier) {
-                    $response['kycStatus'] = strtoupper($latestKycSession->kyc_level ?? 'UNKNOWN').'_PENDING';
-                }
-            } elseif ($latestKycSession->status === 'successful') {
-                // Session successful but tier not marked yet (shouldn't happen, but handle gracefully)
-                $tier = $latestKycSession->kyc_level ?? 'UNKNOWN';
-                $response['kycStatus'] = strtoupper($tier).'_COMPLETED';
-            } else {
-                // Has sessions but none completed - show current status with tier
-                $tier = $latestKycSession->kyc_level ?? 'UNKNOWN';
-                $status = strtoupper($latestKycSession->status ?? 'UNKNOWN');
-                $response['kycStatus'] = strtoupper($tier).'_'.$status;
-            }
+            $kycStatusRaw = $latestKycSession?->status
+                ?? ($highestCompletedTier ? 'successful' : null);
+
+            // Normalize tier: strip "tier_" prefix and keep numeric/string part
+            $kycTier = $kycTierRaw
+                ? ltrim(strtolower(str_replace('tier_', '', $kycTierRaw)))
+                : '';
+
+            $kycStatus = $kycStatusRaw
+                ? strtolower($kycStatusRaw)
+                : '';
+
+            $response['kyc'] = [
+                'tier' => $kycTier,
+                'status' => $kycStatus,
+            ];
         }
 
         return $response;

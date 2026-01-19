@@ -104,4 +104,41 @@ class Wallet extends Model
     {
         return $query->where('currency_id', $currencyId);
     }
+
+    /**
+     * Get the formatted balance with currency symbol
+     */
+    public function getFormattedBalanceAttribute(): string
+    {
+        $symbol = $this->currency?->symbol ?? '';
+        $decimals = $this->currency?->decimal_places ?? 2;
+
+        return $symbol.number_format((float) $this->balance, (int) $decimals);
+    }
+
+    /**
+     * Check if wallet is locked
+     */
+    public function isLocked(): bool
+    {
+        return cache()->has("wallet_lock:{$this->id}");
+    }
+
+    /**
+     * Lock the wallet for a specified duration
+     *
+     * @param  int  $seconds  Lock duration in seconds (default: 30)
+     */
+    public function lock(int $seconds = 30): bool
+    {
+        return cache()->add("wallet_lock:{$this->id}", true, $seconds);
+    }
+
+    /**
+     * Unlock the wallet
+     */
+    public function unlock(): bool
+    {
+        return cache()->forget("wallet_lock:{$this->id}");
+    }
 }

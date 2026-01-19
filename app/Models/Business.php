@@ -178,4 +178,21 @@ class Business extends Model
     {
         return $this->hasMany(LenderKycSession::class, 'lender_business_id');
     }
+
+    /**
+     * Get all wallets for this business
+     */
+    public function wallets()
+    {
+        return $this->hasMany(Wallet::class, 'business_id');
+    }
+
+    /**
+     * Get the main wallet for this business (ADMIN_MAIN type)
+     */
+    public function mainWallet()
+    {
+        return $this->hasOne(Wallet::class, 'business_id')
+            ->where('wallet_type', \App\Enums\WalletType::ADMIN_WALLET->value);
+    }
 }

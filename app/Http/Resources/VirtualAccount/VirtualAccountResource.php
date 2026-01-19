@@ -17,12 +17,20 @@ class VirtualAccountResource extends JsonResource
      */
     public function toArray(Request $request): array
     {
+        // Handle type - it might be an enum or a string
+        $type = $this->type;
+        if ($type instanceof \BackedEnum) {
+            $type = $type->value;
+        } else {
+            $type = is_string($type) ? $type : ($this->getRawOriginal('type') ?? $type);
+        }
+
         return [
             'id' => $this->id,
             'businessId' => $this->business_id,
             'walletId' => $this->wallet_id,
             'currencyId' => $this->currency_id,
-            'type' => $this->type?->value,
+            'type' => $type,
             'provider' => $this->whenLoaded('serviceProvider', fn () => new ServiceProviderResource($this->serviceProvider)),
             'providerReference' => $this->provider_reference,
             'providerStatus' => $this->provider_status,

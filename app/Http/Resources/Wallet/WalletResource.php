@@ -16,10 +16,19 @@ class WalletResource extends JsonResource
      */
     public function toArray(Request $request): array
     {
+        // Handle wallet_type - it might be an enum or a string
+        $walletType = $this->wallet_type;
+        if ($walletType instanceof \BackedEnum) {
+            $walletType = $walletType->value;
+        } else {
+            // If it's already a string or null, use it directly, otherwise get raw value
+            $walletType = is_string($walletType) ? $walletType : ($this->getRawOriginal('wallet_type') ?? $walletType);
+        }
+
         return [
             'id' => $this->id,
             'businessId' => $this->business_id,
-            'walletType' => $this->wallet_type?->value,
+            'walletType' => $walletType,
             'currencyId' => $this->currency_id,
             'balance' => (float) $this->balance,
             'walletName' => $this->wallet_name,

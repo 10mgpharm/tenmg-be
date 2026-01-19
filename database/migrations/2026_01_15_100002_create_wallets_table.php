@@ -13,14 +13,12 @@ return new class extends Migration
     {
         Schema::create('wallets', function (Blueprint $table) {
             $table->uuid('id')->primary();
+            // add slug to this table
             $table->foreignId('business_id')->constrained('businesses')->onDelete('cascade');
             $table->enum('wallet_type', [
-                'vendor_payout',
-                'vendor_credit_voucher',
-                'lender_investment',
-                'lender_deposit',
-                'lender_ledger',
-                'admin_main',
+                'vendor_payout_wallet',
+                'lender_wallet',
+                'admin_wallet',
             ]);
             $table->uuid('currency_id');
             $table->decimal('balance', 18, 2)->default(0);
