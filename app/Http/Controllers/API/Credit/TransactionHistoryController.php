@@ -509,7 +509,7 @@ class TransactionHistoryController extends Controller
                     'mandate_id' => $mandate->mandate_id,
                     'reference' => $mandate->reference,
                     'status' => $mandate->status,
-                    'mono_url' => $mandate->mono_url,
+                    'callback_url' => $mandate->meta['vendor_callback_url'] ?? $mandate->redirect_url ?? null,
                     'amount' => $mandate->amount,
                     'currency' => $mandate->currency,
                     'start_date' => $mandate->start_date->format('Y-m-d'),
