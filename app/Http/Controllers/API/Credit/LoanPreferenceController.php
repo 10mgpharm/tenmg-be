@@ -120,7 +120,7 @@ class LoanPreferenceController extends Controller
             'currency' => 'nullable|string|size:3',
             'transaction_history' => 'nullable|array',
             'product_items' => 'nullable|array',
-            'callback_url' => 'nullable|url',
+            'callback_url' => 'required|url',
         ])->validate();
 
         // When called via clientAuth, the middleware attaches the vendor Business model
@@ -139,6 +139,7 @@ class LoanPreferenceController extends Controller
         return $this->returnJsonResponse(
             data: array_merge($result, [
                 'borrower_reference' => $validated['borrower_reference'],
+                'callback_url' => $validated['callback_url'],
             ]),
             message: 'Lender matched successfully'
         );

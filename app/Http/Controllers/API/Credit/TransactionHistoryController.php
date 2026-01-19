@@ -358,6 +358,7 @@ class TransactionHistoryController extends Controller
             // Format response - return analysis directly if parsing was successful
             $responseData = [
                 'borrower_reference' => $borrowerReference,
+                'callback_url' => $lenderMatch->callback_url ?? null,
                 'analysis' => $analysis['analysis'] ?? null,
                 'mono_data' => $analysis['mono_data'] ?? null,
             ];
