@@ -23,9 +23,18 @@ class MonoProveService
 
             $url = "{$baseUrl}/v1/prove/initiate";
 
+            // Mask phone before logging payload to avoid PII leakage
+            $logPayload = $payload;
+            if (isset($logPayload['customer']['phone'])) {
+                $p = (string) $logPayload['customer']['phone'];
+                $logPayload['customer']['phone'] = strlen($p) > 4
+                    ? substr($p, 0, 3).'****'.substr($p, -2)
+                    : '***';
+            }
+
             Log::info('Mono Prove initiate request', [
                 'url' => $url,
-                'payload' => $payload,
+                'payload' => $logPayload,
             ]);
 
             $response = Http::withHeaders([
@@ -35,13 +44,12 @@ class MonoProveService
             ])->post($url, $payload);
 
             $statusCode = $response->status();
-            $responseBody = $response->body();
             $responseData = $response->json();
 
             Log::info('Mono Prove initiate response', [
                 'status_code' => $statusCode,
-                'response_body' => $responseBody,
-                'response_data' => $responseData,
+                'message' => $responseData['message'] ?? null,
+                'errors' => $responseData['errors'] ?? null,
             ]);
 
             if ($response->failed()) {

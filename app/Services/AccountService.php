@@ -18,6 +18,26 @@ class AccountService implements IAccountService
     {
         try {
             return DB::transaction(function () use ($user, $data) {
+                // Normalize phone (store as 0 + 10 digits) if provided
+                if (array_key_exists('phone', $data)) {
+                    $phone = $data['phone'];
+                    if ($phone === null) {
+                        // allow clearing phone
+                        $data['phone'] = null;
+                    } else {
+                        $phone = preg_replace('/\s+/', '', (string) $phone);
+                        $phone = str_replace(['-', '(', ')'], '', $phone);
+
+                        if (str_starts_with($phone, '+234')) {
+                            $phone = '0'.substr($phone, 4);
+                        } elseif (str_starts_with($phone, '234')) {
+                            $phone = '0'.substr($phone, 3);
+                        }
+
+                        $data['phone'] = $phone;
+                    }
+                }
+
                 // Check if profile picture is being updated.
                 if (isset($data['profilePicture'])) {
                     $created = $this->attachmentService->saveNewUpload(
@@ -34,7 +54,7 @@ class AccountService implements IAccountService
                     // Send OTP to the new email.
                     $this->otpService->forUser($user)
                         ->generate(OtpType::CHANGE_EMAIL_VERIFICATION)
-                        ->sendMail(OtpType::CHANGE_EMAIL_VERIFICATION, $data['email']);
+                        ->sendMail(OtpType::CHANGE_EMAIL_VERIFICATION);
 
                     $data['email_verified_at'] = null;
                 }
@@ -47,7 +67,7 @@ class AccountService implements IAccountService
                     AuditLogService::log(
                         target: $user, // The user is the target (it is being updated)
                         event: 'update.user', // The event name
-                        action: "Updated profile",
+                        action: 'Updated profile',
                         description: "{$user->name} updated their profile information",
                         crud_type: 'UPDATE',
                         properties: $data,
