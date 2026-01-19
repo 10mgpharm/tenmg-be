@@ -36,12 +36,20 @@ class AccountProfileUpdateRequest extends FormRequest
                 'max:255',
                 Rule::unique('users', 'email')->ignore($this->user()->id),
             ],
+            'phone' => [
+                'sometimes',
+                'nullable',
+                'string',
+                // Accept 0XXXXXXXXXX or +234XXXXXXXXXX or 234XXXXXXXXXX (we normalize before saving)
+                'regex:/^(0\d{10}|\+?234\d{10})$/',
+                Rule::unique('users', 'phone')->ignore($this->user()->id),
+            ],
             'profilePicture' => [
                 $this->isMethod('post') ? 'required' : 'sometimes',
                 'image',
                 'max:10240',
             ],
         ];
-        
+
     }
 }

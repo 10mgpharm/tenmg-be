@@ -65,7 +65,25 @@ class LenderProveController extends Controller
         $customerPhone = $user->phone ?? $lenderBusiness->contact_phone;
         $customerAddress = $lenderBusiness->address;
 
-        // Validate required fields exist (only name and email are required)
+        // Normalize/validate phone for Mono Prove (expects 0 + 10 digits)
+        $normalizedPhone = null;
+        if ($customerPhone !== null) {
+            $phone = preg_replace('/\s+/', '', (string) $customerPhone);
+            $phone = str_replace(['-', '(', ')'], '', $phone);
+
+            // Convert +234XXXXXXXXXX or 234XXXXXXXXXX → 0XXXXXXXXXX
+            if (str_starts_with($phone, '+234')) {
+                $phone = '0'.substr($phone, 4);
+            } elseif (str_starts_with($phone, '234')) {
+                $phone = '0'.substr($phone, 3);
+            }
+
+            if (preg_match('/^0\d{10}$/', $phone)) {
+                $normalizedPhone = $phone;
+            }
+        }
+
+        // Validate required fields exist (name, email, and phone for Mono Prove)
         $missingFields = [];
         if (empty($customerName)) {
             $missingFields[] = 'name (user name or business contact person)';
@@ -73,7 +91,10 @@ class LenderProveController extends Controller
         if (empty($customerEmail)) {
             $missingFields[] = 'email (user email or business contact email)';
         }
-        // Phone and address are optional - bypass if missing
+        if (! $normalizedPhone) {
+            $missingFields[] = "phone (must be like '08012345678')";
+        }
+        // Address is optional - bypass if missing
 
         if (! empty($missingFields)) {
             return $this->returnJsonResponse(
@@ -94,7 +115,7 @@ class LenderProveController extends Controller
         $profileData = [
             'name' => $customerName,
             'email' => $customerEmail,
-            'phone' => $customerPhone,
+            'phone' => $normalizedPhone,
             'address' => $customerAddress,
         ];
 
@@ -173,7 +194,7 @@ class LenderProveController extends Controller
             );
         }
 
-        // Check for existing pending KYC session for the same tier to prevent duplicates
+        // Check for existing pending KYC session for the same tier
         $existingPendingSession = LenderKycSession::where('lender_business_id', $lenderBusiness->id)
             ->where('status', 'pending')
             ->where(function ($query) use ($nextTier) {
@@ -183,34 +204,10 @@ class LenderProveController extends Controller
             ->latest()
             ->first();
 
-        // if ($existingPendingSession) {
-        //     // Return the existing pending session instead of creating a duplicate
-        //     Log::info('Existing pending KYC session found, returning existing session', [
-        //         'session_id' => $existingPendingSession->id,
-        //         'lender_business_id' => $lenderBusiness->id,
-        //         'kyc_level' => $nextTier,
-        //         'reference' => $existingPendingSession->reference,
-        //     ]);
-
-        //     return $this->returnJsonResponse(
-        //         message: 'KYC session already in progress. Please complete the existing verification.',
-        //         statusCode: Response::HTTP_OK,
-        //         status: 'success',
-        //         data: [
-        //             'session_id' => $existingPendingSession->id,
-        //             'reference' => $existingPendingSession->reference,
-        //             'mono_url' => $existingPendingSession->mono_url,
-        //             'status' => $existingPendingSession->status,
-        //             'kyc_level' => $existingPendingSession->kyc_level,
-        //             'existing_session' => true,
-        //         ]
-        //     );
-        // }
-
         // Generate a reference if not provided by the frontend
         $reference = $validated['reference'] ?? ('LDR_KYC_'.$lenderBusiness->id.'_'.Str::upper(Str::random(8)));
 
-        // Build customer payload - phone and address are optional
+        // Build customer payload - phone is required for Mono Prove; address is optional
         $customerPayload = [
             'name' => $customerName,
             'email' => $customerEmail,
@@ -220,10 +217,7 @@ class LenderProveController extends Controller
             ],
         ];
 
-        // Only include phone and address if they exist
-        if (! empty($customerPhone)) {
-            $customerPayload['phone'] = $customerPhone;
-        }
+        $customerPayload['phone'] = $normalizedPhone;
         if (! empty($customerAddress)) {
             $customerPayload['address'] = $customerAddress;
         }
@@ -249,21 +243,39 @@ class LenderProveController extends Controller
 
         $data = $result['data'];
 
-        $session = LenderKycSession::create([
-            'lender_business_id' => $lenderBusiness->id,
-            'lender_mono_profile_id' => $profile->id,
-            'prove_id' => $data['id'] ?? ($data['data']['id'] ?? ''),
-            'reference' => $data['reference'] ?? $reference,
-            'mono_url' => $data['mono_url'] ?? null,
-            'status' => $data['status'] ?? 'pending',
-            'kyc_level' => $data['kyc_level'] ?? $nextTier,
-            'completed_tier' => null, // Will be set when status becomes 'successful'
-            'bank_accounts' => $data['bank_accounts'] ?? $validated['bank_accounts'],
-            'meta' => $data,
-        ]);
+        // If there is an existing pending session, update it with the NEW Mono Prove data.
+        // Otherwise, create a fresh session record.
+        if ($existingPendingSession) {
+            $existingPendingSession->update([
+                'lender_mono_profile_id' => $profile->id,
+                'prove_id' => $data['id'] ?? ($data['data']['id'] ?? ''),
+                'reference' => $data['reference'] ?? $reference,
+                'mono_url' => $data['mono_url'] ?? ($data['monoUrl'] ?? null),
+                'status' => $data['status'] ?? 'pending',
+                'kyc_level' => $data['kyc_level'] ?? ($data['kycLevel'] ?? $nextTier),
+                'completed_tier' => null,
+                'bank_accounts' => $data['bank_accounts'] ?? ($data['bankAccounts'] ?? $validated['bank_accounts']),
+                'meta' => $data,
+            ]);
+
+            $session = $existingPendingSession->fresh();
+        } else {
+            $session = LenderKycSession::create([
+                'lender_business_id' => $lenderBusiness->id,
+                'lender_mono_profile_id' => $profile->id,
+                'prove_id' => $data['id'] ?? ($data['data']['id'] ?? ''),
+                'reference' => $data['reference'] ?? $reference,
+                'mono_url' => $data['mono_url'] ?? ($data['monoUrl'] ?? null),
+                'status' => $data['status'] ?? 'pending',
+                'kyc_level' => $data['kyc_level'] ?? ($data['kycLevel'] ?? $nextTier),
+                'completed_tier' => null, // Will be set when status becomes 'successful'
+                'bank_accounts' => $data['bank_accounts'] ?? ($data['bankAccounts'] ?? $validated['bank_accounts']),
+                'meta' => $data,
+            ]);
+        }
 
         // Build KYC payload for frontend (tier + status)
-        $kycTier = (string) ($session->kyc_level ?? $session->completed_tier ?? $data['kyc_level'] ?? $nextTier ?? '');
+        $kycTier = (string) ($session->kyc_level ?? $session->completed_tier ?? $data['kyc_level'] ?? ($data['kycLevel'] ?? $nextTier) ?? '');
         $kycStatus = strtolower($session->status ?? $data['status'] ?? 'pending');
 
         // Return Mono's response structure with KYC payload

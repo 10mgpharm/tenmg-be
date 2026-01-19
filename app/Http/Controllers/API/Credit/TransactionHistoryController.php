@@ -390,7 +390,15 @@ class TransactionHistoryController extends Controller
      *
      * Request body:
      * {
-     *   "borrower_reference": "USER_125"
+     *   "borrower_reference": "USER_125",
+     *   "customer_data": {  // Optional: only needed if MonoCustomer doesn't exist
+     *     "bvn": "12345678901",
+     *     "first_name": "John",
+     *     "last_name": "Doe",
+     *     "email": "john@example.com",
+     *     "phone": "08012345678",
+     *     "address": "123 Main Street, Lagos"
+     *   }
      * }
      */
     public function initiateMandate(Request $request): JsonResponse
@@ -398,9 +406,17 @@ class TransactionHistoryController extends Controller
         // Validate required fields
         $request->validate([
             'borrower_reference' => 'required|string|max:255',
+            'customer_data' => 'sometimes|array',
+            'customer_data.bvn' => 'required_with:customer_data|string|size:11',
+            'customer_data.first_name' => 'required_with:customer_data|string|max:255',
+            'customer_data.last_name' => 'required_with:customer_data|string|max:255',
+            'customer_data.email' => 'required_with:customer_data|email|max:255',
+            'customer_data.phone' => 'required_with:customer_data|string|max:20',
+            'customer_data.address' => 'required_with:customer_data|string|max:255',
         ]);
 
         $borrowerReference = $request->input('borrower_reference');
+        $customerData = $request->input('customer_data');
 
         try {
             // Find lender match by borrower_reference
@@ -415,19 +431,9 @@ class TransactionHistoryController extends Controller
                 );
             }
 
-            // Check if Mono customer ID exists
-            if (! $lenderMatch->mono_customer_id) {
-                return $this->returnJsonResponse(
-                    message: 'Mono customer not found. Please complete credit check first.',
-                    data: ['error' => 'Mono customer ID is required'],
-                    statusCode: Response::HTTP_BAD_REQUEST,
-                    status: 'failed'
-                );
-            }
-
-            // Initiate mandate using the service
+            // Initiate mandate using the service (will create MonoCustomer if needed)
             $monoMandateService = app(MonoMandateService::class);
-            $result = $monoMandateService->initiateMandate($lenderMatch);
+            $result = $monoMandateService->initiateMandate($lenderMatch, $customerData);
 
             if (! $result['success']) {
                 return $this->returnJsonResponse(

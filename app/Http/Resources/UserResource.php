@@ -38,6 +38,7 @@ class UserResource extends JsonResource
             'id' => $this->id,
             'name' => $this->name,
             'email' => $this->email,
+            'phone' => $this->phone,
             'active' => (bool) $this->active == 1,
             'useTwoFactor' => $this->two_factor_secret ?
                 ($this->use_two_factor ? 'ACTIVE' : 'INACTIVE') :
