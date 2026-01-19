@@ -30,6 +30,10 @@ class SignupUserController extends Controller
     {
         $request->validated();
         $user = $this->authService->signUp($request);
+
+        // Load business and wallets to include in response
+        $user->load(['businesses.wallets.currency']);
+
         $tokenResult = $user->createToken('Full Access Token', ['full']);
 
         return (new UserResource($user))

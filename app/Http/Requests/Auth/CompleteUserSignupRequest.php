@@ -28,6 +28,7 @@ class CompleteUserSignupRequest extends FormRequest
             'contact_phone' => $this->input('contactPhone'),
             'contact_person' => $this->input('contactPersonName'),
             'contact_person_position' => $this->input('contactPersonPosition'),
+            'lender_type' => $this->input('lenderType'),
         ]);
     }
 
@@ -66,6 +67,11 @@ class CompleteUserSignupRequest extends FormRequest
                 'required_if:provider,google',
                 'string',
                 'in:'.implode(',', $allowedBusinessTypes),
+            ],
+            'lenderType' => [
+                'nullable',
+                'string',
+                'in:individual,business',
             ],
         ];
     }

@@ -152,4 +152,47 @@ class Business extends Model
     {
         return $this->hasMany(LenderMatch::class, 'lender_business_id', 'id');
     }
+
+    /**
+     * Get all completed KYC sessions for this lender business
+     */
+    public function completedKycSessions()
+    {
+        return $this->hasMany(LenderKycSession::class, 'lender_business_id')
+            ->where('status', 'successful');
+    }
+
+    /**
+     * Get the latest KYC session for this lender business
+     */
+    public function latestKycSession()
+    {
+        return $this->hasOne(LenderKycSession::class, 'lender_business_id')
+            ->latestOfMany();
+    }
+
+    /**
+     * Get all KYC sessions for this lender business
+     */
+    public function kycSessions()
+    {
+        return $this->hasMany(LenderKycSession::class, 'lender_business_id');
+    }
+
+    /**
+     * Get all wallets for this business
+     */
+    public function wallets()
+    {
+        return $this->hasMany(Wallet::class, 'business_id');
+    }
+
+    /**
+     * Get the main wallet for this business (ADMIN_MAIN type)
+     */
+    public function mainWallet()
+    {
+        return $this->hasOne(Wallet::class, 'business_id')
+            ->where('wallet_type', \App\Enums\WalletType::ADMIN_WALLET->value);
+    }
 }

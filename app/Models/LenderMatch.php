@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class LenderMatch extends Model
 {
@@ -17,6 +18,7 @@ class LenderMatch extends Model
         'currency',
         'default_tenor',
         'borrower_reference',
+        'businessname',
         'transaction_history',
         'product_items',
         'callback_url',
@@ -52,5 +54,13 @@ class LenderMatch extends Model
     public function monoCustomer(): BelongsTo
     {
         return $this->belongsTo(MonoCustomer::class, 'mono_customer_id');
+    }
+
+    /**
+     * Get all Mono mandates for this lender match.
+     */
+    public function monoMandates(): HasMany
+    {
+        return $this->hasMany(MonoMandate::class);
     }
 }

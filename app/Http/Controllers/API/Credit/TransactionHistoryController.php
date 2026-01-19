@@ -11,6 +11,7 @@ use App\Models\CreditTxnHistoryEvaluation;
 use App\Models\FileUpload;
 use App\Models\LenderMatch;
 use App\Models\MonoCustomer;
+use App\Models\MonoMandate;
 use App\Services\Credit\MonoCreditWorthinessService;
 use App\Services\Credit\MonoCustomerService;
 use App\Services\Credit\MonoMandateService;
@@ -354,45 +355,13 @@ class TransactionHistoryController extends Controller
                 );
             }
 
-            // Automatically initiate GSM mandate after successful credit analysis
-            $mandateUrl = null;
-            if ($monoCustomerId && $lenderMatch) {
-                try {
-                    $monoMandateService = app(MonoMandateService::class);
-                    $mandateResult = $monoMandateService->initiateMandate($lenderMatch);
-
-                    if ($mandateResult['success']) {
-                        $mandateUrl = $mandateResult['mandate_url'];
-                        Log::info('GSM mandate initiated automatically', [
-                            'borrower_reference' => $borrowerReference,
-                            'mandate_url' => $mandateUrl,
-                        ]);
-                    } else {
-                        Log::warning('Failed to initiate GSM mandate', [
-                            'borrower_reference' => $borrowerReference,
-                            'error' => $mandateResult['error'] ?? 'Unknown error',
-                        ]);
-                    }
-                } catch (\Exception $e) {
-                    // Log error but don't block credit analysis response
-                    Log::error('Exception while initiating GSM mandate', [
-                        'borrower_reference' => $borrowerReference,
-                        'error' => $e->getMessage(),
-                    ]);
-                }
-            }
-
             // Format response - return analysis directly if parsing was successful
             $responseData = [
                 'borrower_reference' => $borrowerReference,
+                'callback_url' => $lenderMatch->callback_url ?? null,
                 'analysis' => $analysis['analysis'] ?? null,
                 'mono_data' => $analysis['mono_data'] ?? null,
             ];
-
-            // Include mandate URL if available
-            if ($mandateUrl) {
-                $responseData['mandate_url'] = $mandateUrl;
-            }
 
             // Only include raw_response if parsing failed or for debugging
             if (isset($analysis['parse_error']) || ! isset($analysis['analysis'])) {
@@ -416,145 +385,320 @@ class TransactionHistoryController extends Controller
     }
 
     /**
-     * Test endpoint for Mono GSM mandate initiation
-     * POST /api/v1/client/credit/mono-test-mandate
-     * Use this endpoint to test direct debit mandate with Postman
-     * Does not affect the main implementation
+     * Initiate Mono GSM mandate for a borrower
+     * POST /api/v1/client/credit/initiate-mandate
+     * Call this endpoint after credit check to initiate the mandate
      *
      * Request body:
      * {
-     *   "mono_customer_id": "69518e4b1e504b81ea8b27d0",
-     *   "amount": 50000,
-     *   "borrower_reference": "TEST_REF_001",
-     *   "default_tenor": 6,
-     *   "callback_url": "https://your-app.com/callback"
+     *   "borrower_reference": "USER_125",
+     *   "customer_data": {  // Optional: only needed if MonoCustomer doesn't exist
+     *     "bvn": "12345678901",
+     *     "first_name": "John",
+     *     "last_name": "Doe",
+     *     "email": "john@example.com",
+     *     "phone": "08012345678",
+     *     "address": "123 Main Street, Lagos"
+     *   }
      * }
      */
-    public function testMonoMandate(Request $request): JsonResponse
+    public function initiateMandate(Request $request): JsonResponse
     {
         // Validate required fields
         $request->validate([
-            'mono_customer_id' => 'required|string',
-            'amount' => 'required|numeric|min:1',
             'borrower_reference' => 'required|string|max:255',
-            'default_tenor' => 'required|integer|min:1',
-            'callback_url' => 'nullable|url',
+            'customer_data' => 'sometimes|array',
+            'customer_data.bvn' => 'required_with:customer_data|string|size:11',
+            'customer_data.first_name' => 'required_with:customer_data|string|max:255',
+            'customer_data.last_name' => 'required_with:customer_data|string|max:255',
+            'customer_data.email' => 'required_with:customer_data|email|max:255',
+            'customer_data.phone' => 'required_with:customer_data|string|max:20',
+            'customer_data.address' => 'required_with:customer_data|string|max:255',
         ]);
 
+        $borrowerReference = $request->input('borrower_reference');
+        $customerData = $request->input('customer_data');
+
         try {
-            $baseUrl = config('services.mono.base_url');
-            $secretKey = config('services.mono.secret_key');
+            // Find lender match by borrower_reference
+            $lenderMatch = LenderMatch::where('borrower_reference', $borrowerReference)->first();
 
-            if (! $secretKey) {
+            if (! $lenderMatch) {
                 return $this->returnJsonResponse(
-                    message: 'Mono secret key is not configured',
-                    data: ['error' => 'Mono secret key is not configured'],
-                    statusCode: Response::HTTP_INTERNAL_SERVER_ERROR,
+                    message: 'Lender match not found for the given borrower reference',
+                    data: ['error' => 'Lender match not found'],
+                    statusCode: Response::HTTP_NOT_FOUND,
                     status: 'failed'
                 );
             }
 
-            $url = "{$baseUrl}/v2/payments/initiate";
+            // Initiate mandate using the service (will create MonoCustomer if needed)
+            $monoMandateService = app(MonoMandateService::class);
+            $result = $monoMandateService->initiateMandate($lenderMatch, $customerData);
 
-            // Calculate dates based on tenor
-            $startDate = \Carbon\Carbon::today();
-            $endDate = \Carbon\Carbon::today()->addMonths($request->input('default_tenor'));
-
-            // Generate unique reference
-            $mandateReference = $request->input('borrower_reference').'_mandate_'.time();
-
-            // Prepare mandate payload
-            $mandatePayload = [
-                'amount' => (int) $request->input('amount'),
-                'type' => 'recurring-debit',
-                'method' => 'mandate',
-                'mandate_type' => 'emandate', // Global Standing Mandate
-                'debit_type' => 'variable', // Variable allows flexible debit amounts
-                'description' => "Loan repayment for {$request->input('borrower_reference')}",
-                'reference' => $mandateReference,
-                'redirect_url' => $request->input('callback_url') ?? config('app.url'),
-                'customer' => [
-                    'id' => $request->input('mono_customer_id'),
-                ],
-                'start_date' => $startDate->format('Y-m-d'),
-                'end_date' => $endDate->format('Y-m-d'),
-                'meta' => [
-                    'borrower_reference' => $request->input('borrower_reference'),
-                    'test_mode' => true,
-                ],
-            ];
-
-            Log::info('Testing Mono GSM mandate initiation', [
-                'url' => $url,
-                'borrower_reference' => $request->input('borrower_reference'),
-                'payload' => $mandatePayload,
-            ]);
-
-            $response = \Illuminate\Support\Facades\Http::withHeaders([
-                'mono-sec-key' => $secretKey,
-                'accept' => 'application/json',
-                'content-type' => 'application/json',
-            ])->post($url, $mandatePayload);
-
-            $statusCode = $response->status();
-            $responseBody = $response->body();
-            $responseData = $response->json();
-
-            Log::info('Mono mandate test response', [
-                'status_code' => $statusCode,
-                'response_body' => $responseBody,
-                'response_data' => $responseData,
-            ]);
-
-            if ($response->failed()) {
-                $errorMessage = $responseData['message'] ?? $responseData['error'] ?? 'Failed to initiate Mono mandate';
-
+            if (! $result['success']) {
                 return $this->returnJsonResponse(
-                    message: $errorMessage,
-                    data: [
-                        'error' => $errorMessage,
-                        'status_code' => $statusCode,
-                        'full_response' => $responseData,
-                    ],
-                    statusCode: $statusCode,
+                    message: $result['error'] ?? 'Failed to initiate Mono mandate',
+                    data: $result,
+                    statusCode: $result['status_code'] ?? Response::HTTP_BAD_REQUEST,
                     status: 'failed'
                 );
             }
 
-            // Extract mandate URL from response
-            $mandateData = $responseData['data'] ?? $responseData;
-            $monoMandateUrl = $mandateData['mono_url'] ?? null;
-
-            if (! $monoMandateUrl) {
+            // If mock response exists (business not active), return full mock data
+            if (isset($result['mock_response'])) {
                 return $this->returnJsonResponse(
-                    message: 'Mono mandate URL not found in response',
-                    data: [
-                        'error' => 'Mono mandate URL not found in response',
-                        'response' => $responseData,
-                    ],
-                    statusCode: Response::HTTP_BAD_REQUEST,
-                    status: 'failed'
+                    message: 'Payment Initiated Successfully',
+                    data: array_merge($result['mock_response'], [
+                        'mandate_id' => $result['mandate_id'] ?? null,
+                    ])
                 );
             }
 
             return $this->returnJsonResponse(
-                message: 'Mono GSM mandate initiated successfully',
+                message: 'Payment Initiated Successfully',
                 data: [
-                    'mandate_url' => $monoMandateUrl,
-                    'mandate_id' => $mandateData['mandate_id'] ?? null,
-                    'reference' => $mandateReference,
-                    'status_code' => $statusCode,
+                    'mono_url' => $result['mandate_url'],
+                    'mandate_id' => $result['mandate_id'] ?? null,
+                    'status_code' => $result['status_code'] ?? 200,
                 ]
             );
 
         } catch (\Exception $e) {
-            Log::error('Exception in test Mono mandate endpoint', [
+            Log::error('Exception while initiating Mono mandate', [
+                'borrower_reference' => $borrowerReference,
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
             ]);
 
             return $this->returnJsonResponse(
                 message: 'Error initiating Mono mandate',
+                data: ['error' => $e->getMessage()],
+                statusCode: Response::HTTP_INTERNAL_SERVER_ERROR,
+                status: 'failed'
+            );
+        }
+    }
+
+    /**
+     * Verify Mono mandate status
+     * GET /api/v1/client/credit/verify-mandate/{mandate_id}
+     */
+    public function verifyMandate(string $mandateId): JsonResponse
+    {
+        try {
+            $mandate = MonoMandate::where('mandate_id', $mandateId)->first();
+
+            if (! $mandate) {
+                return $this->returnJsonResponse(
+                    message: 'Mandate not found',
+                    data: ['error' => 'Mandate not found'],
+                    statusCode: Response::HTTP_NOT_FOUND,
+                    status: 'failed'
+                );
+            }
+
+            return $this->returnJsonResponse(
+                message: 'Mandate status retrieved successfully',
+                data: [
+                    'mandate_id' => $mandate->mandate_id,
+                    'reference' => $mandate->reference,
+                    'status' => $mandate->status,
+                    'mono_url' => $mandate->mono_url,
+                    'amount' => $mandate->amount,
+                    'currency' => $mandate->currency,
+                    'start_date' => $mandate->start_date->format('Y-m-d'),
+                    'end_date' => $mandate->end_date->format('Y-m-d'),
+                    'is_mock' => $mandate->is_mock,
+                    'created_at' => $mandate->created_at->toIso8601String(),
+                ]
+            );
+        } catch (\Exception $e) {
+            Log::error('Exception while verifying Mono mandate', [
+                'mandate_id' => $mandateId,
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+            ]);
+
+            return $this->returnJsonResponse(
+                message: 'Failed to verify mandate',
+                data: ['error' => $e->getMessage()],
+                statusCode: Response::HTTP_INTERNAL_SERVER_ERROR,
+                status: 'failed'
+            );
+        }
+    }
+
+    /**
+     * Update Mono mandate status
+     * PUT/PATCH /api/v1/client/credit/update-mandate-status/{mandate_id}
+     *
+     * Request body:
+     * {
+     *   "status": "approved" // pending, approved, rejected, cancelled, expired
+     * }
+     */
+    public function updateMandateStatus(Request $request, string $mandateId): JsonResponse
+    {
+        try {
+            $validated = $request->validate([
+                'status' => 'required|string|in:pending,approved,rejected,cancelled,expired',
+            ]);
+
+            $mandate = MonoMandate::where('mandate_id', $mandateId)->first();
+
+            if (! $mandate) {
+                return $this->returnJsonResponse(
+                    message: 'Mandate not found',
+                    data: ['error' => 'Mandate not found'],
+                    statusCode: Response::HTTP_NOT_FOUND,
+                    status: 'failed'
+                );
+            }
+
+            $oldStatus = $mandate->status;
+            $mandate->update([
+                'status' => $validated['status'],
+            ]);
+
+            Log::info('Mono mandate status updated', [
+                'mandate_id' => $mandateId,
+                'old_status' => $oldStatus,
+                'new_status' => $validated['status'],
+            ]);
+
+            return $this->returnJsonResponse(
+                message: 'Mandate status updated successfully',
+                data: [
+                    'mandate_id' => $mandate->mandate_id,
+                    'reference' => $mandate->reference,
+                    'status' => $mandate->status,
+                    'previous_status' => $oldStatus,
+                    'updated_at' => $mandate->updated_at->toIso8601String(),
+                ]
+            );
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return $this->returnJsonResponse(
+                message: 'Validation failed',
+                data: ['errors' => $e->errors()],
+                statusCode: Response::HTTP_UNPROCESSABLE_ENTITY,
+                status: 'failed'
+            );
+        } catch (\Exception $e) {
+            Log::error('Exception while updating Mono mandate status', [
+                'mandate_id' => $mandateId,
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+            ]);
+
+            return $this->returnJsonResponse(
+                message: 'Failed to update mandate status',
+                data: ['error' => $e->getMessage()],
+                statusCode: Response::HTTP_INTERNAL_SERVER_ERROR,
+                status: 'failed'
+            );
+        }
+    }
+
+    /**
+     * Update lender match status and related mandate status
+     * PUT/PATCH /api/v1/client/credit/update-match-status/{borrower_reference}
+     *
+     * Request body:
+     * {
+     *   "status": "approved", // matched, approved, rejected, cancelled, expired
+     *   "businessname": "Business Name" // optional
+     * }
+     *
+     * When match status is updated, related mandate status is also updated.
+     */
+    public function updateMatchStatus(Request $request, string $borrowerReference): JsonResponse
+    {
+        try {
+            $validated = $request->validate([
+                'status' => 'required|string|in:matched,approved,rejected,cancelled,expired',
+                'businessname' => 'nullable|string|max:255',
+            ]);
+
+            $lenderMatch = LenderMatch::where('borrower_reference', $borrowerReference)->first();
+
+            if (! $lenderMatch) {
+                return $this->returnJsonResponse(
+                    message: 'Lender match not found',
+                    data: ['error' => 'Lender match not found'],
+                    statusCode: Response::HTTP_NOT_FOUND,
+                    status: 'failed'
+                );
+            }
+
+            $oldStatus = $lenderMatch->status;
+
+            $updateData = [
+                'status' => $validated['status'],
+            ];
+
+            // Add businessname if provided
+            if (isset($validated['businessname'])) {
+                $updateData['businessname'] = $validated['businessname'];
+            }
+
+            $lenderMatch->update($updateData);
+
+            // Map match status to mandate status
+            $mandateStatusMap = [
+                'matched' => 'pending',
+                'approved' => 'approved',
+                'rejected' => 'rejected',
+                'cancelled' => 'cancelled',
+                'expired' => 'expired',
+            ];
+
+            $mandateStatus = $mandateStatusMap[$validated['status']] ?? 'pending';
+
+            // Update all related mandates
+            $updatedMandates = $lenderMatch->monoMandates()->update([
+                'status' => $mandateStatus,
+            ]);
+
+            Log::info('Lender match status updated with related mandates', [
+                'borrower_reference' => $borrowerReference,
+                'lender_match_id' => $lenderMatch->id,
+                'old_status' => $oldStatus,
+                'new_status' => $validated['status'],
+                'businessname' => $validated['businessname'] ?? null,
+                'mandate_status' => $mandateStatus,
+                'mandates_updated' => $updatedMandates,
+            ]);
+
+            return $this->returnJsonResponse(
+                message: 'Match status updated successfully',
+                data: [
+                    'borrower_reference' => $lenderMatch->borrower_reference,
+                    'lender_match_id' => $lenderMatch->id,
+                    'status' => $lenderMatch->status,
+                    'businessname' => $lenderMatch->businessname,
+                    'previous_status' => $oldStatus,
+                    'mandate_status' => $mandateStatus,
+                    'mandates_updated' => $updatedMandates,
+                    'updated_at' => $lenderMatch->updated_at->toIso8601String(),
+                ]
+            );
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return $this->returnJsonResponse(
+                message: 'Validation failed',
+                data: ['errors' => $e->errors()],
+                statusCode: Response::HTTP_UNPROCESSABLE_ENTITY,
+                status: 'failed'
+            );
+        } catch (\Exception $e) {
+            Log::error('Exception while updating lender match status', [
+                'borrower_reference' => $borrowerReference,
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+            ]);
+
+            return $this->returnJsonResponse(
+                message: 'Failed to update match status',
                 data: ['error' => $e->getMessage()],
                 statusCode: Response::HTTP_INTERNAL_SERVER_ERROR,
                 status: 'failed'
