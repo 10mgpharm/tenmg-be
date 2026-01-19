@@ -482,17 +482,22 @@ class TransactionHistoryController extends Controller
 
     /**
      * Verify Mono mandate status
-     * GET /api/v1/client/credit/verify-mandate/{mandate_id}
+     * GET /api/v1/client/credit/verify-mandate/{identifier}
+     *
+     * The identifier can be either mandate_id or reference
      */
-    public function verifyMandate(string $mandateId): JsonResponse
+    public function verifyMandate(string $identifier): JsonResponse
     {
         try {
-            $mandate = MonoMandate::where('mandate_id', $mandateId)->first();
+            // Try to find mandate by mandate_id first, then by reference
+            $mandate = MonoMandate::where('mandate_id', $identifier)
+                ->orWhere('reference', $identifier)
+                ->first();
 
             if (! $mandate) {
                 return $this->returnJsonResponse(
                     message: 'Mandate not found',
-                    data: ['error' => 'Mandate not found'],
+                    data: ['error' => 'Mandate not found with the provided mandate_id or reference'],
                     statusCode: Response::HTTP_NOT_FOUND,
                     status: 'failed'
                 );
@@ -515,7 +520,7 @@ class TransactionHistoryController extends Controller
             );
         } catch (\Exception $e) {
             Log::error('Exception while verifying Mono mandate', [
-                'mandate_id' => $mandateId,
+                'identifier' => $identifier,
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
             ]);
@@ -531,26 +536,31 @@ class TransactionHistoryController extends Controller
 
     /**
      * Update Mono mandate status
-     * PUT/PATCH /api/v1/client/credit/update-mandate-status/{mandate_id}
+     * PUT/PATCH /api/v1/client/credit/update-mandate-status/{identifier}
+     *
+     * The identifier can be either mandate_id or reference
      *
      * Request body:
      * {
      *   "status": "approved" // pending, approved, rejected, cancelled, expired
      * }
      */
-    public function updateMandateStatus(Request $request, string $mandateId): JsonResponse
+    public function updateMandateStatus(Request $request, string $identifier): JsonResponse
     {
         try {
             $validated = $request->validate([
                 'status' => 'required|string|in:pending,approved,rejected,cancelled,expired',
             ]);
 
-            $mandate = MonoMandate::where('mandate_id', $mandateId)->first();
+            // Try to find mandate by mandate_id first, then by reference
+            $mandate = MonoMandate::where('mandate_id', $identifier)
+                ->orWhere('reference', $identifier)
+                ->first();
 
             if (! $mandate) {
                 return $this->returnJsonResponse(
                     message: 'Mandate not found',
-                    data: ['error' => 'Mandate not found'],
+                    data: ['error' => 'Mandate not found with the provided mandate_id or reference'],
                     statusCode: Response::HTTP_NOT_FOUND,
                     status: 'failed'
                 );
@@ -562,7 +572,9 @@ class TransactionHistoryController extends Controller
             ]);
 
             Log::info('Mono mandate status updated', [
-                'mandate_id' => $mandateId,
+                'identifier' => $identifier,
+                'mandate_id' => $mandate->mandate_id,
+                'reference' => $mandate->reference,
                 'old_status' => $oldStatus,
                 'new_status' => $validated['status'],
             ]);
@@ -586,7 +598,7 @@ class TransactionHistoryController extends Controller
             );
         } catch (\Exception $e) {
             Log::error('Exception while updating Mono mandate status', [
-                'mandate_id' => $mandateId,
+                'identifier' => $identifier,
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
             ]);
