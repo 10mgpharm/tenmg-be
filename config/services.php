@@ -88,5 +88,6 @@ return [
 
     'tenmg_credit' => [
         'sdk_base_url' => env('TENMG_CREDIT_SDK_BASE_URL', env('APP_URL')),
+        'mandate_callback_url' => env('TENMG_MANDATE_CALLBACK_URL'),
     ],
 ];

@@ -136,6 +136,10 @@ class MonoMandateService
                 ];
             }
 
+            // Use Tenmg callback URL for processing before redirecting to vendor
+            $tenmgCallbackUrl = config('services.tenmg_credit.mandate_callback_url');
+            $redirectUrl = $tenmgCallbackUrl ?: ($lenderMatch->callback_url ?? config('app.url'));
+
             // Prepare mandate payload
             $mandatePayload = [
                 'amount' => $amount,
@@ -145,7 +149,7 @@ class MonoMandateService
                 'debit_type' => 'variable', // Variable allows flexible debit amounts
                 'description' => "Loan repayment for {$lenderMatch->borrower_reference}",
                 'reference' => $mandateReference,
-                'redirect_url' => $lenderMatch->callback_url ?? config('app.url'),
+                'redirect_url' => $redirectUrl,
                 'customer' => [
                     'id' => $monoCustomerIdToUse,
                 ],
@@ -154,6 +158,7 @@ class MonoMandateService
                 'meta' => [
                     'borrower_reference' => $lenderMatch->borrower_reference,
                     'lender_match_id' => $lenderMatch->id,
+                    'vendor_callback_url' => $lenderMatch->callback_url, // Store vendor's callback for later redirect
                 ],
             ];
 
