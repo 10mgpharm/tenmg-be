@@ -40,10 +40,33 @@ return [
         'url' => env('PAYSTACK_BASE_URL', 'https://api.paystack.co'),
     ],
     'fincra' => [
-        'public' => env('FINCRA_PUBKEY'),
-        'secret' => env('FINCRA_SECKEY'),
+        'api_key' => env('FINCRA_API_KEY'),
         'business_id' => env('FINCRA_BUSINESS_ID'),
-        'url' => env('FINCRA_BASE_URL', 'https://api.paystack.co'),
+        'base_url' => env('FINCRA_BASE_URL'),
+        'database_slug' => 'fincra',
+        'timeout' => env('FINCRA_TIMEOUT', 30),
+        'retries' => env('FINCRA_RETRIES', 3),
+        'webhook_secret' => env('FINCRA_WEBHOOK_SECRET'),
+    ],
+
+    'safehaven' => [
+        'base_url' => env('SAFEHAVEN_BASE_URL'),
+        'client_id' => env('SAFEHAVEN_CLIENT_ID'),
+        'client_assertion' => env('SAFEHAVEN_CLIENT_ASSERTION'),
+        'timeout' => env('SAFEHAVEN_TIMEOUT', 30),
+        'retries' => env('SAFEHAVEN_RETRIES', 3),
+        'accounts' => str_contains(env('SAFEHAVEN_BASE_URL', ''), 'sandbox') ?
+            [
+                'main' => env('SAFEHAVEN_ACCOUNT_MAIN'),
+                'operations' => env('SAFEHAVEN_ACCOUNT_OPERATIONS'),
+                'deposit' => env('SAFEHAVEN_ACCOUNT_DEPOSIT'),
+            ] :
+            [
+                'operations' => env('SAFEHAVEN_ACCOUNT_OPERATIONS'),
+                'deposit' => env('SAFEHAVEN_ACCOUNT_DEPOSIT'),
+                'main' => env('SAFEHAVEN_ACCOUNT_MAIN'),
+            ],
+        'database_slug' => 'safehaven',
     ],
 
     'tenmg' => [
@@ -58,6 +81,7 @@ return [
 
     'mono' => [
         'secret_key' => env('MONO_SEC_KEY'),
+        'prove_secret_key' => env('MONO_PROVE_SEC_KEY'),
         'base_url' => env('MONO_BASE_URL', 'https://api.withmono.com'),
         'default_provider' => env('MONO_DEFAULT_PROVIDER', 'crc'),
     ],

@@ -173,6 +173,40 @@ class LenderProveController extends Controller
             );
         }
 
+        // Check for existing pending KYC session for the same tier to prevent duplicates
+        $existingPendingSession = LenderKycSession::where('lender_business_id', $lenderBusiness->id)
+            ->where('status', 'pending')
+            ->where(function ($query) use ($nextTier) {
+                $query->where('kyc_level', $nextTier)
+                    ->orWhere('completed_tier', $nextTier);
+            })
+            ->latest()
+            ->first();
+
+        // if ($existingPendingSession) {
+        //     // Return the existing pending session instead of creating a duplicate
+        //     Log::info('Existing pending KYC session found, returning existing session', [
+        //         'session_id' => $existingPendingSession->id,
+        //         'lender_business_id' => $lenderBusiness->id,
+        //         'kyc_level' => $nextTier,
+        //         'reference' => $existingPendingSession->reference,
+        //     ]);
+
+        //     return $this->returnJsonResponse(
+        //         message: 'KYC session already in progress. Please complete the existing verification.',
+        //         statusCode: Response::HTTP_OK,
+        //         status: 'success',
+        //         data: [
+        //             'session_id' => $existingPendingSession->id,
+        //             'reference' => $existingPendingSession->reference,
+        //             'mono_url' => $existingPendingSession->mono_url,
+        //             'status' => $existingPendingSession->status,
+        //             'kyc_level' => $existingPendingSession->kyc_level,
+        //             'existing_session' => true,
+        //         ]
+        //     );
+        // }
+
         // Generate a reference if not provided by the frontend
         $reference = $validated['reference'] ?? ('LDR_KYC_'.$lenderBusiness->id.'_'.Str::upper(Str::random(8)));
 
@@ -228,12 +262,21 @@ class LenderProveController extends Controller
             'meta' => $data,
         ]);
 
-        // Return Mono's response structure directly
+        // Build KYC payload for frontend (tier + status)
+        $kycTier = (string) ($session->kyc_level ?? $session->completed_tier ?? $data['kyc_level'] ?? $nextTier ?? '');
+        $kycStatus = strtolower($session->status ?? $data['status'] ?? 'pending');
+
+        // Return Mono's response structure with KYC payload
         $monoResponse = $result['mono_response'] ?? [
             'status' => 'successful',
             'message' => 'Request completed successfully',
             'timestamp' => now()->toIso8601String(),
             'data' => $data,
+        ];
+
+        $monoResponse['data']['kyc'] = [
+            'tier' => $kycTier,
+            'status' => $kycStatus,
         ];
 
         return response()->json($monoResponse);
@@ -285,29 +328,8 @@ class LenderProveController extends Controller
         }
 
         try {
-            // Prepare lender data to use in mock response if needed
-            $lenderData = null;
-            if ($session) {
-                $customerData = $session->meta['customer'] ?? null;
-                if ($customerData) {
-                    $lenderData = [
-                        'name' => $customerData['name'] ?? null,
-                        'email' => $customerData['email'] ?? null,
-                        'phone' => $customerData['phone'] ?? null,
-                        'identity_type' => $customerData['identity']['type'] ?? null,
-                        'identity_number' => $customerData['identity']['number'] ?? null,
-                    ];
-                }
-            } else {
-                // If no session, try to get from user/business
-                $lenderData = [
-                    'name' => $user->name ?? $lenderBusiness->contact_person,
-                    'email' => $user->email ?? $lenderBusiness->contact_email,
-                    'phone' => $user->phone ?? $lenderBusiness->contact_phone,
-                ];
-            }
-
-            $result = $this->monoProveService->fetchCustomerDetails($reference, $lenderData);
+            // Fetch customer details from Mono Prove API
+            $result = $this->monoProveService->fetchCustomerDetails($reference);
 
             if (! $result['success']) {
                 return $this->returnJsonResponse(
@@ -339,12 +361,23 @@ class LenderProveController extends Controller
                 $session->update($updateData);
             }
 
+            // Build KYC payload for frontend (tier + status)
+            $tierSource = $session?->kyc_level ?? $session?->completed_tier ?? ($result['data']['kyc_level'] ?? $result['data']['tier'] ?? null);
+            $statusSource = $session?->status ?? ($result['data']['status'] ?? null);
+            $kycTier = $tierSource !== null ? (string) $tierSource : '';
+            $kycStatus = $statusSource !== null ? strtolower($statusSource) : '';
+
             // Return Mono's response structure
             $monoResponse = $result['mono_response'] ?? [
                 'status' => 'successful',
                 'message' => 'Customer details retrieved successfully',
                 'timestamp' => now()->toIso8601String(),
                 'data' => $result['data'],
+            ];
+
+            $monoResponse['data']['kyc'] = [
+                'tier' => $kycTier,
+                'status' => $kycStatus,
             ];
 
             return response()->json($monoResponse);

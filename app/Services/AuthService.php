@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Enums\BusinessStatus;
 use App\Enums\BusinessType;
 use App\Enums\OtpType;
+use App\Enums\WalletType;
 use App\Helpers\UtilityHelper;
 use App\Http\Requests\Auth\CompleteUserSignupRequest;
 use App\Http\Requests\Auth\SignupUserRequest;
@@ -12,12 +13,13 @@ use App\Http\Requests\AuthProviderRequest;
 use App\Http\Resources\UserResource;
 use App\Models\Business;
 use App\Models\BusinessUser;
-use App\Models\CreditLendersWallet;
+use App\Models\Currency;
 use App\Models\Role;
 use App\Models\User;
 use App\Repositories\ApiKeyRepository;
 use App\Repositories\CreditVendorWalletRepository;
 use App\Services\Interfaces\IAuthService;
+use App\Services\Interfaces\IWalletService;
 use App\Services\Lender\LoanPreferenceService;
 use Exception;
 use Illuminate\Auth\Events\Verified;
@@ -39,7 +41,12 @@ class AuthService implements IAuthService
     /**
      * @throws Exception
      */
-    public function __construct(public ApiKeyRepository $apiKeyRepository, public CreditVendorWalletRepository $creditVendorRepository, private LoanPreferenceService $loanPreferenceService) {}
+    public function __construct(
+        public ApiKeyRepository $apiKeyRepository,
+        public CreditVendorWalletRepository $creditVendorRepository,
+        private LoanPreferenceService $loanPreferenceService,
+        private IWalletService $walletService
+    ) {}
 
     /**
      * Get user
@@ -365,7 +372,7 @@ class AuthService implements IAuthService
                 break;
             case BusinessType::VENDOR:
                 $this->apiKeyRepository->createVendorApiKey($adminBusiness);
-                $this->creditVendorRepository->createVendorWallet($adminBusiness);
+                $this->createVendorWallets($adminBusiness);
                 break;
             default:
                 break;
@@ -382,20 +389,69 @@ class AuthService implements IAuthService
 
     }
 
+    /**
+     * Create wallets for lender (NGN and USD)
+     */
     public function createLendersWallet($business)
     {
-        $walletTypes = ['investment', 'deposit', 'ledger'];
-        foreach ($walletTypes as $type) {
-            CreditLendersWallet::firstOrCreate([
-                'lender_id' => $business->id,
-                'type' => $type,
-            ], [
-                'lender_id' => $business->id,
-                'type' => $type,
-                'prev_balance' => 0,
-                'current_balance' => 0,
+        // Get NGN and USD currencies
+        $currencies = Currency::whereIn('code', ['NGN', 'USD'])
+            ->where('is_active', true)
+            ->get();
+
+        if ($currencies->isEmpty()) {
+            Log::warning('NGN or USD currencies not found, skipping wallet creation for lender', [
+                'business_id' => $business->id,
             ]);
+
+            return;
         }
 
+        // Create lender wallet for each currency
+        foreach ($currencies as $currency) {
+            $this->walletService->createSecondaryWallet(
+                $business,
+                $currency->code,
+                WalletType::LENDER_WALLET
+            );
+        }
+
+        Log::info('Lender wallets created for business', [
+            'business_id' => $business->id,
+            'currencies' => $currencies->pluck('code')->toArray(),
+        ]);
+    }
+
+    /**
+     * Create wallets for vendor (NGN and USD)
+     */
+    public function createVendorWallets($business)
+    {
+        // Get NGN and USD currencies
+        $currencies = Currency::whereIn('code', ['NGN', 'USD'])
+            ->where('is_active', true)
+            ->get();
+
+        if ($currencies->isEmpty()) {
+            Log::warning('NGN or USD currencies not found, skipping wallet creation for vendor', [
+                'business_id' => $business->id,
+            ]);
+
+            return;
+        }
+
+        // Create vendor payout wallet for each currency
+        foreach ($currencies as $currency) {
+            $this->walletService->createSecondaryWallet(
+                $business,
+                $currency->code,
+                WalletType::VENDOR_PAYOUT_WALLET
+            );
+        }
+
+        Log::info('Vendor wallets created for business', [
+            'business_id' => $business->id,
+            'currencies' => $currencies->pluck('code')->toArray(),
+        ]);
     }
 }

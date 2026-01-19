@@ -27,8 +27,12 @@ use App\Services\Interfaces\IClientService;
 use App\Services\Interfaces\ICustomerService;
 use App\Services\Interfaces\IRuleEngineService;
 use App\Services\Interfaces\ITxnHistoryService;
+use App\Services\Interfaces\IVirtualAccountService;
+use App\Services\Interfaces\IWalletService;
 use App\Services\RuleEngineService;
 use App\Services\TransactionHistoryService;
+use App\Services\VirtualAccountService;
+use App\Services\WalletService;
 use Exception;
 use Illuminate\Auth\Events\Verified;
 use Illuminate\Support\Facades\Event;
@@ -75,6 +79,9 @@ class AppServiceProvider extends ServiceProvider
                 apiKeyRepository: $app->make(ApiKeyRepository::class),
             );
         }, shared: true);
+
+        $this->app->bind(IWalletService::class, WalletService::class);
+        $this->app->bind(IVirtualAccountService::class, VirtualAccountService::class);
     }
 
     /**
@@ -125,7 +132,8 @@ class AppServiceProvider extends ServiceProvider
         });
 
         Notification::extend('firebase', function ($app) {
-            return new class {
+            return new class
+            {
                 /**
                  * Send the Firebase notification.
                  *
@@ -137,41 +145,41 @@ class AppServiceProvider extends ServiceProvider
                     try {
                         // Generate the Firebase messages from the notification
                         $messages = $notification->toFirebase($notifiable);
-        
+
                         // Filter out null messages
-                        $messages = array_filter($messages, fn($message) => $message !== null);
-        
+                        $messages = array_filter($messages, fn ($message) => $message !== null);
+
                         // Get the total number of messages
                         $totalMessages = count($messages);
-        
+
                         // Send messages only if there are valid ones
                         if ($totalMessages > 0) {
                             // Get the Firebase messaging instance
                             $messaging = app('firebase.messaging');
-        
+
                             // Send all messages and get the report
                             $report = $messaging->sendAll($messages);
-        
-                            if(config('app.env') === 'local'){
+
+                            if (config('app.env') === 'local') {
 
                                 // Count successes and failures
                                 $successCount = $report->successes()->count();
                                 $failureCount = $report->failures()->count();
-            
+
                                 // Log the summary
                                 logs()->info("Firebase notification summary: $successCount out of $totalMessages were successful.");
                                 logs()->info("Firebase notification summary: $failureCount out of $totalMessages failed.");
-            
+
                                 // Log failures (if any)
                                 if ($report->hasFailures()) {
                                     foreach ($report->failures()->getItems() as $failure) {
-                                        logs()->error('Firebase failed: ' . $failure->error()->getMessage());
+                                        logs()->error('Firebase failed: '.$failure->error()->getMessage());
                                     }
                                 }
                             }
                         }
                     } catch (Exception $e) {
-                        logs()->error('Firebase notification error: ' . $e->getMessage());
+                        logs()->error('Firebase notification error: '.$e->getMessage());
                     }
                 }
             };
