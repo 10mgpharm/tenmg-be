@@ -10,11 +10,11 @@ use App\Http\Controllers\API\Account\PasswordUpdateController;
 use App\Http\Controllers\API\Account\TwoFactorAuthenticationController;
 use App\Http\Controllers\API\Account\UpdateFcmTokenController;
 use App\Http\Controllers\API\Account\UserPermissionController;
-use App\Http\Controllers\API\Bank\BankController;
 use App\Http\Controllers\API\Credit\LoanApplicationController;
 use App\Http\Controllers\API\Job\JobApplicationController;
 use App\Http\Controllers\API\Job\JobController;
 use App\Http\Controllers\API\MessageController;
+use App\Http\Controllers\API\PayoutController;
 use App\Http\Controllers\API\ProfileController;
 use App\Http\Controllers\API\ResendOtpController;
 use App\Http\Controllers\API\VirtualAccount\VirtualAccountController;
@@ -79,9 +79,12 @@ Route::middleware(['auth:api', 'scope:full'])->group(function () {
     });
 
     Route::prefix('bank')->group(function () {
-        Route::get('/list', [BankController::class, 'getBankList']);
-        Route::post('/verify-account', [BankController::class, 'verifyBankAccount']);
+        Route::get('/list', [PayoutController::class, 'listBanks']);
+        Route::post('/verify-account', [PayoutController::class, 'verifyAccount']);
+    });
 
+    Route::prefix('payouts')->group(function () {
+        Route::post('/withdraw', [PayoutController::class, 'payout']);
     });
 
     Route::prefix('jobs')->group(function () {
