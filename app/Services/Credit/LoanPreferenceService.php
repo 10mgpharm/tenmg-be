@@ -3,6 +3,7 @@
 namespace App\Services\Credit;
 
 use App\Enums\BusinessType;
+use App\Helpers\UtilityHelper;
 use App\Models\Business;
 use App\Models\LenderMatch;
 use Carbon\Carbon;
@@ -19,12 +20,12 @@ class LoanPreferenceService
     public function simulate(int $amount, ?int $tenorInMonths = null, array $payload = []): array
     {
         // System default allowed tenors (months)
-        $allowedTenors = [3, 6, 9, 12];
+        $allowedTenors = [1, 2, 3, 4];
 
-        // Default tenor = 3 months if none is provided or invalid
+        // Default tenor = 1 month if none is provided or invalid
         $tenorInMonths = $tenorInMonths && in_array($tenorInMonths, $allowedTenors, true)
             ? $tenorInMonths
-            : 3;
+            : 1;
 
         /**
          * Lender eligibility rules
@@ -37,7 +38,7 @@ class LoanPreferenceService
          *
          * NOTE:
          * - Lenders only set a single interest rate (no per-tenor rate)
-         * - The system controls allowed tenors (3, 6, 9, 12 months)
+         * - The system controls allowed tenors (1, 2, 3, 4 months)
          * - Lender rate MUST NOT be more than 9% (we will cap it if configured higher)
          * - For now, we use a simple global min/max amount range (can be enhanced with instruction_config)
          */
@@ -113,9 +114,12 @@ class LoanPreferenceService
 
         $picked = $eligible[0];
 
-        // Get lender's base rate and enforce max 9%
+        // Get lender's base rate and derive capped effective rate (lender + 10mg, max 15%)
         $baseRate = $picked['rate'] ?? 5.0;
-        $tenorRate = min(max($baseRate, 0), 9.0);
+        $rates = UtilityHelper::getEffectiveInterestRates($baseRate, null);
+        $lenderRate = $rates['lender_rate'];
+        $tenmgRate = $rates['tenmg_rate'];
+        $tenorRate = $rates['effective_rate'];
 
         // $lenderName = $picked['name'] ?? 'Lender';
         // $lenderInstruction = $picked['instruction'] ?? null;
@@ -171,7 +175,7 @@ class LoanPreferenceService
             }
         }
 
-        // Simple interest calculation based on tenor rate
+        // Simple interest calculation based on effective tenor rate
         $interestAmount = $amount * ($tenorRate / 100);
         $totalRepayable = $amount + $interestAmount;
         $monthlyRepayment = $totalRepayable / $tenorInMonths;

@@ -62,8 +62,17 @@ class PayoutController extends Controller
             'nuban' // Always nuban for Nigerian accounts
         );
 
+        if (! ($result['success'] ?? false)) {
+            return $this->returnJsonResponse(
+                message: $result['message'] ?? 'Account verification failed',
+                data: $result,
+                status: 'error',
+                statusCode: $result['error_code'] ?? 400
+            );
+        }
+
         return $this->returnJsonResponse(
-            message: 'Account verified.',
+            message: $result['message'] ?? 'Account verified successfully',
             data: $result
         );
     }

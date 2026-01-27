@@ -25,6 +25,9 @@ Route::post('jobs/applications', [JobApplicationController::class, 'store'])->na
 
 // Public webhooks
 Route::post('/webhooks/vendor/direct-debit/mandate', [\App\Http\Controllers\API\Webhooks\PaystackWebhookController::class, 'handle'])->name('webhooks.paystack.direct_debit');
-Route::post('/webhooks/mono/prove', [\App\Http\Controllers\API\Webhooks\MonoProveWebhookController::class, 'handle'])->name('webhooks.mono.prove');
+// Mono webhook using Spatie WebhookClient
+Route::webhooks('/webhooks/mono/prove', 'mono');
+// Keep old route temporarily for backward compatibility during transition
+// Route::post('/webhooks/mono/prove', [\App\Http\Controllers\API\Webhooks\MonoProveWebhookController::class, 'handle'])->name('webhooks.mono.prove');
 Route::post('/fincra/webhook', [FincraWebhookController::class, 'verifyFincraPaymentWebHook']);
 Route::post('/tenmg/webhook', [TenmgWebhookController::class, 'verifyTenmgCreditPaymentWebHook']);

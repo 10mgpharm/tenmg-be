@@ -28,9 +28,7 @@ use Exception;
 use Illuminate\Filesystem\FilesystemManager;
 use Illuminate\Http\Request;
 use Illuminate\Notifications\Messages\MailMessage;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
-use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
@@ -38,15 +36,14 @@ use SplFileInfo;
 
 class LoanApplicationRepository
 {
-
-    function __construct(private FincraMandateRepository $fincraMandateRepository, private ActivityLogService $activityLogService, private FilesystemManager $fileSystem, private TransactionHistoryController $transactionHistoryController) {}
+    public function __construct(private FincraMandateRepository $fincraMandateRepository, private ActivityLogService $activityLogService, private FilesystemManager $fileSystem, private TransactionHistoryController $transactionHistoryController) {}
 
     public function create(array $data)
     {
-        $loanSettings = new LoanSettings();
+        $loanSettings = new LoanSettings;
 
         // external provided reference by vender (optional)
-        $txnReference =  array_key_exists('txnReference', $data) ? $data['txnReference'] : null;
+        $txnReference = array_key_exists('txnReference', $data) ? $data['txnReference'] : null;
 
         return LoanApplication::create([
             'business_id' => $data['businessId'],
@@ -96,7 +93,7 @@ class LoanApplicationRepository
     public function getAll(array $criteria, int $perPage = 15): \Illuminate\Contracts\Pagination\LengthAwarePaginator
     {
 
-        //get the business type
+        // get the business type
         $user = request()->user();
         $business = $user->ownerBusinessType
             ?: $user->businesses()->firstWhere('user_id', $user->id);
@@ -107,7 +104,7 @@ class LoanApplicationRepository
             $searchTerm = $criteria['search'];
             $query->where('credit_applications.identifier', 'like', $searchTerm)
                 ->orWhereHas('customer', function ($q) use ($searchTerm) {
-                    $q->where('email', 'like', '%' . $searchTerm . '%')->orWhere('name', 'like', '%' . $searchTerm . '%');
+                    $q->where('email', 'like', '%'.$searchTerm.'%')->orWhere('name', 'like', '%'.$searchTerm.'%');
                 });
         }
 
@@ -118,14 +115,14 @@ class LoanApplicationRepository
             $query->where('status', $criteria['status']);
         }
 
-        if ($business->type == "LENDER") {
+        if ($business->type == 'LENDER') {
 
             $lenderId = $business->id;
             $ignoredIds = CreditLenderPreference::where('lender_id', $business->id)->first()->ignored_applications_id;
-            $query->when(!empty($ignoredIds ?? []), function ($querySub) use ($ignoredIds, $lenderId) {
+            $query->when(! empty($ignoredIds ?? []), function ($querySub) use ($ignoredIds, $lenderId) {
                 $querySub->whereNotIn('id', $ignoredIds)->whereHas('offers', function ($offerQuery) use ($lenderId) {
                     $offerQuery->where('lender_id', $lenderId);
-                });;
+                });
             });
 
             $query->where('duration_in_months', '!=', null);
@@ -159,7 +156,7 @@ class LoanApplicationRepository
 
     public function approveLoanApplicationManually(Request $request)
     {
-        if($request->action == 'decline'){
+        if ($request->action == 'decline') {
             return $this->declineLoanApplicationByLender($request);
         }
 
@@ -169,12 +166,12 @@ class LoanApplicationRepository
 
         $business = Business::find($business_id);
         $application = LoanApplication::where('identifier', $request->applicationId)->first();
-        if ($application->status == "APPROVED") {
+        if ($application->status == 'APPROVED') {
             throw new Exception('Loan already approved');
         }
-        //check if lender has enough in his wallet to confirm the load
+        // check if lender has enough in his wallet to confirm the load
         $depositWallet = CreditLendersWallet::where('lender_id', $business_id)->where('type', 'deposit')->first();
-        if ((int)$depositWallet->current_balance < (int)$application->requested_amount) {
+        if ((int) $depositWallet->current_balance < (int) $application->requested_amount) {
             throw new Exception('Insufficient funds in lender\'s wallet to approve loan application.');
         }
         $offer = $this->fincraMandateRepository->createOffer($application, $business);
@@ -190,11 +187,11 @@ class LoanApplicationRepository
             ?: $user->businesses()->firstWhere('user_id', $user->id)?->id;
 
         $application = LoanApplication::where('identifier', $request->applicationId)->first();
-        if ($application->status == "APPROVED") {
+        if ($application->status == 'APPROVED') {
             throw new Exception('Loan already approved');
         }
 
-        //add the loan application id to the loan preferences table ignored_applications_id
+        // add the loan application id to the loan preferences table ignored_applications_id
         $loanPreferences = CreditLenderPreference::where('lender_id', $business_id)->first();
         $loanPreferences->ignored_applications_id = array_merge($loanPreferences->ignored_applications_id ?? [], [$application->id]);
         $loanPreferences->save();
@@ -276,7 +273,7 @@ class LoanApplicationRepository
             throw new Exception('Provided application link does not exist');
         }
 
-        //check if application is approved, rejected or cancelled
+        // check if application is approved, rejected or cancelled
         if ($application->status == 'APPROVED') {
             throw new Exception('Application has been approved');
         }
@@ -288,7 +285,6 @@ class LoanApplicationRepository
             throw new Exception('Your Application is still being processed. Please wait');
         }
 
-
         if ($application->created_at->diffInHours(now()) > $this::LINK_EXPIRED) {
             $application->status = 'EXPIRED';
             $application->save();
@@ -299,7 +295,7 @@ class LoanApplicationRepository
         $vendor = $application->business;
         $customer = $application->customer;
 
-        $loanSettings = new LoanSettings();
+        $loanSettings = new LoanSettings;
 
         $defaultBank = CreditCustomerBank::where('customer_id', $customer->id)
             ->where('business_id', $vendor->id)
@@ -313,7 +309,7 @@ class LoanApplicationRepository
 
         // TODO: check if vendor has a Transaction URL set, if not, use the default one
 
-        //get vendor apikey settings
+        // get vendor apikey settings
         $apiKeyData = ApiKey::where('business_id', $vendor->id)->first();
 
         $transactionUrl = $apiKeyData->is_test ? $apiKeyData->test_transaction_url : $apiKeyData->transaction_url;
@@ -345,8 +341,8 @@ class LoanApplicationRepository
 
                         $jsonString = json_encode($jsonData, JSON_PRETTY_PRINT);
                         // Define the file name and path for temporary storage
-                        $fileName = 'temp_' . time() . '.json';
-                        $filePath = 'temp/' . $fileName;
+                        $fileName = 'temp_'.time().'.json';
+                        $filePath = 'temp/'.$fileName;
 
                         // // Ensure the temp directory exists
                         Storage::disk('local')->makeDirectory('temp');
@@ -355,13 +351,13 @@ class LoanApplicationRepository
                         Storage::disk('local')->put($filePath, $jsonString);
 
                         // Get the full path to the file
-                        $fullFilePath = storage_path('app/' . $filePath);
+                        $fullFilePath = storage_path('app/'.$filePath);
 
                         $finalFile = new SplFileInfo($fullFilePath);
                         $this->transactionHistoryController->uploadTransactionHistory(
                             request: new Request([
                                 'file' => $finalFile,
-                                'customerId' => $application->customer->id
+                                'customerId' => $application->customer->id,
                             ])
                         );
 
@@ -371,13 +367,11 @@ class LoanApplicationRepository
                     }
                 }
 
-
             } else {
                 // Handle the error
                 // continue;
             }
         }
-
 
         // If YES, call endpint to get the transaction hisoty of the customer'
         // Secret-Key: $vendor->api_key->secret
@@ -400,14 +394,19 @@ class LoanApplicationRepository
         //     'token' => $token->accessToken
         // ];
 
+        $rates = UtilityHelper::getEffectiveInterestRates(
+            $loanSettings->lenders_interest,
+            $loanSettings->tenmg_interest
+        );
+
         $data = [
             'customer' => new CreditCustomerResource($customer),
             'business' => new BusinessLimitedRecordResource($vendor),
             'interestConfig' => [
-                'rate' => $loanSettings->lenders_interest,
+                'rate' => $rates['effective_rate'],
             ],
             'application' => new LoadApplicationResource($application),
-            'defaultBank' => $defaultBank, //default bank for mandate authorisation
+            'defaultBank' => $defaultBank, // default bank for mandate authorisation
             'token' => $token->accessToken,
             // flag to indicate if the vendor is a demo vendor
             'isDemo' => str_contains($vendor->email, 'demo'),
@@ -429,7 +428,7 @@ class LoanApplicationRepository
             $totalRepayment = $requestedAmount + $totalInterest;
             $tenmgAmount = $totalInterest * ($loanApplication->tenmg_interest / 100);
 
-            //update load duration
+            // update load duration
             $loanApplication->duration_in_months = $request->duration;
             $loanApplication->interest_amount = $totalInterest;
             $loanApplication->total_amount = $totalRepayment;
@@ -452,21 +451,20 @@ class LoanApplicationRepository
 
             $mandateResponseInitResponse = null;
 
-
             if (config('app.env') != 'production') {
 
                 $uuid = Str::uuid()->toString();
-                $reference = 'mr_' . $uuid;
+                $reference = 'mr_'.$uuid;
 
-                $mandateResponseInitResponse =  [
-                    'amount' => (int)$totalRepayment / (int)$request->duration,
+                $mandateResponseInitResponse = [
+                    'amount' => (int) $totalRepayment / (int) $request->duration,
                     'description' => 'debit_mandate.',
                     'responseDescription' => 'Welcome to NIBSS e-mandate authentication service, a seamless and convenient authentication experience. Kindly proceed with a token payment of N50:00 into account number \"0008787867\" with GTBank. This payment will trigger the  authentication of your mandate. Thank You',
                     'startDate' => $loadStartDate,
                     'endDate' => $loanEndDate,
                     'status' => 'initiated',
                     'reference' => $reference,
-                    'createdAt' => $loanDate
+                    'createdAt' => $loanDate,
                 ];
 
                 $this->createOrUpdateMandateRecord($request, $mandateResponseInitResponse);
@@ -508,10 +506,10 @@ class LoanApplicationRepository
         $debitMandate = DebitMandate::updateOrCreate(
             [
                 'business_id' => $request->businessId,
-                'customer_id' => $request->customerId
+                'customer_id' => $request->customerId,
             ],
             [
-                'amount' => (int)$request->amount / (int)$request->duration,
+                'amount' => (int) $request->amount / (int) $request->duration,
                 'application_id' => $request->loanAppId,
                 'description' => 'debit_mandate',
                 'start_date' => $mandate['startDate'],
@@ -526,7 +524,7 @@ class LoanApplicationRepository
                 'response_description' => $mandate['responseDescription'],
                 'status' => 'initiated',
                 'reference' => $mandate['reference'],
-                'currency' => 'NGN'
+                'currency' => 'NGN',
             ]
         );
 
@@ -538,7 +536,7 @@ class LoanApplicationRepository
             target: $debitMandate,
             event: 'create.mandate',
             action: 'Mandate Initiated',
-            description: $customer->name . " of " . $business->name . " initiated mandate",
+            description: $customer->name.' of '.$business->name.' initiated mandate',
             crud_type: 'CREATE',
             properties: []
         );
@@ -554,7 +552,7 @@ class LoanApplicationRepository
     {
         $business = request()->business;
         $application = LoanApplication::where('reference', $reference)->where('business_id', $business->id)->first();
-        if (!$application) {
+        if (! $application) {
             throw new Exception('Loan application not found');
         }
 
@@ -567,7 +565,7 @@ class LoanApplicationRepository
             ->orWhere('reference', $reference)
             ->first();
 
-        if (!$application) {
+        if (! $application) {
             throw new Exception('Provided application does not exist');
         }
 
@@ -600,13 +598,13 @@ class LoanApplicationRepository
         $vendor = $application->business;
         $customer = $application->customer;
 
-        $user = User::where("id", $vendor->owner_id)->first();
+        $user = User::where('id', $vendor->owner_id)->first();
         $token = $user->createToken('Full Access Token', ['full']);
         $loan = Loan::where('application_id', $application->id)->first();
-        $link = "";
+        $link = '';
 
-        if($loan){
-            $link = config('app.frontend_url') . '/widgets/repayments/' . $loan?->identifier.'?token='.$token->accessToken;
+        if ($loan) {
+            $link = config('app.frontend_url').'/widgets/repayments/'.$loan?->identifier.'?token='.$token->accessToken;
         }
 
         $data = [
@@ -619,7 +617,7 @@ class LoanApplicationRepository
         ];
 
         // only send property for demo instance
-        if(str_contains($vendor->email, 'demo')){
+        if (str_contains($vendor->email, 'demo')) {
             $data['isDemo'] = str_contains($vendor->email, 'demo');
         }
 
@@ -631,10 +629,9 @@ class LoanApplicationRepository
         $loanApplication = LoanApplication::where('identifier', $reference)
             ->orWhere('reference', $reference)->first();
 
-        if (!$loanApplication) {
+        if (! $loanApplication) {
             throw new Exception('Provided application does not exist');
         }
-
 
         if ($loanApplication->status == 'CANCELED') {
             throw new Exception('Application has already been cancelled');
@@ -651,7 +648,7 @@ class LoanApplicationRepository
 
         $subject = 'Loan Application Cancelled';
         $user = User::where('id', $vendorBusiness->owner_id)->first();
-        $message = $loanApplication->customer->name." has cancelled their loan application";
+        $message = $loanApplication->customer->name.' has cancelled their loan application';
 
         $mailable = (new MailMessage)
             ->greeting('Hello '.$user->name)

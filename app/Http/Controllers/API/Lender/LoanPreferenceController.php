@@ -19,7 +19,7 @@ class LoanPreferenceController extends Controller
     {
         $request->validate([
             'loanTenure' => 'required|array',
-            'loanTenure.*' => 'in:3,6,9,12',
+            'loanTenure.*' => 'in:1,2,3,4',
             'creditScoreCategory' => 'required|array',
             'creditScoreCategory.*' => 'in:A,B,C,D',
         ]);

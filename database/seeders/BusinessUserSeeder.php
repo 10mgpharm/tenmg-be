@@ -331,7 +331,7 @@ class BusinessUserSeeder extends Seeder
                     'instruction' => $lenderInstructions[$i - 1],
                     'instruction_config' => [
                         'active' => true, // Lender is active and open to new loans
-                        'supported_tenors' => [3, 6, 9, 12], // Support all system tenors
+                        'supported_tenors' => [1, 2, 3, 4], // Support all system tenors (1-4 months)
                         'min_amount' => 5000, // Minimum loan amount
                         'max_amount' => null, // No maximum (unlimited)
                         'disbursement_channel' => 'bank_transfer',

@@ -60,14 +60,12 @@ class UserResource extends JsonResource
 
         // Include wallets from business
         if ($business) {
-            // If wallets relationship is loaded, use it; otherwise load it
-            if ($business->relationLoaded('wallets')) {
-                $response['wallets'] = WalletResource::collection($business->wallets);
-            } else {
-                // Load wallets with currency relationship
-                $business->load('wallets.currency');
-                $response['wallets'] = WalletResource::collection($business->wallets);
-            }
+            // Load wallets with currency and virtual account relationships
+            $business->load([
+                'wallets.currency',
+                'wallets.virtualAccount',
+            ]);
+            $response['wallets'] = WalletResource::collection($business->wallets);
         } else {
             $response['wallets'] = [];
         }

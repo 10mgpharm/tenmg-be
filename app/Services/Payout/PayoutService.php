@@ -59,9 +59,16 @@ class PayoutService
 
         $raw = $response['data'] ?? [];
 
+        // Look up bank name if not provided in response
+        $bankName = $raw['bankName'] ?? $raw['bank_name'] ?? null;
+
+        if (! $bankName) {
+            $bankName = $this->getBankNameByCode($bankCode, $currency);
+        }
+
         return [
             'account_name' => $raw['accountName'] ?? $raw['account_name'] ?? $raw['accountTitle'] ?? null,
-            'bank_name' => $raw['bankName'] ?? $raw['bank_name'] ?? null,
+            'bank_name' => $bankName,
             'account_number' => $accountNumber,
             'bank_code' => $bankCode,
             'account_type' => $accountType,
@@ -240,5 +247,31 @@ class PayoutService
                 'provider' => $provider->getProviderSlug(),
             ];
         });
+    }
+
+    /**
+     * Get bank name by bank code
+     */
+    private function getBankNameByCode(string $bankCode, string $currency = 'NGN'): ?string
+    {
+        try {
+            $banks = $this->listBanks('NG', $currency);
+
+            if (is_array($banks)) {
+                foreach ($banks as $bank) {
+                    $code = $bank['code'] ?? $bank['bankCode'] ?? $bank['code'] ?? null;
+                    if ($code === $bankCode) {
+                        return $bank['name'] ?? $bank['bankName'] ?? $bank['bank_name'] ?? null;
+                    }
+                }
+            }
+        } catch (\Throwable $e) {
+            Log::warning('Failed to lookup bank name', [
+                'bank_code' => $bankCode,
+                'error' => $e->getMessage(),
+            ]);
+        }
+
+        return null;
     }
 }

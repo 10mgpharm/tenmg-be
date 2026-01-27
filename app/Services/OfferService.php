@@ -28,11 +28,12 @@ class OfferService
             throw new Exception('Loan Application not approved.', Response::HTTP_BAD_REQUEST);
         }
 
-        // Generate the repayment breakdown using the amortization formula
+        // Generate the repayment breakdown using capped effective rates
         $repaymentBreakdown = UtilityHelper::generateRepaymentBreakdown(
             $offerAmount,
             $application->interest_rate,
-            $application->duration_in_months
+            $application->duration_in_months,
+            $application->tenmg_interest
         );
 
         // Create offer
@@ -59,7 +60,7 @@ class OfferService
 
         if ($action === 'accept') {
 
-            if (!$offer->has_mandate) {
+            if (! $offer->has_mandate) {
                 throw new Exception('Can not accept this offer. Customer does not have debit mandate setup yet!', 400);
             }
 

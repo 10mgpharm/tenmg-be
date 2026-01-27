@@ -103,11 +103,22 @@ class FincraPayoutProvider extends AbstractPayoutProvider
                 ]);
 
             if (! $response->successful()) {
+                $body = $response->json();
+
+                // Extract the actual error message from Fincra response
+                $errorMessage = $body['error']
+                    ?? $body['message']
+                    ?? ($body['data']['error'] ?? null)
+                    ?? 'Account could not be resolved. Please check your account number and bank code and try again.';
+
+                // Clean up the message - remove any technical details
+                $errorMessage = trim($errorMessage);
+
                 return [
                     'success' => false,
-                    'message' => $response->json('message') ?? 'Account verification failed',
+                    'message' => $errorMessage,
                     'error_code' => $response->status(),
-                    'data' => $response->json(),
+                    'data' => $body,
                 ];
             }
 
@@ -126,9 +137,21 @@ class FincraPayoutProvider extends AbstractPayoutProvider
                 'bank_code' => $bankCode,
             ]);
 
+            // Try to extract clean error message from exception if it contains JSON
+            $errorMessage = 'Account could not be resolved. Please check your account number and bank code and try again.';
+
+            $exceptionMessage = $e->getMessage();
+
+            // Try to extract JSON error from exception message (handles HTTP client exceptions)
+            if (preg_match('/"error"\s*:\s*"([^"]+)"/', $exceptionMessage, $matches)) {
+                $errorMessage = $matches[1];
+            } elseif (preg_match('/error[":\s]+"([^"]+)"/i', $exceptionMessage, $matches)) {
+                $errorMessage = $matches[1];
+            }
+
             return [
                 'success' => false,
-                'message' => 'Unable to verify account',
+                'message' => $errorMessage,
                 'error_code' => 500,
             ];
         }
@@ -169,7 +192,6 @@ class FincraPayoutProvider extends AbstractPayoutProvider
                 'country' => $bankDetails['country_code'] ?? 'NG',
                 'type' => 'business',
             ],
-            'narration' => $metadata['narration'] ?? 'Wallet withdrawal',
             'customerName' => $metadata['customer_name'] ?? $metadata['business_name'] ?? 'Tenmg User',
         ];
 
@@ -190,9 +212,18 @@ class FincraPayoutProvider extends AbstractPayoutProvider
             $body = $response->json();
 
             if (! $response->successful()) {
+                // Extract the actual error message from Fincra response
+                $errorMessage = $body['error']
+                    ?? $body['message']
+                    ?? ($body['data']['error'] ?? null)
+                    ?? 'Payout initiation failed';
+
+                // Clean up the message
+                $errorMessage = trim($errorMessage);
+
                 return [
                     'success' => false,
-                    'message' => $body['message'] ?? 'Payout initiation failed',
+                    'message' => $errorMessage,
                     'error_code' => $response->status(),
                     'data' => $body,
                     'reference' => $reference,
@@ -213,9 +244,21 @@ class FincraPayoutProvider extends AbstractPayoutProvider
                 'reference' => $reference,
             ]);
 
+            // Try to extract clean error message from exception if it contains JSON
+            $errorMessage = 'Unable to initiate payout. Please try again later.';
+
+            $exceptionMessage = $e->getMessage();
+
+            // Try to extract JSON error from exception message
+            if (preg_match('/"error"\s*:\s*"([^"]+)"/', $exceptionMessage, $matches)) {
+                $errorMessage = $matches[1];
+            } elseif (preg_match('/error[":\s]+"([^"]+)"/i', $exceptionMessage, $matches)) {
+                $errorMessage = $matches[1];
+            }
+
             return [
                 'success' => false,
-                'message' => 'Unable to initiate payout',
+                'message' => $errorMessage,
                 'error_code' => 500,
                 'reference' => $reference,
             ];

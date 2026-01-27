@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\API\Credit;
 
+use App\Helpers\UtilityHelper;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\CreditScoreResource;
 use App\Http\Resources\CreditTransactionsResource;
@@ -355,13 +356,165 @@ class TransactionHistoryController extends Controller
                 );
             }
 
+            // Build repayment preview and normalize AI analysis
+            $analysisData = $analysis['analysis'] ?? null;
+            $monoData = $result = $analysis['mono_data'] ?? [];
+            $repaymentCalculation = null;
+
+            if ($analysisData && $lenderMatch) {
+                // Derive deterministic summary from mono_data for guardrails
+                $summary = $monoData['credit_history_summary'] ?? [];
+                $repaymentStatus = $summary['repayment_status'] ?? ($summary['repayment_schedule_status'] ?? []);
+                $totalLoans = (int) ($summary['total_loans'] ?? 0);
+                $activeLoans = (int) ($summary['active_loans'] ?? 0);
+                $nonPerforming = (int) ($summary['non_performing'] ?? ($summary['non_found'] ?? $summary['non_performing_loans'] ?? 0));
+                $performanceRatio = (float) ($summary['performance_ratio'] ?? 0);
+                $overdueCount = (int) ($repaymentStatus['overdue'] ?? 0);
+
+                $isCleanProfile = $totalLoans >= 1
+                    && $activeLoans === 0
+                    && $nonPerforming === 0
+                    && $performanceRatio >= 99
+                    && $overdueCount === 0;
+
+                // Normalize naming (camelCase and snake_case) for key fields
+                $loanRecommendationRaw = $analysisData['loanRecommendation']
+                    ?? $analysisData['loan_recommendation']
+                    ?? [];
+
+                $requestedAmount = (float) (
+                    $analysisData['requestedAmount']
+                    ?? $analysisData['requested_amount']
+                    ?? $analysis['requested_amount']
+                    ?? $lenderMatch->amount
+                    ?? 0
+                );
+
+                $recommendedAmount = (float) (
+                    $analysisData['recommendedLoanAmount']
+                    ?? $analysisData['recommended_loan_amount']
+                    ?? $loanRecommendationRaw['approvedAmount']
+                    ?? $loanRecommendationRaw['approved_amount']
+                    ?? 0
+                );
+
+                $creditCategory = $analysisData['creditCategory']
+                    ?? $analysisData['credit_category']
+                    ?? null;
+
+                // Apply clean-profile guardrails: always A and full amount if history is perfect
+                if ($isCleanProfile && $requestedAmount > 0) {
+                    $creditCategory = 'A';
+                    $analysisData['creditCategory'] = 'A';
+                    $analysisData['credit_category'] = 'A';
+
+                    $stableScore = 90.0;
+                    $analysisData['creditScorePercentage'] = $stableScore;
+                    $analysisData['credit_score_percentage'] = $stableScore;
+
+                    $recommendedAmount = $requestedAmount;
+                    $analysisData['recommendedLoanAmount'] = $recommendedAmount;
+                    $analysisData['recommended_loan_amount'] = $recommendedAmount;
+
+                    $analysisData['eligibleForLoan'] = true;
+                    $analysisData['eligible_for_loan'] = true;
+
+                    // Clear noisy conditions for clean profiles
+                    if (isset($analysisData['loanRecommendation']) && is_array($analysisData['loanRecommendation'])) {
+                        $analysisData['loanRecommendation']['approved'] = true;
+                        $analysisData['loanRecommendation']['approvedAmount'] = $recommendedAmount;
+                        $analysisData['loanRecommendation']['approved_amount'] = $recommendedAmount;
+                        $analysisData['loanRecommendation']['conditions'] = [];
+                    }
+                    if (isset($analysisData['loan_recommendation']) && is_array($analysisData['loan_recommendation'])) {
+                        $analysisData['loan_recommendation']['approved'] = true;
+                        $analysisData['loan_recommendation']['approved_amount'] = $recommendedAmount;
+                        $analysisData['loan_recommendation']['conditions'] = [];
+                    }
+                }
+
+                // Full approval if category A and recommended >= requested
+                $fullApproval = $creditCategory === 'A' && $recommendedAmount >= $requestedAmount && $requestedAmount > 0;
+
+                // Decide amount to use for repayment preview
+                $approvedAmount = $fullApproval
+                    ? $requestedAmount
+                    : ($recommendedAmount > 0 ? $recommendedAmount : $requestedAmount);
+
+                // Canonical tenor: vendor-selected tenor from LenderMatch, capped to 1–4 months
+                $defaultTenor = (int) ($lenderMatch->default_tenor ?? 1);
+                $tenorInMonths = max(1, min($defaultTenor, 4));
+
+                if ($approvedAmount > 0 && $tenorInMonths > 0) {
+                    // Derive effective (lender + 10mg) interest rate with 15% total cap
+                    $lenderMatch->loadMissing('lender.lenderSetting');
+                    $baseRate = (float) ($lenderMatch->lender->lenderSetting->rate ?? 0);
+                    $rates = UtilityHelper::getEffectiveInterestRates($baseRate, null);
+                    $effectiveRate = $rates['effective_rate'];
+
+                    // Simple interest calculation (same pattern as LoanPreferenceService)
+                    $interestAmount = $approvedAmount * ($effectiveRate / 100);
+                    $totalRepayable = $approvedAmount + $interestAmount;
+                    $monthlyRepayment = $totalRepayable / $tenorInMonths;
+
+                    $schedule = [];
+                    $today = now()->startOfDay();
+                    $remaining = $totalRepayable;
+
+                    for ($i = 1; $i <= $tenorInMonths; $i++) {
+                        // For the last installment, adjust for rounding so total matches exactly
+                        if ($i === $tenorInMonths) {
+                            $amountThisInstallment = round($remaining, 2);
+                        } else {
+                            $amountThisInstallment = round($monthlyRepayment, 2);
+                            $remaining -= $amountThisInstallment;
+                        }
+
+                        $schedule[] = [
+                            'installment_number' => $i,
+                            'due_date' => $today->copy()->addMonths($i)->toDateString(),
+                            'amount' => $amountThisInstallment,
+                        ];
+                    }
+
+                    $repaymentCalculation = [
+                        'principal' => (int) $approvedAmount,
+                        'tenor_interest_rate' => $effectiveRate,
+                        'tenor_in_months' => $tenorInMonths,
+                        'interest_amount' => round($interestAmount, 2),
+                        'total_repayable' => round($totalRepayable, 2),
+                        'monthly_repayment' => round($monthlyRepayment, 2),
+                        'repayment_schedule' => $schedule,
+                        'summary_text' => sprintf(
+                            'For a recommended loan of ₦%s spread over %d months at %.2f%%, your total repayment will be ₦%s and your estimated monthly payment will be ₦%s.',
+                            number_format($approvedAmount),
+                            $tenorInMonths,
+                            $effectiveRate,
+                            number_format(round($totalRepayable, 2)),
+                            number_format(round($monthlyRepayment, 2))
+                        ),
+                    ];
+                }
+
+                // Adjust loanRecommendation visibility:
+                // - If full approval (A and full amount), hide noisy recommendation block
+                // - Otherwise keep whatever AI returned
+                if ($fullApproval) {
+                    unset($analysisData['loanRecommendation'], $analysisData['loan_recommendation']);
+                }
+            }
+
             // Format response - return analysis directly if parsing was successful
             $responseData = [
                 'borrower_reference' => $borrowerReference,
                 'callback_url' => $lenderMatch->callback_url ?? null,
-                'analysis' => $analysis['analysis'] ?? null,
+                'analysis' => $analysisData,
                 'mono_data' => $analysis['mono_data'] ?? null,
             ];
+
+            if ($repaymentCalculation) {
+                $responseData['analysis']['repayment_calculation'] = $repaymentCalculation;
+            }
 
             // Only include raw_response if parsing failed or for debugging
             if (isset($analysis['parse_error']) || ! isset($analysis['analysis'])) {

@@ -74,6 +74,9 @@ Route::middleware(['auth:api', 'scope:full'])->group(function () {
     });
 
     Route::prefix('virtual-account')->group(function () {
+        // Create (if missing) or return virtual account for primary NGN wallet (no wallet_id needed)
+        Route::get('/', [VirtualAccountController::class, 'getOrCreate']);
+
         // Create (if missing) or return virtual account by wallet ID
         Route::get('/wallet/{walletId}', [VirtualAccountController::class, 'getOrCreateByWallet']);
     });
