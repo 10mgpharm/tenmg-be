@@ -332,7 +332,7 @@ class BusinessUserSeeder extends Seeder
                     'instruction_config' => [
                         'active' => true, // Lender is active and open to new loans
                         'supported_tenors' => [1, 2, 3, 4], // Support all system tenors (1-4 months)
-                        'min_amount' => 5000, // Minimum loan amount
+                        'min_amount' => 20000, // Minimum loan amount (NGN 20,000)
                         'max_amount' => null, // No maximum (unlimited)
                         'disbursement_channel' => 'bank_transfer',
                         'require_manual_approval' => $i % 2 === 0, // Alternate between true/false

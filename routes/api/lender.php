@@ -4,6 +4,7 @@ use App\Http\Controllers\API\Credit\LoanApplicationController;
 use App\Http\Controllers\API\Credit\LoanController;
 use App\Http\Controllers\API\Credit\TransactionHistoryController;
 use App\Http\Controllers\API\Lender\LenderDashboardController;
+use App\Http\Controllers\API\Lender\LenderSettingController;
 use App\Http\Controllers\API\Lender\LoanPreferenceController;
 use App\Http\Controllers\API\Storefront\OrdersController;
 use App\Http\Controllers\API\Wallet\WalletController;
@@ -77,6 +78,10 @@ Route::middleware(['auth:api', 'scope:full'])->group(function () {
             Route::get('get-loan-preferences', [LoanPreferenceController::class, 'getLoanPreference']);
             Route::get('get-loan-preferences-prefill', [LoanPreferenceController::class, 'getLoanPreferencePrefill']);
             Route::patch('update-auto-accept-status', [LoanPreferenceController::class, 'updateAutoAcceptStatus']);
+
+            // lender-specific credit settings (rate, instructions, config)
+            Route::get('lender-settings', [LenderSettingController::class, 'show']);
+            Route::put('lender-settings', [LenderSettingController::class, 'update']);
         });
 
         Route::prefix('loan-applications')->name('loan-applications.')->group(function () {
