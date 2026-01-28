@@ -364,10 +364,10 @@ class TransactionHistoryController extends Controller
             if ($analysisData && $lenderMatch) {
                 // Derive deterministic summary from mono_data for guardrails
                 $summary = $monoData['credit_history_summary'] ?? [];
-                $repaymentStatus = $summary['repayment_status'] ?? ($summary['repayment_schedule_status'] ?? []);
+                $repaymentStatus = $summary['repayment_schedule_status'] ?? [];
                 $totalLoans = (int) ($summary['total_loans'] ?? 0);
                 $activeLoans = (int) ($summary['active_loans'] ?? 0);
-                $nonPerforming = (int) ($summary['non_performing'] ?? ($summary['non_found'] ?? $summary['non_performing_loans'] ?? 0));
+                $nonPerforming = (int) ($summary['non_performing_loans'] ?? 0);
                 $performanceRatio = (float) ($summary['performance_ratio'] ?? 0);
                 $overdueCount = (int) ($repaymentStatus['overdue'] ?? 0);
 
