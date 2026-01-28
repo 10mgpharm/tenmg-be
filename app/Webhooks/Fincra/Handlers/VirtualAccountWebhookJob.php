@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Webhooks\Fincra\Handlers;
 
-use App\Models\Transaction\VirtualAccount;
+use App\Models\VirtualAccount;
 use Illuminate\Support\Facades\Log;
 use Spatie\WebhookClient\Jobs\ProcessWebhookJob;
 
