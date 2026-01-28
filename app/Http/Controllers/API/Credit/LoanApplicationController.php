@@ -10,7 +10,6 @@ use App\Services\LoanApplicationService;
 use App\Services\OfferService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Log;
 
 class LoanApplicationController extends Controller
 {
@@ -50,11 +49,11 @@ class LoanApplicationController extends Controller
 
     public function verifyApplicationLink($reference)
     {
-        //check if load application exist with this id
-        $application = LoanApplication::where("identifier", $reference)->first();
+        // check if load application exist with this id
+        $application = LoanApplication::where('identifier', $reference)->first();
 
-        if(!$application){
-            return $this->returnJsonResponse(message:"Application not found", status:400);
+        if (! $application) {
+            return $this->returnJsonResponse(message: 'Application not found', status: 400);
         }
 
         $data = $this->loanApplicationService->verifyApplicationLink($reference);
@@ -126,7 +125,7 @@ class LoanApplicationController extends Controller
     }
 
     // Filter Loan Applications
-    public function filter(Request $request):JsonResponse
+    public function filter(Request $request): JsonResponse
     {
         $request->validate([
             'status' => 'nullable|in:pending,approved,rejected',
@@ -177,12 +176,11 @@ class LoanApplicationController extends Controller
         return $this->returnJsonResponse(data: $applications);
     }
 
-
     public function generateMandateForCustomerClient(Request $request)
     {
         $request->validate([
-            'duration' => 'required|in:3,6,9,12',
-            'loanApplicationIdentifier' =>'required|exists:credit_applications,identifier',
+            'duration' => 'required|in:1,2,3,4',
+            'loanApplicationIdentifier' => 'required|exists:credit_applications,identifier',
             'bank' => 'required|string',
             'customerAccountName' => 'required|string',
             'customerAccountNumber' => 'required|string',
@@ -197,12 +195,14 @@ class LoanApplicationController extends Controller
     public function verifyMandateStatus($reference)
     {
         $mandateStatus = $this->loanApplicationService->verifyMandateStatus($reference);
+
         return $this->returnJsonResponse(data: $mandateStatus, message: 'Mandate status retrieved successfully');
     }
 
     public function verifyLoanApplicationStatus($reference)
     {
         $mandateStatus = $this->loanApplicationService->verifyLoanApplicationStatus($reference);
+
         return $this->returnJsonResponse(data: $mandateStatus, message: 'Application status retrieved successfully');
     }
 

@@ -51,7 +51,7 @@ class LoanPreferenceService
         $categories = Affordability::select('category as value', 'lower_bound as loanAbove')
             ->get()
             ->toArray();
-        $loanTenure = ['3', '6', '9', '12'];
+        $loanTenure = ['1', '2', '3', '4'];
 
         $loanTenureResult = array_map(function ($item) {
             return [

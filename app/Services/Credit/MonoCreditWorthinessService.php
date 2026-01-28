@@ -410,7 +410,7 @@ class MonoCreditWorthinessService
             ? "LENDER INSTRUCTIONS:\n{$lenderInstruction}\n\n"
             : "LENDER INSTRUCTIONS:\nNo specific lender instructions provided.\n\n";
 
-        return "You are an expert credit risk analyst for a lending platform. Your role is to evaluate customer creditworthiness based on credit history data from Mono Credit History API.
+        return "You are an expert credit risk analyst for a lending platform. Your role is to evaluate customer creditworthiness based on credit history data from Mono Credit History API. The loan duration (tenor) is decided by the platform (1–4 months) and is NOT part of your decision; you only decide eligibility, risk, and recommended amount.\n
 
 EVALUATION CRITERIA (based on credit history analysis):
 
@@ -450,6 +450,24 @@ EVALUATION CRITERIA (based on credit history analysis):
    - Overdue payments = High risk indicator
    - Closed loans with good performance = Positive indicator
 
+8. CLEAN CREDIT HISTORY RULE (VERY IMPORTANT):
+   - If ALL of the following are true based on the raw credit history data:
+     - total_loans ≥ 1
+     - active_loans == 0
+     - non_performing_loans == 0
+     - performance_ratio == 100
+     - repayment_schedule_status.overdue == 0
+   - THEN you MUST:
+     - Set credit_category = \"A\"
+     - Set credit_score_percentage between 88 and 92 (pick a value in this band deterministically for the same input)
+     - Set recommended_loan_amount = requested_amount (no reduction)
+     - Set eligibility to true and risk_level = \"LOW\"
+
+9. STABILITY / DETERMINISM REQUIREMENTS:
+   - For the SAME input data, your credit_score_percentage MUST stay within ±3 points of your previous answer.
+   - Large jumps (e.g. from 90 to 70) on identical data are NOT allowed.
+   - Only when the history is borderline (mixed good and bad signals) may you vary the score slightly within the allowed band.\n
+
 6. LOAN ELIGIBILITY CATEGORIES (based on requested amount: ₦{$formattedRequested}):
    - Category A (75-100% score): Excellent credit history, approve 100% of requested amount (₦{$formattedRequested})
    - Category B (50-74% score): Good credit history, approve 75% of requested amount (₦{$formattedCategoryB})
@@ -472,10 +490,9 @@ The response must be in this exact structure (pure JSON, no markdown formatting)
 {
     \"eligible_for_loan\": boolean,
     \"credit_category\": \"A\" | \"B\" | \"C\" | \"D\" | \"E\",
-    \"credit_score_percentage\": number (0-100),
-    \"recommended_loan_amount\": number,
-
-    \"requested_amount\": {$requestedAmount},
+        \"credit_score_percentage\": number (0-100),
+        \"recommended_loan_amount\": number,
+        \"requested_amount\": {$requestedAmount},
     \"risk_level\": \"LOW\" | \"MEDIUM\" | \"HIGH\",
     \"affordability_status\": \"CAN_AFFORD\" | \"CANNOT_AFFORD\" | \"BORDERLINE\",
     \"key_factors\": {
@@ -497,7 +514,6 @@ The response must be in this exact structure (pure JSON, no markdown formatting)
     \"loan_recommendation\": {
         \"approved\": boolean,
         \"approved_amount\": number,
-        \"loan_duration_months\": number,
         \"interest_rate_recommendation\": \"STANDARD\" | \"PREMIUM\" | \"RISK_PREMIUM\",
         \"conditions\": [\"string\"]
     },

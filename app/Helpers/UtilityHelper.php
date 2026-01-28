@@ -43,12 +43,54 @@ class UtilityHelper
         return trim(str_replace(' ', '', $businessName));
     }
 
+    /**
+     * Get lender, 10mg, and effective interest rates with caps applied.
+     *
+     * - Lender rate is clamped between 0% and 9%.
+     * - 10mg rate is clamped at >= 0%.
+     * - Combined (lender + 10mg) is hard-capped at 15%.
+     */
+    public static function getEffectiveInterestRates(?float $lenderRate = null, ?float $tenmgRate = null): array
+    {
+        $loanSettings = new LoanSettings;
+
+        $configuredLenderRate = $lenderRate ?? (float) ($loanSettings->lenders_interest ?? 0);
+        $configuredTenmgRate = $tenmgRate ?? (float) ($loanSettings->tenmg_interest ?? 0);
+
+        // Clamp lender to [0, 9]
+        $lenderRateClamped = max(0.0, min($configuredLenderRate, 9.0));
+
+        // Tenmg share cannot be negative
+        $tenmgRateClamped = max(0.0, $configuredTenmgRate);
+
+        $combined = $lenderRateClamped + $tenmgRateClamped;
+
+        // If combined exceeds 15, reduce 10mg portion so total is exactly 15
+        if ($combined > 15.0) {
+            $tenmgRateEffective = max(0.0, 15.0 - $lenderRateClamped);
+        } else {
+            $tenmgRateEffective = $tenmgRateClamped;
+        }
+
+        $effectiveRate = $lenderRateClamped + $tenmgRateEffective;
+
+        return [
+            'lender_rate' => $lenderRateClamped,
+            'tenmg_rate' => $tenmgRateEffective,
+            'effective_rate' => $effectiveRate,
+        ];
+    }
+
     public static function calculateInterestAmount(float $amount, int $durationInMonths): array
     {
-        // calculate interest amount based on loan amount based on amount and duration
-        $loanSettings = new LoanSettings();
+        // Calculate interest amount using capped effective rate
+        $loanSettings = new LoanSettings;
+        $rates = self::getEffectiveInterestRates(
+            $loanSettings->lenders_interest,
+            $loanSettings->tenmg_interest
+        );
 
-        $interestRate = $loanSettings->lenders_interest;
+        $interestRate = $rates['effective_rate'];
 
         $totalInterest = $amount * ($interestRate / 100);
         $monthlyInterestRate = ($interestRate / 100) * $durationInMonths;
@@ -61,14 +103,16 @@ class UtilityHelper
         ];
     }
 
-    // Generate the repayment breakdown using the amortization formula
-    public static function generateRepaymentBreakdown(float $principal, float $annualInterestRate, int $months, $tenmgInterest)
+    // Generate the repayment breakdown using simple interest and capped rates
+    public static function generateRepaymentBreakdown(float $principal, float $annualInterestRate, int $months, float $tenmgInterest): array
     {
+        // Derive capped effective and 10mg rates from provided values
+        $rates = self::getEffectiveInterestRates($annualInterestRate, $tenmgInterest);
+        $effectiveRate = $rates['effective_rate'];
+        $tenmgRate = $rates['tenmg_rate'];
 
-        $interestRate = $annualInterestRate;
-
-        $totalInterest = $principal * ($interestRate / 100);
-        $tenmgInterestTotal = $totalInterest * ($tenmgInterest / 100);
+        $totalInterest = $principal * ($effectiveRate / 100);
+        $tenmgInterestTotal = $principal * ($tenmgRate / 100);
         $totalRepayment = $principal + $totalInterest;
         $monthlyPayment = $totalRepayment / $months;
 
@@ -82,7 +126,6 @@ class UtilityHelper
             $remainingBalance -= $principalPortion;
             $actualInterest = $interestPortion - $tenmgInterestPortion;
 
-
             $repaymentBreakdown[] = [
                 'month' => Carbon::now()->addMonths($i)->format('F Y'),
                 'totalPayment' => round($monthlyPayment, 2),
@@ -90,7 +133,7 @@ class UtilityHelper
                 'interest' => round($interestPortion, 2),
                 'tenmgInterest' => round($tenmgInterestPortion, 2),
                 'actualInterest' => round($actualInterest, 2),
-                'balance' => round(max($remainingBalance, 0), 2)
+                'balance' => round(max($remainingBalance, 0), 2),
             ];
         }
 
@@ -164,7 +207,7 @@ class UtilityHelper
         // Combine parts to form the slug
         $slug = sprintf('%s-%s-%s-%s', $prefix, $date, $time, $uniqueString);
 
-        return $slug; //CL-20241103-162103-UXYV
+        return $slug; // CL-20241103-162103-UXYV
     }
 
     /**

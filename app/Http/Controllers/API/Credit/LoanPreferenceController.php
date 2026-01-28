@@ -20,7 +20,8 @@ class LoanPreferenceController extends Controller
      *
      * Request body:
      * - amount (required, numeric)
-     * - tenor (required, numeric) - 3, 6, 9, or 12 months
+     * - tenor (optional, numeric) - 1, 2, 3, or 4 months
+     *   If omitted or invalid, the system defaults to 1 month.
      * - borrower_reference (required, string) - unique identifier for the vendor's customer
      * - currency (optional, string) - default NGN
      * - transaction_history (optional, array) - optional transaction history data
@@ -33,7 +34,7 @@ class LoanPreferenceController extends Controller
     {
         $validated = $request->validate([
             'amount' => 'required|numeric|min:1000',
-            'tenor' => 'required|numeric|in:3,6,9,12',
+            'tenor' => 'nullable|numeric|in:1,2,3,4',
             // We handle uniqueness at the DB + service layer (update-or-create by borrower_reference)
             'borrower_reference' => 'required|string|max:255',
             'businessname' => 'nullable|string|max:255',
@@ -52,7 +53,7 @@ class LoanPreferenceController extends Controller
         }
 
         $amount = (int) $validated['amount'];
-        $tenor = (int) $validated['tenor'];
+        $tenor = isset($validated['tenor']) ? (int) $validated['tenor'] : null;
 
         $result = $this->loanPreferenceService->simulate($amount, $tenor, $validated);
 
@@ -71,7 +72,8 @@ class LoanPreferenceController extends Controller
      * Request body options:
      * Option 1 - Full payload:
      * - amount (required, numeric)
-     * - tenor (required, numeric) - 3, 6, 9, or 12 months
+     * - tenor (optional, numeric) - 1, 2, 3, or 4 months
+     *   If omitted or invalid, the system defaults to 1 month.
      * - borrower_reference (required, string) - unique identifier for the vendor's customer
      * - currency (optional, string) - default NGN
      * - transaction_history (optional, array)
@@ -114,7 +116,7 @@ class LoanPreferenceController extends Controller
         // Validate the payload
         $validated = validator($payload, [
             'amount' => 'required|numeric|min:1000',
-            'tenor' => 'required|numeric|in:3,6,9,12',
+            'tenor' => 'nullable|numeric|in:1,2,3,4',
             'borrower_reference' => 'required|string|max:255',
             'businessname' => 'nullable|string|max:255',
             'currency' => 'nullable|string|size:3',
@@ -132,7 +134,7 @@ class LoanPreferenceController extends Controller
         }
 
         $amount = (int) $validated['amount'];
-        $tenor = (int) $validated['tenor'];
+        $tenor = isset($validated['tenor']) ? (int) $validated['tenor'] : null;
 
         $result = $this->loanPreferenceService->simulate($amount, $tenor, $validated);
 
